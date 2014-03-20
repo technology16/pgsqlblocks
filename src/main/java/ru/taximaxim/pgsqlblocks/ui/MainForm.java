@@ -1,6 +1,7 @@
-package ru.taximaxim.psSqlBlocks.ui;
+package ru.taximaxim.pgsqlblocks.ui;
 
 
+import org.apache.log4j.Logger;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.layout.GridData;
@@ -24,6 +25,7 @@ public class MainForm {
     private static final int[] VERTICAL_WEIGHTS = new int[]{70,30};
     private static final int[] HORIZONTAL_WEIGHTS = new int[]{20,80};
     private static final int SASH_WIDTH = 5;
+    private static Logger log = Logger.getLogger(MainForm.class);
     private static MainForm mainForm;
     private Shell shell;
     private MainForm() {}
@@ -38,9 +40,26 @@ public class MainForm {
     private MenuItem infoMi;
     private Menu infoMenu;
     private MenuItem aboutMi;
+    
     private ToolBar toolBar;
-
-    public static MainForm getInstance() {
+    
+    private Composite topComposite;
+    private SashForm horizontalSash;
+    
+    private SashForm verticalSash;
+    private Composite serverComposite;
+    private TabFolder serversTf;
+    private TabItem currentActivityTi;
+    private Table currentActivityTable;
+    private TabItem blocksHistoryTi;
+    private Table blocksHistoryTable;
+    private Composite tableComposite;
+    private Table mainTable;
+    private Composite logComposite;
+    private Table logTable;
+    private Composite statusBar;
+    
+    public final static MainForm getInstance() {
         if(mainForm == null) {
             mainForm = new MainForm();
         }
@@ -62,7 +81,7 @@ public class MainForm {
                 }
             }
         } catch(Exception e){
-
+            log.error(e);
         }
         finally {
             shell = null;
@@ -116,33 +135,33 @@ public class MainForm {
             exampleCheck.setText("CHECK");
         }
 
-        SashForm verticalSash = new SashForm(shell, SWT.VERTICAL);
+        verticalSash = new SashForm(shell, SWT.VERTICAL);
         {
             verticalSash.setLayout(gridLayout);
             verticalSash.setLayoutData(gridData);
             verticalSash.SASH_WIDTH = SASH_WIDTH;
             verticalSash.setBackground(shell.getDisplay().getSystemColor(SWT.COLOR_WIDGET_BACKGROUND));
 
-            Composite topComposite = new Composite(verticalSash, SWT.NONE);
+            topComposite = new Composite(verticalSash, SWT.NONE);
             topComposite.setLayout(gridLayout);
 
-            SashForm horizontalSash = new SashForm(topComposite, SWT.HORIZONTAL);
+            horizontalSash = new SashForm(topComposite, SWT.HORIZONTAL);
             {
                 horizontalSash.setLayout(gridLayout);
                 horizontalSash.setLayoutData(gridData);
                 horizontalSash.SASH_WIDTH = SASH_WIDTH;
                 horizontalSash.setBackground(shell.getDisplay().getSystemColor(SWT.COLOR_WIDGET_BACKGROUND));
 
-                Composite serverComposite = new Composite(horizontalSash, SWT.NONE);
+                serverComposite = new Composite(horizontalSash, SWT.NONE);
                 {
                     serverComposite.setLayout(gridLayout);
-                    TabFolder serversTf = new TabFolder(serverComposite, SWT.BORDER);
+                    serversTf = new TabFolder(serverComposite, SWT.BORDER);
                     {
                         serversTf.setLayoutData(gridData);
-                        TabItem currentActivityTi = new TabItem(serversTf, SWT.NONE);
+                        currentActivityTi = new TabItem(serversTf, SWT.NONE);
                         {
                             currentActivityTi.setText("Текущая активность");
-                            Table currentActivityTable = new Table(serversTf, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
+                            currentActivityTable = new Table(serversTf, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
                             {
                                 currentActivityTable.setHeaderVisible(true);
                                 currentActivityTable.setLinesVisible(true);
@@ -151,10 +170,10 @@ public class MainForm {
                             }
                         }
 
-                        TabItem blocksHistoryTi = new TabItem(serversTf, SWT.NONE);
+                        blocksHistoryTi = new TabItem(serversTf, SWT.NONE);
                         {
                             blocksHistoryTi.setText("История блокировок");
-                            Table blocksHistoryTable = new Table(serversTf, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL | SWT.VIRTUAL);
+                            blocksHistoryTable = new Table(serversTf, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL | SWT.VIRTUAL);
                             {
                                 blocksHistoryTable.setHeaderVisible(true);
                                 blocksHistoryTable.setLinesVisible(true);
@@ -165,10 +184,10 @@ public class MainForm {
                     }
                 }
 
-                Composite tableComposite = new Composite(horizontalSash, SWT.NONE);
+                tableComposite = new Composite(horizontalSash, SWT.NONE);
                 {
                     tableComposite.setLayout(gridLayout);
-                    Table mainTable = new Table(tableComposite, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL | SWT.VIRTUAL);
+                    mainTable = new Table(tableComposite, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL | SWT.VIRTUAL);
                     {
                         mainTable.setLayoutData(gridData);
                         mainTable.setHeaderVisible(true);
@@ -179,10 +198,10 @@ public class MainForm {
                 horizontalSash.setWeights(HORIZONTAL_WEIGHTS);
             }
 
-            Composite logComposite = new Composite(verticalSash, SWT.NONE);
+            logComposite = new Composite(verticalSash, SWT.NONE);
             {
                 logComposite.setLayout(gridLayout);
-                Table logTable = new Table(logComposite, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
+                logTable = new Table(logComposite, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
                 {
                     logTable.setLayoutData(gridData);
                     logTable.setHeaderVisible(true);
@@ -193,7 +212,7 @@ public class MainForm {
             verticalSash.setWeights(VERTICAL_WEIGHTS);
         }
 
-        Composite statusBar = new Composite(shell, SWT.BORDER);
+        statusBar = new Composite(shell, SWT.BORDER);
         {
             statusBar.setLayout(gridLayout);
             statusBar.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, true, false));
