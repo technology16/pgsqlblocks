@@ -16,7 +16,7 @@
 		<swt.artifactId>org.eclipse.swt.gtk.linux.x86</swt.artifactId>
 		<swt.id>Linux-x86</swt.id>
 		<swt.version>4.2.1</swt.version>
-		<mainClass>ru.taximaxim.pgSqlBlocks.App</mainClass>
+		<mainClass>ru.taximaxim.pgsqlblocks.App</mainClass>
 	</properties>
 
 	<profiles>

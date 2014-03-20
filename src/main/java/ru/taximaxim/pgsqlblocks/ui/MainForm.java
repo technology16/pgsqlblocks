@@ -18,7 +18,7 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 
-public class MainForm {
+public final class MainForm {
 
     private static final String APP_NAME = "pgSqlBlocks";
     private static final int ZERO_MARGIN = 0;
@@ -40,25 +40,25 @@ public class MainForm {
     private MenuItem infoMi;
     private Menu infoMenu;
     private MenuItem aboutMi;
-    
+
     private ToolBar toolBar;
-    
+
     private Composite topComposite;
-    private SashForm horizontalSash;
+    private TabFolder tabPanel;
+    private TabItem currentActivityTi;
+    private SashForm currentActivitySh;
+    private Table caServersTable;
+    private Table caMainTable;
+    private TabItem blocksHistoryTi;
+    private SashForm blocksHistorySh;
+    private Table bhServersTable;
+    private Table bhMainTable;
     
     private SashForm verticalSash;
-    private Composite serverComposite;
-    private TabFolder serversTf;
-    private TabItem currentActivityTi;
-    private Table currentActivityTable;
-    private TabItem blocksHistoryTi;
-    private Table blocksHistoryTable;
-    private Composite tableComposite;
-    private Table mainTable;
     private Composite logComposite;
     private Table logTable;
     private Composite statusBar;
-    
+
     public final static MainForm getInstance() {
         if(mainForm == null) {
             mainForm = new MainForm();
@@ -145,59 +145,62 @@ public class MainForm {
             topComposite = new Composite(verticalSash, SWT.NONE);
             topComposite.setLayout(gridLayout);
 
-            horizontalSash = new SashForm(topComposite, SWT.HORIZONTAL);
+            tabPanel = new TabFolder(topComposite, SWT.BORDER);
             {
-                horizontalSash.setLayout(gridLayout);
-                horizontalSash.setLayoutData(gridData);
-                horizontalSash.SASH_WIDTH = SASH_WIDTH;
-                horizontalSash.setBackground(shell.getDisplay().getSystemColor(SWT.COLOR_WIDGET_BACKGROUND));
-
-                serverComposite = new Composite(horizontalSash, SWT.NONE);
+                tabPanel.setLayoutData(gridData);
+                currentActivityTi = new TabItem(tabPanel, SWT.NONE);
                 {
-                    serverComposite.setLayout(gridLayout);
-                    serversTf = new TabFolder(serverComposite, SWT.BORDER);
+                    currentActivityTi.setText("Текущая активность");
+                    currentActivitySh = new SashForm(tabPanel, SWT.HORIZONTAL);
                     {
-                        serversTf.setLayoutData(gridData);
-                        currentActivityTi = new TabItem(serversTf, SWT.NONE);
+                        currentActivitySh.setLayout(gridLayout);
+                        currentActivitySh.setLayoutData(gridData);
+                        currentActivitySh.SASH_WIDTH = SASH_WIDTH;
+                        currentActivitySh.setBackground(shell.getDisplay().getSystemColor(SWT.COLOR_WIDGET_BACKGROUND));
+                        
+                        caServersTable = new Table(currentActivitySh, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
                         {
-                            currentActivityTi.setText("Текущая активность");
-                            currentActivityTable = new Table(serversTf, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
-                            {
-                                currentActivityTable.setHeaderVisible(true);
-                                currentActivityTable.setLinesVisible(true);
-                                currentActivityTable.setLayoutData(gridData);
-                                currentActivityTi.setControl(currentActivityTable);
-                            }
+                            caServersTable.setHeaderVisible(true);
+                            caServersTable.setLinesVisible(true);
+                            caServersTable.setLayoutData(gridData);
                         }
-
-                        blocksHistoryTi = new TabItem(serversTf, SWT.NONE);
+                        caMainTable = new Table(currentActivitySh, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
                         {
-                            blocksHistoryTi.setText("История блокировок");
-                            blocksHistoryTable = new Table(serversTf, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL | SWT.VIRTUAL);
-                            {
-                                blocksHistoryTable.setHeaderVisible(true);
-                                blocksHistoryTable.setLinesVisible(true);
-                                blocksHistoryTable.setLayoutData(gridData);
-                                blocksHistoryTi.setControl(blocksHistoryTable);
-                            }
+                            caMainTable.setHeaderVisible(true);
+                            caMainTable.setLinesVisible(true);
+                            caMainTable.setLayoutData(gridData);
                         }
                     }
+                    currentActivitySh.setWeights(HORIZONTAL_WEIGHTS);
+                    currentActivityTi.setControl(currentActivitySh);
                 }
-
-                tableComposite = new Composite(horizontalSash, SWT.NONE);
+                blocksHistoryTi = new TabItem(tabPanel, SWT.NONE);
                 {
-                    tableComposite.setLayout(gridLayout);
-                    mainTable = new Table(tableComposite, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL | SWT.VIRTUAL);
+                    blocksHistoryTi.setText("История блокировок");
+                    blocksHistorySh = new SashForm(tabPanel, SWT.HORIZONTAL);
                     {
-                        mainTable.setLayoutData(gridData);
-                        mainTable.setHeaderVisible(true);
-                        mainTable.setLinesVisible(true);
-                    }
-                }
+                        blocksHistorySh.setLayout(gridLayout);
+                        blocksHistorySh.setLayoutData(gridData);
+                        blocksHistorySh.SASH_WIDTH = SASH_WIDTH;
+                        blocksHistorySh.setBackground(shell.getDisplay().getSystemColor(SWT.COLOR_WIDGET_BACKGROUND));
 
-                horizontalSash.setWeights(HORIZONTAL_WEIGHTS);
+                        bhServersTable = new Table(blocksHistorySh, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
+                        {
+                            bhServersTable.setHeaderVisible(true);
+                            bhServersTable.setLinesVisible(true);
+                            bhServersTable.setLayoutData(gridData);
+                        }
+                        bhMainTable = new Table(blocksHistorySh, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
+                        {
+                            bhMainTable.setHeaderVisible(true);
+                            bhMainTable.setLinesVisible(true);
+                            bhMainTable.setLayoutData(gridData);
+                        }
+                    }
+                    blocksHistorySh.setWeights(HORIZONTAL_WEIGHTS);
+                    blocksHistoryTi.setControl(blocksHistorySh);
+                }
             }
-
             logComposite = new Composite(verticalSash, SWT.NONE);
             {
                 logComposite.setLayout(gridLayout);
@@ -208,7 +211,6 @@ public class MainForm {
                     logTable.setLinesVisible(true);
                 }
             }
-
             verticalSash.setWeights(VERTICAL_WEIGHTS);
         }
 
