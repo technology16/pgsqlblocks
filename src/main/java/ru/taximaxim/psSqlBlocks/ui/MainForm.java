@@ -28,17 +28,17 @@ public class MainForm {
     private Shell shell;
     private MainForm() {}
 
-    Menu menu;
-    MenuItem serversMi;
-    Menu serversMenu;
-    MenuItem registerMi;
-    MenuItem processesMi;
-    Menu processesMenu;
-    MenuItem viewBlocksMi;
-    MenuItem infoMi;
-    Menu infoMenu;
-    MenuItem aboutMi;
-    ToolBar toolBar;
+    private Menu menu;
+    private MenuItem serversMi;
+    private Menu serversMenu;
+    private MenuItem registerMi;
+    private MenuItem processesMi;
+    private Menu processesMenu;
+    private MenuItem viewBlocksMi;
+    private MenuItem infoMi;
+    private Menu infoMenu;
+    private MenuItem aboutMi;
+    private ToolBar toolBar;
 
     public static MainForm getInstance() {
         if(mainForm == null) {
