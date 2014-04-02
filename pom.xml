@@ -114,7 +114,7 @@
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<version>3.8.1</version>
+			<version>4.11</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -131,6 +131,11 @@
 			<groupId>org.eclipse.jface</groupId>
 			<artifactId>org.eclipse.jface</artifactId>
 			<version>3.8.0.v20120521-2329</version>
+		</dependency>
+		<dependency>
+			<groupId>postgresql</groupId>
+			<artifactId>postgresql</artifactId>
+			<version>9.1-901.jdbc4</version>
 		</dependency>
 	</dependencies>
 </project>
