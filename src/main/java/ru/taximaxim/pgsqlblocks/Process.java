@@ -1,6 +1,5 @@
 package ru.taximaxim.pgsqlblocks;
 
-import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,17 +11,17 @@ public class Process {
     private String datname;
     private String usename;
     private String client;
-    private Date backendStart;
+    private String backendStart;
     private String queryStart;
-    private Date xactStart;
+    private String xactStart;
     private String state;
-    private Date stateChange;
+    private String stateChange;
     private int blockedBy;
     private String query;
     private boolean slowQuery;
     public Process(int pid, String applicationName, String datname,
-            String usename, String client, Date backendStart,
-            String queryStart, Date xactStart, String state, Date stateChange,
+            String usename, String client, String backendStart,
+            String queryStart, String xactStart, String state, String stateChange,
             int blockedBy, String query, boolean slowQuery) {
         this.pid = pid;
         this.applicationName = applicationName;
@@ -65,19 +64,19 @@ public class Process {
     public String getClient() {
         return client;
     }
-    public Date getBackendStart() {
+    public String getBackendStart() {
         return backendStart;
     }
     public String getQueryStart() {
         return queryStart;
     }
-    public Date getXactStart() {
+    public String getXactStart() {
         return xactStart;
     }
     public String getState() {
         return state;
     }
-    public Date getStateChange() {
+    public String getStateChange() {
         return stateChange;
     }
     public int getBlockedBy() {
@@ -89,19 +88,29 @@ public class Process {
     public boolean isSlowQuery() {
         return slowQuery;
     }
+    public int getChildrensCount() {
+        int count = getChildren().size();
+        if(count == 0)
+            return count;
+        for(Process proc : getChildren()) {
+            count += proc.getChildrensCount();
+        }
+        return count;
+    }
 
     public String[] toTree() {
         return new String[]{
                 String.valueOf(pid),
+                String.valueOf(getChildrensCount()),
                 applicationName,
                 datname,
                 usename,
                 client,
-                backendStart==null?"":backendStart.toString(),
+                backendStart,
                 queryStart,
-                xactStart==null?"":xactStart.toString(),
+                xactStart,
                 state,
-                stateChange==null?"":stateChange.toString(),
+                stateChange,
                 blockedBy==0?"":String.valueOf(blockedBy),
                 query.replace("\n", " "),
                 String.valueOf(slowQuery)

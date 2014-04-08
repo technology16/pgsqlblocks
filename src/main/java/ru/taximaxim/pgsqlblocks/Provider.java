@@ -6,6 +6,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -37,14 +40,22 @@ public class Provider {
         this.dbcData = dbcData;
     }
 
-    public Runnable connect = new Runnable(){
+    private Runnable connect = new Runnable(){
         @Override
         public void run() {
             connect();
         }
     };
-
+    
+    public Runnable getConnection() {
+        return connect;
+    }
+    
     private void connect(){
+        if(isConnected()) {
+            log.info(dbcData.getName() + " соединение уже создано");
+            return;
+        }
         try {
             log.info(dbcData.getName() + " Соединение...");
             connection = DriverManager.getConnection(dbcData.getUrl(), dbcData.getUser(), dbcData.getPasswd());
@@ -144,11 +155,11 @@ public class Provider {
                     result.getString("datname"),
                     result.getString("usename"),
                     result.getString("client"),
-                    result.getDate("backend_start"),
-                    result.getString("query_start"),
-                    result.getDate("xact_start"),
+                    dateParse(result.getString("backend_start")),
+                    dateParse(result.getString("query_start")),
+                    dateParse(result.getString("xact_start")),
                     result.getString("state"),
-                    result.getDate("state_change"),
+                    dateParse(result.getString("state_change")),
                     result.getInt("blockedby"),
                     result.getString("query"),
                     result.getBoolean("slowquery"));
@@ -157,6 +168,21 @@ public class Provider {
         processList = new ProcessTreeList(processMap).getTreeList();
     }
 
+    private String dateParse(String dateString) {
+        if(dateString == null || dateString.length() == 0)
+            return "";
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ssX");
+        SimpleDateFormat sdfp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Date date = null;
+        try {
+            date = sdf.parse(dateString);
+        } catch (ParseException e) {
+            log.error("Формат даты " + dateString + " не поддерживается", e);
+        }
+        return sdfp.format(date);
+
+    }
+    
     public void terminate(int pid) {
         String term = "select pg_terminate_backend(?);";
         if(connection == null) {

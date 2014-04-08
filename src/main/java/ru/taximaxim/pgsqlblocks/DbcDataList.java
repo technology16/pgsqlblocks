@@ -69,25 +69,29 @@ public class DbcDataList {
                 continue;
             }
             Element item = (Element) node;
-            Node nameNode    = item.getElementsByTagName("name").item(0).getFirstChild();
-            Node hostNode    = item.getElementsByTagName("host").item(0).getFirstChild();
-            Node portNode    = item.getElementsByTagName("port").item(0).getFirstChild();
-            Node dbnameNode  = item.getElementsByTagName("dbname").item(0).getFirstChild();
-            Node userNode    = item.getElementsByTagName("user").item(0).getFirstChild();
-            Node passwdNode  = item.getElementsByTagName("passwd").item(0).getFirstChild();
-            Node enabledNode = item.getElementsByTagName("enabled").item(0).getFirstChild();
-            String name   = nameNode   == null?"":nameNode.getNodeValue();
-            String host   = hostNode   == null?"":hostNode.getNodeValue();
-            String port   = portNode   == null?"":portNode.getNodeValue();
-            String dbname = dbnameNode == null?"":dbnameNode.getNodeValue();
-            String user   = userNode   == null?"":userNode.getNodeValue();
-            String passwd = passwdNode == null?"":passwdNode.getNodeValue();
-            boolean enabled = Boolean.valueOf(enabledNode==null?"false":enabledNode.getNodeValue());
-            DbcData dbcData = new DbcData(name, host, port, dbname, user, passwd, enabled);
-            list.add(dbcData);
+            list.add(parseDbc(item));
         }
     }
 
+    public DbcData parseDbc(Element item) {
+        Node nameNode    = item.getElementsByTagName("name").item(0).getFirstChild();
+        Node hostNode    = item.getElementsByTagName("host").item(0).getFirstChild();
+        Node portNode    = item.getElementsByTagName("port").item(0).getFirstChild();
+        Node dbnameNode  = item.getElementsByTagName("dbname").item(0).getFirstChild();
+        Node userNode    = item.getElementsByTagName("user").item(0).getFirstChild();
+        Node passwdNode  = item.getElementsByTagName("passwd").item(0).getFirstChild();
+        Node enabledNode = item.getElementsByTagName("enabled").item(0).getFirstChild();
+        String name   = nameNode   == null?"":nameNode.getNodeValue();
+        String host   = hostNode   == null?"":hostNode.getNodeValue();
+        String port   = portNode   == null?"":portNode.getNodeValue();
+        String dbname = dbnameNode == null?"":dbnameNode.getNodeValue();
+        String user   = userNode   == null?"":userNode.getNodeValue();
+        String passwd = passwdNode == null?"":passwdNode.getNodeValue();
+        boolean enabled = Boolean.valueOf(enabledNode==null?"false":enabledNode.getNodeValue());
+        DbcData dbcData = new DbcData(name, host, port, dbname, user, passwd, enabled);
+        return dbcData;
+    }
+    
     private void createConfFile() {
         DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
         try {
@@ -123,12 +127,12 @@ public class DbcDataList {
             e.printStackTrace();
         }
         NodeList rootElement = doc.getElementsByTagName("servers");
-        rootElement.item(0).appendChild(create(doc, dbcData));
+        rootElement.item(0).appendChild(createServerElement(doc, dbcData, true));
 
         save(doc, filePath);
     }
 
-    public Element create(Document doc, DbcData dbcData) {
+    public Element createServerElement(Document doc, DbcData dbcData, boolean wp) {
         Element server = doc.createElement("server");
 
         Element name = doc.createElement("name");
@@ -148,7 +152,7 @@ public class DbcDataList {
         server.appendChild(user);
 
         Element passwd = doc.createElement("passwd");
-        passwd.setTextContent(dbcData.getPasswd());
+        passwd.setTextContent(wp?dbcData.getPasswd():"******");
         server.appendChild(passwd);
 
         Element dbname = doc.createElement("dbname");

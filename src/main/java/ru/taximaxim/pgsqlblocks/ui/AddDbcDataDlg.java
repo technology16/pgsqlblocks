@@ -132,6 +132,7 @@ public class AddDbcDataDlg {
                     break;
                 case EDIT:
                     DbcDataList.getInstance().edit(editableDbc, dbcData);
+                    MainForm.getInstance().deleteServer(editableDbc);
                     break;
                 }
                 MainForm.getInstance().serverListUpdate();

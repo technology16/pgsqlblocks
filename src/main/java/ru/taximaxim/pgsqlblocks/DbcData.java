@@ -39,7 +39,7 @@ public class DbcData {
     }
 
     public String getUrl() {
-        return "jdbc:postgresql://" + this.getHost() + ":" + this.getPort() + "/" + this.getDbname();
+        return "jdbc:postgresql://" + host + ":" + port + "/" + dbname;
     }
     
     public String getPasswd() {
