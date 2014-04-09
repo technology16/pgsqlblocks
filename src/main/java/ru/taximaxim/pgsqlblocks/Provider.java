@@ -99,8 +99,10 @@ public class Provider {
             }
         }
     }
-
-    public Runnable getProcesses = new Runnable() {
+    public Runnable getProc() {
+        return getProcesses;
+    }
+    private Runnable getProcesses = new Runnable() {
         @Override
         public void run() {
             if(!isConnected())

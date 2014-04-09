@@ -725,14 +725,14 @@ public final class MainForm {
         if(selectedDbc != null && selectedProcess != null) {
             connectsMap.get(selectedDbc).terminate(selectedProcess.getPid());
         }
-        executor.execute(connectsMap.get(selectedDbc).getProcesses);
+        executor.execute(connectsMap.get(selectedDbc).getProc());
     }
 
     private void cancel() {
         if(selectedDbc != null && selectedProcess != null) {
             connectsMap.get(selectedDbc).cancel(selectedProcess.getPid());
         }
-        executor.execute(connectsMap.get(selectedDbc).getProcesses);
+        executor.execute(connectsMap.get(selectedDbc).getProc());
     }
 
     private void dbcListInit() {
@@ -926,7 +926,7 @@ public final class MainForm {
 
     public void updateProcesses() {
         for(Entry<DbcData, Provider> map : connectsMap.entrySet()) {
-            executor.execute(map.getValue().getProcesses);
+            executor.execute(map.getValue().getProc());
         }
     }
 

@@ -1,0 +1,38 @@
+Структура пакетов
+ru.taximaxim.pgsqlblocks
+В данном пакете находятся все классы, реализующие бизнес логику проекта.
+ru.taximaxim.pgsqlblocks.ui
+Тут лежит все, что связано с UI.
+
+Бизнес логика
+Есть 3 основных класса:
+    DbcData.java
+    В данном классе хранится вся необходимая для соединения с БД информация + его статус (private DbcStatus status).
+    Каждому статусу необходимо указывать соответсвующую картинку (public String getImageAddr()). Картинки хранятся в src/main/resources/images.
+    Эти данные сохраняются в формате xml. Вся работа с xml реализована в DbcDataList.java.
+    Process.java
+    Данный класс хранит информацию о процессах DB. Для вывода информации в UI-дерево используется метод String[] toTree().
+    Данные реализованы в виде дерева. У процесса могут быть потомки(блокируемые данным процессом процессы) и родитель(блокирующий процесс).
+    Provider.java
+    В нем реализуется связь, отправка запросов и получение данных с БД. Все новые запросы необходимо оборачивать в Runnable и выполнять их в отдельном потоке, во избежании блокировки/подтормаживания ui-потока.
+    Для уведомления ui-потока о том, что запрос отработал, необходимо в его конце вызвать метод display.asyncExec(Runnable runnable);
+
+
+Запросы
+Для получения всех процессов сервера
+SELECT p.pid AS pid, application_name, datname, usename,
+CASE WHEN client_port=-1 THEN 'local pipe' WHEN length(client_hostname)>0 THEN client_hostname||':'||client_port ELSE textin(inet_out(client_addr))||':'||client_port END AS client,
+date_trunc('second', backend_start) AS backend_start, CASE WHEN state='active' THEN date_trunc('second', query_start)::text ELSE '' END AS query_start,
+date_trunc('second', xact_start) AS xact_start, state, date_trunc('second', state_change) AS state_change, (SELECT min(l1.pid) 
+FROM pg_locks l1 WHERE GRANTED AND (relation IN (SELECT relation FROM pg_locks l2 WHERE l2.pid=p.pid AND NOT granted) OR transactionid IN (SELECT transactionid FROM pg_locks l3 WHERE l3.pid=p.pid AND NOT granted))) AS blockedby,query AS query,
+CASE WHEN query_start IS NULL OR state<>'active' THEN false ELSE query_start < now() - '10 seconds'::interval END AS slowquery 
+FROM pg_stat_activity p ORDER BY 1 ASC
+Уничтожить процесс
+select pg_terminate_backend(?);
+Послать сигнал для отмены процесса
+select pg_cancel_backend(?);
+
+UI
+Все, что связано с UI необходимо писать в пакете ru.taximaxim.pgsqlblocks.ui
+Основной UI приложения написан в классе MainForm.java.
+Для добавления новой колонки в таблицу-дерево, необходимо добавить ее название и ширину в caMainTreeColsName и caMainTreeColsSize соответсвенно.
