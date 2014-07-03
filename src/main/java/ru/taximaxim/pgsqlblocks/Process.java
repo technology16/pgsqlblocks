@@ -62,6 +62,8 @@ public class Process {
         return usename;
     }
     public String getClient() {
+        if(client == null)
+            return "";
         return client;
     }
     public String getBackendStart() {
@@ -105,7 +107,7 @@ public class Process {
                 applicationName,
                 datname,
                 usename,
-                client,
+                getClient(),
                 backendStart,
                 queryStart,
                 xactStart,
