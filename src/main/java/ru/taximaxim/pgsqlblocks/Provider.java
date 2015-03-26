@@ -25,18 +25,23 @@ public class Provider {
     static {
         DriverManager.setLoginTimeout(5);
     }
-
+    
+    private static String QUERY = null;
+    
     private String getQuery() throws IOException {
-        try (InputStream input = ClassLoader.getSystemResourceAsStream("query.sql");
-             BufferedReader reader = new BufferedReader(new InputStreamReader(input));)
-        {
-            StringBuilder out = new StringBuilder();
-            String line;
-            while ((line = reader.readLine()) != null) {
-                out.append(line);
+        if(QUERY==null) {
+            try (InputStream input = ClassLoader.getSystemResourceAsStream("query.sql");
+                 BufferedReader reader = new BufferedReader(new InputStreamReader(input));)
+            {
+                StringBuilder out = new StringBuilder();
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    out.append(line);
+                }
+                QUERY = out.toString();
             }
-            return out.toString();
         }
+        return QUERY;
     }
     
     private static Logger log = Logger.getLogger(Provider.class);
