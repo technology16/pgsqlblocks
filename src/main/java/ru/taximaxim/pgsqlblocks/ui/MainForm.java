@@ -545,18 +545,18 @@ public final class MainForm {
                     item.setText(process.toTree());
                     item.setData(process);               
                     if(process.getChildren().size()>0) {
-                        for (Process p : process.getChildren()){
-                            if(p.getBlockedBy()!=0) {
+                        /*for (Process p : process.getChildren()){
+                            if(p.getBlockedBy()!=0) {*/
                                 item.setImage(resHelper.setImage(shell, "images/locker_16.png"));
                                 item.setItemCount(process.getChildren().size());
-                                break;
+                               /* break;
                             } 
                             if((p.getBlockingLocks()!=0) & (p.getBlockingLocks() != p.getBlockedBy())) {
                                 item.setImage(resHelper.setImage(shell, "images/blocked_16.png"));
                                 item.setItemCount(process.getChildren().size());
                                 break;
                             }
-                        }
+                        }*/
                     } else {
                         item.setImage(resHelper.setImage(shell, "images/nb_16.png"));
                     }
@@ -688,18 +688,18 @@ public final class MainForm {
                     item.setText(process.toTree());
                     item.setData(process);
                     if(process.getChildren().size()>0) {
-                        for (Process p : process.getChildren()){
-                            if(p.getBlockedBy()!=0) {
+                       /* for (Process p : process.getChildren()){
+                            if(p.getBlockedBy()!=0) {*/
                                 item.setImage(resHelper.setImage(shell, "images/locker_16.png"));
                                 item.setItemCount(process.getChildren().size());
-                                break;
+                            /*   break;
                             } 
                             if((p.getBlockingLocks()!=0) & (p.getBlockingLocks() != p.getBlockedBy())) {
                                 item.setImage(resHelper.setImage(shell, "images/blocked_16.png"));
                                 item.setItemCount(process.getChildren().size());
                                 break;
                             }
-                        }
+                        }*/
                     } else {
                         item.setImage(resHelper.setImage(shell, "images/nb_16.png"));
                     }
