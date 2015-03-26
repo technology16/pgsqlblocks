@@ -658,10 +658,6 @@ public final class MainForm {
             ti.setData(map.getKey());
         }
     }
-
-    public void helpCode(){
-        
-    }
     
     private Listener caMainTreeListener = new Listener() {
         @Override
@@ -725,7 +721,7 @@ public final class MainForm {
                         if(expandedProcesses.contains(process)) {
                             item.setExpanded(true);
                         }
-                     } else {
+                    } else {
                         if(process.getBlockedBy()>0) {
                             item.setImage(resHelper.setImage(shell, "images/locked_16.png"));
                         } 

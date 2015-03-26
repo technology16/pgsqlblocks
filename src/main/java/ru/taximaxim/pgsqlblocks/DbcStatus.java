@@ -4,8 +4,7 @@ public enum DbcStatus {
     DISABLED,
     CONNECTED,
     ERROR,
-    BLOCKED,
-    WAIT;
+    BLOCKED;
     public String getImageAddr() {
         switch(this) {
         case DISABLED:
@@ -16,8 +15,6 @@ public enum DbcStatus {
             return "images/db_e_16.png";
         case BLOCKED:
             return "images/locked_16.png";
-        case WAIT:
-            return "images/blocking_16.png";
         default:
             return "images/void_16.png";
         }

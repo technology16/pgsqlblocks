@@ -125,13 +125,6 @@ public class Provider {
                             BlocksHistory.getInstance().add(dbcData, process);
                         }
                     }
-                    /*
-                    dbcData.setStatus(DbcStatus.WAIT);
-                    for(Process process : processList) {
-                        if(process.getChildrenLocks().size() > 0){
-                            BlocksHistory.getInstance().add(dbcData, process);
-                        }
-                    }*/
                 } else {
                     dbcData.setStatus(DbcStatus.CONNECTED);
                 }
