@@ -185,10 +185,8 @@ public class Provider {
                     result.getBoolean("slowquery"));
             if(processMap.get(proc.getPid())==null) {
                 processMap.put(proc.getPid(), proc);
-            } else {
-                if(processMap.get(proc.getPid()).getBlockedBy()==processMap.get(proc.getPid()).getBlockingLocks()) {
-                   processMap.put(proc.getPid(), proc);
-                }
+            } else if(processMap.get(proc.getPid()).getBlockedBy()!=processMap.get(proc.getPid()).getBlockingLocks()) {
+                processMap.put(proc.getPid(), proc);
             }
         }
         result.close();
@@ -216,11 +214,14 @@ public class Provider {
         if(connection == null) {
             return;
         }
-        try {
-            PreparedStatement termPs = connection.prepareStatement(term);
+        boolean kill = false;
+        try (PreparedStatement termPs = connection.prepareStatement(term);) {
             termPs.setInt(1, pid);
-            termPs.executeQuery();
-            log.info(dbcData.getName() + " pid=" + pid + " is terminated.");
+            try (ResultSet resultSet = termPs.executeQuery()) {
+                if (resultSet.next()) {
+                    kill = resultSet.getBoolean(1);
+                }
+            }
         } catch (SQLException e) {
             dbcData.setStatus(DbcStatus.ERROR);
             MainForm.getInstance().getDisplay().asyncExec(new Runnable() {
@@ -231,6 +232,11 @@ public class Provider {
             });
             log.error(dbcData.getName() + " " + e.getMessage(), e);
         }
+        if(kill) {
+            log.info(dbcData.getName() + " pid=" + pid + " is terminated.");
+        } else {
+            log.info(dbcData.getName() + " pid=" + pid + " is terminated failed.");
+        }
     }
 
     public void cancel(int pid) {
@@ -238,13 +244,21 @@ public class Provider {
         if(connection == null) {
             return;
         }
-        try {
-            PreparedStatement cancelPs = connection.prepareStatement(cancel);
+        boolean kill = false;
+        try(PreparedStatement cancelPs = connection.prepareStatement(cancel);) {
             cancelPs.setInt(1, pid);
-            cancelPs.executeQuery();
-            log.info(dbcData.getName() + " pid=" + pid + " is canceled.");
+            try (ResultSet resultSet = cancelPs.executeQuery()) {
+                if (resultSet.next()) {
+                    kill = resultSet.getBoolean(1);
+                }
+            }
         } catch (SQLException e) {
             log.error(dbcData.getName() + " " + e.getMessage(), e);
+        }
+        if(kill) {
+            log.info(dbcData.getName() + " pid=" + pid + " is canceled.");
+        } else {
+            log.info(dbcData.getName() + " pid=" + pid + " is canceled failed.");
         }
     }
 

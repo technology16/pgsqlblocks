@@ -682,7 +682,7 @@ public final class MainForm {
                 if(parentItem == null) {
                     process = processList.get(event.index);
                     item.setText(process.toTree());
-                    item.setData(process);
+                    item.setData(process); 
                     if(process.getChildren().size()>0) {
                        for (Process p : process.getChildren()){
                             if(p.getBlockedBy()!=0) {
@@ -696,9 +696,13 @@ public final class MainForm {
                                 break;
                             }
                         }
+                       if(expandedProcesses.contains(process)) {
+                           item.setExpanded(true);
+                       }
                     } else {
                         item.setImage(resHelper.setImage(shell, "images/nb_16.png"));
                     }
+                    
                     if(process.equals(selectedProcess))
                         caMainTree.select(item);
                 } else {
