@@ -225,6 +225,7 @@ public class BlocksHistory {
                 getNodeValue(el,"state"),
                 getNodeValue(el,"stateChange"),
                 Integer.parseInt(getNodeValue(el,"blockedBy")),
+                Integer.parseInt(getNodeValue(el,"blocking_locks")),
                 getNodeValue(el,"query"),
                 Boolean.parseBoolean(getNodeValue(el,"slowQuery"))
                 );
