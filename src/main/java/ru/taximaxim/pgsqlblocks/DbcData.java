@@ -39,7 +39,7 @@ public class DbcData {
     }
 
     public String getUrl() {
-        return "jdbc:postgresql://" + host + ":" + port + "/" + dbname;
+        return String.format("jdbc:postgresql://%1$s:%2$s/%3$s", getHost(), getPort(), getDbname());
     }
     
     public String getPasswd() {
@@ -56,51 +56,68 @@ public class DbcData {
 
     @Override
     public String toString() {
-        return "DbcData [name=" + name + ", host=" + host + ", port=" + port
-                + ", user=" + user + ", passwd=" + passwd + ", dbname="
-                + dbname + ", enabled=" + enabled + "]";
+        return String.format("DbcData [name=%1$s, host=%2$s, port=%3$s, user=%4$s, passwd=%5$s, dbname=%6$s, enabled=%7$s]", 
+            getName(), getHost(), getPort(), getUser(), getPasswd(), getDbname(), isEnabled());
     }
 
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((dbname == null) ? 0 : dbname.hashCode());
-        result = prime * result + ((host == null) ? 0 : host.hashCode());
-        result = prime * result + ((port == null) ? 0 : port.hashCode());
-        result = prime * result + ((user == null) ? 0 : user.hashCode());
+        result = prime * result + ((getDbname() == null) ? 0 : getDbname().hashCode());
+        result = prime * result + ((getHost() == null) ? 0 : getHost().hashCode());
+        result = prime * result + ((getPort() == null) ? 0 : getPort().hashCode());
+        result = prime * result + ((getUser() == null) ? 0 : getUser().hashCode());
         return result;
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        
+        if (obj == null) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        
+        if (getClass() != obj.getClass()) {
             return false;
+        }
+        
         DbcData other = (DbcData) obj;
-        if (dbname == null) {
-            if (other.dbname != null)
+        if (getDbname() == null) {
+            if (other.getDbname() != null) {
                 return false;
-        } else if (!dbname.equals(other.dbname))
+            }
+        } else if (!getDbname().equals(other.getDbname())) {
             return false;
-        if (host == null) {
-            if (other.host != null)
+        }
+        
+        if (getHost() == null) {
+            if (other.getHost() != null){
                 return false;
-        } else if (!host.equals(other.host))
+            }
+        } else if (!getHost().equals(other.getHost())){
             return false;
-        if (port == null) {
-            if (other.port != null)
+        }
+        
+        if (getPort() == null) {
+            if (other.getPort() != null){
                 return false;
-        } else if (!port.equals(other.port))
+            }
+        } else if (!getPort().equals(other.getPort())){
             return false;
-        if (user == null) {
-            if (other.user != null)
+        }
+        
+        if (getUser() == null) {
+            if (other.getUser() != null){
                 return false;
-        } else if (!user.equals(other.user))
+            }
+        } else if (!getUser().equals(other.getUser())){
             return false;
+        }
+        
         return true;
     }
 

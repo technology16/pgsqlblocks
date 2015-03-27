@@ -66,7 +66,7 @@ public final class MainForm {
     private static final int[] VERTICAL_WEIGHTS = new int[]{80,20};
     private static final int[] HORIZONTAL_WEIGHTS = new int[]{17,83};
     private static final int SASH_WIDTH = 2;
-    private static Logger log = Logger.getLogger(MainForm.class);
+    protected static final Logger LOG = Logger.getLogger(MainForm.class);
     private static MainForm mainForm;
     private String[] caMainTreeColsName = new String[]{
             "pid","blocked_count", "application_name", "datname", "usename", "client", "backend_start", "query_start", 
@@ -184,7 +184,7 @@ public final class MainForm {
                 }
             }
         } catch(Exception e){
-            log.error("Что-то пошло не так", e);
+            LOG.error("Что-то пошло не так", e);
         }
         finally {
             executor.shutdown();
@@ -554,7 +554,7 @@ public final class MainForm {
                     try{
                         process = ((Process)parentItem.getData()).getChildren().get(event.index);
                     } catch(IndexOutOfBoundsException e) {
-                        log.error("Ошибка в построении дерева");
+                        LOG.error("Ошибка в построении дерева");
                         return;
                     }
                     item.setText(process.toTree());
@@ -584,7 +584,7 @@ public final class MainForm {
         try {
             manifest = new Manifest(manifestPath.openStream());
         } catch (IOException e) {
-            log.error("Ошибка при чтении манифеста", e);
+            LOG.error("Ошибка при чтении манифеста", e);
         }
         Attributes manifestAttributes = manifest.getMainAttributes();
         appVersion = manifestAttributes.getValue("Implementation-Version");
@@ -678,7 +678,7 @@ public final class MainForm {
                     try{
                         process = ((Process)parentItem.getData()).getChildren().get(event.index);
                     } catch(IndexOutOfBoundsException e) {
-                        log.error("Ошибка в построении дерева");
+                        LOG.error("Ошибка в построении дерева");
                         return;
                     }
                     item.setText(process.toTree());
@@ -783,7 +783,7 @@ public final class MainForm {
             serversTiMap.put(dbc, ti);
             serverStatusUpdate(dbc);
         }
-        log.info("Обновление списка серверов");
+        LOG.info("Обновление списка серверов");
     }
 
     public void deleteServer(DbcData dbc) {

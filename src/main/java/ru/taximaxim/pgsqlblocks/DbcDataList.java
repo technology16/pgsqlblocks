@@ -26,9 +26,21 @@ import org.xml.sax.SAXException;
 
 
 public class DbcDataList {
-
-    private Logger log = Logger.getLogger(DbcDataList.class);
-    private String filePath = "servers.xml";
+    
+    protected static final Logger LOG = Logger.getLogger(DbcDataList.class);
+    private static final String FILE_PATH = "servers.xml";
+    private static final String ID = "id";
+    private static final String NAME = "name";
+    private static final String HOST = "host";
+    private static final String PORT = "port";
+    private static final String DBNAME = "dbname";
+    private static final String USER = "user";
+    private static final String PASSWD = "passwd";
+    private static final String ENABLED = "enabled";
+    private static final String FALSE = "false";
+    private static final String SERVERS = "servers";
+    private static final String SERVER = "server";
+    
     private List<DbcData> list;
 
     private static DbcDataList dbcDataList;
@@ -42,19 +54,26 @@ public class DbcDataList {
     }
 
     public List<DbcData> getList() {
+        if (list==null) {
+            list = new ArrayList<DbcData>();
+        }
         return list;
     }
-
-    public void init() {
+    
+    public void initList() {
         list = new ArrayList<DbcData>();
+    }
+    
+    public void init() {
+        initList();
         DocumentBuilderFactory df = DocumentBuilderFactory.newInstance();
         Document doc = null;
         try {
             DocumentBuilder db = df.newDocumentBuilder();
             try {
-                doc = db.parse(new File(filePath));
+                doc = db.parse(new File(FILE_PATH));
             } catch (SAXException | IOException e) {
-                log.error("Не найден файл конфигурации");
+                LOG.error("Не найден файл конфигурации");
                 createConfFile();
             }
         } catch (ParserConfigurationException e) {
@@ -69,25 +88,25 @@ public class DbcDataList {
                 continue;
             }
             Element item = (Element) node;
-            list.add(parseDbc(item));
+            getList().add(parseDbc(item));
         }
     }
 
     public DbcData parseDbc(Element item) {
-        Node nameNode    = item.getElementsByTagName("name").item(0).getFirstChild();
-        Node hostNode    = item.getElementsByTagName("host").item(0).getFirstChild();
-        Node portNode    = item.getElementsByTagName("port").item(0).getFirstChild();
-        Node dbnameNode  = item.getElementsByTagName("dbname").item(0).getFirstChild();
-        Node userNode    = item.getElementsByTagName("user").item(0).getFirstChild();
-        Node passwdNode  = item.getElementsByTagName("passwd").item(0).getFirstChild();
-        Node enabledNode = item.getElementsByTagName("enabled").item(0).getFirstChild();
+        Node nameNode    = item.getElementsByTagName(NAME).item(0).getFirstChild();
+        Node hostNode    = item.getElementsByTagName(HOST).item(0).getFirstChild();
+        Node portNode    = item.getElementsByTagName(PORT).item(0).getFirstChild();
+        Node dbnameNode  = item.getElementsByTagName(DBNAME).item(0).getFirstChild();
+        Node userNode    = item.getElementsByTagName(USER).item(0).getFirstChild();
+        Node passwdNode  = item.getElementsByTagName(PASSWD).item(0).getFirstChild();
+        Node enabledNode = item.getElementsByTagName(ENABLED).item(0).getFirstChild();
         String name   = nameNode   == null?"":nameNode.getNodeValue();
         String host   = hostNode   == null?"":hostNode.getNodeValue();
         String port   = portNode   == null?"":portNode.getNodeValue();
         String dbname = dbnameNode == null?"":dbnameNode.getNodeValue();
         String user   = userNode   == null?"":userNode.getNodeValue();
         String passwd = passwdNode == null?"":passwdNode.getNodeValue();
-        boolean enabled = Boolean.valueOf(enabledNode==null?"false":enabledNode.getNodeValue());
+        boolean enabled = Boolean.valueOf(enabledNode==null?FALSE:enabledNode.getNodeValue());
         DbcData dbcData = new DbcData(name, host, port, dbname, user, passwd, enabled);
         return dbcData;
     }
@@ -97,73 +116,59 @@ public class DbcDataList {
         try {
             DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
             Document doc = docBuilder.newDocument();
-            Element rootElement = doc.createElement("servers");
+            Element rootElement = doc.createElement(SERVERS);
             doc.appendChild(rootElement);
-            save(doc, filePath);
+            save(doc, FILE_PATH);
         } catch (ParserConfigurationException e) {
-            log.error(e);
+            LOG.error(e);
         }
-        log.info("Создан файл конфигурации " + filePath);
+        LOG.info("Создан файл конфигурации " + FILE_PATH);
     }
 
     public void add(DbcData dbcData) {
-        if(list.contains(dbcData)) {
-            log.error("Данный сервер уже есть в конфигурационном файле");
+        if(getList().contains(dbcData)) {
+            LOG.error("Данный сервер уже есть в конфигурационном файле");
             return;
         }
-        list.add(dbcData);
+        getList().add(dbcData);
 
         DocumentBuilderFactory df = DocumentBuilderFactory.newInstance();
         Document doc = null;
         try {
             DocumentBuilder db = df.newDocumentBuilder();
             try {
-                doc = db.parse(new File(filePath));
+                doc = db.parse(new File(FILE_PATH));
             } catch (SAXException | IOException e) {
-                log.error("Не найден файл конфигурации");
+                LOG.error("Не найден файл конфигурации");
                 createConfFile();
             }
         } catch (ParserConfigurationException e) {
             e.printStackTrace();
         }
-        NodeList rootElement = doc.getElementsByTagName("servers");
+        NodeList rootElement = doc.getElementsByTagName(SERVERS);
         rootElement.item(0).appendChild(createServerElement(doc, dbcData, true));
 
-        save(doc, filePath);
+        save(doc, FILE_PATH);
     }
 
+    private Element createElement(Element server, Element rows, String textContent){
+        rows.setTextContent(textContent);
+        server.appendChild(rows);
+        return server;
+    }
+    
     public Element createServerElement(Document doc, DbcData dbcData, boolean wp) {
-        Element server = doc.createElement("server");
-
-        Element name = doc.createElement("name");
-        name.setTextContent(dbcData.getName());
-        server.appendChild(name);
-
-        Element host = doc.createElement("host");
-        host.setTextContent(dbcData.getHost());
-        server.appendChild(host);
-
-        Element port = doc.createElement("port");
-        port.setTextContent(dbcData.getPort());
-        server.appendChild(port);
-
-        Element user = doc.createElement("user");
-        user.setTextContent(dbcData.getUser());
-        server.appendChild(user);
-
-        Element passwd = doc.createElement("passwd");
-        passwd.setTextContent(wp?dbcData.getPasswd():"******");
-        server.appendChild(passwd);
-
-        Element dbname = doc.createElement("dbname");
-        dbname.setTextContent(dbcData.getDbname());
-        server.appendChild(dbname);
-
-        Element enabled = doc.createElement("enabled");
-        enabled.setTextContent(String.valueOf(dbcData.isEnabled()));
-        server.appendChild(enabled);
-        server.setAttribute("id", String.valueOf(dbcData.hashCode()));
-        server.setIdAttribute("id", true);
+        Element server = doc.createElement(SERVER);
+        server = createElement(server, doc.createElement(NAME), dbcData.getName());
+        server = createElement(server, doc.createElement(HOST), dbcData.getHost());
+        server = createElement(server, doc.createElement(PORT), dbcData.getPort());
+        server = createElement(server, doc.createElement(USER), dbcData.getUser());
+        server = createElement(server, doc.createElement(PASSWD), wp?dbcData.getPasswd():"******");
+        server = createElement(server, doc.createElement(DBNAME), dbcData.getDbname());
+        server = createElement(server, doc.createElement(ENABLED), String.valueOf(dbcData.isEnabled()));
+        
+        server.setAttribute(ID, String.valueOf(dbcData.hashCode()));
+        server.setIdAttribute(ID, true);
         return server;
     } 
     
@@ -177,10 +182,10 @@ public class DbcDataList {
             try {
                 transformer.transform(source, result);
             } catch (TransformerException e) {
-                log.error(e);
+                LOG.error(e);
             }
         } catch (TransformerConfigurationException e) {
-            log.error(e);
+            LOG.error(e);
         }
     }
 
@@ -195,24 +200,24 @@ public class DbcDataList {
         try {
             DocumentBuilder db = df.newDocumentBuilder();
             try {
-                doc = db.parse(new File(filePath));
+                doc = db.parse(new File(FILE_PATH));
             } catch (SAXException | IOException e) {
-                log.error("Не найден файл конфигурации", e);
+                LOG.error("Не найден файл конфигурации", e);
                 createConfFile();
             }
         } catch (ParserConfigurationException e) {
             e.printStackTrace();
         }
-        NodeList nodeList = doc.getElementsByTagName("server");
+        NodeList nodeList = doc.getElementsByTagName(SERVER);
         for(int i=0; i<nodeList.getLength();i++) {
             Node n = nodeList.item(i);
             NamedNodeMap attrs = n.getAttributes();
-            if(attrs.getNamedItem("id").getNodeValue().equals(String.valueOf(oldDbc.hashCode()))) {
+            if(attrs.getNamedItem(ID).getNodeValue().equals(String.valueOf(oldDbc.hashCode()))) {
                 n.getParentNode().removeChild(n);
                 break;
             }
         }
-        list.remove(oldDbc);
-        save(doc, filePath);
+        getList().remove(oldDbc);
+        save(doc, FILE_PATH);
     }
 }

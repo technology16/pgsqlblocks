@@ -7,7 +7,7 @@ import org.eclipse.swt.widgets.Composite;
 public class ResHelper {
 
     private static volatile ResHelper resHelper;
-    private static Logger log = Logger.getLogger(ResHelper.class);
+    protected static final Logger LOG = Logger.getLogger(ResHelper.class);
 
     public static ResHelper getInstance() {
         ResHelper localResHelper = resHelper;
@@ -25,7 +25,7 @@ public class ResHelper {
         try{
             return new Image(composite.getDisplay(),composite.getClass().getClassLoader().getResourceAsStream(addr));
         } catch(Exception e){
-            log.error("Ресурс не найден :" + addr, e);
+            LOG.error("Ресурс не найден :" + addr, e);
         }
         return null;
     }
