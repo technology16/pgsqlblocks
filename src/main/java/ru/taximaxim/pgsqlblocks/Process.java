@@ -6,7 +6,7 @@ import java.util.List;
 public class Process {
     
     private Process parent;
-    private List<Process> children = new ArrayList<Process>();
+    private List<Process> children;
     private int pid;
     private String applicationName;
     private String datname;
@@ -38,6 +38,7 @@ public class Process {
         this.blockedBy = blockedBy;
         this.query = query;
         this.slowQuery = slowQuery;
+        this.children = new ArrayList<Process>();
     }
     
     public void setParent(Process parent) {

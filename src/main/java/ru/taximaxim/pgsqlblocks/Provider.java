@@ -11,6 +11,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import org.apache.log4j.Logger;
 
@@ -49,14 +50,14 @@ public class Provider {
     
     private DbcData dbcData;
     private Connection connection;
-    private ConcurrentHashMap<Integer, Process> processMap;
+    private ConcurrentMap<Integer, Process> processMap;
     private List<Process> processList;
 
     public Provider(DbcData dbcData) {
         this.dbcData = dbcData;
     }
     
-    private ConcurrentHashMap<Integer, Process> getProcessMap(){
+    private ConcurrentMap<Integer, Process> getProcessMap(){
         if(processMap == null) {
             processMap = new ConcurrentHashMap<Integer, Process>();
         }
@@ -132,8 +133,9 @@ public class Provider {
     private Runnable getProcesses = new Runnable() {
         @Override
         public void run() {
-            if(!isConnected())
+            if(!isConnected()) {
                 return;
+            }
             try {
                 getProcesses();
                 if(getProcessMap().size() > getProcessList().size()) {
@@ -191,13 +193,14 @@ public class Provider {
                         result.getBoolean(SLOWQUERY));
                 getProcessMap().put(proc.getPid(), proc);
             }
-            processList = new ProcessTreeList(getProcessMap()).getTreeList();
+            setProcessList();
         }
     }
 
     private String dateParse(String dateString) {
-        if(dateString == null || dateString.length() == 0)
+        if(dateString == null || dateString.length() == 0) {
             return "";
+        }
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ssX");
         SimpleDateFormat sdfp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         Date date = null;
@@ -248,13 +251,17 @@ public class Provider {
     public List<Process> getProcessList() {
         return processList;
     }
-
+    public void setProcessList() {
+        processList = new ProcessTreeList(getProcessMap()).getTreeList();
+    }
+    
     public boolean isConnected() {
         try {
-            if(connection == null || connection.isClosed())
+            if(connection == null || connection.isClosed()) {
                 return false;
+            }
         } catch (SQLException e) {
-            e.printStackTrace();
+            LOG.error("Ошибка isConnected: " + e.getMessage());
         }
         return true;
     }

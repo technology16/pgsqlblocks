@@ -48,8 +48,9 @@ public class DbcDataList {
     private DbcDataList() {}
 
     public static DbcDataList getInstance() {
-        if(dbcDataList == null)
+        if(dbcDataList == null) {
             dbcDataList = new DbcDataList();
+        }
         return dbcDataList;
     }
 
@@ -60,12 +61,7 @@ public class DbcDataList {
         return list;
     }
     
-    public void initList() {
-        list = new ArrayList<DbcData>();
-    }
-    
     public void init() {
-        initList();
         DocumentBuilderFactory df = DocumentBuilderFactory.newInstance();
         Document doc = null;
         try {
@@ -77,10 +73,11 @@ public class DbcDataList {
                 createConfFile();
             }
         } catch (ParserConfigurationException e) {
-            e.printStackTrace();
+            LOG.error("Ошибка ParserConfigurationException: " + e.getMessage());
         }
-        if(doc == null)
+        if(doc == null) {
             return;
+        }
         NodeList items = doc.getElementsByTagName("server");
         for (int i = 0; i < items.getLength(); i++) {
             Node node = items.item(i);
@@ -107,8 +104,7 @@ public class DbcDataList {
         String user   = userNode   == null?"":userNode.getNodeValue();
         String passwd = passwdNode == null?"":passwdNode.getNodeValue();
         boolean enabled = Boolean.valueOf(enabledNode==null?FALSE:enabledNode.getNodeValue());
-        DbcData dbcData = new DbcData(name, host, port, dbname, user, passwd, enabled);
-        return dbcData;
+        return new DbcData(name, host, port, dbname, user, passwd, enabled);
     }
     
     private void createConfFile() {
@@ -143,7 +139,7 @@ public class DbcDataList {
                 createConfFile();
             }
         } catch (ParserConfigurationException e) {
-            e.printStackTrace();
+            LOG.error("Ошибка ParserConfigurationException: " + e.getMessage());
         }
         NodeList rootElement = doc.getElementsByTagName(SERVERS);
         rootElement.item(0).appendChild(createServerElement(doc, dbcData, true));
@@ -206,7 +202,7 @@ public class DbcDataList {
                 createConfFile();
             }
         } catch (ParserConfigurationException e) {
-            e.printStackTrace();
+            LOG.error("Ошибка ParserConfigurationException: " + e.getMessage());
         }
         NodeList nodeList = doc.getElementsByTagName(SERVER);
         for(int i=0; i<nodeList.getLength();i++) {

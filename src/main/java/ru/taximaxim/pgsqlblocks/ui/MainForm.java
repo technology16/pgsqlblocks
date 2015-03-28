@@ -13,6 +13,7 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.jar.Attributes;
@@ -77,13 +78,15 @@ public final class MainForm {
         UP,
         DOWN;
         public SortDirection getOpposite() {
-            if(this == UP)
+            if(this == UP) {
                 return DOWN;
+            }
             return UP;
         }
         public int getSwtData(){
-            if(this == UP)
+            if(this == UP) {
                 return SWT.UP;
+            }
             return SWT.DOWN;
         }
     }
@@ -97,18 +100,16 @@ public final class MainForm {
 
     private List<DbcData> dbcList;
     private List<Process> processList;
-    private ConcurrentHashMap<DbcData, TableItem> serversTiMap = new ConcurrentHashMap<DbcData, TableItem>();
+    private ConcurrentMap<DbcData, TableItem> serversTiMap;
     private DbcDataList dl = DbcDataList.getInstance();
     private DbcData selectedDbc;
-    private ConcurrentHashMap<DbcData, Provider> connectsMap = new ConcurrentHashMap<DbcData, Provider>();
-    private ConcurrentHashMap<DbcData, List<Process>> historyMap;
+    private ConcurrentMap<DbcData, Provider> connectsMap;
+    private ConcurrentMap<DbcData, List<Process>> historyMap;
     private List<Process> historyProcessList;
     private Process selectedProcess;
-    private List<Process> expandedProcesses = new ArrayList<Process>();
-    private String appVersion;
+    private List<Process> expandedProcesses;
     private Label appVersionLabel;
 
-    private ToolBar toolBar;
     private ToolItem addDbTi;
     private ToolItem removeDbTi;
     private ToolItem editDbTi;
@@ -125,10 +126,6 @@ public final class MainForm {
     private ToolItem cancelProc;
     private Text procText;
 
-    private Composite topComposite;
-    private TabFolder tabPanel;
-    private TabItem currentActivityTi;
-    private SashForm currentActivitySf;
     private SashForm caTreeSf;
     private Table caServersTable;
     private MenuItem connectDbCm;
@@ -137,14 +134,10 @@ public final class MainForm {
     private MenuItem removeDbCm;
     private Tree caMainTree;
     private Composite procComposite;
-    private TabItem blocksHistoryTi;
-    private SashForm blocksHistorySf;
     private Table bhServersTable;
     private Tree bhMainTree;
 
-    private SashForm verticalSf;
     private Composite logComposite;
-    private Composite statusBar;
 
     private AddDbcDataDlg dbcDlg;
     private ConfirmDlg confirmDlg;
@@ -164,6 +157,27 @@ public final class MainForm {
         return mainForm;
     }
 
+    public ConcurrentMap<DbcData, TableItem> getServersTiMap() {
+        if(serversTiMap==null) {
+            serversTiMap = new ConcurrentHashMap<DbcData, TableItem>();
+        }
+        return serversTiMap;
+    }
+    
+    public ConcurrentMap<DbcData, Provider> getConnectsMap() {
+        if(connectsMap==null) {
+            connectsMap = new ConcurrentHashMap<DbcData, Provider>();
+        }
+        return connectsMap;
+    }
+    
+    public List<Process> getExpandedProcesses() {
+        if(expandedProcesses==null) {
+            expandedProcesses = new ArrayList<Process>();
+        }
+        return expandedProcesses;
+    }
+    
     public void show(Display display) {
         try {
             shell = new Shell(display);
@@ -189,7 +203,7 @@ public final class MainForm {
         finally {
             executor.shutdown();
             Enumeration<Driver> driver = DriverManager.getDrivers();
-            for(Entry<DbcData, Provider> map : connectsMap.entrySet()) {
+            for(Entry<DbcData, Provider> map : getConnectsMap().entrySet()) {
                 if(map.getValue().isConnected()) {
                     map.getValue().disconnect();
                 }
@@ -198,7 +212,7 @@ public final class MainForm {
                 try {
                     DriverManager.deregisterDriver(driver.nextElement());
                 } catch (SQLException e) {
-                    e.printStackTrace();
+                    LOG.error("Ошибка SQLException: " + e.getMessage());
                 }
             }
             BlocksHistory.getInstance().save();
@@ -216,7 +230,7 @@ public final class MainForm {
 
         GridData gridData = new GridData(SWT.FILL, SWT.FILL, true, true);
 
-        toolBar = new ToolBar(shell, SWT.RIGHT | SWT.FLAT);
+        ToolBar toolBar = new ToolBar(shell, SWT.RIGHT | SWT.FLAT);
         {
             addDbTi = new ToolItem(toolBar, SWT.PUSH);
             addDbTi.setImage(resHelper.setImage(shell, "images/db_add_16.png"));
@@ -284,23 +298,23 @@ public final class MainForm {
             openBlocksHistory.setToolTipText("Открыть файл с историей блокировок");
         }
 
-        verticalSf = new SashForm(shell, SWT.VERTICAL);
+        SashForm verticalSf = new SashForm(shell, SWT.VERTICAL);
         {
             verticalSf.setLayout(gridLayout);
             verticalSf.setLayoutData(gridData);
             verticalSf.SASH_WIDTH = SASH_WIDTH;
             verticalSf.setBackground(shell.getDisplay().getSystemColor(SWT.COLOR_WIDGET_BACKGROUND));
 
-            topComposite = new Composite(verticalSf, SWT.NONE);
+            Composite topComposite = new Composite(verticalSf, SWT.NONE);
             topComposite.setLayout(gridLayout);
 
-            tabPanel = new TabFolder(topComposite, SWT.BORDER);
+            TabFolder tabPanel = new TabFolder(topComposite, SWT.BORDER);
             {
                 tabPanel.setLayoutData(gridData);
-                currentActivityTi = new TabItem(tabPanel, SWT.NONE);
+                TabItem currentActivityTi = new TabItem(tabPanel, SWT.NONE);
                 {
                     currentActivityTi.setText("Текущая активность");
-                    currentActivitySf = new SashForm(tabPanel, SWT.HORIZONTAL);
+                    SashForm currentActivitySf = new SashForm(tabPanel, SWT.HORIZONTAL);
                     {
                         currentActivitySf.setLayout(gridLayout);
                         currentActivitySf.setLayoutData(gridData);
@@ -358,10 +372,10 @@ public final class MainForm {
                     currentActivitySf.setWeights(HORIZONTAL_WEIGHTS);
                     currentActivityTi.setControl(currentActivitySf);
                 }
-                blocksHistoryTi = new TabItem(tabPanel, SWT.NONE);
+                TabItem blocksHistoryTi = new TabItem(tabPanel, SWT.NONE);
                 {
                     blocksHistoryTi.setText("История блокировок");
-                    blocksHistorySf = new SashForm(tabPanel, SWT.HORIZONTAL);
+                    SashForm blocksHistorySf = new SashForm(tabPanel, SWT.HORIZONTAL);
                     {
                         blocksHistorySf.setLayout(gridLayout);
                         blocksHistorySf.setLayoutData(gridData);
@@ -400,7 +414,7 @@ public final class MainForm {
             verticalSf.setWeights(VERTICAL_WEIGHTS);
         }
 
-        statusBar = new Composite(shell, SWT.NONE);
+        Composite statusBar = new Composite(shell, SWT.NONE);
         {
             statusBar.setLayout(gridLayout);
             statusBar.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, true, false));
@@ -439,8 +453,9 @@ public final class MainForm {
             public void mouseUp(MouseEvent e) {
                 Point point = new Point(e.x , e.y);
                 TableItem ti = caServersTable.getItem(point);
-                if(ti==null)
+                if(ti==null) {
                     return;
+                }
                 if(e.stateMask == SWT.BUTTON3) {
                     setSelectedDbc((DbcData)ti.getData());
                     showSm(caServersTable.toDisplay(point));
@@ -461,11 +476,13 @@ public final class MainForm {
             public void mouseUp(MouseEvent e) {
                 Point point = new Point(e.x , e.y);
                 TableItem ti = bhServersTable.getItem(point);
-                if(ti==null)
+                if(ti==null) {
                     return;
+                }
                 historyProcessList = historyMap.get((DbcData)ti.getData());
-                if(historyProcessList == null)
+                if(historyProcessList == null){
                     return;
+                }
                 bhMainTree.removeAll();
                 bhMainTree.setItemCount(historyProcessList.size());
             }
@@ -587,9 +604,10 @@ public final class MainForm {
             LOG.error("Ошибка при чтении манифеста", e);
         }
         Attributes manifestAttributes = manifest.getMainAttributes();
-        appVersion = manifestAttributes.getValue("Implementation-Version");
-        if(appVersion == null)
+        String appVersion = manifestAttributes.getValue("Implementation-Version");
+        if(appVersion == null) {
             return "";
+        }
         return appVersion;
     }
 
@@ -628,7 +646,7 @@ public final class MainForm {
         }
     };
 
-    public void setHistoryMap(ConcurrentHashMap<DbcData, List<Process>> hm) {
+    public void setHistoryMap(ConcurrentMap<DbcData, List<Process>> hm) {
         historyMap = hm;
         bhServersTable.removeAll();
         bhMainTree.removeAll();
@@ -645,8 +663,9 @@ public final class MainForm {
             switch(event.type) {
             case SWT.Expand:
                 Process proc = (Process)event.item.getData();
-                if(!expandedProcesses.contains(proc))
-                    expandedProcesses.add((Process)event.item.getData());
+                if(!getExpandedProcesses().contains(proc)) {
+                    getExpandedProcesses().add((Process)event.item.getData());
+                }
                 break;
             case SWT.Selection:
                 TreeItem ti = (TreeItem)event.item;
@@ -666,7 +685,7 @@ public final class MainForm {
                     if(process.getChildren().size()>0) {
                         item.setImage(resHelper.setImage(shell, "images/locker_16.png"));
                         item.setItemCount(process.getChildren().size());
-                        if(expandedProcesses.contains(process)) {
+                        if(getExpandedProcesses().contains(process)) {
                             item.setExpanded(true);
                         }
                     } else {
@@ -686,14 +705,15 @@ public final class MainForm {
                     if(process.getChildren().size()>0) {
                         item.setImage(resHelper.setImage(shell, "images/locker_16.png"));
                         item.setItemCount(process.getChildren().size());
-                        if(expandedProcesses.contains(process)) {
+                        if(getExpandedProcesses().contains(process)) {
                             item.setExpanded(true);
                         }
                     } else {
                         item.setImage(resHelper.setImage(shell, "images/locked_16.png"));
                     }
-                    if(process.equals(selectedProcess))
+                    if(process.equals(selectedProcess)) {
                         caMainTree.select(item);
+                    }
                 }
                 break;
             }
@@ -723,16 +743,16 @@ public final class MainForm {
 
     private void terminate() {
         if(selectedDbc != null && selectedProcess != null) {
-            connectsMap.get(selectedDbc).terminate(selectedProcess.getPid());
+            getConnectsMap().get(selectedDbc).terminate(selectedProcess.getPid());
         }
-        executor.execute(connectsMap.get(selectedDbc).getProc());
+        executor.execute(getConnectsMap().get(selectedDbc).getProc());
     }
 
     private void cancel() {
         if(selectedDbc != null && selectedProcess != null) {
-            connectsMap.get(selectedDbc).cancel(selectedProcess.getPid());
+            getConnectsMap().get(selectedDbc).cancel(selectedProcess.getPid());
         }
-        executor.execute(connectsMap.get(selectedDbc).getProc());
+        executor.execute(getConnectsMap().get(selectedDbc).getProc());
     }
 
     private void dbcListInit() {
@@ -748,14 +768,15 @@ public final class MainForm {
     }
 
     private void providerInit(DbcData dbc) {
-        if(connectsMap.containsKey(dbc))
+        if(getConnectsMap().containsKey(dbc)){
             return;
+        }
         Provider provider = new Provider(dbc);
-        connectsMap.put(dbc, provider);
+        getConnectsMap().put(dbc, provider);
     }
 
     private void autoConnect() {
-        for(Entry<DbcData, Provider> map : connectsMap.entrySet()) {
+        for(Entry<DbcData, Provider> map : getConnectsMap().entrySet()) {
             if(map.getKey().isEnabled()) {
                 executor.execute(map.getValue().getConnection());
             }
@@ -763,7 +784,7 @@ public final class MainForm {
     }
 
     public synchronized void serverStatusUpdate(DbcData dbc) {
-        TableItem ti = serversTiMap.get(dbc);
+        TableItem ti = getServersTiMap().get(dbc);
         ti.setImage(resHelper.setImage(shell,dbc.getStatus().getImageAddr()));
         if(dbc.equals(selectedDbc)) {
             dbControlsStat();
@@ -773,14 +794,15 @@ public final class MainForm {
     public void serverListUpdate() {
         dbcList = dl.getList();
         for(DbcData dbc : dbcList) {
-            if(serversTiMap.containsKey(dbc))
+            if(getServersTiMap().containsKey(dbc)){
                 continue;
+            }
             providerInit(dbc);
             TableItem ti = new TableItem(caServersTable, SWT.NONE);
             ti.setText(dbc.getName());
             ti.setData(dbc);
             ti.setImage(resHelper.setImage(shell, "images/db_f_16.png"));
-            serversTiMap.put(dbc, ti);
+            getServersTiMap().put(dbc, ti);
             serverStatusUpdate(dbc);
         }
         LOG.info("Обновление списка серверов");
@@ -788,15 +810,15 @@ public final class MainForm {
 
     public void deleteServer(DbcData dbc) {
         selectedDbc = null;
-        connectsMap.remove(dbc);
-        if(serversTiMap.get(dbc)!=null) {
-            serversTiMap.get(dbc).dispose();
-            serversTiMap.remove(dbc);
+        getConnectsMap().remove(dbc);
+        if(getServersTiMap().get(dbc)!=null) {
+            getServersTiMap().get(dbc).dispose();
+            getServersTiMap().remove(dbc);
         }
     }
 
     public void connect(DbcData dbc) {
-        executor.execute(connectsMap.get(dbc).getConnection());
+        executor.execute(getConnectsMap().get(dbc).getConnection());
     }
 
     public synchronized void updateUI(DbcData dbc) {
@@ -808,7 +830,7 @@ public final class MainForm {
                 ti.setItemCount(0);
             }
             caMainTree.clearAll(true);
-            processList = connectsMap.get(dbc).getProcessList();
+            processList = getConnectsMap().get(dbc).getProcessList();
             if(processList != null) {
                 Collections.sort(processList,new Comparator<Process>() {
                     @Override
@@ -817,16 +839,20 @@ public final class MainForm {
                         case DEFAULT:
                             return 0;
                         case PID:
-                            if(o1.getChildren().size()>o2.getChildren().size())
+                            if(o1.getChildren().size()>o2.getChildren().size()){
                                 return sortDirection == SortDirection.UP?-1:1;
-                            if(o1.getChildren().size()<o2.getChildren().size())
+                            }
+                            if(o1.getChildren().size()<o2.getChildren().size()){
                                 return sortDirection == SortDirection.UP?1:-1;
+                            }
                             return 0;
                         case BLOCKED_COUNT:
-                            if(o1.getChildrensCount()>o2.getChildrensCount())
+                            if(o1.getChildrensCount()>o2.getChildrensCount()){
                                 return sortDirection == SortDirection.UP?-1:1;
-                            if(o1.getChildrensCount()<o2.getChildrensCount())
+                            }
+                            if(o1.getChildrensCount()<o2.getChildrensCount()){
                                 return sortDirection == SortDirection.UP?1:-1;
+                            }
                             return 0;
                         case APPLICATION_NAME:
                             return stringCompare(o1.getApplicationName(), o2.getApplicationName());
@@ -852,20 +878,26 @@ public final class MainForm {
                             return stringCompare(o1.getQuery(), o2.getQuery());
                         case SLOWQUERY:
                             if(sortDirection == SortDirection.UP) {
-                                if(o1.isSlowQuery() && o2.isSlowQuery())
+                                if(o1.isSlowQuery() && o2.isSlowQuery()){
                                     return 0;
-                                if(o1.isSlowQuery() && !o2.isSlowQuery()) 
+                                }
+                                if(o1.isSlowQuery() && !o2.isSlowQuery()) {
                                     return 1;
-                                if(!o1.isSlowQuery() && o2.isSlowQuery())
+                                }
+                                if(!o1.isSlowQuery() && o2.isSlowQuery()){
                                     return -1;
+                                }
                                 return 0;
                             } else {
-                                if(o1.isSlowQuery() && o2.isSlowQuery())
+                                if(o1.isSlowQuery() && o2.isSlowQuery()){
                                     return 0;
-                                if(!o1.isSlowQuery() && o2.isSlowQuery()) 
+                                }
+                                if(!o1.isSlowQuery() && o2.isSlowQuery()) {
                                     return 1;
-                                if(o1.isSlowQuery() && !o2.isSlowQuery())
+                                }
+                                if(o1.isSlowQuery() && !o2.isSlowQuery()){
                                     return -1;
+                                }
                                 return 0;
                             }
                         default:
@@ -907,8 +939,9 @@ public final class MainForm {
     }
 
     private void showSm(Point location) {
-        if(selectedDbc == null) 
+        if(selectedDbc == null) {
             return;
+        }
         caServerListContextMenu.setLocation(location);
         dbControlsStat();
         caServerListContextMenu.setVisible(true);
@@ -925,15 +958,16 @@ public final class MainForm {
 
 
     public void updateProcesses() {
-        for(Entry<DbcData, Provider> map : connectsMap.entrySet()) {
+        for(Entry<DbcData, Provider> map : getConnectsMap().entrySet()) {
             executor.execute(map.getValue().getProc());
         }
     }
 
     public void disconnect(DbcData dbc) {
-        if(connectsMap.get(dbc) == null || !connectsMap.get(dbc).isConnected())
+        if(getConnectsMap().get(dbc) == null || !getConnectsMap().get(dbc).isConnected()){
             return;
-        connectsMap.get(dbc).disconnect();
+        }
+        getConnectsMap().get(dbc).disconnect();
     }
 
     private Runnable timer = new Runnable() {

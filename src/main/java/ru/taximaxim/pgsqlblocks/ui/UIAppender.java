@@ -3,6 +3,7 @@ package ru.taximaxim.pgsqlblocks.ui;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import org.apache.log4j.Logger;
 import org.apache.log4j.WriterAppender;
 import org.apache.log4j.spi.LoggingEvent;
 import org.eclipse.swt.SWT;
@@ -17,6 +18,8 @@ public class UIAppender extends WriterAppender{
     private Composite parent;
     private StyledText text;
     private Display display;
+    
+    protected static final Logger LOG = Logger.getLogger(UIAppender.class);
 
     public UIAppender(Composite parent) {
         this.parent = parent;
@@ -33,8 +36,9 @@ public class UIAppender extends WriterAppender{
     }
 
     public void append(LoggingEvent event) {
-        if(display == null || display.isDisposed() || parent ==null || parent.isDisposed() || text == null)
+        if(display == null || display.isDisposed() || parent == null || parent.isDisposed() || text == null) {
             return;
+        }
         SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
         Date time = new Date(event.getTimeStamp());
         String dateTime = sdf.format(time);
@@ -46,7 +50,7 @@ public class UIAppender extends WriterAppender{
         try{
             excMessage = (String)message;
         } catch(Exception e) {
-            e.printStackTrace();
+            LOG.error("Ошибка Exception: " + e.getMessage());
         }
         if(excMessage.isEmpty()) {
             return;

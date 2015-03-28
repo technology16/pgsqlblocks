@@ -7,7 +7,7 @@ import ru.taximaxim.pgsqlblocks.ui.MainForm;
 
 
 public final class App {
-    private static Logger log = Logger.getLogger(App.class);
+    protected static final Logger LOG = Logger.getLogger(App.class);
     private static Display display;
     
     private App() {}
@@ -17,8 +17,7 @@ public final class App {
             display = new Display();
             MainForm.getInstance().show(display);
         } catch (Exception e) {
-            log.error(e);
-            e.printStackTrace();
+            LOG.error("Ошибка main: " + e.getMessage());
         } finally {
             display.dispose();
         }

@@ -8,6 +8,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -30,8 +31,8 @@ public class BlocksHistory {
 
     private static BlocksHistory bh;
     protected static final Logger LOG = Logger.getLogger(BlocksHistory.class);
-    private ConcurrentHashMap<DbcData, List<Process>> hm = new ConcurrentHashMap<DbcData, List<Process>>();
-    private ConcurrentHashMap<DbcData, List<Process>> ohm = new ConcurrentHashMap<DbcData, List<Process>>();
+    private ConcurrentMap<DbcData, List<Process>> hm;
+    private ConcurrentMap<DbcData, List<Process>> ohm;
     private static final String FILEPATH = "BlocksHistory";
     private static final String FILENAME = "/blocksHistory";
 
@@ -61,6 +62,20 @@ public class BlocksHistory {
         return bh;
     }
 
+    public ConcurrentMap<DbcData, List<Process>> getHistoryMap() {
+        if(hm==null){
+            hm = new ConcurrentHashMap<DbcData, List<Process>>();
+        }
+        return hm;
+    }
+    
+    public ConcurrentMap<DbcData, List<Process>> getOldHistoryMap() {
+        if(ohm==null){
+            ohm = new ConcurrentHashMap<DbcData, List<Process>>();
+        }
+        return ohm;
+    }
+    
     private BlocksHistory() {
         File dir = new File(FILEPATH);
         if(!dir.isDirectory()) {
@@ -69,11 +84,11 @@ public class BlocksHistory {
     }
 
     public void add(DbcData dbc, Process process) {
-        List<Process> list = hm.get(dbc);
+        List<Process> list = getHistoryMap().get(dbc);
         if(list == null) {
             list = new ArrayList<Process>();
-            hm.put(dbc, list);
-            list = hm.get(dbc);
+            getHistoryMap().put(dbc, list);
+            list = getHistoryMap().get(dbc);
         }
         if(list.contains(process)) {
             return;
@@ -82,7 +97,7 @@ public class BlocksHistory {
     }
 
     public synchronized void save() {
-        if(hm.size() == 0){
+        if(getHistoryMap().size() == 0){
             LOG.info("Не найдено блокировок для сохранения");
             return;
         }
@@ -91,7 +106,7 @@ public class BlocksHistory {
             DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
             Document doc = docBuilder.newDocument();
             Element rootElement = doc.createElement(SERVERS);
-            for(Entry<DbcData, List<Process>> map : hm.entrySet()) {
+            for(Entry<DbcData, List<Process>> map : getHistoryMap().entrySet()) {
                 Element server = DbcDataList.getInstance().createServerElement(doc, map.getKey(), false);
                 for(Process process : map.getValue()) {
                     server.appendChild(createProcessElement(doc, process));
@@ -106,7 +121,7 @@ public class BlocksHistory {
         } catch (ParserConfigurationException e) {
             LOG.error(e);
         }
-        hm.clear();
+        getHistoryMap().clear();
     }
 
     private Element createElement(Element procEl, Element rows, String textContent){
@@ -141,7 +156,7 @@ public class BlocksHistory {
     }
 
     public void open(String path) {
-        ohm.clear();
+        getOldHistoryMap().clear();
         if(path == null) {
             return;
         }
@@ -155,7 +170,7 @@ public class BlocksHistory {
                 LOG.error("Ошибка при загрузке истории блокировок: " + path);
             }
         } catch (ParserConfigurationException e) {
-            e.printStackTrace();
+            LOG.error("Ошибка ParserConfigurationException: " + e.getMessage());
         }
         if(doc == null) {
             return;
@@ -177,7 +192,7 @@ public class BlocksHistory {
             try {
                 children = (NodeList)xp.evaluate(PROCESS, el, XPathConstants.NODESET);
             } catch (XPathExpressionException e) {
-                e.printStackTrace();
+                LOG.error("Ошибка XPathExpressionException: " + e.getMessage());
             }
             for(int j=0;j<children.getLength();j++) {
                 Node processNode = children.item(j);
@@ -188,18 +203,14 @@ public class BlocksHistory {
                 proc = parseProcess(procEl);
                 list.add(proc);
             }
-            ohm.put(dbc, list);
+            getOldHistoryMap().put(dbc, list);
         }
         MainForm.getInstance().getDisplay().asyncExec(new Runnable() {
             @Override
             public void run() {
-                MainForm.getInstance().setHistoryMap(ohm);
+                MainForm.getInstance().setHistoryMap(getOldHistoryMap());
             }
         });
-    }
-    
-    public ConcurrentHashMap<DbcData, List<Process>> getHistoryMap() {
-        return ohm;
     }
     
     private Process parseProcess(Element el) {
@@ -224,7 +235,7 @@ public class BlocksHistory {
         try {
             children = (NodeList)xp.evaluate("children/process", el, XPathConstants.NODESET);
         } catch (XPathExpressionException e) {
-            e.printStackTrace();
+            LOG.error("Ошибка XPathExpressionException: " + e.getMessage());
         }
         for(int i=0;i<children.getLength();i++) {
             Node processNode = children.item(i);

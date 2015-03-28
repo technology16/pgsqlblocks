@@ -17,19 +17,12 @@ public class AddDbcDataDlg {
 
     private Shell shell;
     private Shell parent;
-    private Label nameLabel;
     private Text nameText;
-    private Label hostLabel;
     private Text hostText;
-    private Label portLabel;
     private Text portText;
-    private Label userLabel;
     private Text userText;
-    private Label passwdLabel;
     private Text passwdText;
-    private Label dbnameLabel;
     private Text dbnameText;
-    private Label enabledLabel;
     private Button enabledButton;
     private Button onOk;
     private Button onCancel;
@@ -54,38 +47,38 @@ public class AddDbcDataDlg {
         shell = new Shell(parent, SWT.DIALOG_TRIM | SWT.APPLICATION_MODAL);
         shell.setLayout(new GridLayout(2, false));
 
-        nameLabel = new Label(shell, SWT.HORIZONTAL);
+        Label nameLabel = new Label(shell, SWT.HORIZONTAL);
         nameLabel.setText("Имя соединения");
         nameText = new Text(shell, SWT.BORDER);
         nameText.setLayoutData(textGd);
 
-        hostLabel = new Label(shell, SWT.HORIZONTAL);
+        Label hostLabel = new Label(shell, SWT.HORIZONTAL);
         hostLabel.setText("Хост");
         hostText = new Text(shell, SWT.BORDER);
         hostText.setLayoutData(textGd);
 
-        portLabel = new Label(shell, SWT.HORIZONTAL);
+        Label portLabel = new Label(shell, SWT.HORIZONTAL);
         portLabel.setText("Порт");
         portText = new Text(shell, SWT.BORDER);
         portText.setLayoutData(textGd);
 
-        userLabel = new Label(shell, SWT.HORIZONTAL);
+        Label userLabel = new Label(shell, SWT.HORIZONTAL);
         userLabel.setText("Имя пользователя");
         userText = new Text(shell, SWT.BORDER);
         userText.setLayoutData(textGd);
 
-        passwdLabel = new Label(shell, SWT.HORIZONTAL);
+        Label passwdLabel = new Label(shell, SWT.HORIZONTAL);
         passwdLabel.setText("Пароль");
         passwdText = new Text(shell, SWT.BORDER);
         passwdText.setLayoutData(textGd);
         passwdText.setEchoChar('•');
 
-        dbnameLabel = new Label(shell, SWT.HORIZONTAL);
+        Label dbnameLabel = new Label(shell, SWT.HORIZONTAL);
         dbnameLabel.setText("Имя БД");
         dbnameText = new Text(shell, SWT.BORDER);
         dbnameText.setLayoutData(textGd);
 
-        enabledLabel = new Label(shell, SWT.HORIZONTAL);
+        Label enabledLabel = new Label(shell, SWT.HORIZONTAL);
         enabledLabel.setText("Подкл. автоматически");
         enabledButton = new Button(shell, SWT.CHECK);
 
