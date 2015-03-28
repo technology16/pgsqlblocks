@@ -57,7 +57,7 @@ import ru.taximaxim.pgsqlblocks.DbcStatus;
 import ru.taximaxim.pgsqlblocks.Process;
 import ru.taximaxim.pgsqlblocks.Provider;
 
-public final class MainForm {
+public class MainForm {
 
     private MainForm() {}
     public static final int BTN_WIDTH = 120;
