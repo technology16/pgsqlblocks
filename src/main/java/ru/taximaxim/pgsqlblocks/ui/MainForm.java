@@ -63,6 +63,8 @@ public final class MainForm {
     public static final int BTN_WIDTH = 120;
     public static final int TEXT_WIDTH = 200;
     private static final String APP_NAME = "pgSqlBlocks";
+    private static final String SORT_DIRECTION = "sortDirection";
+    private static final String COL_NAME = "colName";
     private static final int ZERO_MARGIN = 0;
     private static final int[] VERTICAL_WEIGHTS = new int[]{80,20};
     private static final int[] HORIZONTAL_WEIGHTS = new int[]{17,83};
@@ -136,7 +138,7 @@ public final class MainForm {
     private Composite procComposite;
     private Table bhServersTable;
     private Tree bhMainTree;
-
+    static
     private Composite logComposite;
 
     private AddDbcDataDlg dbcDlg;
@@ -150,7 +152,7 @@ public final class MainForm {
     private SortColumn sortColumn = SortColumn.BLOCKED_COUNT;
     private SortDirection sortDirection = SortDirection.UP;
 
-    public final static MainForm getInstance() {
+    public static final MainForm getInstance() {
         if(mainForm == null) {
             mainForm = new MainForm();
         }
@@ -340,9 +342,8 @@ public final class MainForm {
                                 for(int i=0;i<caMainTreeColsName.length;i++) {
                                     TreeColumn treeColumn = new TreeColumn(caMainTree, SWT.NONE);
                                     treeColumn.setText(caMainTreeColsName[i]);
-                                    treeColumn.setData("colName",caColName[i]);
-                                    SortDirection sortDirection = SortDirection.UP;
-                                    treeColumn.setData("sortDirection", sortDirection);
+                                    treeColumn.setData(COL_NAME,caColName[i]);
+                                    treeColumn.setData(SORT_DIRECTION, SortDirection.UP);
                                     treeColumn.setWidth(caMainTreeColsSize[i]);
                                 }
                             }
@@ -439,10 +440,10 @@ public final class MainForm {
                 @Override
                 public void handleEvent(Event event) {
                     caMainTree.setSortColumn(tc);
-                    tc.setData("sortDirection", ((SortDirection)tc.getData("sortDirection")).getOpposite());
-                    sortDirection = (SortDirection)tc.getData("sortDirection");
+                    tc.setData(SORT_DIRECTION, ((SortDirection)tc.getData(SORT_DIRECTION)).getOpposite());
+                    sortDirection = (SortDirection)tc.getData(SORT_DIRECTION);
                     caMainTree.setSortDirection(sortDirection.getSwtData());
-                    sortColumn = SortColumn.valueOf((String)tc.getData("colName"));
+                    sortColumn = SortColumn.valueOf((String)tc.getData(COL_NAME));
                     updateUI(selectedDbc);
                 }
             });

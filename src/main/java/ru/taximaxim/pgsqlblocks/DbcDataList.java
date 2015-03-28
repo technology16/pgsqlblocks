@@ -25,7 +25,7 @@ import org.xml.sax.SAXException;
 
 
 
-public class DbcDataList {
+public final class DbcDataList {
     
     protected static final Logger LOG = Logger.getLogger(DbcDataList.class);
     private static final String FILE_PATH = "servers.xml";
@@ -47,7 +47,7 @@ public class DbcDataList {
 
     private DbcDataList() {}
 
-    public static DbcDataList getInstance() {
+    public static final DbcDataList getInstance() {
         if(dbcDataList == null) {
             dbcDataList = new DbcDataList();
         }

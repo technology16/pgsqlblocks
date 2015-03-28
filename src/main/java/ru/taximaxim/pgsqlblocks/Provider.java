@@ -18,6 +18,12 @@ import org.apache.log4j.Logger;
 import ru.taximaxim.pgsqlblocks.ui.MainForm;
 
 public class Provider {
+    
+    private static final int LOGINTIMEOUT = 5;
+    
+    static {
+        DriverManager.setLoginTimeout(LOGINTIMEOUT);
+    }
 
     private static final String QUERY = "SELECT p.pid AS pid, application_name, datname, usename,"+
             "CASE WHEN client_port=-1 THEN 'local pipe' WHEN length(client_hostname)>0 THEN client_hostname||':'||client_port ELSE textin(inet_out(client_addr))||':'||client_port END AS client, "+
@@ -83,7 +89,6 @@ public class Provider {
         }
         try {
             LOG.info(getDbcData().getName() + " Соединение...");
-            DriverManager.setLoginTimeout(5);
             connection = DriverManager.getConnection(getDbcData().getUrl(), getDbcData().getUser(), getDbcData().getPasswd());
             getDbcData().setStatus(DbcStatus.CONNECTED);
             LOG.info(getDbcData().getName() + " Соединение создано.");
