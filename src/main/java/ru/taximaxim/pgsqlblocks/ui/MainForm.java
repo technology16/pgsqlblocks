@@ -57,7 +57,7 @@ import ru.taximaxim.pgsqlblocks.DbcStatus;
 import ru.taximaxim.pgsqlblocks.Process;
 import ru.taximaxim.pgsqlblocks.Provider;
 
-public class MainForm {
+public final class MainForm {
 
     private MainForm() {}
     public static final int BTN_WIDTH = 120;
@@ -150,7 +150,7 @@ public class MainForm {
     private SortColumn sortColumn = SortColumn.BLOCKED_COUNT;
     private SortDirection sortDirection = SortDirection.UP;
 
-    public static MainForm getInstance() {
+    public final static MainForm getInstance() {
         if(mainForm == null) {
             mainForm = new MainForm();
         }
