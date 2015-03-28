@@ -147,7 +147,8 @@ public final class MainForm {
     private ConfirmDlg confirmDlg;
     private Menu caServerListContextMenu;
 
-    private ExecutorService executor = Executors.newFixedThreadPool(5);
+    private static final int FIXEDTHREADPOOL = 5;
+    private ExecutorService executor = Executors.newFixedThreadPool(FIXEDTHREADPOOL);
     private boolean autoUpdate = true;
     private boolean onlyBlocked = false;
     private int timerInterval = 10;
