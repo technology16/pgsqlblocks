@@ -65,6 +65,8 @@ public final class MainForm {
     private static final String APP_NAME = "pgSqlBlocks";
     private static final String SORT_DIRECTION = "sortDirection";
     private static final String COL_NAME = "colName";
+    private static final String LOCKER = "images/locker_16.png";
+    private static final String NB = "images/nb_16.png";
     private static final int ZERO_MARGIN = 0;
     private static final int[] VERTICAL_WEIGHTS = new int[]{80,20};
     private static final int[] HORIZONTAL_WEIGHTS = new int[]{17,83};
@@ -138,7 +140,7 @@ public final class MainForm {
     private Composite procComposite;
     private Table bhServersTable;
     private Tree bhMainTree;
-    static
+    
     private Composite logComposite;
 
     private AddDbcDataDlg dbcDlg;
@@ -152,7 +154,7 @@ public final class MainForm {
     private SortColumn sortColumn = SortColumn.BLOCKED_COUNT;
     private SortDirection sortDirection = SortDirection.UP;
 
-    public static final MainForm getInstance() {
+    public static MainForm getInstance() {
         if(mainForm == null) {
             mainForm = new MainForm();
         }
@@ -563,10 +565,10 @@ public final class MainForm {
                     item.setText(process.toTree());
                     item.setData(process);
                     if(process.getChildren().size()>0) {
-                        item.setImage(resHelper.setImage(shell, "images/locker_16.png"));
+                        item.setImage(resHelper.setImage(shell, LOCKER));
                         item.setItemCount(process.getChildren().size());
                     } else {
-                        item.setImage(resHelper.setImage(shell, "images/nb_16.png"));
+                        item.setImage(resHelper.setImage(shell, NB));
                     }
                 } else {
                     try{
@@ -578,7 +580,7 @@ public final class MainForm {
                     item.setText(process.toTree());
                     item.setData(process);
                     if(process.getChildren().size()>0) {
-                        item.setImage(resHelper.setImage(shell, "images/locker_16.png"));
+                        item.setImage(resHelper.setImage(shell, LOCKER));
                         item.setItemCount(process.getChildren().size());
                     } else {
                         item.setImage(resHelper.setImage(shell, "images/locked_16.png"));
@@ -684,13 +686,13 @@ public final class MainForm {
                     item.setText(process.toTree());
                     item.setData(process);
                     if(process.getChildren().size()>0) {
-                        item.setImage(resHelper.setImage(shell, "images/locker_16.png"));
+                        item.setImage(resHelper.setImage(shell, LOCKER));
                         item.setItemCount(process.getChildren().size());
                         if(getExpandedProcesses().contains(process)) {
                             item.setExpanded(true);
                         }
                     } else {
-                        item.setImage(resHelper.setImage(shell, "images/nb_16.png"));
+                        item.setImage(resHelper.setImage(shell, NB));
                     }
                     if(process.equals(selectedProcess)) {
                         caMainTree.select(item);
@@ -705,7 +707,7 @@ public final class MainForm {
                     item.setText(process.toTree());
                     item.setData(process);
                     if(process.getChildren().size()>0) {
-                        item.setImage(resHelper.setImage(shell, "images/locker_16.png"));
+                        item.setImage(resHelper.setImage(shell, LOCKER));
                         item.setItemCount(process.getChildren().size());
                         if(getExpandedProcesses().contains(process)) {
                             item.setExpanded(true);

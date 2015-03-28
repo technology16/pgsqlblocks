@@ -27,7 +27,7 @@ import org.xml.sax.SAXException;
 
 import ru.taximaxim.pgsqlblocks.ui.MainForm;
 
-public class BlocksHistory {
+public final class BlocksHistory {
 
     private static BlocksHistory bh;
     protected static final Logger LOG = Logger.getLogger(BlocksHistory.class);

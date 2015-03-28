@@ -47,7 +47,7 @@ public final class DbcDataList {
 
     private DbcDataList() {}
 
-    public static final DbcDataList getInstance() {
+    public static DbcDataList getInstance() {
         if(dbcDataList == null) {
             dbcDataList = new DbcDataList();
         }
