@@ -150,7 +150,7 @@ public class MainForm {
     private SortColumn sortColumn = SortColumn.BLOCKED_COUNT;
     private SortDirection sortDirection = SortDirection.UP;
 
-    public final static MainForm getInstance() {
+    public static MainForm getInstance() {
         if(mainForm == null) {
             mainForm = new MainForm();
         }
@@ -691,8 +691,9 @@ public class MainForm {
                     } else {
                         item.setImage(resHelper.setImage(shell, "images/nb_16.png"));
                     }
-                    if(process.equals(selectedProcess))
+                    if(process.equals(selectedProcess)) {
                         caMainTree.select(item);
+                    }
                 } else {
                     try{
                         process = ((Process)parentItem.getData()).getChildren().get(event.index);

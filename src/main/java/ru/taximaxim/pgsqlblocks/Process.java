@@ -20,7 +20,7 @@ public class Process {
     private int blockedBy;
     private String query;
     private boolean slowQuery;
-        
+            
     public Process(int pid, String applicationName, String datname,
             String usename, String client, String backendStart,
             String queryStart, String xactStart, String state, String stateChange,
@@ -66,8 +66,9 @@ public class Process {
         return usename;
     }
     public String getClient() {
-        if(client == null)
+        if(client == null) {
             return "";
+        }
         return client;
     }
     public String getBackendStart() {
@@ -155,9 +156,9 @@ public class Process {
     @Override
     public String toString() {
         return String.format("Process [parent=%1$s, childrenLength=%2$s, pid=%3$s, applicationName=%4$s, datname=%5$s, " +
-        		"usename=%6$s, client=%7$s, backendStart=%8$s, queryStart=%9$s, xactStart=%10$s, state=%11$s, stateChange=%12$s, " +
-        		"blockedBy=%13$s, query=%14$s, slowQuery=%15$s]", 
-        		getParent(), getChildren().size(), getPid(), getApplicationName(), getDatname(), getUsename(), getClient(), 
-        		getBackendStart(), getQueryStart(), getXactStart(), getState(), getStateChange(), getBlockedBy(), "query", isSlowQuery());
+                "usename=%6$s, client=%7$s, backendStart=%8$s, queryStart=%9$s, xactStart=%10$s, state=%11$s, stateChange=%12$s, " +
+                "blockedBy=%13$s, query=%14$s, slowQuery=%15$s]", 
+                getParent(), getChildren().size(), getPid(), getApplicationName(), getDatname(), getUsename(), getClient(), 
+                getBackendStart(), getQueryStart(), getXactStart(), getState(), getStateChange(), getBlockedBy(), "query", isSlowQuery());
     }
 }

@@ -19,10 +19,6 @@ import ru.taximaxim.pgsqlblocks.ui.MainForm;
 
 public class Provider {
 
-    static {
-        DriverManager.setLoginTimeout(5);
-    }
-
     private static final String QUERY = "SELECT p.pid AS pid, application_name, datname, usename,"+
             "CASE WHEN client_port=-1 THEN 'local pipe' WHEN length(client_hostname)>0 THEN client_hostname||':'||client_port ELSE textin(inet_out(client_addr))||':'||client_port END AS client, "+
             "date_trunc('second', backend_start) AS backend_start, CASE WHEN state='active' THEN date_trunc('second', query_start)::text ELSE '' END AS query_start, "+
@@ -52,7 +48,8 @@ public class Provider {
     private Connection connection;
     private ConcurrentMap<Integer, Process> processMap;
     private List<Process> processList;
-
+    private Runnable getProcesses;
+    
     public Provider(DbcData dbcData) {
         this.dbcData = dbcData;
     }
@@ -86,6 +83,7 @@ public class Provider {
         }
         try {
             LOG.info(getDbcData().getName() + " Соединение...");
+            DriverManager.setLoginTimeout(5);
             connection = DriverManager.getConnection(getDbcData().getUrl(), getDbcData().getUser(), getDbcData().getPasswd());
             getDbcData().setStatus(DbcStatus.CONNECTED);
             LOG.info(getDbcData().getName() + " Соединение создано.");
@@ -127,43 +125,46 @@ public class Provider {
             }
         }
     }
+    
     public Runnable getProc() {
-        return getProcesses;
-    }
-    private Runnable getProcesses = new Runnable() {
-        @Override
-        public void run() {
-            if(!isConnected()) {
-                return;
-            }
-            try {
-                getProcesses();
-                if(getProcessMap().size() > getProcessList().size()) {
-                    getDbcData().setStatus(DbcStatus.BLOCKED);
-                    for(Process process : getProcessList()) {
-                        if(process.getChildren().size() > 0){
-                            BlocksHistory.getInstance().add(getDbcData(), process);
+        if(getProcesses == null) {
+            getProcesses = new Runnable() {
+                @Override
+                public void run() {
+                    if(!isConnected()) {
+                        return;
+                    }
+                    try {
+                        getProcesses();
+                        if(getProcessMap().size() > getProcessList().size()) {
+                            getDbcData().setStatus(DbcStatus.BLOCKED);
+                            for(Process process : getProcessList()) {
+                                if(process.getChildren().size() > 0){
+                                    BlocksHistory.getInstance().add(getDbcData(), process);
+                                }
+                            }
+                        } else {
+                            getDbcData().setStatus(DbcStatus.CONNECTED);
+                        }
+                    } catch (SQLException e) {
+                        getDbcData().setStatus(DbcStatus.ERROR);
+                        LOG.error(getDbcData().getName() + " " + e.getMessage(), e);
+                    } finally {
+                        if(MainForm.getInstance().getShell() != null && !MainForm.getInstance().getShell().isDisposed()){
+                            MainForm.getInstance().getDisplay().asyncExec(new Runnable() {
+                                @Override
+                                public void run() {
+                                    MainForm.getInstance().serverStatusUpdate(getDbcData());
+                                    MainForm.getInstance().updateUI(getDbcData());
+                                }
+                            });
                         }
                     }
-                } else {
-                    getDbcData().setStatus(DbcStatus.CONNECTED);
                 }
-            } catch (SQLException e) {
-                getDbcData().setStatus(DbcStatus.ERROR);
-                LOG.error(getDbcData().getName() + " " + e.getMessage(), e);
-            } finally {
-                if(MainForm.getInstance().getShell() != null && !MainForm.getInstance().getShell().isDisposed()){
-                    MainForm.getInstance().getDisplay().asyncExec(new Runnable() {
-                        @Override
-                        public void run() {
-                            MainForm.getInstance().serverStatusUpdate(getDbcData());
-                            MainForm.getInstance().updateUI(getDbcData());
-                        }
-                    });
-                }
-            }
+            };
         }
-    };
+        return getProcesses;
+    }
 
     public DbcData getDbcData() {
         return dbcData;
