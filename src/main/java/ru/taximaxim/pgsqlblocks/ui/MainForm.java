@@ -151,7 +151,8 @@ public final class MainForm {
     private ExecutorService executor = Executors.newFixedThreadPool(FIXEDTHREADPOOL);
     private boolean autoUpdate = true;
     private boolean onlyBlocked = false;
-    private int timerInterval = 10;
+    private static final int TEN = 10;
+    private int timerInterval = TEN;
     private SortColumn sortColumn = SortColumn.BLOCKED_COUNT;
     private SortDirection sortDirection = SortDirection.UP;
 
