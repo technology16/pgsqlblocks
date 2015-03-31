@@ -12,16 +12,23 @@ public class ProcessTreeList {
         this.processMap = processMap;
         buildTree();
     }
+    
     private void buildTree() {
         for(Entry<Integer, Process> map : processMap.entrySet()) {
             int blockedBy = map.getValue().getBlockedBy();
+            int blockingLocks = map.getValue().getBlockingLocks();
+
             if(blockedBy != 0) {
                 map.getValue().setParent(processMap.get(blockedBy));
                 processMap.get(blockedBy).addChildren(map.getValue());
             }
+            if((blockingLocks != 0) & (blockingLocks != blockedBy)) {
+                map.getValue().setParent(processMap.get(blockingLocks));
+                processMap.get(blockingLocks).addChildren(map.getValue());
+            }
         }
         for(Entry<Integer, Process> map : processMap.entrySet()) {
-            if(map.getValue().getBlockedBy() == 0) {
+            if((map.getValue().getBlockedBy() == 0) & (map.getValue().getBlockingLocks() == 0) ) {
                 processList.add(map.getValue());
             }
         }

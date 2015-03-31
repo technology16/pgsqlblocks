@@ -17,12 +17,13 @@ public class Process {
     private String state;
     private String stateChange;
     private int blockedBy;
+    private int blockingLocks;
     private String query;
     private boolean slowQuery;
     public Process(int pid, String applicationName, String datname,
             String usename, String client, String backendStart,
             String queryStart, String xactStart, String state, String stateChange,
-            int blockedBy, String query, boolean slowQuery) {
+            int blockedBy, int blockingLocks, String query, boolean slowQuery) {
         this.pid = pid;
         this.applicationName = applicationName;
         this.datname = datname;
@@ -34,6 +35,7 @@ public class Process {
         this.state = state;
         this.stateChange = stateChange;
         this.blockedBy = blockedBy;
+        this.blockingLocks = blockingLocks;
         this.query = query;
         this.slowQuery = slowQuery;
     }
@@ -83,6 +85,9 @@ public class Process {
     }
     public int getBlockedBy() {
         return blockedBy;
+    }
+    public int getBlockingLocks() {
+        return blockingLocks;
     }
     public String getQuery() {
         return query;

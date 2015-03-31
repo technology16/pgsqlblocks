@@ -545,8 +545,18 @@ public final class MainForm {
                     item.setText(process.toTree());
                     item.setData(process);
                     if(process.getChildren().size()>0) {
-                        item.setImage(resHelper.setImage(shell, "images/locker_16.png"));
-                        item.setItemCount(process.getChildren().size());
+                        for (Process p : process.getChildren()){
+                            if(p.getBlockedBy()!=0) {
+                                item.setImage(resHelper.setImage(shell, "images/locker_16.png"));
+                                item.setItemCount(process.getChildren().size());
+                                break;
+                            } 
+                            if((p.getBlockingLocks()!=0) & (p.getBlockingLocks() != p.getBlockedBy())) {
+                                item.setImage(resHelper.setImage(shell, "images/blocked_16.png"));
+                                item.setItemCount(process.getChildren().size());
+                                break;
+                            }
+                        }
                     } else {
                         item.setImage(resHelper.setImage(shell, "images/nb_16.png"));
                     }
@@ -560,10 +570,20 @@ public final class MainForm {
                     item.setText(process.toTree());
                     item.setData(process);
                     if(process.getChildren().size()>0) {
-                        item.setImage(resHelper.setImage(shell, "images/locker_16.png"));
+                        if(process.getBlockedBy()!=0) {
+                            item.setImage(resHelper.setImage(shell, "images/locker_16.png"));
+                        }
+                        if((process.getBlockingLocks()!=0) & (process.getBlockedBy()!=process.getBlockingLocks())) {
+                            item.setImage(resHelper.setImage(shell, "images/blocked_16.png"));
+                        }
                         item.setItemCount(process.getChildren().size());
                     } else {
-                        item.setImage(resHelper.setImage(shell, "images/locked_16.png"));
+                        if(process.getBlockedBy()!=0) {
+                            item.setImage(resHelper.setImage(shell, "images/locked_16.png"));
+                        } 
+                        if((process.getBlockingLocks()!=0) & (process.getBlockedBy()!=process.getBlockingLocks())) {
+                            item.setImage(resHelper.setImage(shell, "images/blocking_16.png"));
+                        }
                     }
                 }
             }
@@ -638,7 +658,7 @@ public final class MainForm {
             ti.setData(map.getKey());
         }
     }
-
+    
     private Listener caMainTreeListener = new Listener() {
         @Override
         public void handleEvent(Event event) {
@@ -662,16 +682,27 @@ public final class MainForm {
                 if(parentItem == null) {
                     process = processList.get(event.index);
                     item.setText(process.toTree());
-                    item.setData(process);
+                    item.setData(process); 
                     if(process.getChildren().size()>0) {
-                        item.setImage(resHelper.setImage(shell, "images/locker_16.png"));
-                        item.setItemCount(process.getChildren().size());
-                        if(expandedProcesses.contains(process)) {
-                            item.setExpanded(true);
+                       for (Process p : process.getChildren()){
+                            if(p.getBlockedBy()!=0) {
+                                item.setImage(resHelper.setImage(shell, "images/locker_16.png"));
+                                item.setItemCount(process.getChildren().size());
+                                break;
+                            } 
+                            if((p.getBlockingLocks()!=0) & (p.getBlockingLocks() != p.getBlockedBy())) {
+                                item.setImage(resHelper.setImage(shell, "images/blocked_16.png"));
+                                item.setItemCount(process.getChildren().size());
+                                break;
+                            }
                         }
+                       if(expandedProcesses.contains(process)) {
+                           item.setExpanded(true);
+                       }
                     } else {
                         item.setImage(resHelper.setImage(shell, "images/nb_16.png"));
                     }
+                    
                     if(process.equals(selectedProcess))
                         caMainTree.select(item);
                 } else {
@@ -684,13 +715,23 @@ public final class MainForm {
                     item.setText(process.toTree());
                     item.setData(process);
                     if(process.getChildren().size()>0) {
-                        item.setImage(resHelper.setImage(shell, "images/locker_16.png"));
+                        if(process.getBlockedBy()>0) {
+                            item.setImage(resHelper.setImage(shell, "images/locker_16.png"));
+                        } 
+                        if((process.getBlockingLocks()!=0) & (process.getBlockedBy()!=process.getBlockingLocks())) {
+                            item.setImage(resHelper.setImage(shell, "images/blocked_16.png"));
+                        }
                         item.setItemCount(process.getChildren().size());
                         if(expandedProcesses.contains(process)) {
                             item.setExpanded(true);
                         }
                     } else {
-                        item.setImage(resHelper.setImage(shell, "images/locked_16.png"));
+                        if(process.getBlockedBy()>0) {
+                            item.setImage(resHelper.setImage(shell, "images/locked_16.png"));
+                        } 
+                        if((process.getBlockingLocks()!=0) & (process.getBlockedBy()!=process.getBlockingLocks())) {
+                            item.setImage(resHelper.setImage(shell, "images/blocking_16.png"));
+                        }
                     }
                     if(process.equals(selectedProcess))
                         caMainTree.select(item);
