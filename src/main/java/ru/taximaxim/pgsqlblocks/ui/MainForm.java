@@ -66,6 +66,9 @@ public final class MainForm {
     private static final String SORT_DIRECTION = "sortDirection";
     private static final String COL_NAME = "colName";
     private static final String LOCKER = "images/locker_16.png";
+    private static final String LOCKED = "images/locked_16.png";
+    private static final String BLOCKED = "images/blocked_16.png";
+    private static final String BLOCKING = "images/blocking_16.png";
     private static final String NB = "images/nb_16.png";
     private static final int ZERO_MARGIN = 0;
     private static final int[] VERTICAL_WEIGHTS = new int[]{80,20};
@@ -567,8 +570,18 @@ public final class MainForm {
                     item.setText(process.toTree());
                     item.setData(process);
                     if(process.getChildren().size()>0) {
-                        item.setImage(resHelper.setImage(shell, LOCKER));
-                        item.setItemCount(process.getChildren().size());
+                        for (Process p : process.getChildren()){
+                            if(p.getBlockedBy()!=0) {
+                                item.setImage(resHelper.setImage(shell, LOCKER));
+                                item.setItemCount(process.getChildren().size());
+                                break;
+                            } 
+                            if((p.getBlockingLocks()!=0) & (p.getBlockingLocks() != p.getBlockedBy())) {
+                                item.setImage(resHelper.setImage(shell, BLOCKED));
+                                item.setItemCount(process.getChildren().size());
+                                break;
+                            }
+                        }
                     } else {
                         item.setImage(resHelper.setImage(shell, NB));
                     }
@@ -582,10 +595,20 @@ public final class MainForm {
                     item.setText(process.toTree());
                     item.setData(process);
                     if(process.getChildren().size()>0) {
-                        item.setImage(resHelper.setImage(shell, LOCKER));
+                        if(process.getBlockedBy()!=0) {
+                            item.setImage(resHelper.setImage(shell, LOCKER));
+                        }
+                        if((process.getBlockingLocks()!=0) & (process.getBlockedBy()!=process.getBlockingLocks())) {
+                            item.setImage(resHelper.setImage(shell, BLOCKED));
+                        }
                         item.setItemCount(process.getChildren().size());
                     } else {
-                        item.setImage(resHelper.setImage(shell, "images/locked_16.png"));
+                        if(process.getBlockedBy()!=0) {
+                            item.setImage(resHelper.setImage(shell, LOCKED));
+                        } 
+                        if((process.getBlockingLocks()!=0) & (process.getBlockedBy()!=process.getBlockingLocks())) {
+                            item.setImage(resHelper.setImage(shell, BLOCKING));
+                        }
                     }
                 }
             }
@@ -661,7 +684,7 @@ public final class MainForm {
             ti.setData(map.getKey());
         }
     }
-
+    
     private Listener caMainTreeListener = new Listener() {
         @Override
         public void handleEvent(Event event) {
@@ -686,16 +709,27 @@ public final class MainForm {
                 if(parentItem == null) {
                     process = processList.get(event.index);
                     item.setText(process.toTree());
-                    item.setData(process);
+                    item.setData(process); 
                     if(process.getChildren().size()>0) {
-                        item.setImage(resHelper.setImage(shell, LOCKER));
-                        item.setItemCount(process.getChildren().size());
-                        if(getExpandedProcesses().contains(process)) {
-                            item.setExpanded(true);
+                       for (Process p : process.getChildren()){
+                            if(p.getBlockedBy()!=0) {
+                                item.setImage(resHelper.setImage(shell, LOCKER));
+                                item.setItemCount(process.getChildren().size());
+                                break;
+                            } 
+                            if((p.getBlockingLocks()!=0) & (p.getBlockingLocks() != p.getBlockedBy())) {
+                                item.setImage(resHelper.setImage(shell, BLOCKED));
+                                item.setItemCount(process.getChildren().size());
+                                break;
+                            }
                         }
+                       if(getExpandedProcesses().contains(process)) {
+                           item.setExpanded(true);
+                       }
                     } else {
                         item.setImage(resHelper.setImage(shell, NB));
                     }
+                    
                     if(process.equals(selectedProcess)) {
                         caMainTree.select(item);
                     }
@@ -709,13 +743,23 @@ public final class MainForm {
                     item.setText(process.toTree());
                     item.setData(process);
                     if(process.getChildren().size()>0) {
-                        item.setImage(resHelper.setImage(shell, LOCKER));
+                        if(process.getBlockedBy()>0) {
+                            item.setImage(resHelper.setImage(shell, LOCKER));
+                        } 
+                        if((process.getBlockingLocks()!=0) & (process.getBlockedBy()!=process.getBlockingLocks())) {
+                            item.setImage(resHelper.setImage(shell, BLOCKED));
+                        }
                         item.setItemCount(process.getChildren().size());
                         if(getExpandedProcesses().contains(process)) {
                             item.setExpanded(true);
                         }
                     } else {
-                        item.setImage(resHelper.setImage(shell, "images/locked_16.png"));
+                        if(process.getBlockedBy()>0) {
+                            item.setImage(resHelper.setImage(shell, LOCKED));
+                        } 
+                        if((process.getBlockingLocks()!=0) & (process.getBlockedBy()!=process.getBlockingLocks())) {
+                            item.setImage(resHelper.setImage(shell, BLOCKING));
+                        }
                     }
                     if(process.equals(selectedProcess)) {
                         caMainTree.select(item);

@@ -47,6 +47,7 @@ public final class BlocksHistory {
     private static final String STATE = "state";
     private static final String STATECHANGE = "stateChange";
     private static final String BLOCKEDBY = "blockedBy";
+    private static final String BLOCKING_LOCKS = "blocking_locks";
     private static final String QUERY = "query";
     private static final String SLOWQUERY = "slowQuery";
     private static final String SERVERS = "servers";
@@ -226,6 +227,7 @@ public final class BlocksHistory {
                 getNodeValue(el,STATE),
                 getNodeValue(el,STATECHANGE),
                 Integer.parseInt(getNodeValue(el,BLOCKEDBY)),
+                Integer.parseInt(getNodeValue(el,BLOCKING_LOCKS)),
                 getNodeValue(el,QUERY),
                 Boolean.parseBoolean(getNodeValue(el,SLOWQUERY))
                 );

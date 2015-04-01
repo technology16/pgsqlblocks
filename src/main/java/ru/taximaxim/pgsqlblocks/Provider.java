@@ -1,5 +1,9 @@
 package ru.taximaxim.pgsqlblocks;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -24,15 +28,6 @@ public class Provider {
     static {
         DriverManager.setLoginTimeout(LOGINTIMEOUT);
     }
-
-    private static final String QUERY = "SELECT p.pid AS pid, application_name, datname, usename,"+
-            "CASE WHEN client_port=-1 THEN 'local pipe' WHEN length(client_hostname)>0 THEN client_hostname||':'||client_port ELSE textin(inet_out(client_addr))||':'||client_port END AS client, "+
-            "date_trunc('second', backend_start) AS backend_start, CASE WHEN state='active' THEN date_trunc('second', query_start)::text ELSE '' END AS query_start, "+
-            "date_trunc('second', xact_start) AS xact_start, state, date_trunc('second', state_change) AS state_change, (SELECT min(l1.pid) " +
-            "FROM pg_locks l1 WHERE GRANTED AND (relation IN (SELECT relation FROM pg_locks l2 WHERE l2.pid=p.pid AND NOT granted) OR transactionid IN (SELECT transactionid FROM pg_locks l3 WHERE l3.pid=p.pid AND NOT granted))) AS blockedby," +
-            "query AS query, "+
-            "CASE WHEN query_start IS NULL OR state<>'active' THEN false ELSE query_start < now() - '10 seconds'::interval END AS slowquery "+
-            "FROM pg_stat_activity p ORDER BY 1 ASC";
     
     protected static final Logger LOG = Logger.getLogger(Provider.class);
     
@@ -42,6 +37,7 @@ public class Provider {
     private static final String CLIENT = "client";
     private static final String STATE = "state";
     private static final String BLOCKEDBY = "blockedBy";
+    private static final String BLOCKING_LOCKS = "blocking_locks";
     private static final String SLOWQUERY = "slowQuery";
     private static final String APPLICATIONNAME = "application_name";
     private static final String BACKENDSTART = "backend_start";
@@ -49,6 +45,25 @@ public class Provider {
     private static final String XACTSTART = "xact_start";
     private static final String STATECHANGE = "state_change";
     private static final String QUERYSQL = "query";
+    private static String QUERY = null;
+    
+    private String getQuery() throws IOException {
+        if(QUERY==null) {
+            try (InputStream input = ClassLoader.getSystemResourceAsStream("query.sql");
+                 BufferedReader reader = new BufferedReader(new InputStreamReader(input));)
+            {
+                StringBuilder out = new StringBuilder();
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    out.append(line);
+                }
+                QUERY = out.toString();
+            }
+        }
+        return QUERY;
+    }
+    
+    private static Logger log = Logger.getLogger(Provider.class);
     
     private DbcData dbcData;
     private Connection connection;
@@ -154,6 +169,9 @@ public class Provider {
                     } catch (SQLException e) {
                         getDbcData().setStatus(DbcStatus.ERROR);
                         LOG.error(getDbcData().getName() + " " + e.getMessage(), e);
+                    } catch (IOException e) {
+                        getDbcData().setStatus(DbcStatus.ERROR);
+                        LOG.error(getDbcData().getName() + " " + e.getMessage(), e);
                     } finally {
                         if(MainForm.getInstance().getShell() != null && !MainForm.getInstance().getShell().isDisposed()){
                             MainForm.getInstance().getDisplay().asyncExec(new Runnable() {
@@ -175,13 +193,13 @@ public class Provider {
         return dbcData;
     }
 
-    public void getProcesses() throws SQLException {
+    public void getProcesses() throws SQLException, IOException {
         clearProcessMap();
         if(connection == null) {
             return;
         }
         try(Statement stmt = connection.createStatement();
-            ResultSet result = stmt.executeQuery(QUERY)){
+            ResultSet result = stmt.executeQuery(getQuery())){
             while(result.next()) {
                 Process proc = new Process(
                         result.getInt(PID),
@@ -195,6 +213,7 @@ public class Provider {
                         result.getString(STATE),
                         dateParse(result.getString(STATECHANGE)),
                         result.getInt(BLOCKEDBY),
+                        result.getInt(BLOCKING_LOCKS),
                         result.getString(QUERYSQL),
                         result.getBoolean(SLOWQUERY));
                 getProcessMap().put(proc.getPid(), proc);
@@ -224,10 +243,14 @@ public class Provider {
         if(connection == null) {
             return;
         }
-        try (PreparedStatement termPs = connection.prepareStatement(term);){
+        boolean kill = false;
+        try (PreparedStatement termPs = connection.prepareStatement(term);) {
             termPs.setInt(1, pid);
-            termPs.executeQuery();
-            LOG.info(getDbcData().getName() + " pid=" + pid + " is terminated.");
+            try (ResultSet resultSet = termPs.executeQuery()) {
+                if (resultSet.next()) {
+                    kill = resultSet.getBoolean(1);
+                }
+            }
         } catch (SQLException e) {
             getDbcData().setStatus(DbcStatus.ERROR);
             MainForm.getInstance().getDisplay().asyncExec(new Runnable() {
@@ -238,6 +261,11 @@ public class Provider {
             });
             LOG.error(getDbcData().getName() + " " + e.getMessage(), e);
         }
+        if(kill) {
+            log.info(dbcData.getName() + " pid=" + pid + " is terminated.");
+        } else {
+            log.info(dbcData.getName() + " pid=" + pid + " is terminated failed.");
+        }
     }
 
     public void cancel(int pid) {
@@ -245,12 +273,21 @@ public class Provider {
         if(connection == null) {
             return;
         }
-        try (PreparedStatement cancelPs = connection.prepareStatement(cancel);){
+        boolean kill = false;
+        try(PreparedStatement cancelPs = connection.prepareStatement(cancel);) {
             cancelPs.setInt(1, pid);
-            cancelPs.executeQuery();
-            LOG.info(getDbcData().getName() + " pid=" + pid + " is canceled.");
+            try (ResultSet resultSet = cancelPs.executeQuery()) {
+                if (resultSet.next()) {
+                    kill = resultSet.getBoolean(1);
+                }
+            }
         } catch (SQLException e) {
             LOG.error(getDbcData().getName() + " " + e.getMessage(), e);
+        }
+        if(kill) {
+            log.info(dbcData.getName() + " pid=" + pid + " is canceled.");
+        } else {
+            log.info(dbcData.getName() + " pid=" + pid + " is canceled failed.");
         }
     }
 
