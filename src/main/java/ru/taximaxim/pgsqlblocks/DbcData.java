@@ -1,8 +1,12 @@
 package ru.taximaxim.pgsqlblocks;
 
-
+/**
+ * Класс, представляющий строку подключения к БД
+ * 
+ * @author ismagilov_mg
+ */
 public class DbcData {
-
+    
     private String name;
     private String host;
     private String port;
@@ -11,7 +15,7 @@ public class DbcData {
     private String dbname;
     private boolean enabled;
     private DbcStatus status = DbcStatus.DISABLED;
-
+    
     public DbcData(String name,String host, String port,String dbname, String user, String passwd, boolean enabled) {
         this.name = name;
         this.host = host;
@@ -25,19 +29,19 @@ public class DbcData {
     public String getName() {
         return name;
     }
-
+    
     public String getHost() {
         return host;
     }
-
+    
     public String getPort() {
         return port;
     }
-
+    
     public String getUser() {
         return user;
     }
-
+    
     public String getUrl() {
         return String.format("jdbc:postgresql://%1$s:%2$s/%3$s", getHost(), getPort(), getDbname());
     }
@@ -45,21 +49,21 @@ public class DbcData {
     public String getPasswd() {
         return passwd;
     }
-
+    
     public String getDbname() {
         return dbname;
     }
-
+    
     public boolean isEnabled() {
         return enabled;
     }
-
+    
     @Override
     public String toString() {
         return String.format("DbcData [name=%1$s, host=%2$s, port=%3$s, user=%4$s, passwd=%5$s, dbname=%6$s, enabled=%7$s]", 
             getName(), getHost(), getPort(), getUser(), getPasswd(), getDbname(), isEnabled());
     }
-
+    
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -70,7 +74,7 @@ public class DbcData {
         result = prime * result + ((getUser() == null) ? 0 : getUser().hashCode());
         return result;
     }
-
+    
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {
@@ -120,11 +124,11 @@ public class DbcData {
         
         return true;
     }
-
+    
     public DbcStatus getStatus() {
         return status;
     }
-
+    
     public void setStatus(DbcStatus status) {
         this.status = status;
     }

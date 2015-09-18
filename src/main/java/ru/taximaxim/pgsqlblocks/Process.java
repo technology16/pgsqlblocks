@@ -3,10 +3,14 @@ package ru.taximaxim.pgsqlblocks;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Класс, представляющий описание серверного процесса
+ * 
+ * @author ismagilov_mg
+ */
 public class Process {
     
     private Process parent;
-    private List<Process> children;
     private int pid;
     private String applicationName;
     private String datname;
@@ -21,11 +25,13 @@ public class Process {
     private int blockingLocks;
     private String query;
     private boolean slowQuery;
-            
+    private List<Process> children = new ArrayList<Process>();
+    
     public Process(int pid, String applicationName, String datname,
             String usename, String client, String backendStart,
             String queryStart, String xactStart, String state, String stateChange,
             int blockedBy, int blockingLocks, String query, boolean slowQuery) {
+        
         this.pid = pid;
         this.applicationName = applicationName;
         this.datname = datname;
@@ -40,63 +46,79 @@ public class Process {
         this.blockingLocks = blockingLocks;
         this.query = query;
         this.slowQuery = slowQuery;
-        this.children = new ArrayList<Process>();
     }
     
     public void setParent(Process parent) {
         this.parent = parent;
     }
+    
     public Process getParent() {
         return parent;
     }
+    
     public void addChildren(Process child) {
         children.add(child);
     }
+    
     public List<Process> getChildren() {
         return children;
     }
+    
     public int getPid() {
         return pid;
     }
+    
     public String getApplicationName() {
         return applicationName;
     }
+    
     public String getDatname() {
         return datname;
     }
+    
     public String getUsename() {
         return usename;
     }
+    
     public String getClient() {
         if(client == null) {
             return "";
         }
         return client;
     }
+    
     public String getBackendStart() {
         return backendStart;
     }
+    
     public String getQueryStart() {
         return queryStart;
     }
+    
     public String getXactStart() {
         return xactStart;
     }
+    
     public String getState() {
         return state;
     }
+    
     public String getStateChange() {
         return stateChange;
     }
+    
     public int getBlockedBy() {
         return blockedBy;
     }
+    
     public int getBlockingLocks() {
         return blockingLocks;
     }
+    
     public String getQuery() {
         return query;
     }
+    
     public boolean isSlowQuery() {
         return slowQuery;
     }
@@ -111,7 +133,7 @@ public class Process {
         }
         return count;
     }
-
+    
     public String[] toTree() {
         return new String[]{
                 String.valueOf(getPid()),
@@ -125,12 +147,12 @@ public class Process {
                 getXactStart(),
                 getState(),
                 getStateChange(),
-                getBlockedBy()==0?"":String.valueOf(getBlockedBy()),
+                getBlockedBy() == 0 ? "" : String.valueOf(getBlockedBy()),
                 getQuery().replace("\n", " "),
                 String.valueOf(isSlowQuery())
         };
     }
-
+    
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -138,26 +160,25 @@ public class Process {
         result = prime * result + getPid();
         return result;
     }
+    
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {
             return true;
         }
-        
         if (obj == null) {
             return false;
         }
-        
         if (getClass() != obj.getClass()){
             return false;
         }
-        
         Process other = (Process) obj;
         if (getPid() != other.getPid()){
             return false;
         }
         return true;
     }
+    
     @Override
     public String toString() {
         return String.format("Process [parent=%1$s, childrenLength=%2$s, pid=%3$s, applicationName=%4$s, datname=%5$s, " +

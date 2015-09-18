@@ -1,10 +1,20 @@
 package ru.taximaxim.pgsqlblocks;
 
+/**
+ * Перечесление возможных состояний БД
+ * 
+ * @author ismagilov_mg
+ */
 public enum DbcStatus {
     DISABLED,
     CONNECTED,
     ERROR,
     BLOCKED;
+    
+    /**
+     * Получение иконки в зависимости от состояния
+     * @return
+     */
     public String getImageAddr() {
         switch(this) {
         case DISABLED:

@@ -27,15 +27,15 @@ import org.xml.sax.SAXException;
 
 import ru.taximaxim.pgsqlblocks.ui.MainForm;
 
-public final class BlocksHistory {
-
-    private static BlocksHistory bh;
-    protected static final Logger LOG = Logger.getLogger(BlocksHistory.class);
-    private ConcurrentMap<DbcData, List<Process>> hm;
-    private ConcurrentMap<DbcData, List<Process>> ohm;
-    private static final String FILEPATH = "BlocksHistory";
-    private static final String FILENAME = "/blocksHistory";
-
+/**
+ * Класс для работы с историей блокировок
+ * 
+ * @author ismagilov_mg
+ */
+public class BlocksHistory {
+    
+    private static final Logger LOG = Logger.getLogger(BlocksHistory.class);
+    
     private static final String PID = "pid";
     private static final String APPLICATIONNAME = "applicationName";
     private static final String DATNAME = "datname";
@@ -54,44 +54,50 @@ public final class BlocksHistory {
     private static final String SERVER = "server";
     private static final String PROCESS = "process";
     private static final String CHILDREN = "children";
-
-
+    private static final String FILEPATH = "BlocksHistory";
+    private static final String FILENAME = "/blocksHistory";
+    
+    private static BlocksHistory blocksHistory;
+    
+    private ConcurrentMap<DbcData, List<Process>> historyMap;
+    private ConcurrentMap<DbcData, List<Process>> oldHistoryMap;
+    
     public static BlocksHistory getInstance() {
-        if(bh == null) {
-            bh = new BlocksHistory();
+        if(blocksHistory == null) {
+            blocksHistory = new BlocksHistory();
         }
-        synchronized (bh) {
-            return bh;
+        synchronized (blocksHistory) {
+            return blocksHistory;
         }
     }
-
+    
     public ConcurrentMap<DbcData, List<Process>> getHistoryMap() {
-        if(hm==null){
-            hm = new ConcurrentHashMap<DbcData, List<Process>>();
+        if(historyMap == null){
+            historyMap = new ConcurrentHashMap<DbcData, List<Process>>();
         }
-        synchronized (hm) {
-            return hm;
+        synchronized (historyMap) {
+            return historyMap;
         }
     }
     
     public void clearHistoryMap() {
-        if (hm != null) {
-            hm.clear();
+        if (historyMap != null) {
+            historyMap.clear();
         }
     }
-
+    
     public void clearOldHistoryMap() {
-        if (ohm != null) {
-            ohm.clear();
+        if (oldHistoryMap != null) {
+            oldHistoryMap.clear();
         }
     }
     
     public ConcurrentMap<DbcData, List<Process>> getOldHistoryMap() {
-        if(ohm==null) {
-            ohm = new ConcurrentHashMap<DbcData, List<Process>>();
+        if(oldHistoryMap == null) {
+            oldHistoryMap = new ConcurrentHashMap<DbcData, List<Process>>();
         }
-        synchronized (ohm) {
-            return ohm;
+        synchronized (oldHistoryMap) {
+            return oldHistoryMap;
         }
     }
     
@@ -101,7 +107,7 @@ public final class BlocksHistory {
             dir.mkdir();
         }
     }
-
+    
     public void add(DbcData dbc, Process process) {
         List<Process> list = getHistoryMap().get(dbc);
         if(list == null) {
@@ -114,7 +120,7 @@ public final class BlocksHistory {
         }
         list.add(process);
     }
-
+    
     public synchronized void save() {
         if(getHistoryMap().size() == 0){
             LOG.info("Не найдено блокировок для сохранения");
@@ -142,7 +148,7 @@ public final class BlocksHistory {
         }
         clearHistoryMap();
     }
-
+    
     private Element createElement(Element procEl, Element rows, String textContent){
         rows.setTextContent(textContent);
         procEl.appendChild(rows);
@@ -166,7 +172,7 @@ public final class BlocksHistory {
         procEl = createElement(procEl, doc.createElement(BLOCKING_LOCKS), String.valueOf(process.getBlockingLocks()));
         procEl = createElement(procEl, doc.createElement(QUERY), process.getQuery());
         procEl = createElement(procEl, doc.createElement(SLOWQUERY), String.valueOf(process.isSlowQuery()));
-
+        
         Element children = doc.createElement(CHILDREN);
         for(Process childProcess : process.getChildren()) {
             children.appendChild(createProcessElement(doc, childProcess));
@@ -174,7 +180,7 @@ public final class BlocksHistory {
         procEl.appendChild(children);
         return procEl;
     }
-
+    
     public void open(String path) {
         clearOldHistoryMap();
         if(path == null) {
@@ -214,7 +220,7 @@ public final class BlocksHistory {
             } catch (XPathExpressionException e) {
                 LOG.error("Ошибка XPathExpressionException: " + e.getMessage());
             }
-            for(int j=0;j<children.getLength();j++) {
+            for(int j = 0; j < children.getLength(); j++) {
                 Node processNode = children.item(j);
                 if (processNode.getNodeType() != Node.ELEMENT_NODE) {
                     continue;
@@ -235,20 +241,20 @@ public final class BlocksHistory {
     
     private Process parseProcess(Element el) {
         Process process = new Process(
-                Integer.parseInt(getNodeValue(el,PID)),
-                getNodeValue(el,APPLICATIONNAME),
-                getNodeValue(el,DATNAME),
-                getNodeValue(el,USENAME),
-                getNodeValue(el,CLIENT),
-                getNodeValue(el,BACKENDSTART),
-                getNodeValue(el,QUERYSTART),
-                getNodeValue(el,XACTSTART),
-                getNodeValue(el,STATE),
-                getNodeValue(el,STATECHANGE),
-                Integer.parseInt(getNodeValue(el,BLOCKEDBY)),
-                Integer.parseInt(getNodeValue(el,BLOCKING_LOCKS)),
-                getNodeValue(el,QUERY),
-                Boolean.parseBoolean(getNodeValue(el,SLOWQUERY))
+                Integer.parseInt(getNodeValue(el, PID)),
+                getNodeValue(el, APPLICATIONNAME),
+                getNodeValue(el, DATNAME),
+                getNodeValue(el, USENAME),
+                getNodeValue(el, CLIENT),
+                getNodeValue(el, BACKENDSTART),
+                getNodeValue(el, QUERYSTART),
+                getNodeValue(el, XACTSTART),
+                getNodeValue(el, STATE),
+                getNodeValue(el, STATECHANGE),
+                Integer.parseInt(getNodeValue(el, BLOCKEDBY)),
+                Integer.parseInt(getNodeValue(el, BLOCKING_LOCKS)),
+                getNodeValue(el, QUERY),
+                Boolean.parseBoolean(getNodeValue(el, SLOWQUERY))
                 );
         XPathFactory xpf = XPathFactory.newInstance();
         XPath xp = xpf.newXPath();
@@ -270,7 +276,7 @@ public final class BlocksHistory {
         }
         return process;
     }
-
+    
     private String getNodeValue(Element el, String nodeName) {
         Node node = el.getElementsByTagName(nodeName).item(0).getFirstChild();
         if(node == null) {

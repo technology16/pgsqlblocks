@@ -23,11 +23,15 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-
-
+/**
+ * Класс для работы со списком строк подключения к БД
+ * 
+ * @author ismagilov_mg
+ */
 public final class DbcDataList {
     
     protected static final Logger LOG = Logger.getLogger(DbcDataList.class);
+    
     private static final String FILE_PATH = "servers.xml";
     private static final String ID = "id";
     private static final String NAME = "name";
@@ -42,20 +46,20 @@ public final class DbcDataList {
     private static final String SERVER = "server";
     
     private List<DbcData> list;
-
+    
     private static DbcDataList dbcDataList;
-
+    
     private DbcDataList() {}
-
+    
     public static DbcDataList getInstance() {
         if(dbcDataList == null) {
             dbcDataList = new DbcDataList();
         }
         return dbcDataList;
     }
-
+    
     public List<DbcData> getList() {
-        if (list==null) {
+        if (list == null) {
             list = new ArrayList<DbcData>();
         }
         return list;
@@ -88,22 +92,22 @@ public final class DbcDataList {
             getList().add(parseDbc(item));
         }
     }
-
+    
     public DbcData parseDbc(Element item) {
-        Node nameNode    = item.getElementsByTagName(NAME).item(0).getFirstChild();
-        Node hostNode    = item.getElementsByTagName(HOST).item(0).getFirstChild();
-        Node portNode    = item.getElementsByTagName(PORT).item(0).getFirstChild();
-        Node dbnameNode  = item.getElementsByTagName(DBNAME).item(0).getFirstChild();
-        Node userNode    = item.getElementsByTagName(USER).item(0).getFirstChild();
-        Node passwdNode  = item.getElementsByTagName(PASSWD).item(0).getFirstChild();
+        Node nameNode = item.getElementsByTagName(NAME).item(0).getFirstChild();
+        Node hostNode = item.getElementsByTagName(HOST).item(0).getFirstChild();
+        Node portNode = item.getElementsByTagName(PORT).item(0).getFirstChild();
+        Node dbnameNode = item.getElementsByTagName(DBNAME).item(0).getFirstChild();
+        Node userNode = item.getElementsByTagName(USER).item(0).getFirstChild();
+        Node passwdNode = item.getElementsByTagName(PASSWD).item(0).getFirstChild();
         Node enabledNode = item.getElementsByTagName(ENABLED).item(0).getFirstChild();
-        String name   = nameNode   == null?"":nameNode.getNodeValue();
-        String host   = hostNode   == null?"":hostNode.getNodeValue();
-        String port   = portNode   == null?"":portNode.getNodeValue();
-        String dbname = dbnameNode == null?"":dbnameNode.getNodeValue();
-        String user   = userNode   == null?"":userNode.getNodeValue();
-        String passwd = passwdNode == null?"":passwdNode.getNodeValue();
-        boolean enabled = Boolean.valueOf(enabledNode==null?FALSE:enabledNode.getNodeValue());
+        String name = nameNode == null ? "" : nameNode.getNodeValue();
+        String host = hostNode == null ? "" : hostNode.getNodeValue();
+        String port = portNode == null ? "" : portNode.getNodeValue();
+        String dbname = dbnameNode == null ? "" : dbnameNode.getNodeValue();
+        String user = userNode == null ? "" : userNode.getNodeValue();
+        String passwd = passwdNode == null ? "" : passwdNode.getNodeValue();
+        boolean enabled = Boolean.valueOf(enabledNode == null ? FALSE : enabledNode.getNodeValue());
         return new DbcData(name, host, port, dbname, user, passwd, enabled);
     }
     
@@ -120,14 +124,14 @@ public final class DbcDataList {
         }
         LOG.info("Создан файл конфигурации " + FILE_PATH);
     }
-
+    
     public void add(DbcData dbcData) {
         if(getList().contains(dbcData)) {
             LOG.error("Данный сервер уже есть в конфигурационном файле");
             return;
         }
         getList().add(dbcData);
-
+        
         DocumentBuilderFactory df = DocumentBuilderFactory.newInstance();
         Document doc = null;
         try {
@@ -143,11 +147,11 @@ public final class DbcDataList {
         }
         NodeList rootElement = doc.getElementsByTagName(SERVERS);
         rootElement.item(0).appendChild(createServerElement(doc, dbcData, true));
-
+        
         save(doc, FILE_PATH);
     }
-
-    private Element createElement(Element server, Element rows, String textContent){
+    
+    private Element createElement(Element server, Element rows, String textContent) {
         rows.setTextContent(textContent);
         server.appendChild(rows);
         return server;
@@ -159,7 +163,7 @@ public final class DbcDataList {
         server = createElement(server, doc.createElement(HOST), dbcData.getHost());
         server = createElement(server, doc.createElement(PORT), dbcData.getPort());
         server = createElement(server, doc.createElement(USER), dbcData.getUser());
-        server = createElement(server, doc.createElement(PASSWD), wp?dbcData.getPasswd():"******");
+        server = createElement(server, doc.createElement(PASSWD), wp ? dbcData.getPasswd() : "******");
         server = createElement(server, doc.createElement(DBNAME), dbcData.getDbname());
         server = createElement(server, doc.createElement(ENABLED), String.valueOf(dbcData.isEnabled()));
         
@@ -168,7 +172,7 @@ public final class DbcDataList {
         return server;
     } 
     
-    public void save(Document doc, String filePath){
+    public void save(Document doc, String filePath) {
         TransformerFactory transformerFactory = TransformerFactory.newInstance();
         Transformer transformer;
         try {
@@ -184,12 +188,12 @@ public final class DbcDataList {
             LOG.error(e);
         }
     }
-
+    
     public void edit(DbcData oldDbc, DbcData newDbc) {
         delete(oldDbc);
         add(newDbc);
     }
-
+    
     public void delete(DbcData oldDbc) {
         DocumentBuilderFactory df = DocumentBuilderFactory.newInstance();
         Document doc = null;

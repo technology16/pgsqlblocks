@@ -1,6 +1,5 @@
 package ru.taximaxim.pgsqlblocks.ui;
 
-
 import java.io.IOException;
 import java.net.URL;
 import java.sql.Driver;
@@ -57,11 +56,13 @@ import ru.taximaxim.pgsqlblocks.DbcStatus;
 import ru.taximaxim.pgsqlblocks.Process;
 import ru.taximaxim.pgsqlblocks.Provider;
 
+/**
+ * Главная форма приложения
+ * 
+ * @author ismagilov_mg
+ */
 public final class MainForm {
-
-    private MainForm() {}
-    public static final int BTN_WIDTH = 120;
-    public static final int TEXT_WIDTH = 200;
+    
     private static final String APP_NAME = "pgSqlBlocks";
     private static final String SORT_DIRECTION = "sortDirection";
     private static final String COL_NAME = "colName";
@@ -71,40 +72,12 @@ public final class MainForm {
     private static final String BLOCKING = "images/blocking_16.png";
     private static final String NB = "images/nb_16.png";
     private static final int ZERO_MARGIN = 0;
+    private static final int FIXEDTHREADPOOL = 5;
+    private static final int TEN = 10;
     private static final int[] VERTICAL_WEIGHTS = new int[]{80,20};
     private static final int[] HORIZONTAL_WEIGHTS = new int[]{17,83};
     private static final int SASH_WIDTH = 2;
-    protected static final Logger LOG = Logger.getLogger(MainForm.class);
-    private static MainForm mainForm;
-    private String[] caMainTreeColsName = new String[]{
-            "pid","blocked_count", "application_name", "datname", "usename", "client", "backend_start", "query_start", 
-            "xact_stat", "state", "state_change" , "blocked_by" , "query" , "slowquery"};
-    private String[] caColName = {"PID","BLOCKED_COUNT", "APPLICATION_NAME", "DATNAME", "USENAME", "CLIENT", "BACKEND_START", "QUERY_START", 
-            "XACT_STAT", "STATE", "STATE_CHANGE" , "BLOCKED_BY" , "QUERY" , "SLOWQUERY"};
-    private enum SortDirection{
-        UP,
-        DOWN;
-        public SortDirection getOpposite() {
-            if(this == UP) {
-                return DOWN;
-            }
-            return UP;
-        }
-        public int getSwtData(){
-            if(this == UP) {
-                return SWT.UP;
-            }
-            return SWT.DOWN;
-        }
-    }
-    private enum SortColumn{
-        PID, BLOCKED_COUNT, APPLICATION_NAME, DATNAME, USENAME, CLIENT, BACKEND_START, QUERY_START, 
-        XACT_STAT, STATE, STATE_CHANGE , BLOCKED_BY , QUERY , SLOWQUERY, DEFAULT;
-    }
-    private int[] caMainTreeColsSize = new int[]{80,100,150,100,100,100,138,138,138,100,138,80,150,80};
-    private Shell shell;
-    private ResHelper resHelper = ResHelper.getInstance();
-
+    
     private List<DbcData> dbcList;
     private List<Process> processList;
     private ConcurrentMap<DbcData, TableItem> serversTiMap;
@@ -116,7 +89,6 @@ public final class MainForm {
     private Process selectedProcess;
     private List<Process> expandedProcesses;
     private Label appVersionLabel;
-
     private ToolItem addDbTi;
     private ToolItem removeDbTi;
     private ToolItem editDbTi;
@@ -124,15 +96,13 @@ public final class MainForm {
     private ToolItem disconnectDbTi;
     private ToolItem updateTi;
     private ToolItem autoUpdateTi;
-    private Spinner timerSpinner;
     private ToolItem onlyBlockedTi;
     private ToolItem saveBlocksHistory;
     private ToolItem openBlocksHistory;
-
     private ToolItem terminateProc;
     private ToolItem cancelProc;
     private Text procText;
-
+    private Spinner timerSpinner;
     private SashForm caTreeSf;
     private Table caServersTable;
     private MenuItem connectDbCm;
@@ -143,45 +113,83 @@ public final class MainForm {
     private Composite procComposite;
     private Table bhServersTable;
     private Tree bhMainTree;
-    
     private Composite logComposite;
-
+    
     private AddDbcDataDlg dbcDlg;
     private ConfirmDlg confirmDlg;
     private Menu caServerListContextMenu;
-
-    private static final int FIXEDTHREADPOOL = 5;
     private ExecutorService executor = Executors.newFixedThreadPool(FIXEDTHREADPOOL);
     private boolean autoUpdate = true;
     private boolean onlyBlocked = false;
-    private static final int TEN = 10;
     private int timerInterval = TEN;
     private SortColumn sortColumn = SortColumn.BLOCKED_COUNT;
     private SortDirection sortDirection = SortDirection.UP;
-
+    private Shell shell;
+    private ResHelper resHelper = ResHelper.getInstance();
+    
+    private static MainForm mainForm;
+    
+    protected static final Logger LOG = Logger.getLogger(MainForm.class);
+    
+    private int[] caMainTreeColsSize = new int[]{80,100,150,100,100,100,138,138,138,100,138,80,150,80};
+    private String[] caMainTreeColsName = new String[]{
+            "pid","blocked_count", "application_name", "datname", "usename", "client", "backend_start", "query_start", 
+            "xact_stat", "state", "state_change" , "blocked_by" , "query" , "slowquery"};
+    private String[] caColName = {"PID","BLOCKED_COUNT", "APPLICATION_NAME", "DATNAME", "USENAME", "CLIENT", "BACKEND_START", "QUERY_START", 
+            "XACT_STAT", "STATE", "STATE_CHANGE" , "BLOCKED_BY" , "QUERY" , "SLOWQUERY"};
+    
+    public static final int BTN_WIDTH = 120;
+    public static final int TEXT_WIDTH = 200;
+    
+    private enum SortDirection {
+        UP,
+        DOWN;
+        
+        public SortDirection getOpposite() {
+            if(this == UP) {
+                return DOWN;
+            }
+            return UP;
+        }
+        
+        public int getSwtData() {
+            if(this == UP) {
+                return SWT.UP;
+            }
+            return SWT.DOWN;
+        }
+    }
+    
+    private enum SortColumn {
+        PID, BLOCKED_COUNT, APPLICATION_NAME, DATNAME, USENAME, CLIENT, BACKEND_START, QUERY_START,
+        XACT_STAT, STATE, STATE_CHANGE , BLOCKED_BY , QUERY , SLOWQUERY, DEFAULT;
+    }
+    
+    private MainForm() {}
+    
     public static MainForm getInstance() {
         if(mainForm == null) {
             mainForm = new MainForm();
         }
         return mainForm;
     }
-
+    
     public ConcurrentMap<DbcData, TableItem> getServersTiMap() {
-        if(serversTiMap==null) {
+        if(serversTiMap == null) {
             serversTiMap = new ConcurrentHashMap<DbcData, TableItem>();
         }
         return serversTiMap;
     }
     
     public ConcurrentMap<DbcData, Provider> getConnectsMap() {
-        if(connectsMap==null) {
+        if(connectsMap == null) {
             connectsMap = new ConcurrentHashMap<DbcData, Provider>();
         }
         return connectsMap;
     }
     
     public List<Process> getExpandedProcesses() {
-        if(expandedProcesses==null) {
+        if(expandedProcesses == null) {
             expandedProcesses = new ArrayList<Process>();
         }
         return expandedProcesses;
@@ -228,58 +236,57 @@ public final class MainForm {
             shell = null;
         }
     }
-
-
+    
     private void createControls() {
         dbcDlg = new AddDbcDataDlg(shell);
         confirmDlg = new ConfirmDlg(shell);
         GridLayout gridLayout = new GridLayout();
         gridLayout.marginHeight = ZERO_MARGIN;
         gridLayout.marginWidth = ZERO_MARGIN;
-
+        
         GridData gridData = new GridData(SWT.FILL, SWT.FILL, true, true);
-
+        
         ToolBar toolBar = new ToolBar(shell, SWT.RIGHT | SWT.FLAT);
         {
             addDbTi = new ToolItem(toolBar, SWT.PUSH);
             addDbTi.setImage(resHelper.setImage(shell, "images/db_add_16.png"));
             addDbTi.setToolTipText("Добавить БД");
-
+            
             removeDbTi = new ToolItem(toolBar, SWT.PUSH);
             removeDbTi.setImage(resHelper.setImage(shell, "images/db_del_16.png"));
             removeDbTi.setToolTipText("Удалить БД");
             removeDbTi.setEnabled(false);
-
+            
             editDbTi = new ToolItem(toolBar, SWT.PUSH);
             editDbTi.setImage(resHelper.setImage(shell, "images/db_edit_16.png"));
             editDbTi.setToolTipText("Редактировать БД");
             editDbTi.setEnabled(false);
-
+            
             ToolItem sep = new ToolItem(toolBar, SWT.SEPARATOR);
             sep.setWidth(10);
-
+            
             connectDbTi = new ToolItem(toolBar, SWT.PUSH);
             connectDbTi.setImage(resHelper.setImage(shell, "images/db_connect_16.png"));
             connectDbTi.setToolTipText("Подключиться");
             connectDbTi.setEnabled(false);
-
+            
             disconnectDbTi = new ToolItem(toolBar, SWT.PUSH);
             disconnectDbTi.setImage(resHelper.setImage(shell, "images/db_disconnect_16.png"));
             disconnectDbTi.setToolTipText("Отключиться");
             disconnectDbTi.setEnabled(false);
-
+            
             sep = new ToolItem(toolBar, SWT.SEPARATOR);
             sep.setWidth(15);
-
+            
             updateTi = new ToolItem(toolBar, SWT.PUSH);
             updateTi.setImage(resHelper.setImage(shell, "images/update_16.png"));
             updateTi.setToolTipText("Обновить");
-
+            
             autoUpdateTi = new ToolItem(toolBar, SWT.CHECK);
             autoUpdateTi.setImage(resHelper.setImage(shell, "images/autoupdate_16.png"));
             autoUpdateTi.setToolTipText("Автообновление");
             autoUpdateTi.setSelection(autoUpdate);
-
+            
             timerSpinner = new Spinner(toolBar,SWT.BORDER | SWT.READ_ONLY);
             timerSpinner.setMinimum(1);
             timerSpinner.setMaximum(100);
@@ -289,7 +296,7 @@ public final class MainForm {
             ToolItem timerSpinnerSep = new ToolItem(toolBar, SWT.SEPARATOR);
             timerSpinnerSep.setControl(timerSpinner);
             timerSpinnerSep.setWidth(60);
-
+            
             sep = new ToolItem(toolBar, SWT.SEPARATOR);
             sep.setWidth(15);
             
@@ -297,26 +304,26 @@ public final class MainForm {
             onlyBlockedTi.setImage(resHelper.setImage(shell, "images/db_ob_16.png"));
             onlyBlockedTi.setToolTipText("Показывать только блокирующие и блокированные процессы");
             onlyBlockedTi.setSelection(onlyBlocked);
-
+            
             saveBlocksHistory = new ToolItem(toolBar, SWT.PUSH);
             saveBlocksHistory.setImage(resHelper.setImage(shell, "images/save_16.png"));
             saveBlocksHistory.setToolTipText("Выгрузить историю блокировок");
-
+            
             openBlocksHistory = new ToolItem(toolBar, SWT.PUSH);
             openBlocksHistory.setImage(resHelper.setImage(shell, "images/document_open_16.png"));
             openBlocksHistory.setToolTipText("Открыть файл с историей блокировок");
         }
-
+        
         SashForm verticalSf = new SashForm(shell, SWT.VERTICAL);
         {
             verticalSf.setLayout(gridLayout);
             verticalSf.setLayoutData(gridData);
             verticalSf.SASH_WIDTH = SASH_WIDTH;
             verticalSf.setBackground(shell.getDisplay().getSystemColor(SWT.COLOR_WIDGET_BACKGROUND));
-
+            
             Composite topComposite = new Composite(verticalSf, SWT.NONE);
             topComposite.setLayout(gridLayout);
-
+            
             TabFolder tabPanel = new TabFolder(topComposite, SWT.BORDER);
             {
                 tabPanel.setLayoutData(gridData);
@@ -329,7 +336,7 @@ public final class MainForm {
                         currentActivitySf.setLayoutData(gridData);
                         currentActivitySf.SASH_WIDTH = SASH_WIDTH;
                         currentActivitySf.setBackground(shell.getDisplay().getSystemColor(SWT.COLOR_WIDGET_BACKGROUND));
-
+                        
                         caServersTable = new Table(currentActivitySf, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL | SWT.FULL_SELECTION);
                         {
                             caServersTable.setHeaderVisible(true);
@@ -360,16 +367,16 @@ public final class MainForm {
                                 GridData procCompositeGd = new GridData(SWT.FILL, SWT.FILL, true, true);
                                 procComposite.setLayoutData(procCompositeGd);
                                 procComposite.setVisible(false);
-
+                                
                                 ToolBar pcToolBar = new ToolBar(procComposite, SWT.FLAT | SWT.RIGHT);
                                 pcToolBar.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
-
+                                
                                 terminateProc = new ToolItem(pcToolBar, SWT.PUSH);
                                 terminateProc.setText("Уничтожить процесс");
-
+                                
                                 cancelProc = new ToolItem(pcToolBar, SWT.PUSH);
                                 cancelProc.setText("Послать сигнал отмены процесса");
-
+                                
                                 procText = new Text(procComposite, SWT.MULTI | SWT.BORDER | SWT.READ_ONLY | SWT.V_SCROLL | SWT.H_SCROLL);
                                 procText.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
                                 procText.setBackground(getDisplay().getSystemColor(SWT.COLOR_WHITE));
@@ -389,7 +396,7 @@ public final class MainForm {
                         blocksHistorySf.setLayoutData(gridData);
                         blocksHistorySf.SASH_WIDTH = SASH_WIDTH;
                         blocksHistorySf.setBackground(shell.getDisplay().getSystemColor(SWT.COLOR_WIDGET_BACKGROUND));
-
+                        
                         bhServersTable = new Table(blocksHistorySf, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
                         {
                             bhServersTable.setHeaderVisible(true);
@@ -404,7 +411,7 @@ public final class MainForm {
                             bhMainTree.setHeaderVisible(true);
                             bhMainTree.setLinesVisible(true);
                             bhMainTree.setLayoutData(gridData);
-                            for(int i=0;i<caMainTreeColsName.length;i++) {
+                            for(int i = 0; i < caMainTreeColsName.length; i++) {
                                 TreeColumn treeColumn = new TreeColumn(bhMainTree, SWT.NONE);
                                 treeColumn.setText(caMainTreeColsName[i]);
                                 treeColumn.setWidth(caMainTreeColsSize[i]);
@@ -421,7 +428,7 @@ public final class MainForm {
             }
             verticalSf.setWeights(VERTICAL_WEIGHTS);
         }
-
+        
         Composite statusBar = new Composite(shell, SWT.NONE);
         {
             statusBar.setLayout(gridLayout);
@@ -440,7 +447,7 @@ public final class MainForm {
             removeDbCm.setText("Удалить");
         }
     }
-
+    
     private void addHandlers() {
         for(final TreeColumn tc : caMainTree.getColumns()) {
             tc.addListener(SWT.Selection, new Listener() {
@@ -484,7 +491,7 @@ public final class MainForm {
             public void mouseUp(MouseEvent e) {
                 Point point = new Point(e.x , e.y);
                 TableItem ti = bhServersTable.getItem(point);
-                if(ti==null) {
+                if(ti == null) {
                     return;
                 }
                 historyProcessList = historyMap.get((DbcData)ti.getData());
@@ -499,7 +506,7 @@ public final class MainForm {
             @Override
             public void mouseDown(MouseEvent e) {}
         });
-
+        
         connectDbCm.addListener(SWT.Selection, onServerListener);
         connectDbTi.addListener(SWT.Selection, onServerListener);
         disconnectDbCm.addListener(SWT.Selection, offServerListener);
@@ -569,14 +576,14 @@ public final class MainForm {
                     process = historyProcessList.get(event.index);
                     item.setText(process.toTree());
                     item.setData(process);
-                    if(process.getChildren().size()>0) {
+                    if(process.getChildren().size() > 0) {
                         for (Process p : process.getChildren()){
-                            if(p.getBlockedBy()!=0) {
+                            if(p.getBlockedBy() != 0) {
                                 item.setImage(resHelper.setImage(shell, LOCKER));
                                 item.setItemCount(process.getChildren().size());
                                 break;
                             } 
-                            if((p.getBlockingLocks()!=0) & (p.getBlockingLocks() != p.getBlockedBy())) {
+                            if((p.getBlockingLocks() != 0) && (p.getBlockingLocks() != p.getBlockedBy())) {
                                 item.setImage(resHelper.setImage(shell, BLOCKED));
                                 item.setItemCount(process.getChildren().size());
                                 break;
@@ -594,19 +601,19 @@ public final class MainForm {
                     }
                     item.setText(process.toTree());
                     item.setData(process);
-                    if(process.getChildren().size()>0) {
-                        if(process.getBlockedBy()!=0) {
+                    if(process.getChildren().size() > 0) {
+                        if(process.getBlockedBy() != 0) {
                             item.setImage(resHelper.setImage(shell, LOCKER));
                         }
-                        if((process.getBlockingLocks()!=0) & (process.getBlockedBy()!=process.getBlockingLocks())) {
+                        if((process.getBlockingLocks() != 0) && (process.getBlockedBy() != process.getBlockingLocks())) {
                             item.setImage(resHelper.setImage(shell, BLOCKED));
                         }
                         item.setItemCount(process.getChildren().size());
                     } else {
-                        if(process.getBlockedBy()!=0) {
+                        if(process.getBlockedBy() != 0) {
                             item.setImage(resHelper.setImage(shell, LOCKED));
                         } 
-                        if((process.getBlockingLocks()!=0) & (process.getBlockedBy()!=process.getBlockingLocks())) {
+                        if((process.getBlockingLocks() != 0) && (process.getBlockedBy() != process.getBlockingLocks())) {
                             item.setImage(resHelper.setImage(shell, BLOCKING));
                         }
                     }
@@ -622,7 +629,7 @@ public final class MainForm {
             }
         });
     }
-
+    
     private String getAppVersion() {
         URL manifestPath = MainForm.class.getClassLoader().getResource("META-INF/MANIFEST.MF");
         Manifest manifest = null;
@@ -638,42 +645,42 @@ public final class MainForm {
         }
         return appVersion;
     }
-
+    
     private Listener addDbListener = new Listener() {
         @Override
         public void handleEvent(Event event) {
             dbcDlg.show();
         }
     };
-
+    
     private Listener onServerListener = new Listener() {
         @Override
         public void handleEvent(Event event) {
             connect(selectedDbc);
         }
     };
-
+    
     private Listener editServerListener = new Listener() {
         @Override
         public void handleEvent(Event event) {
             dbcDlg.show(selectedDbc);
         }
     };
-
+    
     private Listener deleteServerListener = new Listener() {
         @Override
         public void handleEvent(Event event) {
             confirmDlg.show(selectedDbc);
         }
     };
-
+    
     private Listener offServerListener = new Listener() {
         @Override
         public void handleEvent(Event event) {
             disconnect(selectedDbc);
         }
     };
-
+    
     public void setHistoryMap(ConcurrentMap<DbcData, List<Process>> hm) {
         historyMap = hm;
         bhServersTable.removeAll();
@@ -697,7 +704,7 @@ public final class MainForm {
                 break;
             case SWT.Selection:
                 TreeItem ti = (TreeItem)event.item;
-                if(ti!=null) {
+                if(ti != null) {
                     selectedProcess = (Process)ti.getData();
                     procCompositeShow(selectedProcess);
                 }
@@ -710,14 +717,14 @@ public final class MainForm {
                     process = processList.get(event.index);
                     item.setText(process.toTree());
                     item.setData(process); 
-                    if(process.getChildren().size()>0) {
+                    if(process.getChildren().size() > 0) {
                        for (Process p : process.getChildren()){
-                            if(p.getBlockedBy()!=0) {
+                            if(p.getBlockedBy() != 0) {
                                 item.setImage(resHelper.setImage(shell, LOCKER));
                                 item.setItemCount(process.getChildren().size());
                                 break;
-                            } 
-                            if((p.getBlockingLocks()!=0) & (p.getBlockingLocks() != p.getBlockedBy())) {
+                            }
+                            if((p.getBlockingLocks() != 0) && (p.getBlockingLocks() != p.getBlockedBy())) {
                                 item.setImage(resHelper.setImage(shell, BLOCKED));
                                 item.setItemCount(process.getChildren().size());
                                 break;
@@ -734,7 +741,7 @@ public final class MainForm {
                         caMainTree.select(item);
                     }
                 } else {
-                    try{
+                    try {
                         process = ((Process)parentItem.getData()).getChildren().get(event.index);
                     } catch(IndexOutOfBoundsException e) {
                         LOG.error("Ошибка в построении дерева");
@@ -742,11 +749,11 @@ public final class MainForm {
                     }
                     item.setText(process.toTree());
                     item.setData(process);
-                    if(process.getChildren().size()>0) {
-                        if(process.getBlockedBy()>0) {
+                    if(process.getChildren().size() > 0) {
+                        if(process.getBlockedBy() > 0) {
                             item.setImage(resHelper.setImage(shell, LOCKER));
                         } 
-                        if((process.getBlockingLocks()!=0) & (process.getBlockedBy()!=process.getBlockingLocks())) {
+                        if((process.getBlockingLocks() != 0) && (process.getBlockedBy() != process.getBlockingLocks())) {
                             item.setImage(resHelper.setImage(shell, BLOCKED));
                         }
                         item.setItemCount(process.getChildren().size());
@@ -754,10 +761,10 @@ public final class MainForm {
                             item.setExpanded(true);
                         }
                     } else {
-                        if(process.getBlockedBy()>0) {
+                        if(process.getBlockedBy() > 0) {
                             item.setImage(resHelper.setImage(shell, LOCKED));
                         } 
-                        if((process.getBlockingLocks()!=0) & (process.getBlockedBy()!=process.getBlockingLocks())) {
+                        if((process.getBlockingLocks() != 0) && (process.getBlockedBy() != process.getBlockingLocks())) {
                             item.setImage(resHelper.setImage(shell, BLOCKING));
                         }
                     }
@@ -769,54 +776,54 @@ public final class MainForm {
             }
         }
     };
-
+    
     public Shell getShell() {
         return shell;
     }
-
+    
     public Display getDisplay() {
         return shell.getDisplay();
     }
-
+    
     private void procCompositeShow(Process proc) {
         if(!procComposite.isVisible()) {
             procComposite.setVisible(true);
             caTreeSf.layout(true, true);
         }
-        procText.setText(String.format("pid=%s\n%s",proc.getPid(), proc.getQuery()));
+        procText.setText(String.format("pid=%s\n%s", proc.getPid(), proc.getQuery()));
     }
-
+    
     private void procCompositeHide() {
         procComposite.setVisible(false);
         caTreeSf.layout(true, true);
     }
-
+    
     private void terminate() {
         if(selectedDbc != null && selectedProcess != null) {
             getConnectsMap().get(selectedDbc).terminate(selectedProcess.getPid());
         }
         executor.execute(getConnectsMap().get(selectedDbc).getProc());
     }
-
+    
     private void cancel() {
         if(selectedDbc != null && selectedProcess != null) {
             getConnectsMap().get(selectedDbc).cancel(selectedProcess.getPid());
         }
         executor.execute(getConnectsMap().get(selectedDbc).getProc());
     }
-
+    
     private void dbcListInit() {
         dl.init();
         serverListUpdate();
         autoConnect();
     }
-
+    
     public void providersInit() {
         for(DbcData dbc : dbcList) {
             providerInit(dbc);
         }
     }
-
+    
     private void providerInit(DbcData dbc) {
         if(getConnectsMap().containsKey(dbc)){
             return;
@@ -824,7 +831,7 @@ public final class MainForm {
         Provider provider = new Provider(dbc);
         getConnectsMap().put(dbc, provider);
     }
-
+    
     private void autoConnect() {
         for(Entry<DbcData, Provider> map : getConnectsMap().entrySet()) {
             if(map.getKey().isEnabled()) {
@@ -832,7 +839,7 @@ public final class MainForm {
             }
         }
     }
-
+    
     public synchronized void serverStatusUpdate(DbcData dbc) {
         TableItem ti = getServersTiMap().get(dbc);
         ti.setImage(resHelper.setImage(shell,dbc.getStatus().getImageAddr()));
@@ -840,7 +847,7 @@ public final class MainForm {
             dbControlsStat();
         }
     }
-
+    
     public void serverListUpdate() {
         dbcList = dl.getList();
         for(DbcData dbc : dbcList) {
@@ -857,51 +864,51 @@ public final class MainForm {
         }
         LOG.info("Обновление списка серверов");
     }
-
+    
     public void deleteServer(DbcData dbc) {
         selectedDbc = null;
         getConnectsMap().remove(dbc);
-        if(getServersTiMap().get(dbc)!=null) {
+        if(getServersTiMap().get(dbc) != null) {
             getServersTiMap().get(dbc).dispose();
             getServersTiMap().remove(dbc);
         }
     }
-
+    
     public void connect(DbcData dbc) {
         executor.execute(getConnectsMap().get(dbc).getConnection());
     }
-
+    
     public synchronized void updateUI(DbcData dbc) {
         if(dbc == null) {
             return;
         }
         if(dbc.equals(selectedDbc)) {
-            for(TreeItem ti :caMainTree.getItems()) {
+            for(TreeItem ti : caMainTree.getItems()) {
                 ti.setItemCount(0);
             }
             caMainTree.clearAll(true);
             processList = getConnectsMap().get(dbc).getProcessList();
             if(processList != null) {
-                Collections.sort(processList,new Comparator<Process>() {
+                Collections.sort(processList, new Comparator<Process>() {
                     @Override
                     public int compare(Process o1, Process o2) {
                         switch(sortColumn){
                         case DEFAULT:
                             return 0;
                         case PID:
-                            if(o1.getChildren().size()>o2.getChildren().size()){
-                                return sortDirection == SortDirection.UP?-1:1;
+                            if(o1.getChildren().size() > o2.getChildren().size()){
+                                return sortDirection == SortDirection.UP ? -1 : 1;
                             }
                             if(o1.getChildren().size()<o2.getChildren().size()){
-                                return sortDirection == SortDirection.UP?1:-1;
+                                return sortDirection == SortDirection.UP ? 1 : -1;
                             }
                             return 0;
                         case BLOCKED_COUNT:
-                            if(o1.getChildrensCount()>o2.getChildrensCount()){
-                                return sortDirection == SortDirection.UP?-1:1;
+                            if(o1.getChildrensCount() > o2.getChildrensCount()){
+                                return sortDirection == SortDirection.UP ? -1 : 1;
                             }
-                            if(o1.getChildrensCount()<o2.getChildrensCount()){
-                                return sortDirection == SortDirection.UP?1:-1;
+                            if(o1.getChildrensCount() < o2.getChildrensCount()){
+                                return sortDirection == SortDirection.UP ? 1 : -1;
                             }
                             return 0;
                         case APPLICATION_NAME:
@@ -972,8 +979,7 @@ public final class MainForm {
     }
 
     private int stringCompare(String s1, String s2) {
-        return sortDirection == SortDirection.DOWN?
-                s1.compareTo(s2):s2.compareTo(s1);
+        return sortDirection == SortDirection.DOWN ? s1.compareTo(s2) : s2.compareTo(s1);
     }
 
     private void dbControlsStat() {

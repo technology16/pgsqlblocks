@@ -21,13 +21,12 @@ import org.apache.log4j.Logger;
 
 import ru.taximaxim.pgsqlblocks.ui.MainForm;
 
+/**
+ * Класс для работы с серверными процессами
+ * 
+ * @author ismagilov_mg
+ */
 public class Provider {
-    
-    private static final int LOGINTIMEOUT = 5;
-    
-    static {
-        DriverManager.setLoginTimeout(LOGINTIMEOUT);
-    }
     
     protected static final Logger LOG = Logger.getLogger(Provider.class);
     
@@ -45,31 +44,37 @@ public class Provider {
     private static final String XACTSTART = "xact_start";
     private static final String STATECHANGE = "state_change";
     private static final String QUERYSQL = "query";
-    private static String QUERY = null;
+    private static final int LOGINTIMEOUT = 5;
     
-    private String getQuery() throws IOException {
-        if(QUERY==null) {
-            try (InputStream input = ClassLoader.getSystemResourceAsStream("query.sql");
-                 BufferedReader reader = new BufferedReader(new InputStreamReader(input));)
-            {
-                StringBuilder out = new StringBuilder();
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    out.append(line);
-                }
-                QUERY = out.toString();
-            }
-        }
-        return QUERY;
+    private static String query;
+    
+    static {
+        DriverManager.setLoginTimeout(LOGINTIMEOUT);
     }
-    
-    private static Logger log = Logger.getLogger(Provider.class);
     
     private DbcData dbcData;
     private Connection connection;
     private ConcurrentMap<Integer, Process> processMap;
     private List<Process> processList;
     private Runnable getProcesses;
+    
+    private String getQuery() throws IOException {
+        if(query == null) {
+            try (
+                    InputStream input = ClassLoader.getSystemResourceAsStream("query.sql");
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(input));
+                    ) {
+                
+                StringBuilder out = new StringBuilder();
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    out.append(line);
+                }
+                query = out.toString();
+            }
+        }
+        return query;
+    }
     
     public Provider(DbcData dbcData) {
         this.dbcData = dbcData;
@@ -84,6 +89,7 @@ public class Provider {
     private void clearProcessMap(){
         processMap = new ConcurrentHashMap<Integer, Process>();
     }
+    
     private Runnable connect = new Runnable(){
         @Override
         public void run() {
@@ -198,8 +204,11 @@ public class Provider {
         if(connection == null) {
             return;
         }
-        try(Statement stmt = connection.createStatement();
-            ResultSet result = stmt.executeQuery(getQuery())){
+        try (
+                Statement stmt = connection.createStatement();
+                ResultSet result = stmt.executeQuery(getQuery());
+                ) {
+            
             while(result.next()) {
                 Process proc = new Process(
                         result.getInt(PID),
@@ -216,7 +225,11 @@ public class Provider {
                         result.getInt(BLOCKING_LOCKS),
                         result.getString(QUERYSQL),
                         result.getBoolean(SLOWQUERY));
-                getProcessMap().put(proc.getPid(), proc);
+                if (processMap.get(proc.getPid()) == null ||
+                        processMap.get(proc.getPid()).getBlockedBy() != processMap.get(proc.getPid()).getBlockingLocks()) {
+                    
+                    getProcessMap().put(proc.getPid(), proc);
+                }
             }
             setProcessList();
         }
@@ -262,9 +275,9 @@ public class Provider {
             LOG.error(getDbcData().getName() + " " + e.getMessage(), e);
         }
         if(kill) {
-            log.info(dbcData.getName() + " pid=" + pid + " is terminated.");
+            LOG.info(dbcData.getName() + " pid=" + pid + " is terminated.");
         } else {
-            log.info(dbcData.getName() + " pid=" + pid + " is terminated failed.");
+            LOG.info(dbcData.getName() + " pid=" + pid + " is terminated failed.");
         }
     }
 
@@ -285,9 +298,9 @@ public class Provider {
             LOG.error(getDbcData().getName() + " " + e.getMessage(), e);
         }
         if(kill) {
-            log.info(dbcData.getName() + " pid=" + pid + " is canceled.");
+            LOG.info(dbcData.getName() + " pid=" + pid + " is canceled.");
         } else {
-            log.info(dbcData.getName() + " pid=" + pid + " is canceled failed.");
+            LOG.info(dbcData.getName() + " pid=" + pid + " is canceled failed.");
         }
     }
 

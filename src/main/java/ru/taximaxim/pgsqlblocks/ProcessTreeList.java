@@ -5,9 +5,17 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentMap;
 
+/**
+ * Класс, представляющий дерево, листами
+ * которого являются серверные процессы
+ * 
+ * @author ismagilov_mg
+ */
 public class ProcessTreeList {
+    
     private ConcurrentMap<Integer, Process> processMap;
     private List<Process> processList;
+    
     public ProcessTreeList(ConcurrentMap<Integer,Process> processMap) {
         this.processMap = processMap;
         buildTree();
@@ -17,7 +25,7 @@ public class ProcessTreeList {
         for(Entry<Integer, Process> map : getProcessMap().entrySet()) {
             int blockedBy = map.getValue().getBlockedBy();
             int blockingLocks = map.getValue().getBlockingLocks();
-
+            
             if(blockedBy != 0) {
                 map.getValue().setParent(getProcessMap().get(blockedBy));
                 getProcessMap().get(blockedBy).addChildren(map.getValue());
@@ -33,9 +41,11 @@ public class ProcessTreeList {
             }
         }
     }
+    
     public ConcurrentMap<Integer, Process> getProcessMap() {
         return processMap;
     }
+    
     public List<Process> getTreeList() {
         if (processList==null) {
             processList = new ArrayList<Process>();
