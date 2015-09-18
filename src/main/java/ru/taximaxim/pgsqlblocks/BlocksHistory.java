@@ -60,21 +60,39 @@ public final class BlocksHistory {
         if(bh == null) {
             bh = new BlocksHistory();
         }
-        return bh;
+        synchronized (bh) {
+            return bh;
+        }
     }
 
     public ConcurrentMap<DbcData, List<Process>> getHistoryMap() {
         if(hm==null){
             hm = new ConcurrentHashMap<DbcData, List<Process>>();
         }
-        return hm;
+        synchronized (hm) {
+            return hm;
+        }
+    }
+    
+    public void clearHistoryMap() {
+        if (hm != null) {
+            hm.clear();
+        }
+    }
+
+    public void clearOldHistoryMap() {
+        if (ohm != null) {
+            ohm.clear();
+        }
     }
     
     public ConcurrentMap<DbcData, List<Process>> getOldHistoryMap() {
-        if(ohm==null){
+        if(ohm==null) {
             ohm = new ConcurrentHashMap<DbcData, List<Process>>();
         }
-        return ohm;
+        synchronized (ohm) {
+            return ohm;
+        }
     }
     
     private BlocksHistory() {
@@ -122,7 +140,7 @@ public final class BlocksHistory {
         } catch (ParserConfigurationException e) {
             LOG.error(e);
         }
-        getHistoryMap().clear();
+        clearHistoryMap();
     }
 
     private Element createElement(Element procEl, Element rows, String textContent){
@@ -145,6 +163,7 @@ public final class BlocksHistory {
         procEl = createElement(procEl, doc.createElement(STATE), process.getState());
         procEl = createElement(procEl, doc.createElement(STATECHANGE), process.getStateChange());
         procEl = createElement(procEl, doc.createElement(BLOCKEDBY), String.valueOf(process.getBlockedBy()));
+        procEl = createElement(procEl, doc.createElement(BLOCKING_LOCKS), String.valueOf(process.getBlockingLocks()));
         procEl = createElement(procEl, doc.createElement(QUERY), process.getQuery());
         procEl = createElement(procEl, doc.createElement(SLOWQUERY), String.valueOf(process.isSlowQuery()));
 
@@ -157,7 +176,7 @@ public final class BlocksHistory {
     }
 
     public void open(String path) {
-        getOldHistoryMap().clear();
+        clearOldHistoryMap();
         if(path == null) {
             return;
         }
