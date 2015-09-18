@@ -30,7 +30,7 @@ import org.xml.sax.SAXException;
  */
 public final class DbcDataList {
     
-    protected static final Logger LOG = Logger.getLogger(DbcDataList.class);
+    private static final Logger LOG = Logger.getLogger(DbcDataList.class);
     
     private static final String FILE_PATH = "servers.xml";
     private static final String ID = "id";
@@ -151,21 +151,20 @@ public final class DbcDataList {
         save(doc, FILE_PATH);
     }
     
-    private Element createElement(Element server, Element rows, String textContent) {
+    private void createElement(Element server, Element rows, String textContent) {
         rows.setTextContent(textContent);
         server.appendChild(rows);
-        return server;
     }
     
     public Element createServerElement(Document doc, DbcData dbcData, boolean wp) {
         Element server = doc.createElement(SERVER);
-        server = createElement(server, doc.createElement(NAME), dbcData.getName());
-        server = createElement(server, doc.createElement(HOST), dbcData.getHost());
-        server = createElement(server, doc.createElement(PORT), dbcData.getPort());
-        server = createElement(server, doc.createElement(USER), dbcData.getUser());
-        server = createElement(server, doc.createElement(PASSWD), wp ? dbcData.getPasswd() : "******");
-        server = createElement(server, doc.createElement(DBNAME), dbcData.getDbname());
-        server = createElement(server, doc.createElement(ENABLED), String.valueOf(dbcData.isEnabled()));
+        createElement(server, doc.createElement(NAME), dbcData.getName());
+        createElement(server, doc.createElement(HOST), dbcData.getHost());
+        createElement(server, doc.createElement(PORT), dbcData.getPort());
+        createElement(server, doc.createElement(USER), dbcData.getUser());
+        createElement(server, doc.createElement(PASSWD), wp ? dbcData.getPasswd() : "******");
+        createElement(server, doc.createElement(DBNAME), dbcData.getDbname());
+        createElement(server, doc.createElement(ENABLED), String.valueOf(dbcData.isEnabled()));
         
         server.setAttribute(ID, String.valueOf(dbcData.hashCode()));
         server.setIdAttribute(ID, true);

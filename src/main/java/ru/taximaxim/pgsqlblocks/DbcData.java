@@ -16,7 +16,9 @@ public class DbcData {
     private boolean enabled;
     private DbcStatus status = DbcStatus.DISABLED;
     
-    public DbcData(String name,String host, String port,String dbname, String user, String passwd, boolean enabled) {
+    public DbcData(String name,String host, String port,String dbname,
+            String user, String passwd, boolean enabled) {
+        
         this.name = name;
         this.host = host;
         this.port = port;
@@ -80,15 +82,12 @@ public class DbcData {
         if (this == obj) {
             return true;
         }
-        
         if (obj == null) {
             return false;
         }
-        
         if (getClass() != obj.getClass()) {
             return false;
         }
-        
         DbcData other = (DbcData) obj;
         if (getDbname() == null) {
             if (other.getDbname() != null) {
@@ -97,7 +96,6 @@ public class DbcData {
         } else if (!getDbname().equals(other.getDbname())) {
             return false;
         }
-        
         if (getHost() == null) {
             if (other.getHost() != null){
                 return false;
@@ -105,7 +103,6 @@ public class DbcData {
         } else if (!getHost().equals(other.getHost())){
             return false;
         }
-        
         if (getPort() == null) {
             if (other.getPort() != null){
                 return false;
@@ -113,7 +110,6 @@ public class DbcData {
         } else if (!getPort().equals(other.getPort())){
             return false;
         }
-        
         if (getUser() == null) {
             if (other.getUser() != null){
                 return false;
@@ -121,7 +117,6 @@ public class DbcData {
         } else if (!getUser().equals(other.getUser())){
             return false;
         }
-        
         return true;
     }
     

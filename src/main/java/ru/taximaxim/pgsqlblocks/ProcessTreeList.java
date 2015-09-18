@@ -47,7 +47,7 @@ public class ProcessTreeList {
     }
     
     public List<Process> getTreeList() {
-        if (processList==null) {
+        if (processList == null) {
             processList = new ArrayList<Process>();
         }
         return processList;

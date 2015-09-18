@@ -149,29 +149,27 @@ public class BlocksHistory {
         clearHistoryMap();
     }
     
-    private Element createElement(Element procEl, Element rows, String textContent){
+    private void createElement(Element procEl, Element rows, String textContent){
         rows.setTextContent(textContent);
         procEl.appendChild(rows);
-        return procEl;
     }
     
     private Element createProcessElement(Document doc, Process process) {
         Element procEl = doc.createElement(PROCESS);
-        
-        procEl = createElement(procEl, doc.createElement(PID), String.valueOf(process.getPid()));
-        procEl = createElement(procEl, doc.createElement(APPLICATIONNAME), process.getApplicationName());
-        procEl = createElement(procEl, doc.createElement(DATNAME), process.getDatname());
-        procEl = createElement(procEl, doc.createElement(USENAME), process.getUsename());
-        procEl = createElement(procEl, doc.createElement(CLIENT), process.getClient());
-        procEl = createElement(procEl, doc.createElement(BACKENDSTART), process.getBackendStart());
-        procEl = createElement(procEl, doc.createElement(QUERYSTART), process.getQueryStart());
-        procEl = createElement(procEl, doc.createElement(XACTSTART), process.getXactStart());
-        procEl = createElement(procEl, doc.createElement(STATE), process.getState());
-        procEl = createElement(procEl, doc.createElement(STATECHANGE), process.getStateChange());
-        procEl = createElement(procEl, doc.createElement(BLOCKEDBY), String.valueOf(process.getBlockedBy()));
-        procEl = createElement(procEl, doc.createElement(BLOCKING_LOCKS), String.valueOf(process.getBlockingLocks()));
-        procEl = createElement(procEl, doc.createElement(QUERY), process.getQuery());
-        procEl = createElement(procEl, doc.createElement(SLOWQUERY), String.valueOf(process.isSlowQuery()));
+        createElement(procEl, doc.createElement(PID), String.valueOf(process.getPid()));
+        createElement(procEl, doc.createElement(APPLICATIONNAME), process.getApplicationName());
+        createElement(procEl, doc.createElement(DATNAME), process.getDatname());
+        createElement(procEl, doc.createElement(USENAME), process.getUsename());
+        createElement(procEl, doc.createElement(CLIENT), process.getClient());
+        createElement(procEl, doc.createElement(BACKENDSTART), process.getBackendStart());
+        createElement(procEl, doc.createElement(QUERYSTART), process.getQueryStart());
+        createElement(procEl, doc.createElement(XACTSTART), process.getXactStart());
+        createElement(procEl, doc.createElement(STATE), process.getState());
+        createElement(procEl, doc.createElement(STATECHANGE), process.getStateChange());
+        createElement(procEl, doc.createElement(BLOCKEDBY), String.valueOf(process.getBlockedBy()));
+        createElement(procEl, doc.createElement(BLOCKING_LOCKS), String.valueOf(process.getBlockingLocks()));
+        createElement(procEl, doc.createElement(QUERY), process.getQuery());
+        createElement(procEl, doc.createElement(SLOWQUERY), String.valueOf(process.isSlowQuery()));
         
         Element children = doc.createElement(CHILDREN);
         for(Process childProcess : process.getChildren()) {
