@@ -50,15 +50,11 @@ import org.eclipse.swt.widgets.TreeColumn;
 import org.eclipse.swt.widgets.TreeItem;
 
 import ru.taximaxim.pgsqlblocks.BlocksHistory;
+import ru.taximaxim.pgsqlblocks.DbcData;
+import ru.taximaxim.pgsqlblocks.DbcDataList;
+import ru.taximaxim.pgsqlblocks.DbcStatus;
+import ru.taximaxim.pgsqlblocks.Process;
 import ru.taximaxim.pgsqlblocks.Provider;
-import ru.taximaxim.pgsqlblocks.dbc.DbcData;
-import ru.taximaxim.pgsqlblocks.dbc.DbcDataList;
-import ru.taximaxim.pgsqlblocks.dbc.DbcStatus;
-import ru.taximaxim.pgsqlblocks.process.Process;
-import ru.taximaxim.pgsqlblocks.ui.dlg.AddDbcDataDlg;
-import ru.taximaxim.pgsqlblocks.ui.dlg.ConfirmDlg;
-import ru.taximaxim.pgsqlblocks.ui.util.ResHelper;
-import ru.taximaxim.pgsqlblocks.ui.util.UIAppender;
 
 /**
  * Главная форма приложения

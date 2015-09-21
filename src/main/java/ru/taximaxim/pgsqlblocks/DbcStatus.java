@@ -1,4 +1,4 @@
-package ru.taximaxim.pgsqlblocks.dbc;
+package ru.taximaxim.pgsqlblocks;
 
 /**
  * Перечесление возможных состояний БД

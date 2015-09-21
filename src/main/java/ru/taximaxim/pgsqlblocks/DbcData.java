@@ -1,4 +1,5 @@
-package ru.taximaxim.pgsqlblocks.dbc;
+package ru.taximaxim.pgsqlblocks;
+
 
 
 /**

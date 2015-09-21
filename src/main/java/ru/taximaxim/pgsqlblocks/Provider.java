@@ -19,10 +19,6 @@ import java.util.concurrent.ConcurrentMap;
 
 import org.apache.log4j.Logger;
 
-import ru.taximaxim.pgsqlblocks.dbc.DbcData;
-import ru.taximaxim.pgsqlblocks.dbc.DbcStatus;
-import ru.taximaxim.pgsqlblocks.process.Process;
-import ru.taximaxim.pgsqlblocks.process.ProcessTreeList;
 import ru.taximaxim.pgsqlblocks.ui.MainForm;
 
 /**
