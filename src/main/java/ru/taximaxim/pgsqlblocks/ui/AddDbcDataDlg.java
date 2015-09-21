@@ -7,6 +7,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
@@ -78,6 +79,15 @@ public class AddDbcDataDlg {
         passwdText = new Text(shell, SWT.BORDER);
         passwdText.setLayoutData(textGd);
         passwdText.setEchoChar('•');
+        passwdText.addListener(SWT.FocusOut, new Listener() {
+            @Override
+            public void handleEvent(Event arg0) {
+                MessageBox msgBox = new MessageBox(shell, SWT.ICON_WARNING | SWT.OK);
+                msgBox.setText("Внимание!");
+                msgBox.setMessage("Указание пароля здесь небезопасно. Используйте .pgpass файл.");
+                msgBox.open();
+            }
+        });
         
         Label dbnameLabel = new Label(shell, SWT.HORIZONTAL);
         dbnameLabel.setText("Имя БД");
