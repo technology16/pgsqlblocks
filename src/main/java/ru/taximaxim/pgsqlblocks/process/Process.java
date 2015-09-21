@@ -1,4 +1,4 @@
-package ru.taximaxim.pgsqlblocks;
+package ru.taximaxim.pgsqlblocks.process;
 
 import java.util.ArrayList;
 import java.util.List;

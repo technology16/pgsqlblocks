@@ -19,6 +19,10 @@ import java.util.concurrent.ConcurrentMap;
 
 import org.apache.log4j.Logger;
 
+import ru.taximaxim.pgsqlblocks.dbc.DbcData;
+import ru.taximaxim.pgsqlblocks.dbc.DbcStatus;
+import ru.taximaxim.pgsqlblocks.process.Process;
+import ru.taximaxim.pgsqlblocks.process.ProcessTreeList;
 import ru.taximaxim.pgsqlblocks.ui.MainForm;
 
 /**
@@ -275,9 +279,9 @@ public class Provider {
             LOG.error(getDbcData().getName() + " " + e.getMessage(), e);
         }
         if(kill) {
-            LOG.info(dbcData.getName() + " pid=" + pid + " is terminated.");
+            LOG.info(String.format("%s pid = %s is terminated.", dbcData.getName(), pid));
         } else {
-            LOG.info(dbcData.getName() + " pid=" + pid + " is terminated failed.");
+            LOG.info(String.format("%s pid = %s is terminated failed.", dbcData.getName(), pid));
         }
     }
 
@@ -298,9 +302,9 @@ public class Provider {
             LOG.error(getDbcData().getName() + " " + e.getMessage(), e);
         }
         if(kill) {
-            LOG.info(dbcData.getName() + " pid=" + pid + " is canceled.");
+            LOG.info(String.format("%s pid = %s is canceled.", dbcData.getName(), pid));
         } else {
-            LOG.info(dbcData.getName() + " pid=" + pid + " is canceled failed.");
+            LOG.info(String.format("%s pid = %s is canceled failed.", dbcData.getName(), pid));
         }
     }
 

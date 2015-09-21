@@ -1,4 +1,5 @@
-package ru.taximaxim.pgsqlblocks;
+package ru.taximaxim.pgsqlblocks.dbc;
+
 
 /**
  * Класс, представляющий строку подключения к БД

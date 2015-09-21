@@ -19,7 +19,6 @@ public final class App {
             MainForm.getInstance().show(display);
         } catch (Exception e) {
             LOG.error(e.getMessage());
-            e.printStackTrace();
         } finally {
             display.dispose();
         }

@@ -25,6 +25,9 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
+import ru.taximaxim.pgsqlblocks.dbc.DbcData;
+import ru.taximaxim.pgsqlblocks.dbc.DbcDataList;
+import ru.taximaxim.pgsqlblocks.process.Process;
 import ru.taximaxim.pgsqlblocks.ui.MainForm;
 
 /**
@@ -32,7 +35,7 @@ import ru.taximaxim.pgsqlblocks.ui.MainForm;
  * 
  * @author ismagilov_mg
  */
-public class BlocksHistory {
+public final class BlocksHistory {
     
     private static final Logger LOG = Logger.getLogger(BlocksHistory.class);
     

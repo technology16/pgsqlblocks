@@ -1,4 +1,4 @@
-package ru.taximaxim.pgsqlblocks.ui;
+package ru.taximaxim.pgsqlblocks.ui.util;
 
 import org.apache.log4j.Logger;
 import org.eclipse.swt.graphics.Image;

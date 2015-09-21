@@ -1,4 +1,4 @@
-package ru.taximaxim.pgsqlblocks.ui;
+package ru.taximaxim.pgsqlblocks.ui.dlg;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
@@ -10,8 +10,9 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
-import ru.taximaxim.pgsqlblocks.DbcData;
-import ru.taximaxim.pgsqlblocks.DbcDataList;
+import ru.taximaxim.pgsqlblocks.dbc.DbcData;
+import ru.taximaxim.pgsqlblocks.dbc.DbcDataList;
+import ru.taximaxim.pgsqlblocks.ui.MainForm;
 
 /**
  * Диалоговое окно добавления/редактирования подключения к БД
