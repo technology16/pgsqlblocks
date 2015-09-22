@@ -54,7 +54,7 @@ public final class BlocksHistory {
     private static final String SERVER = "server";
     private static final String PROCESS = "process";
     private static final String CHILDREN = "children";
-    private static final String FILEPATH = "BlocksHistory";
+    private static final String FILEPATH = System.getProperty("user.home") + "/BlocksHistory";
     private static final String FILENAME = "/blocksHistory";
     
     private static BlocksHistory blocksHistory;
@@ -66,18 +66,14 @@ public final class BlocksHistory {
         if(blocksHistory == null) {
             blocksHistory = new BlocksHistory();
         }
-        synchronized (blocksHistory) {
-            return blocksHistory;
-        }
+        return blocksHistory;
     }
     
     public ConcurrentMap<DbcData, List<Process>> getHistoryMap() {
         if(historyMap == null){
             historyMap = new ConcurrentHashMap<DbcData, List<Process>>();
         }
-        synchronized (historyMap) {
-            return historyMap;
-        }
+        return historyMap;
     }
     
     public void clearHistoryMap() {
@@ -96,9 +92,7 @@ public final class BlocksHistory {
         if(oldHistoryMap == null) {
             oldHistoryMap = new ConcurrentHashMap<DbcData, List<Process>>();
         }
-        synchronized (oldHistoryMap) {
-            return oldHistoryMap;
-        }
+        return oldHistoryMap;
     }
     
     private BlocksHistory() {
@@ -142,7 +136,7 @@ public final class BlocksHistory {
             SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy HH-mm-ss");
             Date time = new Date(System.currentTimeMillis());
             String dateTime = sdf.format(time);
-            DbcDataList.getInstance().save(doc, String.format("%s%s-%s.xml", FILEPATH,FILENAME,dateTime));
+            DbcDataList.getInstance().save(doc, String.format("%s%s-%s.xml", FILEPATH, FILENAME, dateTime));
         } catch (ParserConfigurationException e) {
             LOG.error(e);
         }

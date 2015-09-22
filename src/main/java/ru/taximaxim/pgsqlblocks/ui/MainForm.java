@@ -551,7 +551,7 @@ public final class MainForm {
             @Override
             public void handleEvent(Event event) {
                 FileDialog fd = new FileDialog(shell);
-                fd.setFilterPath("/BlocksHistory");
+                fd.setFilterPath(System.getProperty("user.home") + "/BlocksHistory");
                 fd.setText("Открыть историю блокировок");
                 fd.setFilterExtensions(new String[]{"*.xml"});
                 BlocksHistory.getInstance().open(fd.open());

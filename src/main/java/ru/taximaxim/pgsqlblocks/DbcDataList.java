@@ -32,7 +32,7 @@ public final class DbcDataList {
     
     private static final Logger LOG = Logger.getLogger(DbcDataList.class);
     
-    private static final String FILE_PATH = "servers.xml";
+    private static final String FILE_PATH = System.getProperty("user.home") + "/servers.xml";
     private static final String ID = "id";
     private static final String NAME = "name";
     private static final String HOST = "host";
