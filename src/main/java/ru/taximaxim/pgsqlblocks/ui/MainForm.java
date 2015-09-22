@@ -545,6 +545,7 @@ public final class MainForm {
             @Override
             public void handleEvent(Event event) {
                 BlocksHistory.getInstance().save();
+                LOG.info("Блокировка сохранена...");
             }
         });
         openBlocksHistory.addListener(SWT.Selection, new Listener() {
