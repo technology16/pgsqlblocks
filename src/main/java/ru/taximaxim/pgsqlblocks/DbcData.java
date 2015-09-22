@@ -54,7 +54,7 @@ public class DbcData {
             } catch (FileNotFoundException e1) {
                 LOG.error("Файл ./pgpass не найден");
             } catch (IOException e1) {
-                LOG.error("Ошибка чтения файла ");
+                LOG.error("Ошибка чтения файла ./pgpass");
             }
         }
         this.passwd = passwd;
