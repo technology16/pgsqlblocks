@@ -2,9 +2,8 @@ package ru.taximaxim.pgsqlblocks;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -62,10 +61,10 @@ public class Provider {
     private String getQuery() throws IOException {
         if(query == null) {
             try (
-                    BufferedReader reader = Files.newBufferedReader(
-                            Paths.get("query.sql"), StandardCharsets.UTF_8);
+                    InputStream input = ClassLoader.getSystemResourceAsStream("query.sql");
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(input));
                     ) {
-
+                
                 StringBuilder out = new StringBuilder();
                 String line;
                 while ((line = reader.readLine()) != null) {
