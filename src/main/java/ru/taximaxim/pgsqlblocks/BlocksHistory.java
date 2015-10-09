@@ -2,6 +2,9 @@ package ru.taximaxim.pgsqlblocks;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -93,9 +96,13 @@ public final class BlocksHistory {
     }
     
     private BlocksHistory() {
-        File dir = new File(FILEPATH);
-        if(!dir.isDirectory()) {
-            dir.mkdir();
+        try {
+            Path dir = Paths.get(FILEPATH);
+            if(!Files.exists(dir)) {
+                Files.createDirectory(dir);
+            }
+        } catch (IOException e) {
+            LOG.error("Ошибка при создании директории", e);
         }
     }
     
