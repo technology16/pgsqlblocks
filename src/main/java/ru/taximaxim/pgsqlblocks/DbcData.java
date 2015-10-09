@@ -2,11 +2,11 @@ package ru.taximaxim.pgsqlblocks;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Paths;
 
 import org.apache.log4j.Logger;
@@ -40,17 +40,20 @@ public class DbcData {
         this.dbname = dbname;
         this.user = user;
         this.enabled = enabled;
+        this.password = passwd;
         // Считывание пароля из ./pgpass
         if (passwd == null || passwd.isEmpty()) {
-            try (BufferedReader reader = new BufferedReader(
-                    new FileReader(new File(System.getProperty("user.home") + "/.pgpass")));) {
+            try (
+                    BufferedReader reader = Files.newBufferedReader(
+                            Paths.get(System.getProperty("user.home") + "/.pgpass"), StandardCharsets.UTF_8);
+                    ) {
 
                 String settingsLine = null;
                 while ((settingsLine = reader.readLine()) != null) {
                     String[] settings = settingsLine.split(":");
                     if (settings[0].equals(host) && (settings[1].equals(port)
                             && settings[3].equals(user))) {
-                        passwd = settings[4];
+                        this.password = settings[4];
                     }
                 }
             } catch (FileNotFoundException e1) {
@@ -59,7 +62,6 @@ public class DbcData {
                 LOG.error("Ошибка чтения файла ./pgpass");
             }
         }
-        this.password = passwd;
     }
     
     public String getName() {

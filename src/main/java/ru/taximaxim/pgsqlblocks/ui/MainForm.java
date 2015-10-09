@@ -771,6 +771,8 @@ public final class MainForm {
                     }
                 }
                 break;
+            default:
+                LOG.error(String.format("Произошло необрабатываемое событие: %s", event.type));
             }
         }
     };

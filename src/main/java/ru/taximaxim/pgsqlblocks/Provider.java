@@ -4,6 +4,9 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -61,10 +64,10 @@ public class Provider {
     private String getQuery() throws IOException {
         if(query == null) {
             try (
-                    InputStream input = ClassLoader.getSystemResourceAsStream("query.sql");
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(input));
+                    BufferedReader reader = Files.newBufferedReader(
+                            Paths.get("query.sql"), StandardCharsets.UTF_8);
                     ) {
-                
+
                 StringBuilder out = new StringBuilder();
                 String line;
                 while ((line = reader.readLine()) != null) {
