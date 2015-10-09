@@ -127,7 +127,7 @@ public final class MainForm {
     private Shell shell;
     private ResHelper resHelper = ResHelper.getInstance();
     
-    private static MainForm mainForm;
+    private static MainForm mainForm = new MainForm();
     
     protected static final Logger LOG = Logger.getLogger(MainForm.class);
     
@@ -168,9 +168,6 @@ public final class MainForm {
     private MainForm() {}
     
     public static MainForm getInstance() {
-        if(mainForm == null) {
-            mainForm = new MainForm();
-        }
         return mainForm;
     }
     

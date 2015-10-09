@@ -57,15 +57,12 @@ public final class BlocksHistory {
     private static final String FILEPATH = System.getProperty("user.home") + "/BlocksHistory";
     private static final String FILENAME = "/blocksHistory";
     
-    private static BlocksHistory blocksHistory;
+    private static BlocksHistory blocksHistory = new BlocksHistory();
     
     private ConcurrentMap<DbcData, List<Process>> historyMap;
     private ConcurrentMap<DbcData, List<Process>> oldHistoryMap;
     
     public static BlocksHistory getInstance() {
-        if(blocksHistory == null) {
-            blocksHistory = new BlocksHistory();
-        }
         return blocksHistory;
     }
     
