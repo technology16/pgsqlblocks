@@ -62,7 +62,7 @@ public class UIAppender extends WriterAppender {
         if(excMessage.isEmpty()) {
             return;
         }
-        final String logMessage = String.format("[%s] %s\n",dateTime,excMessage);
+        final String logMessage = String.format("[%s] %s%n",dateTime,excMessage);
         parent.getDisplay().asyncExec(new Runnable() {
             @Override
             public void run() {

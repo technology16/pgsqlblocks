@@ -788,7 +788,7 @@ public final class MainForm {
             procComposite.setVisible(true);
             caTreeSf.layout(true, true);
         }
-        procText.setText(String.format("pid=%s\n%s", proc.getPid(), proc.getQuery()));
+        procText.setText(String.format("pid=%s%n%s", proc.getPid(), proc.getQuery()));
     }
     
     private void procCompositeHide() {

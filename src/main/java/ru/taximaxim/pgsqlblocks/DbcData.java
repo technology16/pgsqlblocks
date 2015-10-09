@@ -26,7 +26,7 @@ public class DbcData {
     private String host;
     private String port;
     private String user;
-    private String passwd;
+    private String password;
     private String dbname;
     private boolean enabled;
     private DbcStatus status = DbcStatus.DISABLED;
@@ -42,10 +42,6 @@ public class DbcData {
         this.enabled = enabled;
         // Считывание пароля из ./pgpass
         if (passwd == null || passwd.isEmpty()) {
-            /*try (BufferedReader reader = new BufferedReader(
-                    new InputStreamReader(
-                            new FileInputStream(System.getProperty("user.home") + "/.pgpass"), "utf-8"));) {*/
-
             try (BufferedReader reader = new BufferedReader(
                     new FileReader(new File(System.getProperty("user.home") + "/.pgpass")));) {
 
@@ -63,7 +59,7 @@ public class DbcData {
                 LOG.error("Ошибка чтения файла ./pgpass");
             }
         }
-        this.passwd = passwd;
+        this.password = passwd;
     }
     
     public String getName() {
@@ -87,7 +83,7 @@ public class DbcData {
     }
     
     public String getPasswd() {
-        return passwd;
+        return password;
     }
     
     public String getDbname() {
