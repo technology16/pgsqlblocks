@@ -3,12 +3,7 @@ package ru.taximaxim.pgsqlblocks;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Класс, представляющий описание серверного процесса
- * 
- * @author ismagilov_mg
- */
-public class Process {
+public class Process implements Comparable<Process> {
     
     private Process parent;
     private int pid;
@@ -26,6 +21,7 @@ public class Process {
     private String query;
     private boolean slowQuery;
     private List<Process> children = new ArrayList<Process>();
+    private ProcessStatus status = ProcessStatus.WORKING;
     
     public Process(int pid, String applicationName, String datname,
             String usename, String client, String backendStart,
@@ -50,6 +46,10 @@ public class Process {
     
     public void setParent(Process parent) {
         this.parent = parent;
+    }
+    
+    public void setStatus(ProcessStatus status) {
+        this.status = status;
     }
     
     public Process getParent() {
@@ -85,6 +85,20 @@ public class Process {
             return "";
         }
         return client;
+    }
+    
+    public boolean hasChildren() {
+        if (children.size() > 0) {
+            return true;
+        }
+        return false;
+    }
+    
+    public boolean hasParent() {
+        if (parent != null) {
+            return true;
+        }
+        return false;
     }
     
     public String getBackendStart() {
@@ -132,6 +146,10 @@ public class Process {
             count += proc.getChildrensCount();
         }
         return count;
+    }
+    
+    public ProcessStatus getStatus() {
+        return status;
     }
     
     public String[] toTree() {
@@ -186,5 +204,16 @@ public class Process {
                 "blockedBy=%13$s, query=%14$s, slowQuery=%15$s]", 
                 getParent(), getChildren().size(), getPid(), getApplicationName(), getDatname(), getUsename(), getClient(), 
                 getBackendStart(), getQueryStart(), getXactStart(), getState(), getStateChange(), getBlockedBy(), "query", isSlowQuery());
+    }
+    
+    @Override
+    public int compareTo(Process other) {
+        if (pid == other.getPid()) {
+            return 0;
+        } else if (pid > other.getPid()) {
+            return 1;
+        } else {
+            return -1;
+        }
     }
 }

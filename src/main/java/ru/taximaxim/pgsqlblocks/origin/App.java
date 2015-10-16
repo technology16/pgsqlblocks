@@ -1,9 +1,9 @@
-package ru.taximaxim.pgsqlblocks;
+package ru.taximaxim.pgsqlblocks.origin;
 
 import org.apache.log4j.Logger;
 import org.eclipse.swt.widgets.Display;
 
-import ru.taximaxim.pgsqlblocks.ui.MainForm;
+import ru.taximaxim.pgsqlblocks.ui.origin.MainForm;
 
 public final class App {
     

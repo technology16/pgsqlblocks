@@ -1,4 +1,4 @@
-package ru.taximaxim.pgsqlblocks;
+package ru.taximaxim.pgsqlblocks.origin;
 
 import java.io.File;
 import java.io.IOException;
@@ -28,7 +28,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-import ru.taximaxim.pgsqlblocks.ui.MainForm;
+import ru.taximaxim.pgsqlblocks.ui.origin.MainForm;
 
 /**
  * Класс для работы с историей блокировок

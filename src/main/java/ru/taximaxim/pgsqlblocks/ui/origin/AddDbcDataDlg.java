@@ -1,4 +1,4 @@
-package ru.taximaxim.pgsqlblocks.ui;
+package ru.taximaxim.pgsqlblocks.ui.origin;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
@@ -11,8 +11,8 @@ import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
-import ru.taximaxim.pgsqlblocks.DbcData;
-import ru.taximaxim.pgsqlblocks.DbcDataList;
+import ru.taximaxim.pgsqlblocks.origin.DbcData;
+import ru.taximaxim.pgsqlblocks.origin.DbcDataList;
 
 /**
  * Диалоговое окно добавления/редактирования подключения к БД
@@ -49,10 +49,12 @@ public class AddDbcDataDlg {
     }
     
     private void createControls() {
-        GridData textGd = new GridData();
-        textGd.widthHint = MainForm.TEXT_WIDTH;
+        
         shell = new Shell(parent, SWT.DIALOG_TRIM | SWT.APPLICATION_MODAL);
         shell.setLayout(new GridLayout(2, false));
+        
+        GridData textGd = new GridData();
+        textGd.widthHint = MainForm.TEXT_WIDTH;
         
         Label nameLabel = new Label(shell, SWT.HORIZONTAL);
         nameLabel.setText("Имя соединения");

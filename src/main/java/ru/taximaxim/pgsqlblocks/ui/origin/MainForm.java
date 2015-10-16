@@ -1,4 +1,4 @@
-package ru.taximaxim.pgsqlblocks.ui;
+package ru.taximaxim.pgsqlblocks.ui.origin;
 
 import java.io.IOException;
 import java.net.URL;
@@ -49,12 +49,12 @@ import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeColumn;
 import org.eclipse.swt.widgets.TreeItem;
 
-import ru.taximaxim.pgsqlblocks.BlocksHistory;
-import ru.taximaxim.pgsqlblocks.DbcData;
-import ru.taximaxim.pgsqlblocks.DbcDataList;
-import ru.taximaxim.pgsqlblocks.DbcStatus;
-import ru.taximaxim.pgsqlblocks.Process;
-import ru.taximaxim.pgsqlblocks.Provider;
+import ru.taximaxim.pgsqlblocks.origin.BlocksHistory;
+import ru.taximaxim.pgsqlblocks.origin.DbcData;
+import ru.taximaxim.pgsqlblocks.origin.DbcDataList;
+import ru.taximaxim.pgsqlblocks.origin.DbcStatus;
+import ru.taximaxim.pgsqlblocks.origin.Process;
+import ru.taximaxim.pgsqlblocks.origin.Provider;
 
 /**
  * Главная форма приложения
@@ -433,7 +433,7 @@ public final class MainForm {
             appVersionLabel = new Label(statusBar, SWT.HORIZONTAL);
         }
         caServerListContextMenu = new Menu(shell, SWT.POP_UP);
-        {
+        {;
             connectDbCm = new MenuItem(caServerListContextMenu, SWT.PUSH);
             connectDbCm.setText("Подключиться");
             disconnectDbCm = new MenuItem(caServerListContextMenu, SWT.PUSH);
@@ -767,7 +767,7 @@ public final class MainForm {
                         }
                     }
                     if(process.equals(selectedProcess)) {
-                        caMainTree.select(item);
+                        ;;.select(item);
                     }
                 }
                 break;

@@ -1,5 +1,10 @@
-package ru.taximaxim.pgsqlblocks;
+package ru.taximaxim.pgsqlblocks.origin;
 
+/**
+ * Перечесление возможных состояний БД
+ * 
+ * @author ismagilov_mg
+ */
 public enum DbcStatus {
     DISABLED,
     CONNECTED,

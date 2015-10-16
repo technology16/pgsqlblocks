@@ -1,4 +1,4 @@
-package ru.taximaxim.pgsqlblocks;
+package ru.taximaxim.pgsqlblocks.origin;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -19,7 +19,7 @@ import java.util.concurrent.ConcurrentMap;
 
 import org.apache.log4j.Logger;
 
-import ru.taximaxim.pgsqlblocks.ui.MainForm;
+import ru.taximaxim.pgsqlblocks.ui.origin.MainForm;
 
 /**
  * Класс для работы с серверными процессами

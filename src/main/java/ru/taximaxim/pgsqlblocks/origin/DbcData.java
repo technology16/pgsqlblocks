@@ -1,4 +1,4 @@
-package ru.taximaxim.pgsqlblocks;
+package ru.taximaxim.pgsqlblocks.origin;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
@@ -6,14 +6,16 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
 
 import org.apache.log4j.Logger;
 
-import ru.taximaxim.pgsqlblocks.origin.DbcStatus;
 
+
+/**
+ * Класс, представляющий строку подключения к БД
+ * 
+ * @author ismagilov_mg
+ */
 public class DbcData {
     
     private static final Logger LOG = Logger.getLogger(DbcData.class);
@@ -26,8 +28,6 @@ public class DbcData {
     private String dbname;
     private boolean enabled;
     private DbcStatus status = DbcStatus.DISABLED;
-    
-    private Connection connection;
     
     public DbcData(String name,String host, String port,String dbname,
             String user, String passwd, boolean enabled) {
@@ -92,10 +92,6 @@ public class DbcData {
     
     public boolean isEnabled() {
         return enabled;
-    }
-    
-    public Connection getConnection() {
-        return connection;
     }
     
     @Override
@@ -165,47 +161,4 @@ public class DbcData {
     public void setStatus(DbcStatus status) {
         this.status = status;
     }
-    
-    public void connect() {
-        if(isConnected()) {
-            LOG.info(getName() + " соединение уже создано");
-            return;
-        }
-        try {
-            LOG.info(getName() + " Соединение...");
-            connection = DriverManager.getConnection(getUrl(), getUser(), getPasswd());
-            setStatus(DbcStatus.CONNECTED);
-            LOG.info(getName() + " Соединение создано.");
-        } catch (SQLException e) {
-            setStatus(DbcStatus.ERROR);
-            LOG.error(getName() + " " + e.getMessage(), e);
-        }
-    }
-    
-    public void disconnect() {
-        if(connection != null) {
-            try {
-                connection.close();
-                connection = null;
-                setStatus(DbcStatus.DISABLED);
-                LOG.info(getName() + " Соединение закрыто.");
-            } catch (SQLException e) {
-                connection = null;
-                setStatus(DbcStatus.ERROR);
-                LOG.error(getName() + " " + e.getMessage(), e);
-            } 
-        }
-    }
-    
-    public boolean isConnected() {
-        try {
-            if(connection == null || connection.isClosed()) {
-                return false;
-            }
-        } catch (SQLException e) {
-            LOG.error("Ошибка isConnected: " + e.getMessage());
-        }
-        return true;
-    }
 }
-

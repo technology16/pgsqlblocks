@@ -1,4 +1,4 @@
-package ru.taximaxim.pgsqlblocks.ui;
+package ru.taximaxim.pgsqlblocks.ui.origin;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
@@ -10,8 +10,8 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 
-import ru.taximaxim.pgsqlblocks.DbcData;
-import ru.taximaxim.pgsqlblocks.DbcDataList;
+import ru.taximaxim.pgsqlblocks.origin.DbcData;
+import ru.taximaxim.pgsqlblocks.origin.DbcDataList;
 
 /**
  * Диалоговое окно подтверждения действия

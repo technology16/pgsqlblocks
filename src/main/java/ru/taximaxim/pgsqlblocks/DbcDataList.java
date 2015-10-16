@@ -23,11 +23,6 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-/**
- * Класс для работы со списком строк подключения к БД
- * 
- * @author ismagilov_mg
- */
 public final class DbcDataList {
     
     private static final Logger LOG = Logger.getLogger(DbcDataList.class);
