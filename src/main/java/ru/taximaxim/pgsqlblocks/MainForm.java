@@ -2,6 +2,10 @@ package ru.taximaxim.pgsqlblocks;
 
 import java.io.IOException;
 import java.net.URL;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -10,18 +14,13 @@ import java.util.concurrent.Executors;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.eclipse.jface.action.Action;
-import org.eclipse.jface.action.ContributionItem;
-import org.eclipse.jface.action.CoolBarManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.resource.JFaceResources;
-import org.eclipse.jface.resource.LocalResourceManager;
-import org.eclipse.jface.viewers.DoubleClickEvent;
-import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
@@ -32,38 +31,33 @@ import org.eclipse.jface.viewers.TreeViewerColumn;
 import org.eclipse.jface.window.ApplicationWindow;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Menu;
-import org.eclipse.swt.widgets.MenuItem;
-import org.eclipse.swt.widgets.MessageBox;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swt.widgets.Spinner;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
-import org.eclipse.swt.widgets.Table;
-import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
-import org.eclipse.swt.widgets.Tree;
-import org.eclipse.swt.widgets.TreeColumn;
 
 
 public class MainForm extends ApplicationWindow {
 
 
     private ConcurrentMap<String, Image> imagesMap = new ConcurrentHashMap<String, Image>();
+    private static final Logger LOG = Logger.getLogger(MainForm.class);
+    
+    private static Display display;
+    private static Shell shell;
 
 
     private static final String APP_NAME = "pgSqlBlocks";
@@ -84,10 +78,7 @@ public class MainForm extends ApplicationWindow {
     
     private DbcDataList dbcDataList = DbcDataList.getInstance();
     private DbcData selectedDbcData;
-    private Process viewProcessTree;
     
-
-    private ExecutorService executor = Executors.newFixedThreadPool(FIXEDTHREADPOOL);
     
     private List<DbcData> dbcList;
     private List<Process> processList;
@@ -95,42 +86,37 @@ public class MainForm extends ApplicationWindow {
     private ConcurrentMap<DbcData, List<Process>> historyMap;
     private List<Process> historyProcessList;
     private Process selectedProcess;
-    private List<Process> expandedProcesses;
     private Label appVersionLabel;
-    private ToolItem addDbTi;
-    private ToolItem removeDbTi;
-    private ToolItem editDbTi;
-    private ToolItem connectDbTi;
-    private ToolItem disconnectDbTi;
-    private ToolItem updateTi;
-    private ToolItem autoUpdateTi;
-    private ToolItem onlyBlockedTi;
-    private ToolItem saveBlocksHistory;
-    private ToolItem openBlocksHistory;
     private ToolItem terminateProc;
     private ToolItem cancelProc;
     private Text procText;
-    private Spinner timerSpinner;
     private SashForm caTreeSf;
     private TableViewer caServersTable;
-    private MenuItem connectDbCm;
-    private MenuItem disconnectDbCm;
-    private MenuItem editDbCm;
-    private MenuItem removeDbCm;
     private TreeViewer caMainTree;
     private Composite procComposite;
     private TableViewer bhServersTable;
     private TreeViewer bhMainTree;
     private Composite logComposite;
+    
+    private ToolBarManager toolBarManager;
+    private Action addDb;
+    private Action deleteDB;
+    private Action editDB;
+    private Action connectDB;
+    private Action disconnectDB;
+    private Action update;
+    private Action autoUpdate;
+    private Action onlyBlocked;
+    private Action exportBlocks;
+    private Action importBlocks;
 
     private AddDbcDataDlg addDbcDlg;
     private AddDbcDataDlg editDbcDlg;
     
-    private Menu caServerListContextMenu;
     //private int timerInterval = TEN;
-    private int timerInterval = 3;
+    private int timerInterval = 5;
     private boolean autoUpdateMode = true;
-  ///  private boolean onlyBlocked = false;
+    private boolean onlyBlockedMode = false;
     
     private int[] caMainTreeColsSize = new int[]{80,110,150,110,110,110,145,145,145,55,145,70,65,150,80};
     private String[] caMainTreeColsName = new String[]{
@@ -164,6 +150,7 @@ public class MainForm extends ApplicationWindow {
     
     
     private ConcurrentMap<DbcData, ProcessTree> processTreeMap = new ConcurrentHashMap<>();
+    private ConcurrentMap<DbcData, ProcessTree> blockedProcessTreeMap = new ConcurrentHashMap<>();
     
     public Process getProcessTree(DbcData dbcData) {
         ProcessTree processTree = processTreeMap.get(dbcData);
@@ -175,14 +162,17 @@ public class MainForm extends ApplicationWindow {
         return processTree.getProcessTree();
     }
     
+    public Process getOnlyBlockedProcessTree(DbcData dbcData) {
+        ProcessTree processTree = blockedProcessTreeMap.get(dbcData);
+        if(processTree == null){
+            processTree = new ProcessTree(dbcData);
+            blockedProcessTreeMap.put(dbcData, processTree);
+        }
+        
+        return processTree.getOnlyBlockedProcessTree();
+    }
     
     
-    
-    
-    private static final Logger LOG = Logger.getLogger(MainForm.class);
-    
-    private static Display display;
-    private static Shell shell;
 
     public static void main(String[] args) {
         try {
@@ -217,8 +207,6 @@ public class MainForm extends ApplicationWindow {
     @Override
     protected Control createContents(Composite parent)
     {
-      //  display.timerExec(1000, timer);
-        
         Composite composite = new Composite(parent, SWT.NONE);
         composite.setLayout(new GridLayout());
         
@@ -253,16 +241,6 @@ public class MainForm extends ApplicationWindow {
                         currentActivitySf.SASH_WIDTH = SASH_WIDTH;
                         currentActivitySf.setBackground(topComposite.getDisplay().getSystemColor(SWT.COLOR_WIDGET_BACKGROUND));
                         
-                       /* caServersTable = new Table(currentActivitySf, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL | SWT.FULL_SELECTION);
-                        {
-                            caServersTable.setHeaderVisible(true);
-                            caServersTable.setLinesVisible(true);
-                            caServersTable.setLayoutData(gridData);
-                            TableColumn serversTc = new TableColumn(caServersTable, SWT.NONE);
-                            serversTc.setText("Сервер");
-                            serversTc.setWidth(200);
-                        }*/
-                        
                         caServersTable = new TableViewer(currentActivitySf, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL | SWT.FULL_SELECTION);
                         {
                             caServersTable.getTable().setHeaderVisible(true);
@@ -279,12 +257,6 @@ public class MainForm extends ApplicationWindow {
                             caServersTable.setInput(dbcDataList);
                             
                             caServersTable.refresh();
-                           /* TableViewerColumn tvColumn = new TableViewerColumn(caServersTable, SWT.NONE);
-                            tvColumn.getColumn().setText("Сервер");*/
-                            
-                            /*TableColumn serversTc = new TableColumn(caServersTable, SWT.NONE);
-                            serversTc.setText("Сервер");
-                            serversTc.setWidth(200);*/
                         }
                         
                         caTreeSf = new SashForm(currentActivitySf, SWT.VERTICAL);
@@ -298,8 +270,6 @@ public class MainForm extends ApplicationWindow {
                                 treeColumn.getColumn().setText(caMainTreeColsName[i]);
                                 treeColumn.getColumn().setWidth(caMainTreeColsSize[i]);
                             }
-                            
-                       
                             caMainTree.setContentProvider(new ProcessTreeContentProvider());
                             caMainTree.setLabelProvider(new ProcessTreeLabelProvider());
                             
@@ -331,9 +301,29 @@ public class MainForm extends ApplicationWindow {
                                 
                                 terminateProc = new ToolItem(pcToolBar, SWT.PUSH);
                                 terminateProc.setText("Уничтожить процесс");
+                                terminateProc.addListener(SWT.Selection, new Listener() {
+                                    @Override
+                                    public void handleEvent(Event event) {
+                                        if (selectedProcess != null) {
+                                            terminate(selectedProcess);
+                                            updateTree();
+                                            caServersTable.refresh();
+                                        }
+                                    }
+                                });
                                 
                                 cancelProc = new ToolItem(pcToolBar, SWT.PUSH);
                                 cancelProc.setText("Послать сигнал отмены процесса");
+                                cancelProc.addListener(SWT.Selection, new Listener() {
+                                    @Override
+                                    public void handleEvent(Event event) {
+                                        if (selectedProcess != null) {
+                                            cancel(selectedProcess);
+                                            updateTree();
+                                            caServersTable.refresh();
+                                        }
+                                    }
+                                });
                                 
                                 procText = new Text(procComposite, SWT.MULTI | SWT.BORDER | SWT.READ_ONLY | SWT.V_SCROLL | SWT.H_SCROLL);
                                 procText.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -401,6 +391,9 @@ public class MainForm extends ApplicationWindow {
                 logComposite.setLayout(gridLayout);
             }
             verticalSf.setWeights(VERTICAL_WEIGHTS);
+            UIAppender uiAppender = new UIAppender(logComposite);
+            uiAppender.setThreshold(Level.INFO);
+            Logger.getRootLogger().addAppender(uiAppender);
             
             Composite statusBar = new Composite(composite, SWT.NONE);
             {
@@ -409,64 +402,7 @@ public class MainForm extends ApplicationWindow {
                 appVersionLabel = new Label(statusBar, SWT.HORIZONTAL);
                 appVersionLabel.setText("PgSqlBlocks v." + getAppVersion());
             }
-            
-            
-            /*caServerListContextMenu = new Menu(parent, SWT.POP_UP);
-            {
-                connectDbCm = new MenuItem(caServerListContextMenu, SWT.PUSH);
-                connectDbCm.setText("Подключиться");
-                disconnectDbCm = new MenuItem(caServerListContextMenu, SWT.PUSH);
-                disconnectDbCm.setText("Отключиться");
-                editDbCm = new MenuItem(caServerListContextMenu, SWT.PUSH);
-                editDbCm.setText("Редактировать");
-                removeDbCm = new MenuItem(caServerListContextMenu, SWT.PUSH);
-                removeDbCm.setText("Удалить");
-            }*/
         }
-        
-        
-        /* getShell().setText(APP_NAME);
-        getShell().setMaximized(true);
-
-        GridLayout gridLayout = new GridLayout();
-        getShell().setLayout(gridLayout);
-
-        gridLayout.marginHeight = ZERO_MARGIN;
-        gridLayout.marginWidth = ZERO_MARGIN;*/
-
-
-
-        //GridData gridData = new GridData(SWT.FILL, SWT.FILL, true, true);
-
-
-        // Create the tree viewer to display the file tree
-        /*treeViewer = new TreeViewer(shell, SWT.VIRTUAL | SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL | SWT.FULL_SELECTION);
-            treeViewer.getTree().setHeaderVisible(true);
-            treeViewer.getTree().setLinesVisible(true);
-            treeViewer.getTree().setLayoutData(new GridData(GridData.FILL_BOTH));
-            for(int i=0;i<treeColsName.length;i++) {
-                TreeViewerColumn treeColumn = new TreeViewerColumn(treeViewer, SWT.NONE);
-                treeColumn.getColumn().setText(treeColsName[i]);
-                treeColumn.getColumn().setWidth(treeColsWidth[i]);
-            }
-            treeViewer.setContentProvider(new ProcessTreeContentProvider());
-            treeViewer.setLabelProvider(new ProcessTreeLabelProvider());
-            treeViewer.setInput(new ProcessTreeList(new ConcurrentHashMap<>()));*/
-        
-        
-        
-        ////////////////////////////////
-        /////     ADD HANDLERS     /////
-        ////////////////////////////////
-        
-        /*caServersTable.addDoubleClickListener(new IDoubleClickListener()
-        {
-                    @Override
-                    public void doubleClick(DoubleClickEvent event) {
-                        MessageDialog.openWarning(shell, "222222", "22222222");
-                    }
-
-        });*/
 
         caMainTree.addSelectionChangedListener(new ISelectionChangedListener() {
             @Override
@@ -489,7 +425,10 @@ public class MainForm extends ApplicationWindow {
                 if (!caServersTable.getSelection().isEmpty()) {
                     IStructuredSelection selected = (IStructuredSelection) event.getSelection();
                     selectedDbcData = (DbcData) selected.getFirstElement();
-                    
+                    if(procComposite.isVisible()) {
+                        procComposite.setVisible(false);
+                        caTreeSf.layout(false, false);
+                    }
                     if (selectedDbcData.getStatus() == DbcStatus.ERROR ||
                             selectedDbcData.getStatus() == DbcStatus.DISABLED) {
                         
@@ -503,9 +442,8 @@ public class MainForm extends ApplicationWindow {
                         connectDB.setEnabled(false);
                         disconnectDB.setEnabled(true);
                     }
-
                     if (selectedDbcData != null) {
-                        caMainTree.setInput(getProcessTree(selectedDbcData));
+                        updateTree();
                     }
                     caMainTree.refresh();
                     caServersTable.refresh();
@@ -516,23 +454,9 @@ public class MainForm extends ApplicationWindow {
         return parent;
     }
 
-    private ToolBarManager toolBarManager;
-    private Action addDb;
-    private Action deleteDB;
-    private Action editDB;
-    private Action connectDB;
-    private Action disconnectDB;
-    private Action update;
-    private Action autoUpdate;
-    private Action onlyBlocked;
-    private Action exportBlocks;
-    private Action importBlocks;
-    
     protected ToolBarManager createToolBarManager(int style) {
-        // Create the toolbar manager
         toolBarManager = new ToolBarManager(style);
 
-        // Add the file actions
         addDb = new Action(Images.ADD_DATABASE.getDescription()) {
             @Override
             public void run() {
@@ -542,13 +466,15 @@ public class MainForm extends ApplicationWindow {
         };
 
         addDb.setImageDescriptor(ImageDescriptor.createFromImage(getImage(Images.ADD_DATABASE)));
-
+        
         toolBarManager.add(addDb);
 
         deleteDB = new Action(Images.DELETE_DATABASE.getDescription()) {
             @Override
             public void run() {
-                boolean okPress = MessageDialog.openQuestion(shell, "Подтверждение действия", "Удалить?");
+                boolean okPress = MessageDialog.openQuestion(shell,
+                        "Подтверждение действия",
+                        String.format("Вы действительно хотите удалить %s?", selectedDbcData.getName()));
                 if (okPress) {
                     dbcDataList.delete(selectedDbcData);
                 }
@@ -588,11 +514,9 @@ public class MainForm extends ApplicationWindow {
                connectDB.setEnabled(false);
                disconnectDB.setEnabled(true);
                
-               if (selectedDbcData != null) {
-                   caMainTree.setInput(getProcessTree(selectedDbcData));
-                   }
-               caMainTree.refresh();
+               updateTree();
                caServersTable.refresh();
+               display.timerExec(1000, timer);
             }
         };
 
@@ -611,10 +535,7 @@ public class MainForm extends ApplicationWindow {
                 connectDB.setEnabled(true);
                 disconnectDB.setEnabled(false);
                 
-                if (selectedDbcData != null) {
-                    caMainTree.setInput(getProcessTree(selectedDbcData));
-                }
-                caMainTree.refresh();
+                updateTree();
                 caServersTable.refresh();
             }
         };
@@ -630,10 +551,7 @@ public class MainForm extends ApplicationWindow {
         update = new Action(Images.UPDATE.getDescription()) {
             @Override
             public void run() {
-                if (selectedDbcData != null) {
-                    caMainTree.setInput(getProcessTree(selectedDbcData));
-                }
-                caMainTree.refresh();
+                updateTree();
                 caServersTable.refresh();
             }
         };
@@ -645,7 +563,11 @@ public class MainForm extends ApplicationWindow {
         autoUpdate = new Action(Images.AUTOUPDATE.getDescription()) {
             @Override
             public void run() {
-                setStatus("Hello world1");
+                if (autoUpdate.isChecked()) {
+                    autoUpdateMode = true;
+                } else {
+                    autoUpdateMode = false;
+                }
             }
         };
 
@@ -678,11 +600,17 @@ public class MainForm extends ApplicationWindow {
         onlyBlocked = new Action(Images.VIEW_ONLY_BLOCKED.getDescription()) {
             @Override
             public void run() {
-                setStatus("Hello world1");
+                if (onlyBlocked.isChecked()) {
+                    onlyBlockedMode = true;
+                    updateTree();
+                } else {
+                    onlyBlockedMode = false;
+                }
             }
         };
 
         onlyBlocked.setImageDescriptor(ImageDescriptor.createFromImage(getImage(Images.VIEW_ONLY_BLOCKED)));
+        onlyBlocked.setChecked(false);
 
         toolBarManager.add(onlyBlocked);
 
@@ -744,18 +672,68 @@ public class MainForm extends ApplicationWindow {
     private Runnable timer = new Runnable() {
         @Override
         public void run() {
-            if(autoUpdateMode){
-                viewProcessTree = getProcessTree(selectedDbcData);
-                caMainTree.setInput(viewProcessTree);
+            if (autoUpdateMode) {
+                updateTree();
                 display.timerExec(timerInterval * 1000, this);
             }
+            caMainTree.refresh();
+            caServersTable.refresh();
         }
     };
     
-    private void setAutoUpdate(boolean autoUpdate) {
-        this.autoUpdateMode = true;
-        display.timerExec(1000, timer);
+    public void terminate(Process process) {
+        String term = "select pg_terminate_backend(?);";
+        boolean kill = false;
+        int pid = process.getPid();
+        try (PreparedStatement termPs = selectedDbcData.getConnection().prepareStatement(term);) {
+            termPs.setInt(1, pid);
+            try (ResultSet resultSet = termPs.executeQuery()) {
+                if (resultSet.next()) {
+                    kill = resultSet.getBoolean(1);
+                }
+            }
+        } catch (SQLException e) {
+            selectedDbcData.setStatus(DbcStatus.ERROR);
+            LOG.error(selectedDbcData.getName() + " " + e.getMessage(), e);
+        }
+        if(kill) {
+            LOG.info(selectedDbcData.getName() + " pid=" + pid + " is terminated.");
+        } else {
+            LOG.info(selectedDbcData.getName() + " pid=" + pid + " is terminated failed.");
+        }
+    }
+
+    public void cancel(Process process) {
+        String cancel = "select pg_cancel_backend(?);";
+        int pid = process.getPid();
+        boolean kill = false;
+        try (PreparedStatement cancelPs = selectedDbcData.getConnection().prepareStatement(cancel);) {
+            cancelPs.setInt(1, pid);
+            try (ResultSet resultSet = cancelPs.executeQuery()) {
+                if (resultSet.next()) {
+                    kill = resultSet.getBoolean(1);
+                }
+            }
+        } catch (SQLException e) {
+            selectedDbcData.setStatus(DbcStatus.ERROR);
+            LOG.error(selectedDbcData.getName() + " " + e.getMessage(), e);
+        }
+        if(kill) {
+            LOG.info(selectedDbcData.getName() + " pid=" + pid + " is canceled.");
+        } else {
+            LOG.info(selectedDbcData.getName() + " pid=" + pid + " is canceled failed.");
+        }
     }
     
+    private void updateTree() {
+        if (selectedDbcData != null) {
+            if (onlyBlockedMode) {
+                caMainTree.setInput(getOnlyBlockedProcessTree(selectedDbcData));
+            } else {
+                caMainTree.setInput(getProcessTree(selectedDbcData));
+            }
+        }
+        caMainTree.refresh();
+    }
 }
 

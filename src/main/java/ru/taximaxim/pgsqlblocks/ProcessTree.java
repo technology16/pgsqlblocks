@@ -39,20 +39,36 @@ public class ProcessTree {
     private List<Process> tempProcessList = new ArrayList<Process>();
 
     private Process rootProcess;
+    private Process blockedRootProcess;
 
     public ProcessTree(DbcData dbcData) {
         this.dbcData = dbcData;
     }
 
     public Process getProcessTree() {
-        return createProcessTree();
+        rootProcess = new Process();
+        for (Process process : createProcessTree()) {
+            if (!process.hasParent()) {
+                rootProcess.addChildren(process);
+            }
+        }
+        return rootProcess;
+    }
+    
+    public Process getOnlyBlockedProcessTree() {
+        blockedRootProcess = new Process();
+        for (Process process : createProcessTree()) {
+            if (process.hasChildren()) {
+                blockedRootProcess.addChildren(process);
+            }
+        }
+        return blockedRootProcess;
     }
 
-    public Process createProcessTree() {
-        rootProcess = new Process();
+    public List<Process> createProcessTree() {
         tempProcessList.clear();
         if (dbcData.getConnection() == null) {
-            return rootProcess;
+            return tempProcessList;
         }
         try (
                 PreparedStatement statement = dbcData.getConnection().prepareStatement(getQuery());
@@ -83,6 +99,7 @@ public class ProcessTree {
         }
         
         // Пробегаем по списку процессов, ищем ожидающие и блокированные процессы
+        dbcData.setStatus(DbcStatus.CONNECTED);
         for (Process process : tempProcessList) {
             if ((process.getBlockingLocks() != 0) && (process.getBlockedBy() == 0)) {
                 //Добавляем для данного процесса родителя с pid = process.getBlockingLocks()
@@ -105,14 +122,15 @@ public class ProcessTree {
             }
         }
 
+        return tempProcessList;
         // Добавляем в дерево только корневые элементы
-        for (Process process : tempProcessList) {
+      /*  for (Process process : tempProcessList) {
             if (!process.hasParent()) {
                 rootProcess.addChildren(process);
             }
         }
 
-        return rootProcess;
+        return rootProcess;*/
     }
 
     private String dateParse(String dateString) {

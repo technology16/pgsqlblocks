@@ -2,7 +2,6 @@ package ru.taximaxim.pgsqlblocks;
 
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.swt.widgets.Control;
 
 public class ProcessTreeContentProvider implements ITreeContentProvider {
     

@@ -218,4 +218,8 @@ public class Process implements Comparable<Process> {
             return -1;
         }
     }
+    
+    public void removeChild(Process process) {
+        children.remove(process);
+    }
 }
