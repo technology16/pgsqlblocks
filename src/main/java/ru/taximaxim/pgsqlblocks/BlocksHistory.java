@@ -227,12 +227,12 @@ public final class BlocksHistory {
             }
             getOldHistoryMap().put(dbc, list);
         }
-        MainForm.getInstance().getDisplay().asyncExec(new Runnable() {
+       /* MainForm.getInstance().getDisplay().asyncExec(new Runnable() {
             @Override
             public void run() {
                 MainForm.getInstance().setHistoryMap(getOldHistoryMap());
             }
-        });
+        });*/
     }
     
     private Process parseProcess(Element el) {
