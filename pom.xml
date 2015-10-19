@@ -16,8 +16,8 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <swt.artifactId>org.eclipse.swt.gtk.linux.x86_64</swt.artifactId>
         <swt.id>Linux-x86_64</swt.id>
-        <swt.version>4.3</swt.version>
-        <mainClass>ru.taximaxim.pgsqlblocks.App</mainClass>
+        <swt.version>4.4</swt.version>
+        <mainClass>ru.taximaxim.pgsqlblocks.MainForm</mainClass>
     </properties>
 
     <profiles>
@@ -71,6 +71,8 @@
                             <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
                         </manifest>
                     </archive>
+                    <downloadSources>true</downloadSources>
+                    <downloadJavadocs>true</downloadJavadocs>
                 </configuration>
             </plugin>
             <plugin>
@@ -129,14 +131,14 @@
             <version>${swt.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.eclipse</groupId>
-            <artifactId>jface</artifactId>
-            <version>3.3.0-I20070606-0010</version>
+            <groupId>org.eclipse.jface</groupId>
+            <artifactId>org.eclipse.jface</artifactId>
+            <version>3.8.0.v20120521-2329</version>
         </dependency>
-        <dependency>
+         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
             <version>9.3-1102-jdbc41</version>
-        </dependency>
+        </dependency> 
     </dependencies>
 </project>
