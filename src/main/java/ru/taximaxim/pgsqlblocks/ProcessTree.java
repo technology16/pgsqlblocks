@@ -12,7 +12,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.TreeSet;
 
 import org.apache.log4j.Logger;
 
@@ -39,21 +38,21 @@ public class ProcessTree {
     private DbcData dbcData;
     private List<Process> tempProcessList = new ArrayList<Process>();
 
-    private TreeSet<Process> processTree = new TreeSet<Process>();
+    private Process rootProcess;
 
     public ProcessTree(DbcData dbcData) {
         this.dbcData = dbcData;
     }
 
-    public TreeSet<Process> getProcessTree() {
+    public Process getProcessTree() {
         return createProcessTree();
     }
 
-    public TreeSet<Process> createProcessTree() {
-        processTree.clear();
+    public Process createProcessTree() {
+        rootProcess = new Process();
         tempProcessList.clear();
         if (dbcData.getConnection() == null) {
-            return new TreeSet<Process>();
+            return rootProcess;
         }
         try (
                 PreparedStatement statement = dbcData.getConnection().prepareStatement(getQuery());
@@ -101,6 +100,7 @@ public class ProcessTree {
                     parentProcess.addChildren(process);
                     parentProcess.setStatus(ProcessStatus.BLOCKING);
                     process.setStatus(ProcessStatus.BLOCKED);
+                    dbcData.setStatus(DbcStatus.BLOCKED);
                 }
             }
         }
@@ -108,11 +108,11 @@ public class ProcessTree {
         // Добавляем в дерево только корневые элементы
         for (Process process : tempProcessList) {
             if (!process.hasParent()) {
-                processTree.add(process);
+                rootProcess.addChildren(process);
             }
         }
 
-        return processTree;
+        return rootProcess;
     }
 
     private String dateParse(String dateString) {

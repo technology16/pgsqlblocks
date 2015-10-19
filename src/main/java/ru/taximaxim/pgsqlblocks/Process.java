@@ -23,6 +23,8 @@ public class Process implements Comparable<Process> {
     private List<Process> children = new ArrayList<Process>();
     private ProcessStatus status = ProcessStatus.WORKING;
     
+    public Process() {}
+    
     public Process(int pid, String applicationName, String datname,
             String usename, String client, String backendStart,
             String queryStart, String xactStart, String state, String stateChange,

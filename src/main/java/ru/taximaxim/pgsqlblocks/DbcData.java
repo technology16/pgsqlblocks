@@ -12,8 +12,6 @@ import java.sql.SQLException;
 
 import org.apache.log4j.Logger;
 
-import ru.taximaxim.pgsqlblocks.origin.DbcStatus;
-
 public class DbcData {
     
     private static final Logger LOG = Logger.getLogger(DbcData.class);

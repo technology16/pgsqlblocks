@@ -32,6 +32,8 @@ import org.eclipse.jface.viewers.TreeViewerColumn;
 import org.eclipse.jface.window.ApplicationWindow;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -57,11 +59,11 @@ import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeColumn;
 
+
 public class MainForm extends ApplicationWindow {
 
 
     private ConcurrentMap<String, Image> imagesMap = new ConcurrentHashMap<String, Image>();
-    private ProcessTreeMap proccesTreeMap = new ProcessTreeMap();
 
 
     private static final String APP_NAME = "pgSqlBlocks";
@@ -82,7 +84,7 @@ public class MainForm extends ApplicationWindow {
     
     private DbcDataList dbcDataList = DbcDataList.getInstance();
     private DbcData selectedDbcData;
-    private ProcessTree viewProcessTree;
+    private Process viewProcessTree;
     
 
     private ExecutorService executor = Executors.newFixedThreadPool(FIXEDTHREADPOOL);
@@ -125,8 +127,9 @@ public class MainForm extends ApplicationWindow {
     private AddDbcDataDlg editDbcDlg;
     
     private Menu caServerListContextMenu;
-    private int timerInterval = TEN;
-   /// private boolean autoUpdate = true;
+    //private int timerInterval = TEN;
+    private int timerInterval = 3;
+    private boolean autoUpdateMode = true;
   ///  private boolean onlyBlocked = false;
     
     private int[] caMainTreeColsSize = new int[]{80,110,150,110,110,110,145,145,145,55,145,70,65,150,80};
@@ -158,6 +161,24 @@ public class MainForm extends ApplicationWindow {
         }
     }
 
+    
+    
+    private ConcurrentMap<DbcData, ProcessTree> processTreeMap = new ConcurrentHashMap<>();
+    
+    public Process getProcessTree(DbcData dbcData) {
+        ProcessTree processTree = processTreeMap.get(dbcData);
+        if(processTree == null){
+            processTree = new ProcessTree(dbcData);
+            processTreeMap.put(dbcData, processTree);
+        }
+        
+        return processTree.getProcessTree();
+    }
+    
+    
+    
+    
+    
     private static final Logger LOG = Logger.getLogger(MainForm.class);
     
     private static Display display;
@@ -196,6 +217,8 @@ public class MainForm extends ApplicationWindow {
     @Override
     protected Control createContents(Composite parent)
     {
+      //  display.timerExec(1000, timer);
+        
         Composite composite = new Composite(parent, SWT.NONE);
         composite.setLayout(new GridLayout());
         
@@ -444,19 +467,20 @@ public class MainForm extends ApplicationWindow {
                     }
 
         });*/
-        
-        
+
         caMainTree.addSelectionChangedListener(new ISelectionChangedListener() {
 
             @Override
             public void selectionChanged(SelectionChangedEvent event) {
-                IStructuredSelection selected = (IStructuredSelection) event.getSelection();
-                selectedProcess = (Process) selected.getFirstElement();
-                if(!procComposite.isVisible()) {
-                    procComposite.setVisible(true);
-                    caTreeSf.layout(true, true);
+                if (!caMainTree.getSelection().isEmpty()) {
+                    IStructuredSelection selected = (IStructuredSelection) event.getSelection();
+                    selectedProcess = (Process) selected.getFirstElement();
+                    if(!procComposite.isVisible()) {
+                        procComposite.setVisible(true);
+                        caTreeSf.layout(true, true);
+                    }
+                    procText.setText(String.format("pid=%s%n%s", selectedProcess.getPid(), selectedProcess.getQuery()));
                 }
-                procText.setText(String.format("pid=%s%n%s", selectedProcess.getPid(), selectedProcess.getQuery()));
             }
         });
         
@@ -464,18 +488,23 @@ public class MainForm extends ApplicationWindow {
 
             @Override
             public void selectionChanged(SelectionChangedEvent event) {
-                IStructuredSelection selected = (IStructuredSelection) event.getSelection();
-                selectedDbcData = (DbcData) selected.getFirstElement();
-                deleteDB.setEnabled(true);
-                editDB.setEnabled(true);
-                connectDB.setEnabled(true);
-                
-                viewProcessTree = proccesTreeMap.getProcessTree(selectedDbcData);
-                if (selectedDbcData != null && selectedDbcData.isConnected()) {
-                    caMainTree.setInput(viewProcessTree);
+                if (!caServersTable.getSelection().isEmpty()) {
+                    IStructuredSelection selected = (IStructuredSelection) event.getSelection();
+                    selectedDbcData = (DbcData) selected.getFirstElement();
+                    deleteDB.setEnabled(true);
+                    editDB.setEnabled(true);
+                    connectDB.setEnabled(true);
+
+                    viewProcessTree = getProcessTree(selectedDbcData);
+                    // if (selectedDbcData != null && selectedDbcData.isConnected()) {
+                    if (selectedDbcData != null) {
+                        caMainTree.setInput(viewProcessTree);
+                    }
+
+
+                    caMainTree.refresh();
+                    caServersTable.refresh();
                 }
-                
-                caMainTree.refresh();
             }
         });
         
@@ -550,13 +579,16 @@ public class MainForm extends ApplicationWindow {
             @Override
             public void run() {
                selectedDbcData.connect();
-               caServersTable.refresh();
+               
                deleteDB.setEnabled(false);
                editDB.setEnabled(false);
                connectDB.setEnabled(false);
                disconnectDB.setEnabled(true);
                
+               caMainTree.setInput(null);
                caMainTree.setInput(viewProcessTree);
+               caMainTree.refresh();
+               caServersTable.refresh();
             }
         };
 
@@ -569,11 +601,16 @@ public class MainForm extends ApplicationWindow {
             @Override
             public void run() {
                 selectedDbcData.disconnect();
-                caServersTable.refresh();
+                
                 deleteDB.setEnabled(true);
                 editDB.setEnabled(true);
                 connectDB.setEnabled(true);
                 disconnectDB.setEnabled(false);
+                
+                caMainTree.setInput(null);
+                caMainTree.setInput(viewProcessTree);
+                caMainTree.refresh();
+                caServersTable.refresh();
             }
         };
 
@@ -588,7 +625,10 @@ public class MainForm extends ApplicationWindow {
         update = new Action(Images.UPDATE.getDescription()) {
             @Override
             public void run() {
-                setStatus("Hello world1");
+                caMainTree.setInput(null);
+                caMainTree.setInput(viewProcessTree);
+                caMainTree.refresh();
+                caServersTable.refresh();
             }
         };
 
@@ -694,5 +734,22 @@ public class MainForm extends ApplicationWindow {
         }
         return appVersion;
     }
+    
+    private Runnable timer = new Runnable() {
+        @Override
+        public void run() {
+            if(autoUpdateMode){
+                viewProcessTree = getProcessTree(selectedDbcData);
+                caMainTree.setInput(viewProcessTree);
+                display.timerExec(timerInterval * 1000, this);
+            }
+        }
+    };
+    
+    private void setAutoUpdate(boolean autoUpdate) {
+        this.autoUpdateMode = true;
+        display.timerExec(1000, timer);
+    }
+    
 }
 

@@ -4,6 +4,9 @@ import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 
 public class ProcessTreeContentProvider implements ITreeContentProvider {
+    
+    private final Object[] EMPTY_ARRAY = new Object[0];
+    
     /**
      * Gets the children of the specified object
      * 
@@ -12,7 +15,12 @@ public class ProcessTreeContentProvider implements ITreeContentProvider {
      * @return Object[]
      */
     public Object[] getChildren(Object arg0) {
-        return ((Process) arg0).getChildren().toArray();
+        Process process = (Process) arg0;
+        if (process.getChildren().size() == 0) {
+            return EMPTY_ARRAY;
+        } else {
+            return process.getChildren().toArray();
+        }
     }
 
     /**
@@ -45,14 +53,14 @@ public class ProcessTreeContentProvider implements ITreeContentProvider {
      * @return Object[]
      */
     public Object[] getElements(Object arg0) {
-        return ((ProcessTree) arg0).getProcessTree().toArray();
+        return getChildren(arg0);
     }
 
     /**
      * Disposes any created resources
      */
     public void dispose() {
-     // TODO Auto-generated method stub
+        // TODO Auto-generated method stub
     }
 
     @Override
