@@ -676,7 +676,7 @@ public class MainForm extends ApplicationWindow {
                 updateTree();
                 display.timerExec(timerInterval * 1000, this);
             }
-            caMainTree.refresh();
+            updateTree();
             caServersTable.refresh();
         }
     };
