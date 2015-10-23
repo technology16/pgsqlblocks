@@ -47,21 +47,21 @@ public class ProcessTree {
 
     public Process getProcessTree() {
         rootProcess = new Process();
-        for (Process process : createProcessTree()) {
-            if (!process.hasParent()) {
-                rootProcess.addChildren(process);
-            }
-        }
+        
+        createProcessTree().stream()
+            .filter(process -> !process.hasParent())
+            .forEach(process -> rootProcess.addChildren(process));
+        
         return rootProcess;
     }
     
     public Process getOnlyBlockedProcessTree() {
         blockedRootProcess = new Process();
-        for (Process process : createProcessTree()) {
-            if (process.hasChildren()) {
-                blockedRootProcess.addChildren(process);
-            }
-        }
+        
+        createProcessTree().stream()
+            .filter(process -> process.hasChildren())
+            .forEach(process -> blockedRootProcess.addChildren(process));
+        
         return blockedRootProcess;
     }
 
@@ -123,14 +123,6 @@ public class ProcessTree {
         }
 
         return tempProcessList;
-        // Добавляем в дерево только корневые элементы
-      /*  for (Process process : tempProcessList) {
-            if (!process.hasParent()) {
-                rootProcess.addChildren(process);
-            }
-        }
-
-        return rootProcess;*/
     }
 
     private String dateParse(String dateString) {
@@ -156,56 +148,6 @@ public class ProcessTree {
         }
         return null;
     }
-    
-   /* private Process getProcessByBlocked(List<Process> processList, int blockedBy) {
-        for (Process process : processList) {
-            if (process.getBlockedBy() == blockedBy) {
-                return process;
-            }
-        }
-        return null;
-    }
-
-    private Process getProcessByBlocking(List<Process> processList, int blockingLocks) {
-        for (Process process : processList) {
-            if (process.getBlockingLocks() == blockingLocks) {
-                return process;
-            }
-        }
-        return null;
-    }*/
-
-    /*private void buildTree() {
-        for(Entry<Integer, Process> map : getProcessMap().entrySet()) {
-            int blockedBy = map.getValue().getBlockedBy();
-            int blockingLocks = map.getValue().getBlockingLocks();
-
-            if(blockedBy != 0) {
-                map.getValue().setParent(getProcessMap().get(blockedBy));
-                getProcessMap().get(blockedBy).addChildren(map.getValue());
-            }
-            if((blockingLocks != 0) && (blockingLocks != blockedBy)) {
-                map.getValue().setParent(getProcessMap().get(blockingLocks));
-                getProcessMap().get(blockingLocks).addChildren(map.getValue());
-            }
-        }
-        for(Entry<Integer, Process> map : getProcessMap().entrySet()) {
-            if((map.getValue().getBlockedBy() == 0) && (map.getValue().getBlockingLocks() == 0) ) {
-                getTreeList().add(map.getValue());
-            }
-        }
-    }
-
-    public ConcurrentMap<Integer, Process> getProcessMap() {
-        return processMap;
-    }
-
-    public List<Process> getTreeList() {
-        if (processList == null) {
-            processList = new ArrayList<Process>();
-        }
-        return processList;
-    }*/
     
     private String getQuery() {
         if(query == null) {

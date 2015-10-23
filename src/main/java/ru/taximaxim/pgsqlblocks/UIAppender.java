@@ -52,11 +52,6 @@ public class UIAppender extends WriterAppender{
             return;
         }
         final String logMessage = String.format("[%s] %s\n",dateTime,excMessage);
-        parent.getDisplay().asyncExec(new Runnable() {
-            @Override
-            public void run() {
-                text.append(logMessage);
-            }
-        });
+        parent.getDisplay().asyncExec(() -> text.append(logMessage));
     }
 }

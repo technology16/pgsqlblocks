@@ -2,15 +2,12 @@ package ru.taximaxim.pgsqlblocks;
 
 import java.io.IOException;
 import java.net.URL;
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 
@@ -301,30 +298,24 @@ public class MainForm extends ApplicationWindow {
                                 
                                 terminateProc = new ToolItem(pcToolBar, SWT.PUSH);
                                 terminateProc.setText("Уничтожить процесс");
-                                terminateProc.addListener(SWT.Selection, new Listener() {
-                                    @Override
-                                    public void handleEvent(Event event) {
-                                        if (selectedProcess != null) {
-                                            terminate(selectedProcess);
-                                            updateTree();
-                                            caServersTable.refresh();
-                                        }
+                                terminateProc.addListener(SWT.Selection, event -> {
+                                    if (selectedProcess != null) {
+                                        terminate(selectedProcess);
+                                        updateTree();
+                                        caServersTable.refresh();
                                     }
                                 });
                                 
                                 cancelProc = new ToolItem(pcToolBar, SWT.PUSH);
                                 cancelProc.setText("Послать сигнал отмены процесса");
-                                cancelProc.addListener(SWT.Selection, new Listener() {
-                                    @Override
-                                    public void handleEvent(Event event) {
-                                        if (selectedProcess != null) {
-                                            cancel(selectedProcess);
-                                            updateTree();
-                                            caServersTable.refresh();
-                                        }
+                                cancelProc.addListener(SWT.Selection, event -> {
+                                    if (selectedProcess != null) {
+                                        cancel(selectedProcess);
+                                        updateTree();
+                                        caServersTable.refresh();
                                     }
                                 });
-                                
+
                                 procText = new Text(procComposite, SWT.MULTI | SWT.BORDER | SWT.READ_ONLY | SWT.V_SCROLL | SWT.H_SCROLL);
                                 procText.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
                                 procText.setBackground(composite.getDisplay().getSystemColor(SWT.COLOR_WHITE));
@@ -457,7 +448,9 @@ public class MainForm extends ApplicationWindow {
     protected ToolBarManager createToolBarManager(int style) {
         toolBarManager = new ToolBarManager(style);
 
-        addDb = new Action(Images.ADD_DATABASE.getDescription()) {
+        addDb = new Action(Images.ADD_DATABASE.getDescription(),
+                ImageDescriptor.createFromImage(getImage(Images.ADD_DATABASE))) {
+            
             @Override
             public void run() {
                 addDbcDlg.open();
@@ -465,11 +458,11 @@ public class MainForm extends ApplicationWindow {
             }
         };
 
-        addDb.setImageDescriptor(ImageDescriptor.createFromImage(getImage(Images.ADD_DATABASE)));
-        
         toolBarManager.add(addDb);
 
-        deleteDB = new Action(Images.DELETE_DATABASE.getDescription()) {
+        deleteDB = new Action(Images.DELETE_DATABASE.getDescription(),
+                ImageDescriptor.createFromImage(getImage(Images.DELETE_DATABASE))) {
+            
             @Override
             public void run() {
                 boolean okPress = MessageDialog.openQuestion(shell,
@@ -482,12 +475,12 @@ public class MainForm extends ApplicationWindow {
             }
         };
 
-        deleteDB.setImageDescriptor(ImageDescriptor.createFromImage(getImage(Images.DELETE_DATABASE)));
         deleteDB.setEnabled(false);
-
         toolBarManager.add(deleteDB);
 
-        editDB = new Action(Images.EDIT_DATABASE.getDescription()) {
+        editDB = new Action(Images.EDIT_DATABASE.getDescription(),
+                ImageDescriptor.createFromImage(getImage(Images.EDIT_DATABASE))) {
+            
             @Override
             public void run() {
                 editDbcDlg = new AddDbcDataDlg(shell, selectedDbcData);
@@ -496,15 +489,15 @@ public class MainForm extends ApplicationWindow {
             }
         };
 
-        editDB.setImageDescriptor(ImageDescriptor.createFromImage(getImage(Images.EDIT_DATABASE)));
         editDB.setEnabled(false);
-
         toolBarManager.add(editDB);
 
         // Add a separator
         toolBarManager.add(new Separator());
 
-        connectDB = new Action(Images.CONNECT_DATABASE.getDescription()) {
+        connectDB = new Action(Images.CONNECT_DATABASE.getDescription(),
+                ImageDescriptor.createFromImage(getImage(Images.CONNECT_DATABASE))) {
+            
             @Override
             public void run() {
                selectedDbcData.connect();
@@ -520,12 +513,12 @@ public class MainForm extends ApplicationWindow {
             }
         };
 
-        connectDB.setImageDescriptor(ImageDescriptor.createFromImage(getImage(Images.CONNECT_DATABASE)));
         connectDB.setEnabled(false);
-
         toolBarManager.add(connectDB);
 
-        disconnectDB = new Action(Images.DISCONNECT_DATABASE.getDescription()) {
+        disconnectDB = new Action(Images.DISCONNECT_DATABASE.getDescription(),
+                ImageDescriptor.createFromImage(getImage(Images.DISCONNECT_DATABASE))) {
+            
             @Override
             public void run() {
                 selectedDbcData.disconnect();
@@ -540,15 +533,15 @@ public class MainForm extends ApplicationWindow {
             }
         };
 
-        disconnectDB.setImageDescriptor(ImageDescriptor.createFromImage(getImage(Images.DISCONNECT_DATABASE)));
         disconnectDB.setEnabled(false);
-
         toolBarManager.add(disconnectDB);
 
         // Add a separator
         toolBarManager.add(new Separator());
 
-        update = new Action(Images.UPDATE.getDescription()) {
+        update = new Action(Images.UPDATE.getDescription(),
+                ImageDescriptor.createFromImage(getImage(Images.UPDATE))) {
+            
             @Override
             public void run() {
                 updateTree();
@@ -556,11 +549,11 @@ public class MainForm extends ApplicationWindow {
             }
         };
 
-        update.setImageDescriptor(ImageDescriptor.createFromImage(getImage(Images.UPDATE)));
-
         toolBarManager.add(update);
 
-        autoUpdate = new Action(Images.AUTOUPDATE.getDescription()) {
+        autoUpdate = new Action(Images.AUTOUPDATE.getDescription(),
+                ImageDescriptor.createFromImage(getImage(Images.AUTOUPDATE))) {
+            
             @Override
             public void run() {
                 if (autoUpdate.isChecked()) {
@@ -571,9 +564,7 @@ public class MainForm extends ApplicationWindow {
             }
         };
 
-        autoUpdate.setImageDescriptor(ImageDescriptor.createFromImage(getImage(Images.AUTOUPDATE)));
         autoUpdate.setChecked(true);
-
         toolBarManager.add(autoUpdate);
 
         ///////////////////////////////
@@ -597,7 +588,9 @@ public class MainForm extends ApplicationWindow {
 
         toolBarManager.add(new Separator());
 
-        onlyBlocked = new Action(Images.VIEW_ONLY_BLOCKED.getDescription()) {
+        onlyBlocked = new Action(Images.VIEW_ONLY_BLOCKED.getDescription(),
+                ImageDescriptor.createFromImage(getImage(Images.VIEW_ONLY_BLOCKED))) {
+            
             @Override
             public void run() {
                 if (onlyBlocked.isChecked()) {
@@ -609,20 +602,18 @@ public class MainForm extends ApplicationWindow {
             }
         };
 
-        onlyBlocked.setImageDescriptor(ImageDescriptor.createFromImage(getImage(Images.VIEW_ONLY_BLOCKED)));
         onlyBlocked.setChecked(false);
-
         toolBarManager.add(onlyBlocked);
 
-        exportBlocks = new Action(Images.EXPORT_BLOCKS.getDescription()) {
+        exportBlocks = new Action(Images.EXPORT_BLOCKS.getDescription(),
+                ImageDescriptor.createFromImage(getImage(Images.EXPORT_BLOCKS))) {
+            
             @Override
             public void run() {
                // BlocksHistory.getInstance().save();
                 LOG.info("Блокировка сохранена...");
             }
         };
-
-        exportBlocks.setImageDescriptor(ImageDescriptor.createFromImage(getImage(Images.EXPORT_BLOCKS)));
 
         toolBarManager.add(exportBlocks);
 
@@ -638,7 +629,6 @@ public class MainForm extends ApplicationWindow {
         };
 
         importBlocks.setImageDescriptor(ImageDescriptor.createFromImage(getImage(Images.IMPORT_BLOCKS)));
-
         toolBarManager.add(importBlocks);
 
         return toolBarManager;
