@@ -5,6 +5,7 @@ import java.net.URL;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -251,7 +252,7 @@ public class MainForm extends ApplicationWindow {
                             caServersTable.setContentProvider(new DbcDataListContentProvider());
                             caServersTable.setLabelProvider(new DbcDataListLabelProvider());
                             dbcDataList.init();
-                            caServersTable.setInput(dbcDataList);
+                            caServersTable.setInput(dbcDataList.getList());
                             
                             caServersTable.refresh();
                         }
@@ -344,8 +345,11 @@ public class MainForm extends ApplicationWindow {
                             bhServersTable.getTable().setLayoutData(gridData);
                             
                             TableViewerColumn serversTc = new TableViewerColumn(bhServersTable, SWT.NONE);
-                            serversTc.getColumn().setText("Блокировка");
+                            serversTc.getColumn().setText("Сервер");
                             serversTc.getColumn().setWidth(200);
+                            
+                            bhServersTable.setContentProvider(new DbcDataListContentProvider());
+                            bhServersTable.setLabelProvider(new DbcDataListLabelProvider());
                             
                             /*bhServersTable.setContentProvider();
                             bhServersTable.setLabelProvider();
@@ -368,6 +372,10 @@ public class MainForm extends ApplicationWindow {
                                 treeColumn.getColumn().setText(caMainTreeColsName[i]);
                                 treeColumn.getColumn().setWidth(caMainTreeColsSize[i]);
                             }
+
+                            bhMainTree.setContentProvider(new ProcessTreeContentProvider());
+                            bhMainTree.setLabelProvider(new ProcessTreeLabelProvider());
+                            
                             /*bhMainTree.setContentProvider();
                             bhMainTree.setLabelProvider();*/
                             
@@ -610,8 +618,14 @@ public class MainForm extends ApplicationWindow {
             
             @Override
             public void run() {
-               // BlocksHistory.getInstance().save();
-                LOG.info("Блокировка сохранена...");
+                if (processTreeMap.keySet().stream()
+                        .filter(dbcData -> dbcData.getStatus() == DbcStatus.BLOCKED).count() > 0) {
+                    
+                    BlocksHistory.getInstance().save(processTreeMap);
+                    LOG.info("Блокировка сохранена...");
+                } else {
+                    LOG.info("Не найдено блокировок для сохранения");
+                }
             }
         };
 
@@ -620,11 +634,21 @@ public class MainForm extends ApplicationWindow {
         importBlocks = new Action(Images.IMPORT_BLOCKS.getDescription()) {
             @Override
             public void run() {
-                FileDialog fd = new FileDialog(shell);
-                fd.setFilterPath(System.getProperty("user.home") + "/BlocksHistory");
-                fd.setText("Открыть историю блокировок");
-                fd.setFilterExtensions(new String[]{"*.xml"});
-               // BlocksHistory.getInstance().open(fd.open());
+                FileDialog dialog = new FileDialog(shell);
+                dialog.setFilterPath(System.getProperty("user.home") + "/BlocksHistory");
+                dialog.setText("Открыть историю блокировок");
+                dialog.setFilterExtensions(new String[]{"*.xml"});
+                
+                ConcurrentMap<DbcData, Process> map = BlocksHistory.getInstance().open(dialog.open());
+                List<DbcData> ll = new ArrayList<DbcData>();
+                for (DbcData key : map.keySet()) {
+                    bhMainTree.setInput(map.get(key));
+                    ll.add(key);
+                }
+                bhServersTable.setInput(ll);
+                
+                bhMainTree.refresh();
+                bhServersTable.refresh();
             }
         };
 

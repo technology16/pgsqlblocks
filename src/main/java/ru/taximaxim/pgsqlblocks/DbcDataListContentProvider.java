@@ -1,5 +1,7 @@
 package ru.taximaxim.pgsqlblocks;
 
+import java.util.List;
+
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 
@@ -13,7 +15,7 @@ public class DbcDataListContentProvider implements IStructuredContentProvider {
      * @return Object[]
      */
     public Object[] getElements(Object arg0) {
-        return ((DbcDataList) arg0).getList().toArray();
+        return ((List<DbcData>) arg0).toArray();
     }
 
     /**

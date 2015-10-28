@@ -44,10 +44,11 @@ public final class BlocksHistory {
     private static final String XACTSTART = "xactStart";
     private static final String STATE = "state";
     private static final String STATECHANGE = "stateChange";
-    private static final String BLOCKEDBY = "blockedBy";
-    private static final String BLOCKING_LOCKS = "blocking_locks";
+    private static final String BLOCKED = "blocked";
+    private static final String WAITING = "waiting";
     private static final String QUERY = "query";
     private static final String SLOWQUERY = "slowQuery";
+    
     private static final String SERVERS = "servers";
     private static final String SERVER = "server";
     private static final String PROCESS = "process";
@@ -60,6 +61,9 @@ public final class BlocksHistory {
     private ConcurrentMap<DbcData, List<Process>> historyMap;
     private ConcurrentMap<DbcData, List<Process>> oldHistoryMap;
     
+    private Process rootBHProcess;
+    private Process oldRootBHProcess;
+    
     public static BlocksHistory getInstance() {
         if(blocksHistory == null) {
             blocksHistory = new BlocksHistory();
@@ -69,7 +73,7 @@ public final class BlocksHistory {
         }
     }
     
-    public ConcurrentMap<DbcData, List<Process>> getHistoryMap() {
+   /* public ConcurrentMap<DbcData, List<Process>> getHistoryMap() {
         if(historyMap == null){
             historyMap = new ConcurrentHashMap<DbcData, List<Process>>();
         }
@@ -97,7 +101,7 @@ public final class BlocksHistory {
         synchronized (oldHistoryMap) {
             return oldHistoryMap;
         }
-    }
+    }*/
     
     private BlocksHistory() {
         File dir = new File(FILEPATH);
@@ -106,7 +110,7 @@ public final class BlocksHistory {
         }
     }
     
-    public void add(DbcData dbc, Process process) {
+   /* public void add(DbcData dbc, Process process) {
         List<Process> list = getHistoryMap().get(dbc);
         if(list == null) {
             list = new ArrayList<Process>();
@@ -117,34 +121,33 @@ public final class BlocksHistory {
             return;
         }
         list.add(process);
-    }
+    }*/
     
-    public synchronized void save() {
-        if(getHistoryMap().size() == 0){
-            LOG.info("Не найдено блокировок для сохранения");
-            return;
-        }
+    public synchronized void save(ConcurrentMap<DbcData, ProcessTree> processTreeMap) {
         DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
         try {
             DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
             Document doc = docBuilder.newDocument();
             Element rootElement = doc.createElement(SERVERS);
-            for(Entry<DbcData, List<Process>> map : getHistoryMap().entrySet()) {
-                Element server = DbcDataList.getInstance().createServerElement(doc, map.getKey(), false);
-                for(Process process : map.getValue()) {
-                    server.appendChild(createProcessElement(doc, process));
+            for(Entry<DbcData, ProcessTree> map : processTreeMap.entrySet()) {
+                if (map.getKey().getStatus() == DbcStatus.BLOCKED) {
+                    Element server = DbcDataList.getInstance().createServerElement(doc, map.getKey(), false);
+                    for(Process process : map.getValue().getProcessTree().getChildren()) {
+                        if (process.hasChildren()) {
+                            server.appendChild(createProcessElement(doc, process));
+                        }
+                    }
+                    rootElement.appendChild(server);
                 }
-                rootElement.appendChild(server);
             }
             doc.appendChild(rootElement);
             SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy HH-mm-ss");
             Date time = new Date(System.currentTimeMillis());
             String dateTime = sdf.format(time);
-            DbcDataList.getInstance().save(doc, String.format("%s%s-%s.xml", FILEPATH,FILENAME,dateTime));
+            DbcDataList.getInstance().save(doc, String.format("%s%s-%s.xml", FILEPATH, FILENAME, dateTime));
         } catch (ParserConfigurationException e) {
             LOG.error(e);
         }
-        clearHistoryMap();
     }
     
     private void createElement(Element procEl, Element rows, String textContent){
@@ -164,8 +167,8 @@ public final class BlocksHistory {
         createElement(procEl, doc.createElement(XACTSTART), process.getXactStart());
         createElement(procEl, doc.createElement(STATE), process.getState());
         createElement(procEl, doc.createElement(STATECHANGE), process.getStateChange());
-        createElement(procEl, doc.createElement(BLOCKEDBY), String.valueOf(process.getBlockedBy()));
-        createElement(procEl, doc.createElement(BLOCKING_LOCKS), String.valueOf(process.getBlockingLocks()));
+        createElement(procEl, doc.createElement(BLOCKED), String.valueOf(process.getBlockedBy()));
+        createElement(procEl, doc.createElement(WAITING), String.valueOf(process.getBlockingLocks()));
         createElement(procEl, doc.createElement(QUERY), process.getQuery());
         createElement(procEl, doc.createElement(SLOWQUERY), String.valueOf(process.isSlowQuery()));
         
@@ -177,10 +180,11 @@ public final class BlocksHistory {
         return procEl;
     }
     
-    public void open(String path) {
-        clearOldHistoryMap();
+    public ConcurrentMap<DbcData, Process> open(String path) {
+        ConcurrentMap<DbcData, Process> processTreeMap = new ConcurrentHashMap<DbcData, Process>();
+        Process rootProcess = new Process();
         if(path == null) {
-            return;
+            return processTreeMap;
         }
         DocumentBuilderFactory df = DocumentBuilderFactory.newInstance();
         Document doc = null;
@@ -195,13 +199,12 @@ public final class BlocksHistory {
             LOG.error("Ошибка ParserConfigurationException: " + e.getMessage());
         }
         if(doc == null) {
-            return;
+            return processTreeMap;
         }
         NodeList items = doc.getElementsByTagName(SERVER);
         for(int i=0;i<items.getLength();i++) {
             DbcData dbc = null;
             Process proc = null;
-            List<Process> list = new ArrayList<Process>();
             Node node = items.item(i);
             if (node.getNodeType() != Node.ELEMENT_NODE) {
                 continue;
@@ -223,16 +226,13 @@ public final class BlocksHistory {
                 }
                 Element procEl = (Element)processNode;
                 proc = parseProcess(procEl);
-                list.add(proc);
+                rootProcess.addChildren(proc);
             }
-            getOldHistoryMap().put(dbc, list);
+            
+            processTreeMap.put(dbc, rootProcess);
         }
-       /* MainForm.getInstance().getDisplay().asyncExec(new Runnable() {
-            @Override
-            public void run() {
-                MainForm.getInstance().setHistoryMap(getOldHistoryMap());
-            }
-        });*/
+        
+        return processTreeMap;
     }
     
     private Process parseProcess(Element el) {
@@ -247,8 +247,8 @@ public final class BlocksHistory {
                 getNodeValue(el, XACTSTART),
                 getNodeValue(el, STATE),
                 getNodeValue(el, STATECHANGE),
-                Integer.parseInt(getNodeValue(el, BLOCKEDBY)),
-                Integer.parseInt(getNodeValue(el, BLOCKING_LOCKS)),
+                Integer.parseInt(getNodeValue(el, BLOCKED)),
+                Integer.parseInt(getNodeValue(el, WAITING)),
                 getNodeValue(el, QUERY),
                 Boolean.parseBoolean(getNodeValue(el, SLOWQUERY))
                 );
