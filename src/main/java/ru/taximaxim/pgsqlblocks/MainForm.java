@@ -7,6 +7,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.jar.Attributes;
@@ -357,8 +358,9 @@ public class MainForm extends ApplicationWindow {
                         procComposite.setVisible(false);
                         caTreeSf.layout(false, false);
                     }
-                    if (selectedDbcData.getStatus() == DbcStatus.ERROR ||
-                            selectedDbcData.getStatus() == DbcStatus.DISABLED) {
+                    if (selectedDbcData != null &&
+                            (selectedDbcData.getStatus() == DbcStatus.ERROR ||
+                            selectedDbcData.getStatus() == DbcStatus.DISABLED)) {
                         
                         deleteDB.setEnabled(true);
                         editDB.setEnabled(true);
@@ -561,12 +563,13 @@ public class MainForm extends ApplicationWindow {
                 dialog.setFilterExtensions(new String[]{"*.xml"});
                 
                 ConcurrentMap<DbcData, Process> map = BlocksHistory.getInstance().open(dialog.open());
-                List<DbcData> ll = new ArrayList<DbcData>();
-                for (DbcData key : map.keySet()) {
-                    bhMainTree.setInput(map.get(key));
-                    ll.add(key);
+                List<DbcData> blockedDbsData = new ArrayList<DbcData>();
+                for (Map.Entry<DbcData, Process> entry : map.entrySet())
+                {
+                    bhMainTree.setInput(entry.getValue());
+                    blockedDbsData.add(entry.getKey());
                 }
-                bhServersTable.setInput(ll);
+                bhServersTable.setInput(blockedDbsData);
                 
                 bhMainTree.refresh();
                 bhServersTable.refresh();

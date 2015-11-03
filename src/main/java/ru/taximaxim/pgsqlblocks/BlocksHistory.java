@@ -53,11 +53,9 @@ public final class BlocksHistory {
         if(instance == null) {
             instance = new BlocksHistory();
         }
-        synchronized (instance) {
-            return instance;
-        }
+        return instance;
     }
-    
+
     private BlocksHistory() {
         File blockHistoryFile  = PathBuilder.getInstance().getBlockHistoryPath().toFile();
         docWorker = new XmlDocumentWorker(blockHistoryFile);
