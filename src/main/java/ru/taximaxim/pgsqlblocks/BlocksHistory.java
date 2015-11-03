@@ -61,7 +61,7 @@ public final class BlocksHistory {
         docWorker = new XmlDocumentWorker(blockHistoryFile);
     }
     
-    public synchronized void save(ConcurrentMap<DbcData, ProcessTreeBuilder> processTreeMap) {
+    public void save(ConcurrentMap<DbcData, ProcessTreeBuilder> processTreeMap) {
         DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
         try {
             DocumentBuilder docBuilder = docFactory.newDocumentBuilder();

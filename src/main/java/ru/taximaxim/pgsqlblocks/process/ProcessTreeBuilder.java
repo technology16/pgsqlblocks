@@ -140,17 +140,21 @@ public class ProcessTreeBuilder {
             case DEFAULT:
                 return 0;
             case PID:
-                if(process1.getPid() > process2.getPid())
+                if(process1.getPid() > process2.getPid()) {
                     return sortDirection == SortDirection.UP ? -1 : 1;
-                if(process1.getPid() < process2.getPid())
+                } else if(process1.getPid() < process2.getPid()) {
                     return sortDirection == SortDirection.UP ? 1 : -1;
-                return 0;
+                } else {
+                    return 0;
+                }
             case BLOCKED_COUNT:
-                if(process1.getChildrensCount() > process2.getChildrensCount())
+                if(process1.getChildrensCount() > process2.getChildrensCount()) {
                     return sortDirection == SortDirection.UP ? -1 : 1;
-                if(process1.getChildrensCount() < process2.getChildrensCount())
+                } else if(process1.getChildrensCount() < process2.getChildrensCount()) {
                     return sortDirection == SortDirection.UP ? 1 : -1;
-                return 0;
+                } else {
+                    return 0;
+                }
             case APPLICATION_NAME:
                 return stringCompare(process1.getApplicationName(), process2.getApplicationName(), sortDirection);
             case DATNAME:
@@ -177,21 +181,25 @@ public class ProcessTreeBuilder {
                 return stringCompare(process1.getQuery(), process2.getQuery(), sortDirection);
             case SLOWQUERY:
                 if(sortDirection == SortDirection.UP) {
-                    if(process1.isSlowQuery() && process2.isSlowQuery())
+                    if(process1.isSlowQuery() && process2.isSlowQuery()) {
                         return 0;
-                    if(process1.isSlowQuery() && !process2.isSlowQuery()) 
+                    } else if(process1.isSlowQuery() && !process2.isSlowQuery()) {
                         return 1;
-                    if(!process1.isSlowQuery() && process2.isSlowQuery())
+                    } else if(!process1.isSlowQuery() && process2.isSlowQuery()) {
                         return -1;
-                    return 0;
+                    } else {
+                        return 0;
+                    }
                 } else {
-                    if(process1.isSlowQuery() && process2.isSlowQuery())
+                    if(process1.isSlowQuery() && process2.isSlowQuery()) {
                         return 0;
-                    if(!process1.isSlowQuery() && process2.isSlowQuery()) 
+                    } else if(!process1.isSlowQuery() && process2.isSlowQuery()) {
                         return 1;
-                    if(process1.isSlowQuery() && !process2.isSlowQuery())
+                    } else if(process1.isSlowQuery() && !process2.isSlowQuery()) {
                         return -1;
-                    return 0;
+                    } else {
+                        return 0;
+                    }
                 }
             default:
                 return 0;

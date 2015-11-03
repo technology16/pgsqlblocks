@@ -10,7 +10,7 @@ import java.util.Date;
 
 import org.apache.log4j.Logger;
 
-public class PathBuilder {
+final public class PathBuilder {
     
     private static final Logger LOG = Logger.getLogger(PathBuilder.class);
     

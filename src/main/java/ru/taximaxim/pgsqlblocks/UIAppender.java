@@ -33,8 +33,9 @@ public class UIAppender extends WriterAppender{
     }
 
     public void append(LoggingEvent event) {
-        if(display == null || display.isDisposed() || parent ==null || parent.isDisposed() || text == null)
+        if(display == null || display.isDisposed() || parent ==null || parent.isDisposed() || text == null) {
             return;
+        }
         SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
         Date time = new Date(event.getTimeStamp());
         String dateTime = sdf.format(time);
@@ -44,14 +45,14 @@ public class UIAppender extends WriterAppender{
             return;
         }
         try{
-            excMessage = (String)message;
+            excMessage = (String) message;
         } catch(Exception e) {
             e.printStackTrace();
         }
         if(excMessage.isEmpty()) {
             return;
         }
-        final String logMessage = String.format("[%s] %s\n",dateTime,excMessage);
+        final String logMessage = String.format("[%s] %s%n", dateTime,excMessage);
         parent.getDisplay().asyncExec(() -> text.append(logMessage));
     }
 }

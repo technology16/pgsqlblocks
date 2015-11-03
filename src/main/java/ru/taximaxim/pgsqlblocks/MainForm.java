@@ -66,6 +66,8 @@ public class MainForm extends ApplicationWindow {
     private static final Logger LOG = Logger.getLogger(MainForm.class);
     
     private static final String APP_NAME = "pgSqlBlocks";
+    private static final String SORT_DIRECTION = "sortDirection";
+    private static final String PID = " pid=";
     private static final int ZERO_MARGIN = 0;
     private static final int[] VERTICAL_WEIGHTS = new int[] {80, 20};
     private static final int[] HORIZONTAL_WEIGHTS = new int[] {12, 88};
@@ -231,7 +233,7 @@ public class MainForm extends ApplicationWindow {
                                 treeColumn.getColumn().setText(caMainTreeColsName[i]);
                                 treeColumn.getColumn().setWidth(caMainTreeColsSize[i]);
                                 treeColumn.getColumn().setData("colName",caColName[i]);
-                                treeColumn.getColumn().setData("sortDirection", SortDirection.UP);
+                                treeColumn.getColumn().setData(SORT_DIRECTION, SortDirection.UP);
                             }
                             caMainTree.setContentProvider(new ProcessTreeContentProvider());
                             caMainTree.setLabelProvider(new ProcessTreeLabelProvider());
@@ -388,8 +390,8 @@ public class MainForm extends ApplicationWindow {
                 public void handleEvent(Event event) {
                     
                     caMainTree.getTree().setSortColumn(column);
-                    column.setData("sortDirection", ((SortDirection)column.getData("sortDirection")).getOpposite());
-                    sortDirection = (SortDirection)column.getData("sortDirection");
+                    column.setData(SORT_DIRECTION, ((SortDirection)column.getData(SORT_DIRECTION)).getOpposite());
+                    sortDirection = (SortDirection)column.getData(SORT_DIRECTION);
                     caMainTree.getTree().setSortDirection(sortDirection.getSwtData());
                     sortColumn = SortColumn.valueOf((String)column.getData("colName"));
                     
@@ -635,9 +637,9 @@ public class MainForm extends ApplicationWindow {
             LOG.error(selectedDbcData.getName() + " " + e.getMessage(), e);
         }
         if(kill) {
-            LOG.info(selectedDbcData.getName() + " pid=" + pid + " is terminated.");
+            LOG.info(selectedDbcData.getName() + PID + pid + " is terminated.");
         } else {
-            LOG.info(selectedDbcData.getName() + " pid=" + pid + " is terminated failed.");
+            LOG.info(selectedDbcData.getName() + PID + pid + " is terminated failed.");
         }
     }
 
@@ -657,9 +659,9 @@ public class MainForm extends ApplicationWindow {
             LOG.error(selectedDbcData.getName() + " " + e.getMessage(), e);
         }
         if(kill) {
-            LOG.info(selectedDbcData.getName() + " pid=" + pid + " is canceled.");
+            LOG.info(selectedDbcData.getName() + PID + pid + " is canceled.");
         } else {
-            LOG.info(selectedDbcData.getName() + " pid=" + pid + " is canceled failed.");
+            LOG.info(selectedDbcData.getName() + PID + pid + " is canceled failed.");
         }
     }
     
@@ -675,74 +677,5 @@ public class MainForm extends ApplicationWindow {
         
         bhMainTree.refresh();
     }
-    
-   /* private int stringCompare(String s1, String s2) {
-        return sortDirection == SortDirection.DOWN ? s1.compareTo(s2) : s2.compareTo(s1);
-    }
-    
-    private void processSort(Process rootProcess) {
-        rootProcess.getChildren().sort((Process process1, Process process2) -> {
-            switch (sortColumn) {
-            case DEFAULT:
-                return 0;
-            case PID:
-                if(process1.getPid() > process2.getPid())
-                    return sortDirection == SortDirection.UP ? -1 : 1;
-                if(process1.getPid() < process2.getPid())
-                    return sortDirection == SortDirection.UP ? 1 : -1;
-                return 0;
-            case BLOCKED_COUNT:
-                if(process1.getChildrensCount() > process2.getChildrensCount())
-                    return sortDirection == SortDirection.UP ? -1 : 1;
-                if(process1.getChildrensCount() < process2.getChildrensCount())
-                    return sortDirection == SortDirection.UP ? 1 : -1;
-                return 0;
-            case APPLICATION_NAME:
-                return stringCompare(process1.getApplicationName(), process2.getApplicationName());
-            case DATNAME:
-                return stringCompare(process1.getDatname(), process2.getDatname());
-            case USENAME:
-                return stringCompare(process1.getUsename(), process2.getUsename());
-            case CLIENT:
-                return stringCompare(process1.getClient(), process2.getClient());
-            case BACKEND_START:
-                return stringCompare(process1.getBackendStart(), process2.getBackendStart());
-            case QUERY_START:
-                return stringCompare(process1.getQueryStart(), process2.getQueryStart());
-            case XACT_STAT:
-                return stringCompare(process1.getXactStart(), process2.getXactStart());
-            case STATE:
-                return stringCompare(process1.getState(), process2.getState());
-            case STATE_CHANGE:
-                return stringCompare(process1.getStateChange(), process2.getStateChange());
-            case BLOCKED:
-                return 0;
-            case WAITING:
-                return 0;
-            case QUERY:
-                return stringCompare(process1.getQuery(), process2.getQuery());
-            case SLOWQUERY:
-                if(sortDirection == SortDirection.UP) {
-                    if(process1.isSlowQuery() && process2.isSlowQuery())
-                        return 0;
-                    if(process1.isSlowQuery() && !process2.isSlowQuery()) 
-                        return 1;
-                    if(!process1.isSlowQuery() && process2.isSlowQuery())
-                        return -1;
-                    return 0;
-                } else {
-                    if(process1.isSlowQuery() && process2.isSlowQuery())
-                        return 0;
-                    if(!process1.isSlowQuery() && process2.isSlowQuery()) 
-                        return 1;
-                    if(process1.isSlowQuery() && !process2.isSlowQuery())
-                        return -1;
-                    return 0;
-                }
-            default:
-                return 0;
-            }
-        });
-    }*/
 }
 
