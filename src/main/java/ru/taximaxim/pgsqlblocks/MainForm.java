@@ -48,7 +48,7 @@ import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.swt.widgets.TreeColumn;
 
 import ru.taximaxim.pgsqlblocks.dbcdata.DbcData;
-import ru.taximaxim.pgsqlblocks.dbcdata.DbcDataList;
+import ru.taximaxim.pgsqlblocks.dbcdata.DbcDataListBuilder;
 import ru.taximaxim.pgsqlblocks.dbcdata.DbcDataListContentProvider;
 import ru.taximaxim.pgsqlblocks.dbcdata.DbcDataListLabelProvider;
 import ru.taximaxim.pgsqlblocks.dbcdata.DbcStatus;
@@ -76,7 +76,7 @@ public class MainForm extends ApplicationWindow {
     private static final int SASH_WIDTH = 2;
     private static final int TIMER_INTERVAL = 10;
     
-    private DbcDataList dbcDataList = DbcDataList.getInstance();
+    private DbcDataListBuilder dbcDataList = DbcDataListBuilder.getInstance();
     private DbcData selectedDbcData;
     
     private Process selectedProcess;
@@ -312,7 +312,6 @@ public class MainForm extends ApplicationWindow {
                             
                             caServersTable.setContentProvider(new DbcDataListContentProvider());
                             caServersTable.setLabelProvider(new DbcDataListLabelProvider());
-                            ///dbcDataList.init();
                             caServersTable.setInput(dbcDataList.getList());
                             
                             caServersTable.refresh();
@@ -497,7 +496,6 @@ public class MainForm extends ApplicationWindow {
                     sortColumn = SortColumn.valueOf((String)column.getData("colName"));
                     
                     updateTree();
-                    //caMainTree.setInput(getProcessTree(selectedDbcData));
                 }
             });
         }
@@ -634,10 +632,10 @@ public class MainForm extends ApplicationWindow {
             public void run() {
                 if (onlyBlocked.isChecked()) {
                     onlyBlockedMode = true;
-                    updateTree();
                 } else {
                     onlyBlockedMode = false;
                 }
+                updateTree();
             }
         };
 
@@ -666,7 +664,7 @@ public class MainForm extends ApplicationWindow {
             @Override
             public void run() {
                 FileDialog dialog = new FileDialog(shell);
-                dialog.setFilterPath(System.getProperty("user.home") + "/BlocksHistory");
+                dialog.setFilterPath(PathBuilder.getInstance().getBlockHistoryDir().toString());
                 dialog.setText("Открыть историю блокировок");
                 dialog.setFilterExtensions(new String[]{"*.xml"});
                 

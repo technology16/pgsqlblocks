@@ -14,7 +14,7 @@ public class PathBuilder {
     
     private static final Logger LOG = Logger.getLogger(PathBuilder.class);
     
-    private static PathBuilder pathBuilder;
+    private static PathBuilder instance;
     
     private Path path;
     
@@ -35,13 +35,13 @@ public class PathBuilder {
     }
     
     public static PathBuilder getInstance() {
-        if(pathBuilder == null) {
-            pathBuilder = new PathBuilder();
+        if(instance == null) {
+            instance = new PathBuilder();
         }
-        return pathBuilder;
+        return instance;
     }
     
-    public Path getBlockHistoryPath() {
+    public Path getBlockHistoryDir() {
         Path blocksHistoryDir = Paths.get(path.toString(), "blocksHistory");
         if (Files.notExists(blocksHistoryDir)) {
             try {
@@ -50,6 +50,11 @@ public class PathBuilder {
                 LOG.error("Ошибка создания директории pgSqlBlocks/blocksHistory: " + e.getMessage());
             }
         }
+        return blocksHistoryDir;
+    }
+    
+    public Path getBlockHistoryPath() {
+        Path blocksHistoryDir = getBlockHistoryDir();
         SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy HH-mm-ss");
         Date time = new Date(System.currentTimeMillis());
         String dateTime = sdf.format(time);

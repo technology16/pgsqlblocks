@@ -9,9 +9,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 import org.apache.log4j.Logger;
 
@@ -39,7 +39,7 @@ public class ProcessTreeBuilder {
     
     private String query;
     private DbcData dbcData;
-    private List<Process> tempProcessList = new ArrayList<Process>();
+    private Set<Process> tempProcessList = new LinkedHashSet<Process>();
 
     private Process rootProcess;
     private Process blockedRootProcess;
@@ -68,7 +68,7 @@ public class ProcessTreeBuilder {
         return blockedRootProcess;
     }
 
-    public List<Process> buildProcessTree() {
+    public Set<Process> buildProcessTree() {
         tempProcessList.clear();
         if (dbcData.getConnection() == null) {
             return tempProcessList;
@@ -143,7 +143,7 @@ public class ProcessTreeBuilder {
         return sdfp.format(date);
     }
 
-    private Process getProcessByPid(List<Process> processList, int pid) {
+    private Process getProcessByPid(Set<Process> processList, int pid) {
         return processList.stream().filter(process -> process.getPid() == pid).findFirst().get();
     }
     
