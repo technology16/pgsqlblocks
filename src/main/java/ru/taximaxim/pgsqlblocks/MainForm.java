@@ -13,8 +13,11 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 
+import org.apache.log4j.ConsoleAppender;
+import org.apache.log4j.DailyRollingFileAppender;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
+import org.apache.log4j.PatternLayout;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.action.ToolBarManager;
@@ -133,6 +136,16 @@ public class MainForm extends ApplicationWindow {
     
     public static void main(String[] args) {
         try {
+            Logger rootLogger = Logger.getRootLogger();
+            rootLogger.setLevel(Level.INFO);
+            PatternLayout layout = new PatternLayout("%d{ISO8601} [%t] %-5p %c %x - %m%n");
+            rootLogger.addAppender(new ConsoleAppender(layout));
+            try {
+                DailyRollingFileAppender fileAppender = new DailyRollingFileAppender(layout, PathBuilder.getInstance().getLogsPath().toString(), "yyyy-MM-dd");
+                rootLogger.addAppender(fileAppender);
+            } catch (IOException e) {
+                LOG.error("Произошла ошибка при настройке логирования:", e);
+            }
             display = new Display();
             shell = new Shell(display);
             MainForm wwin = new MainForm(shell);

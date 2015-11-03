@@ -30,7 +30,7 @@ public final class PathBuilder {
                 Files.setAttribute(path, "dos:hidden", Boolean.TRUE, LinkOption.NOFOLLOW_LINKS);
             }
         } catch (IOException e) {
-            LOG.error("Ошибка создания директории pgSqlBlocks: " + e.getMessage());
+            LOG.error(String.format("Ошибка создания директории %s: %s", path, e.getMessage()));
         }
     }
     
@@ -47,7 +47,7 @@ public final class PathBuilder {
             try {
                 Files.createDirectory(blocksHistoryDir);
             } catch (IOException e) {
-                LOG.error("Ошибка создания директории pgSqlBlocks/blocksHistory: " + e.getMessage());
+                LOG.error(String.format("Ошибка создания директории %s: %s", blocksHistoryDir, e.getMessage()));
             }
         }
         return blocksHistoryDir;
@@ -56,10 +56,9 @@ public final class PathBuilder {
     public Path getBlockHistoryPath() {
         Path blocksHistoryDir = getBlockHistoryDir();
         SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy HH-mm-ss");
-        Date time = new Date(System.currentTimeMillis());
-        String dateTime = sdf.format(time);
+        String dateTime = sdf.format(new Date(System.currentTimeMillis()));
         
-        return Paths.get(blocksHistoryDir.toString(), String.format("%s-%s.xml", "blocksHistory", dateTime));
+        return Paths.get(blocksHistoryDir.toString(), String.format("blocksHistory-%s.xml", dateTime));
     }
     
     public Path getServersPath() {
@@ -68,9 +67,31 @@ public final class PathBuilder {
             try {
                 Files.createFile(serversPath);
             } catch (IOException e) {
-                LOG.error("Ошибка создания файла pgSqlBlocks/servers.xml: " + e.getMessage());
+                LOG.error(String.format("Ошибка создания файла %s: %s", serversPath, e.getMessage()));
             }
         }
         return serversPath;
+    }
+    
+    public Path getLogsPath() {
+        Path logsDir = Paths.get(path.toString(), "logs");
+        if (Files.notExists(logsDir)) {
+            try {
+                Files.createDirectory(logsDir);
+            } catch (IOException e) {
+                LOG.error(String.format("Ошибка создания директории %s: %s", logsDir, e.getMessage()));
+            }
+        }
+        SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
+        String date = sdf.format(new Date(System.currentTimeMillis()));
+        Path logsFile = Paths.get(logsDir.toString(), String.format("log-%s.log", date));
+        if (Files.notExists(logsFile)) {
+            try {
+                Files.createFile(logsFile);
+            } catch (IOException e) {
+                LOG.error(String.format("Ошибка создания файла %s: %s", logsFile, e.getMessage()));
+            }
+        }
+        return logsFile;
     }
 }
