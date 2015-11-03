@@ -26,7 +26,7 @@ public final class DbcDataListBuilder {
     private XmlDocumentWorker docWorker;
     private DbcDataParcer dbcDataParcer = new DbcDataParcer();
     
-    private static DbcDataListBuilder instance;
+    private static volatile DbcDataListBuilder instance;
     
     private DbcDataListBuilder() {
         File serversFile  = PathBuilder.getInstance().getServersPath().toFile();
@@ -36,7 +36,11 @@ public final class DbcDataListBuilder {
     
     public static DbcDataListBuilder getInstance() {
         if(instance == null) {
-            instance = new DbcDataListBuilder();
+            synchronized(DbcDataListBuilder.class) {
+                if(instance == null) {
+                    instance=new DbcDataListBuilder();
+                }
+            }
         }
         return instance;
     }

@@ -43,7 +43,7 @@ public final class BlocksHistory {
     private static final String SERVERS = "servers";
     private static final String SERVER = "server";
     private static final String PROCESS = "process";
-    private static BlocksHistory instance;
+    private static volatile BlocksHistory instance;
     
     private XmlDocumentWorker docWorker;
     private DbcDataParcer dbcDataParcer = new DbcDataParcer();
@@ -51,7 +51,11 @@ public final class BlocksHistory {
     
     public static BlocksHistory getInstance() {
         if(instance == null) {
-            instance = new BlocksHistory();
+            synchronized(BlocksHistory.class) {
+                if(instance == null) {
+                    instance=new BlocksHistory();
+                }
+            }
         }
         return instance;
     }

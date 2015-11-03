@@ -79,9 +79,6 @@ public class MainForm extends ApplicationWindow {
     
     private DbcData selectedDbcData;
     private Process selectedProcess;
-    private Label appVersionLabel;
-    private ToolItem terminateProc;
-    private ToolItem cancelProc;
     private Text procText;
     private SashForm caTreeSf;
     private TableViewer caServersTable;
@@ -89,20 +86,13 @@ public class MainForm extends ApplicationWindow {
     private Composite procComposite;
     private TableViewer bhServersTable;
     private TreeViewer bhMainTree;
-    private Composite logComposite;
-    private ToolBarManager toolBarManager;
-    private Action addDb;
     private Action deleteDB;
     private Action editDB;
     private Action connectDB;
     private Action disconnectDB;
-    private Action update;
     private Action autoUpdate;
     private Action onlyBlocked;
-    private Action exportBlocks;
-    private Action importBlocks;
     private AddDbcDataDlg addDbcDlg;
-    private AddDbcDataDlg editDbcDlg;
     private boolean autoUpdateMode = true;
     private boolean onlyBlockedMode = false;
     private SortColumn sortColumn = SortColumn.BLOCKED_COUNT;
@@ -246,7 +236,7 @@ public class MainForm extends ApplicationWindow {
                                 procComposite.setVisible(false);
                                 ToolBar pcToolBar = new ToolBar(procComposite, SWT.FLAT | SWT.RIGHT);
                                 pcToolBar.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
-                                terminateProc = new ToolItem(pcToolBar, SWT.PUSH);
+                                ToolItem terminateProc = new ToolItem(pcToolBar, SWT.PUSH);
                                 terminateProc.setText("Уничтожить процесс");
                                 terminateProc.addListener(SWT.Selection, event -> {
                                     if (selectedProcess != null) {
@@ -256,7 +246,7 @@ public class MainForm extends ApplicationWindow {
                                     }
                                 });
                                 
-                                cancelProc = new ToolItem(pcToolBar, SWT.PUSH);
+                                ToolItem cancelProc = new ToolItem(pcToolBar, SWT.PUSH);
                                 cancelProc.setText("Послать сигнал отмены процесса");
                                 cancelProc.addListener(SWT.Selection, event -> {
                                     if (selectedProcess != null) {
@@ -317,7 +307,7 @@ public class MainForm extends ApplicationWindow {
                     blocksHistoryTi.setControl(blocksHistorySf);
                 }
             }
-            logComposite = new Composite(verticalSf, SWT.NONE);
+            Composite logComposite = new Composite(verticalSf, SWT.NONE);
             {
                 logComposite.setLayout(gridLayout);
             }
@@ -330,7 +320,7 @@ public class MainForm extends ApplicationWindow {
             {
                 statusBar.setLayout(gridLayout);
                 statusBar.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, true, false));
-                appVersionLabel = new Label(statusBar, SWT.HORIZONTAL);
+                Label appVersionLabel = new Label(statusBar, SWT.HORIZONTAL);
                 appVersionLabel.setText("PgSqlBlocks v." + getAppVersion());
             }
         }
@@ -404,9 +394,9 @@ public class MainForm extends ApplicationWindow {
     }
     
     protected ToolBarManager createToolBarManager(int style) {
-        toolBarManager = new ToolBarManager(style);
+        ToolBarManager toolBarManager = new ToolBarManager(style);
 
-        addDb = new Action(Images.ADD_DATABASE.getDescription(),
+        Action addDb = new Action(Images.ADD_DATABASE.getDescription(),
                 ImageDescriptor.createFromImage(getImage(Images.ADD_DATABASE))) {
             
             @Override
@@ -441,7 +431,7 @@ public class MainForm extends ApplicationWindow {
             
             @Override
             public void run() {
-                editDbcDlg = new AddDbcDataDlg(shell, selectedDbcData);
+                AddDbcDataDlg editDbcDlg = new AddDbcDataDlg(shell, selectedDbcData);
                 editDbcDlg.open();
                 caServersTable.refresh();
             }
@@ -491,7 +481,7 @@ public class MainForm extends ApplicationWindow {
 
         toolBarManager.add(new Separator());
 
-        update = new Action(Images.UPDATE.getDescription(),
+        Action update = new Action(Images.UPDATE.getDescription(),
                 ImageDescriptor.createFromImage(getImage(Images.UPDATE))) {
             
             @Override
@@ -538,7 +528,7 @@ public class MainForm extends ApplicationWindow {
         onlyBlocked.setChecked(false);
         toolBarManager.add(onlyBlocked);
 
-        exportBlocks = new Action(Images.EXPORT_BLOCKS.getDescription(),
+        Action exportBlocks = new Action(Images.EXPORT_BLOCKS.getDescription(),
                 ImageDescriptor.createFromImage(getImage(Images.EXPORT_BLOCKS))) {
             
             @Override
@@ -556,7 +546,7 @@ public class MainForm extends ApplicationWindow {
 
         toolBarManager.add(exportBlocks);
 
-        importBlocks = new Action(Images.IMPORT_BLOCKS.getDescription()) {
+        Action importBlocks = new Action(Images.IMPORT_BLOCKS.getDescription()) {
             @Override
             public void run() {
                 FileDialog dialog = new FileDialog(shell);

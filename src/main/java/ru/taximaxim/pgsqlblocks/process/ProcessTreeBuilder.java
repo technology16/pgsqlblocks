@@ -43,15 +43,12 @@ public class ProcessTreeBuilder {
     private DbcData dbcData;
     private Set<Process> tempProcessList = new LinkedHashSet<Process>();
 
-    private Process rootProcess;
-    private Process blockedRootProcess;
-
     public ProcessTreeBuilder(DbcData dbcData) {
         this.dbcData = dbcData;
     }
 
     public Process getProcessTree() {
-        rootProcess = new Process();
+        Process rootProcess = new Process();
         
         buildProcessTree().stream()
             .filter(process -> !process.hasParent())
@@ -61,7 +58,7 @@ public class ProcessTreeBuilder {
     }
     
     public Process getOnlyBlockedProcessTree() {
-        blockedRootProcess = new Process();
+        Process blockedRootProcess = new Process();
         
         buildProcessTree().stream()
             .filter(process -> process.hasChildren())
@@ -230,7 +227,7 @@ public class ProcessTreeBuilder {
         if(query == null) {
             try (
                     InputStream input = ClassLoader.getSystemResourceAsStream("query.sql");
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(input));
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(input, "UTF-8"));
                     ) {
                 
                 StringBuilder out = new StringBuilder();
