@@ -1,10 +1,8 @@
-package ru.taximaxim.pgsqlblocks;
+package ru.taximaxim.pgsqlblocks.dbcdata;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
-
-import ru.taximaxim.pgsqlblocks.dbcdata.DbcData;
 
 public class DbcDataParcer {
 

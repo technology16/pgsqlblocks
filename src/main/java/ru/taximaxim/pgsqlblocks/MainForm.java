@@ -56,29 +56,25 @@ import ru.taximaxim.pgsqlblocks.process.Process;
 import ru.taximaxim.pgsqlblocks.process.ProcessTreeBuilder;
 import ru.taximaxim.pgsqlblocks.process.ProcessTreeContentProvider;
 import ru.taximaxim.pgsqlblocks.process.ProcessTreeLabelProvider;
+import ru.taximaxim.pgsqlblocks.utils.Images;
+import ru.taximaxim.pgsqlblocks.utils.PathBuilder;
 
 
 public class MainForm extends ApplicationWindow {
 
-
-    private ConcurrentMap<String, Image> imagesMap = new ConcurrentHashMap<String, Image>();
     private static final Logger LOG = Logger.getLogger(MainForm.class);
     
-    private static Display display;
-    private static Shell shell;
-
-
     private static final String APP_NAME = "pgSqlBlocks";
-    
     private static final int ZERO_MARGIN = 0;
     private static final int[] VERTICAL_WEIGHTS = new int[] {80, 20};
     private static final int[] HORIZONTAL_WEIGHTS = new int[] {12, 88};
     private static final int SASH_WIDTH = 2;
     private static final int TIMER_INTERVAL = 10;
     
-    private DbcDataListBuilder dbcDataList = DbcDataListBuilder.getInstance();
-    private DbcData selectedDbcData;
+    private static Display display;
+    private static Shell shell;
     
+    private DbcData selectedDbcData;
     private Process selectedProcess;
     private Label appVersionLabel;
     private ToolItem terminateProc;
@@ -91,7 +87,6 @@ public class MainForm extends ApplicationWindow {
     private TableViewer bhServersTable;
     private TreeViewer bhMainTree;
     private Composite logComposite;
-    
     private ToolBarManager toolBarManager;
     private Action addDb;
     private Action deleteDB;
@@ -103,17 +98,16 @@ public class MainForm extends ApplicationWindow {
     private Action onlyBlocked;
     private Action exportBlocks;
     private Action importBlocks;
-
     private AddDbcDataDlg addDbcDlg;
     private AddDbcDataDlg editDbcDlg;
-    
-    
     private boolean autoUpdateMode = true;
     private boolean onlyBlockedMode = false;
-    
+    private SortColumn sortColumn = SortColumn.BLOCKED_COUNT;
+    private SortDirection sortDirection = SortDirection.UP;
+    private DbcDataListBuilder dbcDataList = DbcDataListBuilder.getInstance();
+    private ConcurrentMap<String, Image> imagesMap = new ConcurrentHashMap<String, Image>();
     private ConcurrentMap<DbcData, ProcessTreeBuilder> processTreeMap = new ConcurrentHashMap<>();
     private ConcurrentMap<DbcData, ProcessTreeBuilder> blockedProcessTreeMap = new ConcurrentHashMap<>();
-    
     
     private int[] caMainTreeColsSize = new int[]{80, 110, 150, 110, 110, 110, 145, 145, 145, 55, 145, 70, 65, 150, 80};
     private String[] caMainTreeColsName = new String[]{
@@ -123,103 +117,14 @@ public class MainForm extends ApplicationWindow {
     private String[] caColName = {"PID", "BLOCKED_COUNT", "APPLICATION_NAME", "DATNAME", "USENAME", "CLIENT", "BACKEND_START", "QUERY_START",
             "XACT_STAT", "STATE", "STATE_CHANGE", "BLOCKED", "WAITING", "QUERY", "SLOWQUERY"};
     
-    private enum SortColumn{
-        PID, BLOCKED_COUNT, APPLICATION_NAME, DATNAME, USENAME, CLIENT, BACKEND_START, QUERY_START, 
-        XACT_STAT, STATE, STATE_CHANGE, BLOCKED, WAITING, QUERY, SLOWQUERY, DEFAULT;
-    }
-    
-    private enum SortDirection{
-        UP,
-        DOWN;
-        public SortDirection getOpposite() {
-            if(this == UP)
-                return DOWN;
-            return UP;
-        }
-        public int getSwtData(){
-            if(this == UP)
-                return SWT.UP;
-            return SWT.DOWN;
-        }
-    }
-    
-    private SortColumn sortColumn = SortColumn.BLOCKED_COUNT;
-    private SortDirection sortDirection = SortDirection.UP;
-    
-   
-
     public Process getProcessTree(DbcData dbcData) {
         ProcessTreeBuilder processTree = processTreeMap.get(dbcData);
         if(processTree == null){
             processTree = new ProcessTreeBuilder(dbcData);
             processTreeMap.put(dbcData, processTree);
         }
-        
         Process rootProcess = processTree.getProcessTree();
-        
-        rootProcess.getChildren().sort((Process process1, Process process2) -> {
-            switch (sortColumn) {
-            case DEFAULT:
-                return 0;
-            case PID:
-                if(process1.getPid() > process2.getPid())
-                    return sortDirection == SortDirection.UP ? -1 : 1;
-                if(process1.getPid() < process2.getPid())
-                    return sortDirection == SortDirection.UP ? 1 : -1;
-                return 0;
-            case BLOCKED_COUNT:
-                if(process1.getChildrensCount() > process2.getChildrensCount())
-                    return sortDirection == SortDirection.UP ? -1 : 1;
-                if(process1.getChildrensCount() < process2.getChildrensCount())
-                    return sortDirection == SortDirection.UP ? 1 : -1;
-                return 0;
-            case APPLICATION_NAME:
-                return stringCompare(process1.getApplicationName(), process2.getApplicationName());
-            case DATNAME:
-                return stringCompare(process1.getDatname(), process2.getDatname());
-            case USENAME:
-                return stringCompare(process1.getUsename(), process2.getUsename());
-            case CLIENT:
-                return stringCompare(process1.getClient(), process2.getClient());
-            case BACKEND_START:
-                return stringCompare(process1.getBackendStart(), process2.getBackendStart());
-            case QUERY_START:
-                return stringCompare(process1.getQueryStart(), process2.getQueryStart());
-            case XACT_STAT:
-                return stringCompare(process1.getXactStart(), process2.getXactStart());
-            case STATE:
-                return stringCompare(process1.getState(), process2.getState());
-            case STATE_CHANGE:
-                return stringCompare(process1.getStateChange(), process2.getStateChange());
-            case BLOCKED:
-                return 0;
-            case WAITING:
-                return 0;
-            case QUERY:
-                return stringCompare(process1.getQuery(), process2.getQuery());
-            case SLOWQUERY:
-                if(sortDirection == SortDirection.UP) {
-                    if(process1.isSlowQuery() && process2.isSlowQuery())
-                        return 0;
-                    if(process1.isSlowQuery() && !process2.isSlowQuery()) 
-                        return 1;
-                    if(!process1.isSlowQuery() && process2.isSlowQuery())
-                        return -1;
-                    return 0;
-                } else {
-                    if(process1.isSlowQuery() && process2.isSlowQuery())
-                        return 0;
-                    if(!process1.isSlowQuery() && process2.isSlowQuery()) 
-                        return 1;
-                    if(process1.isSlowQuery() && !process2.isSlowQuery())
-                        return -1;
-                    return 0;
-                }
-            default:
-                return 0;
-            }
-        });
-        
+        processTree.processSort(rootProcess, sortColumn, sortDirection);
         return rootProcess;
     }
     
@@ -305,15 +210,12 @@ public class MainForm extends ApplicationWindow {
                             caServersTable.getTable().setHeaderVisible(true);
                             caServersTable.getTable().setLinesVisible(true);
                             caServersTable.getTable().setLayoutData(gridData);
-                            
                             TableViewerColumn tvColumn = new TableViewerColumn(caServersTable, SWT.NONE);
                             tvColumn.getColumn().setText("Сервер");
                             tvColumn.getColumn().setWidth(200);
-                            
                             caServersTable.setContentProvider(new DbcDataListContentProvider());
                             caServersTable.setLabelProvider(new DbcDataListLabelProvider());
                             caServersTable.setInput(dbcDataList.getList());
-                            
                             caServersTable.refresh();
                         }
                         
@@ -327,7 +229,6 @@ public class MainForm extends ApplicationWindow {
                                 TreeViewerColumn treeColumn = new TreeViewerColumn(caMainTree, SWT.NONE);
                                 treeColumn.getColumn().setText(caMainTreeColsName[i]);
                                 treeColumn.getColumn().setWidth(caMainTreeColsSize[i]);
-
                                 treeColumn.getColumn().setData("colName",caColName[i]);
                                 treeColumn.getColumn().setData("sortDirection", SortDirection.UP);
                             }
@@ -340,10 +241,8 @@ public class MainForm extends ApplicationWindow {
                                 GridData procCompositeGd = new GridData(SWT.FILL, SWT.FILL, true, true);
                                 procComposite.setLayoutData(procCompositeGd);
                                 procComposite.setVisible(false);
-                                
                                 ToolBar pcToolBar = new ToolBar(procComposite, SWT.FLAT | SWT.RIGHT);
                                 pcToolBar.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
-                                
                                 terminateProc = new ToolItem(pcToolBar, SWT.PUSH);
                                 terminateProc.setText("Уничтожить процесс");
                                 terminateProc.addListener(SWT.Selection, event -> {
@@ -390,11 +289,9 @@ public class MainForm extends ApplicationWindow {
                             bhServersTable.getTable().setHeaderVisible(true);
                             bhServersTable.getTable().setLinesVisible(true);
                             bhServersTable.getTable().setLayoutData(gridData);
-                            
                             TableViewerColumn serversTc = new TableViewerColumn(bhServersTable, SWT.NONE);
                             serversTc.getColumn().setText("Сервер");
                             serversTc.getColumn().setWidth(200);
-                            
                             bhServersTable.setContentProvider(new DbcDataListContentProvider());
                             bhServersTable.setLabelProvider(new DbcDataListLabelProvider());
                         }
@@ -409,7 +306,6 @@ public class MainForm extends ApplicationWindow {
                                 treeColumn.getColumn().setText(caMainTreeColsName[i]);
                                 treeColumn.getColumn().setWidth(caMainTreeColsSize[i]);
                             }
-
                             bhMainTree.setContentProvider(new ProcessTreeContentProvider());
                             bhMainTree.setLabelProvider(new ProcessTreeLabelProvider());
                         }
@@ -558,12 +454,10 @@ public class MainForm extends ApplicationWindow {
             @Override
             public void run() {
                selectedDbcData.connect();
-               
                deleteDB.setEnabled(false);
                editDB.setEnabled(false);
                connectDB.setEnabled(false);
                disconnectDB.setEnabled(true);
-               
                updateTree();
                caServersTable.refresh();
                display.timerExec(1000, timer);
@@ -579,12 +473,10 @@ public class MainForm extends ApplicationWindow {
             @Override
             public void run() {
                 selectedDbcData.disconnect();
-                
                 deleteDB.setEnabled(true);
                 editDB.setEnabled(true);
                 connectDB.setEnabled(true);
                 disconnectDB.setEnabled(false);
-                
                 updateTree();
                 caServersTable.refresh();
             }
@@ -781,8 +673,73 @@ public class MainForm extends ApplicationWindow {
         bhMainTree.refresh();
     }
     
-    private int stringCompare(String s1, String s2) {
+   /* private int stringCompare(String s1, String s2) {
         return sortDirection == SortDirection.DOWN ? s1.compareTo(s2) : s2.compareTo(s1);
     }
+    
+    private void processSort(Process rootProcess) {
+        rootProcess.getChildren().sort((Process process1, Process process2) -> {
+            switch (sortColumn) {
+            case DEFAULT:
+                return 0;
+            case PID:
+                if(process1.getPid() > process2.getPid())
+                    return sortDirection == SortDirection.UP ? -1 : 1;
+                if(process1.getPid() < process2.getPid())
+                    return sortDirection == SortDirection.UP ? 1 : -1;
+                return 0;
+            case BLOCKED_COUNT:
+                if(process1.getChildrensCount() > process2.getChildrensCount())
+                    return sortDirection == SortDirection.UP ? -1 : 1;
+                if(process1.getChildrensCount() < process2.getChildrensCount())
+                    return sortDirection == SortDirection.UP ? 1 : -1;
+                return 0;
+            case APPLICATION_NAME:
+                return stringCompare(process1.getApplicationName(), process2.getApplicationName());
+            case DATNAME:
+                return stringCompare(process1.getDatname(), process2.getDatname());
+            case USENAME:
+                return stringCompare(process1.getUsename(), process2.getUsename());
+            case CLIENT:
+                return stringCompare(process1.getClient(), process2.getClient());
+            case BACKEND_START:
+                return stringCompare(process1.getBackendStart(), process2.getBackendStart());
+            case QUERY_START:
+                return stringCompare(process1.getQueryStart(), process2.getQueryStart());
+            case XACT_STAT:
+                return stringCompare(process1.getXactStart(), process2.getXactStart());
+            case STATE:
+                return stringCompare(process1.getState(), process2.getState());
+            case STATE_CHANGE:
+                return stringCompare(process1.getStateChange(), process2.getStateChange());
+            case BLOCKED:
+                return 0;
+            case WAITING:
+                return 0;
+            case QUERY:
+                return stringCompare(process1.getQuery(), process2.getQuery());
+            case SLOWQUERY:
+                if(sortDirection == SortDirection.UP) {
+                    if(process1.isSlowQuery() && process2.isSlowQuery())
+                        return 0;
+                    if(process1.isSlowQuery() && !process2.isSlowQuery()) 
+                        return 1;
+                    if(!process1.isSlowQuery() && process2.isSlowQuery())
+                        return -1;
+                    return 0;
+                } else {
+                    if(process1.isSlowQuery() && process2.isSlowQuery())
+                        return 0;
+                    if(!process1.isSlowQuery() && process2.isSlowQuery()) 
+                        return 1;
+                    if(process1.isSlowQuery() && !process2.isSlowQuery())
+                        return -1;
+                    return 0;
+                }
+            default:
+                return 0;
+            }
+        });
+    }*/
 }
 

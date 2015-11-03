@@ -15,6 +15,8 @@ import java.util.Set;
 
 import org.apache.log4j.Logger;
 
+import ru.taximaxim.pgsqlblocks.SortColumn;
+import ru.taximaxim.pgsqlblocks.SortDirection;
 import ru.taximaxim.pgsqlblocks.dbcdata.DbcData;
 import ru.taximaxim.pgsqlblocks.dbcdata.DbcStatus;
 
@@ -126,6 +128,75 @@ public class ProcessTreeBuilder {
         }
 
         return tempProcessList;
+    }
+    
+    private int stringCompare(String s1, String s2, SortDirection sortDirection) {
+        return sortDirection == SortDirection.DOWN ? s1.compareTo(s2) : s2.compareTo(s1);
+    }
+    
+    public void processSort(Process rootProcess, SortColumn sortColumn, SortDirection sortDirection) {
+        rootProcess.getChildren().sort((Process process1, Process process2) -> {
+            switch (sortColumn) {
+            case DEFAULT:
+                return 0;
+            case PID:
+                if(process1.getPid() > process2.getPid())
+                    return sortDirection == SortDirection.UP ? -1 : 1;
+                if(process1.getPid() < process2.getPid())
+                    return sortDirection == SortDirection.UP ? 1 : -1;
+                return 0;
+            case BLOCKED_COUNT:
+                if(process1.getChildrensCount() > process2.getChildrensCount())
+                    return sortDirection == SortDirection.UP ? -1 : 1;
+                if(process1.getChildrensCount() < process2.getChildrensCount())
+                    return sortDirection == SortDirection.UP ? 1 : -1;
+                return 0;
+            case APPLICATION_NAME:
+                return stringCompare(process1.getApplicationName(), process2.getApplicationName(), sortDirection);
+            case DATNAME:
+                return stringCompare(process1.getDatname(), process2.getDatname(), sortDirection);
+            case USENAME:
+                return stringCompare(process1.getUsename(), process2.getUsename(), sortDirection);
+            case CLIENT:
+                return stringCompare(process1.getClient(), process2.getClient(), sortDirection);
+            case BACKEND_START:
+                return stringCompare(process1.getBackendStart(), process2.getBackendStart(), sortDirection);
+            case QUERY_START:
+                return stringCompare(process1.getQueryStart(), process2.getQueryStart(), sortDirection);
+            case XACT_STAT:
+                return stringCompare(process1.getXactStart(), process2.getXactStart(), sortDirection);
+            case STATE:
+                return stringCompare(process1.getState(), process2.getState(), sortDirection);
+            case STATE_CHANGE:
+                return stringCompare(process1.getStateChange(), process2.getStateChange(), sortDirection);
+            case BLOCKED:
+                return 0;
+            case WAITING:
+                return 0;
+            case QUERY:
+                return stringCompare(process1.getQuery(), process2.getQuery(), sortDirection);
+            case SLOWQUERY:
+                if(sortDirection == SortDirection.UP) {
+                    if(process1.isSlowQuery() && process2.isSlowQuery())
+                        return 0;
+                    if(process1.isSlowQuery() && !process2.isSlowQuery()) 
+                        return 1;
+                    if(!process1.isSlowQuery() && process2.isSlowQuery())
+                        return -1;
+                    return 0;
+                } else {
+                    if(process1.isSlowQuery() && process2.isSlowQuery())
+                        return 0;
+                    if(!process1.isSlowQuery() && process2.isSlowQuery()) 
+                        return 1;
+                    if(process1.isSlowQuery() && !process2.isSlowQuery())
+                        return -1;
+                    return 0;
+                }
+            default:
+                return 0;
+            }
+        });
     }
 
     private String dateParse(String dateString) {

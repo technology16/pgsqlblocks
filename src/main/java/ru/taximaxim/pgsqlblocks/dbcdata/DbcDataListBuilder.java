@@ -11,9 +11,8 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import ru.taximaxim.pgsqlblocks.DbcDataParcer;
-import ru.taximaxim.pgsqlblocks.PathBuilder;
-import ru.taximaxim.pgsqlblocks.XmlDocumentWorker;
+import ru.taximaxim.pgsqlblocks.utils.PathBuilder;
+import ru.taximaxim.pgsqlblocks.utils.XmlDocumentWorker;
 
 public final class DbcDataListBuilder {
     

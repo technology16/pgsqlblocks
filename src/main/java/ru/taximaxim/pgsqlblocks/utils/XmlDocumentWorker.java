@@ -1,4 +1,4 @@
-package ru.taximaxim.pgsqlblocks;
+package ru.taximaxim.pgsqlblocks.utils;
 
 import java.io.File;
 import java.io.IOException;
