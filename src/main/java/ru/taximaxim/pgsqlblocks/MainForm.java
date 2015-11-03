@@ -23,6 +23,8 @@ import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.viewers.DoubleClickEvent;
+import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
@@ -380,29 +382,36 @@ public class MainForm extends ApplicationWindow {
                     if (selectedDbcData != null) {
                         updateTree();
                     }
-                    caMainTree.refresh();
-                    caServersTable.refresh();
+                    updateTree();
                 }
             }
         });
         
         for (TreeColumn column : caMainTree.getTree().getColumns()) {
             column.addListener(SWT.Selection, new Listener() {
-
                 @Override
                 public void handleEvent(Event event) {
-                    
                     caMainTree.getTree().setSortColumn(column);
                     column.setData(SORT_DIRECTION, ((SortDirection)column.getData(SORT_DIRECTION)).getOpposite());
                     sortDirection = (SortDirection)column.getData(SORT_DIRECTION);
                     caMainTree.getTree().setSortDirection(sortDirection.getSwtData());
                     sortColumn = SortColumn.valueOf((String)column.getData("colName"));
-                    
                     updateTree();
                 }
             });
         }
         
+        caServersTable.addDoubleClickListener(new IDoubleClickListener() {
+            @Override
+            public void doubleClick(DoubleClickEvent event) {
+                if (!caServersTable.getSelection().isEmpty()) {
+                    IStructuredSelection selected = (IStructuredSelection) event.getSelection();
+                    selectedDbcData = (DbcData) selected.getFirstElement();
+                    selectedDbcData.connect();
+                    updateTree();
+                }
+            }
+        });
         return parent;
     }
     
@@ -678,6 +687,7 @@ public class MainForm extends ApplicationWindow {
         }
         caMainTree.refresh();
         bhMainTree.refresh();
+        caServersTable.refresh();
     }
 }
 
