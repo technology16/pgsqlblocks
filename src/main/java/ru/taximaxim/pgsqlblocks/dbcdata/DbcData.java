@@ -1,4 +1,4 @@
-package ru.taximaxim.pgsqlblocks;
+package ru.taximaxim.pgsqlblocks.dbcdata;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;

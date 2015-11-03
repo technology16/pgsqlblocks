@@ -1,10 +1,10 @@
-package ru.taximaxim.pgsqlblocks;
+package ru.taximaxim.pgsqlblocks.process;
 
-public enum DbcStatus {
-    DISABLED,
-    CONNECTED,
-    ERROR,
-    BLOCKED;
+public enum ProcessStatus {
+    WORKING,
+    BLOCKING,
+    BLOCKED,
+    WAITING;
     
     /**
      * Получение иконки в зависимости от состояния
@@ -12,14 +12,14 @@ public enum DbcStatus {
      */
     public String getImageAddr() {
         switch(this) {
-        case DISABLED:
-            return "images/db_f_16.png";
-        case CONNECTED:
-            return "images/db_t_16.png";
-        case ERROR:
-            return "images/db_e_16.png";
+        case WORKING:
+            return "images/nb_16.png";
+        case BLOCKING:
+            return "images/locker_16.png";
         case BLOCKED:
             return "images/locked_16.png";
+        case WAITING:
+            return "images/waiting_16.png";
         default:
             return "images/void_16.png";
         }

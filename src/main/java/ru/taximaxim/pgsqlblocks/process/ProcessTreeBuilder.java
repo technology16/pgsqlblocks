@@ -1,4 +1,4 @@
-package ru.taximaxim.pgsqlblocks;
+package ru.taximaxim.pgsqlblocks.process;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -15,9 +15,12 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 
-public class ProcessTree {
+import ru.taximaxim.pgsqlblocks.dbcdata.DbcData;
+import ru.taximaxim.pgsqlblocks.dbcdata.DbcStatus;
 
-    private static final Logger LOG = Logger.getLogger(ProcessTree.class);
+public class ProcessTreeBuilder {
+
+    private static final Logger LOG = Logger.getLogger(ProcessTreeBuilder.class);
 
     private static final String PID = "pid";
     private static final String DATNAME = "datname";
@@ -41,14 +44,14 @@ public class ProcessTree {
     private Process rootProcess;
     private Process blockedRootProcess;
 
-    public ProcessTree(DbcData dbcData) {
+    public ProcessTreeBuilder(DbcData dbcData) {
         this.dbcData = dbcData;
     }
 
     public Process getProcessTree() {
         rootProcess = new Process();
         
-        createProcessTree().stream()
+        buildProcessTree().stream()
             .filter(process -> !process.hasParent())
             .forEach(process -> rootProcess.addChildren(process));
         
@@ -58,14 +61,14 @@ public class ProcessTree {
     public Process getOnlyBlockedProcessTree() {
         blockedRootProcess = new Process();
         
-        createProcessTree().stream()
+        buildProcessTree().stream()
             .filter(process -> process.hasChildren())
             .forEach(process -> blockedRootProcess.addChildren(process));
         
         return blockedRootProcess;
     }
 
-    public List<Process> createProcessTree() {
+    public List<Process> buildProcessTree() {
         tempProcessList.clear();
         if (dbcData.getConnection() == null) {
             return tempProcessList;
@@ -141,12 +144,7 @@ public class ProcessTree {
     }
 
     private Process getProcessByPid(List<Process> processList, int pid) {
-        for (Process process : processList) {
-            if (process.getPid() == pid) {
-                return process;
-            }
-        }
-        return null;
+        return processList.stream().filter(process -> process.getPid() == pid).findFirst().get();
     }
     
     private String getQuery() {

@@ -1,4 +1,4 @@
-package ru.taximaxim.pgsqlblocks;
+package ru.taximaxim.pgsqlblocks.dbcdata;
 
 import java.util.List;
 
@@ -15,7 +15,7 @@ public class DbcDataListContentProvider implements IStructuredContentProvider {
      * @return Object[]
      */
     public Object[] getElements(Object arg0) {
-        return ((List<DbcData>) arg0).toArray();
+        return ((List<?>) arg0).toArray();
     }
 
     /**

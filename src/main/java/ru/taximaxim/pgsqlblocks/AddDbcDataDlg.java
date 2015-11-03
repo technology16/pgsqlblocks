@@ -13,10 +13,14 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
+import ru.taximaxim.pgsqlblocks.dbcdata.DbcData;
+import ru.taximaxim.pgsqlblocks.dbcdata.DbcDataList;
+
 public class AddDbcDataDlg extends Dialog {
 
-private static final String DEFAULT_PORT = "5432";
-    
+    private static final String DEFAULT_PORT = "5432";
+    private static final int TEXT_WIDTH = 200;
+
     private Shell shell;
     private DbcData selectedDbcData;
     private Action action;
@@ -57,7 +61,7 @@ private static final String DEFAULT_PORT = "5432";
       container.setLayout(layout);
 
       GridData textGd = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1);
-      textGd.widthHint = MainForm.TEXT_WIDTH;
+      textGd.widthHint = TEXT_WIDTH;
       
       Label nameLabel = new Label(container, SWT.HORIZONTAL);
       nameLabel.setText("Имя соединения");
