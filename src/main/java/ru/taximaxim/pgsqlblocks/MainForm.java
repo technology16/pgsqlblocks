@@ -77,7 +77,7 @@ public class MainForm extends ApplicationWindow {
     private static final int[] VERTICAL_WEIGHTS = new int[] {80, 20};
     private static final int[] HORIZONTAL_WEIGHTS = new int[] {12, 88};
     private static final int SASH_WIDTH = 2;
-    private static final int TIMER_INTERVAL = 10;
+    private static final int TIMER_INTERVAL = 2;
     
     private static Display display;
     private static Shell shell;
@@ -408,7 +408,13 @@ public class MainForm extends ApplicationWindow {
                     IStructuredSelection selected = (IStructuredSelection) event.getSelection();
                     selectedDbcData = (DbcData) selected.getFirstElement();
                     selectedDbcData.connect();
+                    deleteDB.setEnabled(false);
+                    editDB.setEnabled(false);
+                    connectDB.setEnabled(false);
+                    disconnectDB.setEnabled(true);
                     updateTree();
+                    caServersTable.refresh();
+                    display.timerExec(1000, timer);
                 }
             }
         });
