@@ -1,7 +1,6 @@
 package ru.taximaxim.pgsqlblocks;
 
-import java.io.File;
-import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -19,7 +18,6 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
 
 import ru.taximaxim.pgsqlblocks.dbcdata.DbcData;
 import ru.taximaxim.pgsqlblocks.dbcdata.DbcDataParcer;
@@ -61,8 +59,7 @@ public final class BlocksHistory {
     }
 
     private BlocksHistory() {
-        File blockHistoryFile  = PathBuilder.getInstance().getBlockHistoryPath().toFile();
-        docWorker = new XmlDocumentWorker(blockHistoryFile);
+        docWorker = new XmlDocumentWorker();
     }
     
     public void save(ConcurrentMap<DbcData, ProcessTreeBuilder> processTreeMap) {
@@ -95,18 +92,7 @@ public final class BlocksHistory {
         if(path == null) {
             return processTreeMap;
         }
-        DocumentBuilderFactory df = DocumentBuilderFactory.newInstance();
-        Document doc = null;
-        try {
-            DocumentBuilder db = df.newDocumentBuilder();
-            try {
-                doc = db.parse(new File(path));
-            } catch (SAXException | IOException e) {
-                LOG.error("Ошибка при загрузке истории блокировок: " + path);
-            }
-        } catch (ParserConfigurationException e) {
-            LOG.error("Ошибка ParserConfigurationException: " + e.getMessage());
-        }
+        Document doc = docWorker.open(Paths.get(path).toFile());
         if(doc == null) {
             return processTreeMap;
         }

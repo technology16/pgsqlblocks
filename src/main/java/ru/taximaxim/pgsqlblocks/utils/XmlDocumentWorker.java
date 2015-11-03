@@ -24,19 +24,15 @@ public class XmlDocumentWorker {
     private static final Logger LOG = Logger.getLogger(XmlDocumentWorker.class);
     private static final String SERVERS = "servers";
     
-    private File xmlFile;
-    
-    public XmlDocumentWorker(File xmlFile) {
-        this.xmlFile = xmlFile;
-    }
+    public XmlDocumentWorker() {}
 
-    public void save(Document doc, File file) {
+    public void save(Document doc, File xmlFile) {
         TransformerFactory transformerFactory = TransformerFactory.newInstance();
         Transformer transformer;
         try {
             transformer = transformerFactory.newTransformer();
             DOMSource source = new DOMSource(doc);
-            StreamResult result = new StreamResult(file);
+            StreamResult result = new StreamResult(xmlFile);
             try {
                 transformer.transform(source, result);
             } catch (TransformerException e) {
@@ -47,11 +43,7 @@ public class XmlDocumentWorker {
         }
     }
     
-    public void save(Document doc) {
-        save(doc, xmlFile);
-    }
-    
-    public Document open() {
+    public Document open(File xmlFile) {
         DocumentBuilderFactory df = DocumentBuilderFactory.newInstance();
         Document doc = null;
         try {
@@ -59,27 +51,27 @@ public class XmlDocumentWorker {
             try {
                 doc = db.parse(xmlFile);
             } catch (SAXException | IOException e) {
-                LOG.error("Не найден файл конфигурации");
-                createConfFile();
+                LOG.error(String.format("Не найден файл %!", xmlFile), e);
+                createConfFile(xmlFile);
             }
         } catch (ParserConfigurationException e) {
-            LOG.error("Ошибка ParserConfigurationException: " + e.getMessage());
+            LOG.error(String.format("Ошибка парсинга файла %s!", xmlFile), e);
         }
         
         return doc;
     }
     
-    private void createConfFile() {
+    private void createConfFile(File xmlFile) {
         DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
         try {
             DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
             Document doc = docBuilder.newDocument();
             Element rootElement = doc.createElement(SERVERS);
             doc.appendChild(rootElement);
-            save(doc);
+            save(doc, xmlFile);
         } catch (ParserConfigurationException e) {
             LOG.error(e);
         }
-        LOG.info("Создан файл конфигурации " + xmlFile.toString());
+        LOG.info(String.format("Создан файл %s...", xmlFile));
     }
 }

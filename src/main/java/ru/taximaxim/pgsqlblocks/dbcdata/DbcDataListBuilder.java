@@ -23,14 +23,13 @@ public final class DbcDataListBuilder {
     private static final String SERVER = "server";
     
     private List<DbcData> list;
-    private XmlDocumentWorker docWorker;
     private DbcDataParcer dbcDataParcer = new DbcDataParcer();
+    private XmlDocumentWorker docWorker = new XmlDocumentWorker();
+    private File serversFile = PathBuilder.getInstance().getServersPath().toFile();
     
     private static volatile DbcDataListBuilder instance;
     
     private DbcDataListBuilder() {
-        File serversFile  = PathBuilder.getInstance().getServersPath().toFile();
-        docWorker = new XmlDocumentWorker(serversFile);
         init();
     }
     
@@ -53,7 +52,7 @@ public final class DbcDataListBuilder {
     }
     
     public void init() {
-        Document doc = docWorker.open();
+        Document doc = docWorker.open(serversFile);
         if(doc == null) {
             return;
         }
@@ -74,10 +73,10 @@ public final class DbcDataListBuilder {
             return;
         }
         getList().add(dbcData);
-        Document doc = docWorker.open();
+        Document doc = docWorker.open(serversFile);
         NodeList rootElement = doc.getElementsByTagName(SERVERS);
         rootElement.item(0).appendChild(dbcDataParcer.createServerElement(doc, dbcData, true));
-        docWorker.save(doc);
+        docWorker.save(doc, serversFile);
     }
     
     public void edit(DbcData oldDbc, DbcData newDbc) {
@@ -86,7 +85,7 @@ public final class DbcDataListBuilder {
     }
     
     public void delete(DbcData oldDbc) {
-        Document doc = docWorker.open();
+        Document doc = docWorker.open(serversFile);
         NodeList nodeList = doc.getElementsByTagName(SERVER);
         for(int i=0; i<nodeList.getLength();i++) {
             Node n = nodeList.item(i);
@@ -97,6 +96,6 @@ public final class DbcDataListBuilder {
             }
         }
         getList().remove(oldDbc);
-        docWorker.save(doc);
+        docWorker.save(doc, serversFile);
     }
 }

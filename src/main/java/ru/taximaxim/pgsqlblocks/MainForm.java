@@ -677,7 +677,6 @@ public class MainForm extends ApplicationWindow {
             }
         }
         caMainTree.refresh();
-        
         bhMainTree.refresh();
     }
 }
