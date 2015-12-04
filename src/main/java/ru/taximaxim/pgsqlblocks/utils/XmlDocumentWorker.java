@@ -51,7 +51,7 @@ public class XmlDocumentWorker {
             try {
                 doc = db.parse(xmlFile);
             } catch (SAXException | IOException e) {
-                LOG.error(String.format("Не найден файл %!", xmlFile), e);
+                LOG.info("Не найден файл конфигураци servers.xml", e);
                 createConfFile(xmlFile);
             }
         } catch (ParserConfigurationException e) {
