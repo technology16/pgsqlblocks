@@ -77,7 +77,6 @@ public class MainForm extends ApplicationWindow {
     private static final int[] VERTICAL_WEIGHTS = new int[] {80, 20};
     private static final int[] HORIZONTAL_WEIGHTS = new int[] {12, 88};
     private static final int SASH_WIDTH = 2;
-    private static final int TIMER_INTERVAL = 10;
     
     private static Display display;
     private static Shell shell;
@@ -102,6 +101,7 @@ public class MainForm extends ApplicationWindow {
     private boolean onlyBlockedMode = false;
     private SortColumn sortColumn = SortColumn.BLOCKED_COUNT;
     private SortDirection sortDirection = SortDirection.UP;
+    private Settings settings = Settings.getInstance();
     private DbcDataListBuilder dbcDataList = DbcDataListBuilder.getInstance();
     private ConcurrentMap<String, Image> imagesMap = new ConcurrentHashMap<String, Image>();
     private ConcurrentMap<DbcData, ProcessTreeBuilder> processTreeMap = new ConcurrentHashMap<>();
@@ -599,6 +599,20 @@ public class MainForm extends ApplicationWindow {
         importBlocks.setImageDescriptor(ImageDescriptor.createFromImage(getImage(Images.IMPORT_BLOCKS)));
         toolBarManager.add(importBlocks);
 
+        toolBarManager.add(new Separator());
+        
+        Action settingsAction = new Action(Images.SETTINGS.getDescription(),
+                ImageDescriptor.createFromImage(getImage(Images.SETTINGS))) {
+            
+            @Override
+            public void run() {
+                SettingsDlg settingsDlg = new SettingsDlg(shell, settings);
+                settingsDlg.open();
+            }
+        };
+
+        toolBarManager.add(settingsAction);
+        
         return toolBarManager;
     }
 
@@ -632,7 +646,7 @@ public class MainForm extends ApplicationWindow {
         public void run() {
             if (autoUpdateMode) {
                 updateTree();
-                display.timerExec(TIMER_INTERVAL * 1000, this);
+                display.timerExec(settings.getUpdatePeriod() * 1000, this);
             }
             updateTree();
             caServersTable.refresh();
