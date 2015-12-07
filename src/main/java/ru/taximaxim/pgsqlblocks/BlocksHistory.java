@@ -1,13 +1,9 @@
 package ru.taximaxim.pgsqlblocks;
 
-import java.io.File;
-import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.nio.file.Paths;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -22,239 +18,124 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
 
-import ru.taximaxim.pgsqlblocks.ui.MainForm;
+import ru.taximaxim.pgsqlblocks.dbcdata.DbcData;
+import ru.taximaxim.pgsqlblocks.dbcdata.DbcDataParcer;
+import ru.taximaxim.pgsqlblocks.dbcdata.DbcStatus;
+import ru.taximaxim.pgsqlblocks.process.Process;
+import ru.taximaxim.pgsqlblocks.process.ProcessParcer;
+import ru.taximaxim.pgsqlblocks.process.ProcessStatus;
+import ru.taximaxim.pgsqlblocks.process.ProcessTreeBuilder;
+import ru.taximaxim.pgsqlblocks.utils.PathBuilder;
+import ru.taximaxim.pgsqlblocks.utils.XmlDocumentWorker;
 
-public class BlocksHistory {
-
-    private static BlocksHistory bh;
-    private static Logger log = Logger.getLogger(BlocksHistory.class);
-    private ConcurrentHashMap<DbcData, List<Process>> hm = new ConcurrentHashMap<DbcData, List<Process>>();
-    private ConcurrentHashMap<DbcData, List<Process>> ohm = new ConcurrentHashMap<DbcData, List<Process>>();
-    private static final String filePath = "BlocksHistory";
-    private static final String fileName = "/blocksHistory";
-
-
+/**
+ * Класс для работы с историей блокировок
+ * 
+ * @author ismagilov_mg
+ */
+public final class BlocksHistory {
+    
+    private static final Logger LOG = Logger.getLogger(BlocksHistory.class);
+    
+    private static final String SERVERS = "servers";
+    private static final String SERVER = "server";
+    private static final String PROCESS = "process";
+    private static volatile BlocksHistory instance;
+    
+    private XmlDocumentWorker docWorker;
+    private DbcDataParcer dbcDataParcer = new DbcDataParcer();
+    private ProcessParcer processParcer = new ProcessParcer();
+    
     public static BlocksHistory getInstance() {
-        if(bh == null)
-            bh = new BlocksHistory();
-        return bh;
+        if(instance == null) {
+            synchronized(BlocksHistory.class) {
+                if(instance == null) {
+                    instance=new BlocksHistory();
+                }
+            }
+        }
+        return instance;
     }
 
     private BlocksHistory() {
-        File dir = new File(filePath);
-        if(!dir.isDirectory())
-            dir.mkdir();
+        docWorker = new XmlDocumentWorker();
     }
-
-    public void add(DbcData dbc, Process process) {
-        List<Process> list = hm.get(dbc);
-        if(list == null) {
-            list = new ArrayList<Process>();
-            hm.put(dbc, list);
-            list = hm.get(dbc);
-        }
-        if(list.contains(process))
-            return;
-        list.add(process);
-    }
-
-    public synchronized void save() {
-        if(hm.size() == 0){
-            log.info("Не найдено блокировок для сохранения");
-            return;
-        }
+    
+    public void save(ConcurrentMap<DbcData, ProcessTreeBuilder> processTreeMap) {
         DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
         try {
             DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
             Document doc = docBuilder.newDocument();
-            Element rootElement = doc.createElement("servers");
-            for(Entry<DbcData, List<Process>> map : hm.entrySet()) {
-                Element server = DbcDataList.getInstance().createServerElement(doc, map.getKey(), false);
-                for(Process process : map.getValue()) {
-                    server.appendChild(createProcessElement(doc, process));
+            Element rootElement = doc.createElement(SERVERS);
+            for(Entry<DbcData, ProcessTreeBuilder> map : processTreeMap.entrySet()) {
+                if (map.getKey().getStatus() == DbcStatus.BLOCKED) {
+                    Element server = dbcDataParcer.createServerElement(doc, map.getKey(), false);
+                    for(Process process : map.getValue().getProcessTree().getChildren()) {
+                        if (process.hasChildren()) {
+                            server.appendChild(processParcer.createProcessElement(doc, process));
+                        }
+                    }
+                    rootElement.appendChild(server);
                 }
-                rootElement.appendChild(server);
             }
             doc.appendChild(rootElement);
-            SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy HH-mm-ss");
-            Date time = new Date(System.currentTimeMillis());
-            String dateTime = sdf.format(time);
-            DbcDataList.getInstance().save(doc, String.format("%s%s-%s.xml", filePath,fileName,dateTime));
+            docWorker.save(doc, PathBuilder.getInstance().getBlockHistoryPath().toFile());
         } catch (ParserConfigurationException e) {
-            log.error(e);
+            LOG.error(e);
         }
-        hm.clear();
     }
-
-    private Element createProcessElement(Document doc, Process process) {
-        Element procEl = doc.createElement("process");
-
-        Element pid = doc.createElement("pid");
-        pid.setTextContent(String.valueOf(process.getPid()));
-        procEl.appendChild(pid);
-
-        Element applicationName = doc.createElement("applicationName");
-        applicationName.setTextContent(process.getApplicationName());
-        procEl.appendChild(applicationName);
-
-        Element datname = doc.createElement("datname");
-        datname.setTextContent(process.getDatname());
-        procEl.appendChild(datname);
-
-        Element usename = doc.createElement("usename");
-        usename.setTextContent(process.getUsename());
-        procEl.appendChild(usename);
-
-        Element client = doc.createElement("client");
-        client.setTextContent(process.getClient());
-        procEl.appendChild(client);
-
-        Element backendStart = doc.createElement("backendStart");
-        backendStart.setTextContent(process.getBackendStart());
-        procEl.appendChild(backendStart);
-
-        Element queryStart = doc.createElement("queryStart");
-        queryStart.setTextContent(process.getQueryStart());
-        procEl.appendChild(queryStart);
-
-        Element xactStart = doc.createElement("xactStart");
-        xactStart.setTextContent(process.getXactStart());
-        procEl.appendChild(xactStart);
-
-        Element state = doc.createElement("state");
-        state.setTextContent(process.getState());
-        procEl.appendChild(state);
-
-        Element stateChange = doc.createElement("stateChange");
-        stateChange.setTextContent(process.getStateChange());
-        procEl.appendChild(stateChange);
-
-        Element blockedBy = doc.createElement("blockedBy");
-        blockedBy.setTextContent(String.valueOf(process.getBlockedBy()));
-        procEl.appendChild(blockedBy);
-
-        Element query = doc.createElement("query");
-        query.setTextContent(process.getQuery());
-        procEl.appendChild(query);
-
-        Element slowQuery = doc.createElement("slowQuery");
-        slowQuery.setTextContent(String.valueOf(process.isSlowQuery()));
-        procEl.appendChild(slowQuery);
-
-        Element children = doc.createElement("children");
-        for(Process childProcess : process.getChildren()) {
-            children.appendChild(createProcessElement(doc, childProcess));
-        }
-        procEl.appendChild(children);
-        return procEl;
-    }
-
-    public void open(String path) {
-        ohm.clear();
+    
+    public ConcurrentMap<DbcData, Process> open(String path) {
+        ConcurrentMap<DbcData, Process> processTreeMap = new ConcurrentHashMap<DbcData, Process>();
+        Process rootProcess = new Process();
         if(path == null) {
-            return;
+            return processTreeMap;
         }
-        DocumentBuilderFactory df = DocumentBuilderFactory.newInstance();
-        Document doc = null;
-        try {
-            DocumentBuilder db = df.newDocumentBuilder();
-            try {
-                doc = db.parse(new File(path));
-            } catch (SAXException | IOException e) {
-                log.error("Ошибка при загрузке истории блокировок: " + path);
-            }
-        } catch (ParserConfigurationException e) {
-            e.printStackTrace();
+        Document doc = docWorker.open(Paths.get(path).toFile());
+        if(doc == null) {
+            return processTreeMap;
         }
-        if(doc == null)
-            return;
-        NodeList items = doc.getElementsByTagName("server");
+        NodeList items = doc.getElementsByTagName(SERVER);
         for(int i=0;i<items.getLength();i++) {
             DbcData dbc = null;
             Process proc = null;
-            List<Process> list = new ArrayList<Process>();
             Node node = items.item(i);
             if (node.getNodeType() != Node.ELEMENT_NODE) {
                 continue;
             }
             Element el = (Element) node;
-            dbc = DbcDataList.getInstance().parseDbc(el);
+            dbc = dbcDataParcer.parseDbc(el);
             XPathFactory xpf = XPathFactory.newInstance();
             XPath xp = xpf.newXPath();
             NodeList children = null;
             try {
-                children = (NodeList)xp.evaluate("process", el, XPathConstants.NODESET);
+                children = (NodeList)xp.evaluate(PROCESS, el, XPathConstants.NODESET);
             } catch (XPathExpressionException e) {
-                e.printStackTrace();
+                LOG.error("Ошибка XPathExpressionException: " + e.getMessage());
             }
-            for(int j=0;j<children.getLength();j++) {
+            for(int j = 0; j < children.getLength(); j++) {
                 Node processNode = children.item(j);
                 if (processNode.getNodeType() != Node.ELEMENT_NODE) {
                     continue;
                 }
                 Element procEl = (Element)processNode;
-                proc = parseProcess(procEl);
-                list.add(proc);
+                proc = processParcer.parseProcess(procEl);
+                
+                for (Process process : proc.getChildren()) {
+                    if ((process.getBlockingLocks() != 0) && (process.getBlockedBy() == 0)) {
+                        process.setStatus(ProcessStatus.WAITING);
+                    } else if (process.getBlockedBy() != 0) {
+                        process.getParent().setStatus(ProcessStatus.BLOCKING);
+                        process.setStatus(ProcessStatus.BLOCKED);
+                        dbc.setStatus(DbcStatus.BLOCKED);
+                    }
+                }
+                rootProcess.addChildren(proc);
             }
-            ohm.put(dbc, list);
+            processTreeMap.put(dbc, rootProcess);
         }
-        MainForm.getInstance().getDisplay().asyncExec(new Runnable() {
-            @Override
-            public void run() {
-                MainForm.getInstance().setHistoryMap(ohm);
-            }
-        });
-    }
-    
-    public ConcurrentHashMap<DbcData, List<Process>> getHistoryMap() {
-        return ohm;
-    }
-    
-    private Process parseProcess(Element el) {
-        Process process = new Process(
-                Integer.parseInt(getNodeValue(el,"pid")),
-                getNodeValue(el,"applicationName"),
-                getNodeValue(el,"datname"),
-                getNodeValue(el,"usename"),
-                getNodeValue(el,"client"),
-                getNodeValue(el,"backendStart"),
-                getNodeValue(el,"queryStart"),
-                getNodeValue(el,"xactStart"),
-                getNodeValue(el,"state"),
-                getNodeValue(el,"stateChange"),
-                Integer.parseInt(getNodeValue(el,"blockedBy")),
-                Integer.parseInt(getNodeValue(el,"blocking_locks")),
-                getNodeValue(el,"query"),
-                Boolean.parseBoolean(getNodeValue(el,"slowQuery"))
-                );
-        XPathFactory xpf = XPathFactory.newInstance();
-        XPath xp = xpf.newXPath();
-        NodeList children = null;
-        try {
-            children = (NodeList)xp.evaluate("children/process", el, XPathConstants.NODESET);
-        } catch (XPathExpressionException e) {
-            e.printStackTrace();
-        }
-        for(int i=0;i<children.getLength();i++) {
-            Node processNode = children.item(i);
-            if (processNode.getNodeType() != Node.ELEMENT_NODE) {
-                continue;
-            }
-            Element procEl = (Element)processNode;
-            Process proc = parseProcess(procEl);
-            proc.setParent(process);
-            process.addChildren(proc);
-        }
-        return process;
-    }
-
-    private String getNodeValue(Element el, String nodeName) {
-        Node node = el.getElementsByTagName(nodeName).item(0).getFirstChild();
-        if(node == null) {
-            return "";
-        }
-        return node.getNodeValue();
+        
+        return processTreeMap;
     }
 }
