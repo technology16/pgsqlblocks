@@ -34,6 +34,7 @@ import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.TreeViewerColumn;
 import org.eclipse.jface.window.ApplicationWindow;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.SWTException;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
@@ -81,6 +82,7 @@ public class MainForm extends ApplicationWindow {
     private static Display display;
     private static Shell shell;
     
+    private Process updateProcces;
     private DbcData selectedDbcData;
     private Process selectedProcess;
     private Text procText;
@@ -379,9 +381,6 @@ public class MainForm extends ApplicationWindow {
                         connectDB.setEnabled(false);
                         disconnectDB.setEnabled(true);
                     }
-                    if (selectedDbcData != null) {
-                        updateTree();
-                    }
                     updateTree();
                 }
             }
@@ -528,6 +527,7 @@ public class MainForm extends ApplicationWindow {
             public void run() {
                 if (autoUpdate.isChecked()) {
                     autoUpdateMode = true;
+                    display.timerExec(1000, timer);
                 } else {
                     autoUpdateMode = false;
                 }
@@ -648,8 +648,6 @@ public class MainForm extends ApplicationWindow {
                 updateTree();
                 display.timerExec(settings.getUpdatePeriod() * 1000, this);
             }
-            updateTree();
-            caServersTable.refresh();
         }
     };
     
@@ -698,16 +696,31 @@ public class MainForm extends ApplicationWindow {
     }
     
     private void updateTree() {
-        if (selectedDbcData != null) {
-            if (onlyBlockedMode) {
-                caMainTree.setInput(getOnlyBlockedProcessTree(selectedDbcData));
-            } else {
-                caMainTree.setInput(getProcessTree(selectedDbcData));
+        new Thread() {
+            public void run() {
+
+                if (selectedDbcData != null) {
+                    if (onlyBlockedMode) {
+                        updateProcces = getOnlyBlockedProcessTree(selectedDbcData);
+                    } else {
+                        updateProcces = getProcessTree(selectedDbcData);
+                    }
+                }
+                try {
+                    display.syncExec(new Runnable() {
+                        @Override
+                        public void run() {
+                            caMainTree.setInput(updateProcces);
+                            caMainTree.refresh();
+                            bhMainTree.refresh();
+                            caServersTable.refresh();
+                        }
+                    }); 
+                } catch (SWTException e) {
+                    LOG.error("Ошибка при отрисовке таблицы!", e);
+                }
             }
-        }
-        caMainTree.refresh();
-        bhMainTree.refresh();
-        caServersTable.refresh();
+        }.start();
     }
 }
 
