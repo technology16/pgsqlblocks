@@ -90,7 +90,9 @@ public class AddDbcDataDlg extends Dialog {
       passwdText.setLayoutData(textGd);
       passwdText.setEchoChar('•');
       passwdText.addListener(SWT.FocusOut, event -> {
-          MessageDialog.openWarning(shell, "Внимание!", "Указание пароля здесь небезопасно. Используйте .pgpass файл.");
+          if (!passwdText.getText().isEmpty()) {
+              MessageDialog.openWarning(shell, "Внимание!", "Указание пароля здесь небезопасно. Используйте .pgpass файл.");
+          }
       });
       
       Label dbnameLabel = new Label(container, SWT.HORIZONTAL);

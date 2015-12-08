@@ -23,8 +23,6 @@ import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.viewers.DoubleClickEvent;
-import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
@@ -259,7 +257,6 @@ public class MainForm extends ApplicationWindow {
                                     if (selectedProcess != null) {
                                         terminate(selectedProcess);
                                         updateTree();
-                                        caServersTable.refresh();
                                     }
                                 });
                                 
@@ -269,7 +266,6 @@ public class MainForm extends ApplicationWindow {
                                     if (selectedProcess != null) {
                                         cancel(selectedProcess);
                                         updateTree();
-                                        caServersTable.refresh();
                                     }
                                 });
 
@@ -400,23 +396,6 @@ public class MainForm extends ApplicationWindow {
             });
         }
         
-        caServersTable.addDoubleClickListener(new IDoubleClickListener() {
-            @Override
-            public void doubleClick(DoubleClickEvent event) {
-                if (!caServersTable.getSelection().isEmpty()) {
-                    IStructuredSelection selected = (IStructuredSelection) event.getSelection();
-                    selectedDbcData = (DbcData) selected.getFirstElement();
-                    selectedDbcData.connect();
-                    deleteDB.setEnabled(false);
-                    editDB.setEnabled(false);
-                    connectDB.setEnabled(false);
-                    disconnectDB.setEnabled(true);
-                    updateTree();
-                    caServersTable.refresh();
-                    display.timerExec(1000, timer);
-                }
-            }
-        });
         return parent;
     }
     
@@ -429,6 +408,7 @@ public class MainForm extends ApplicationWindow {
             @Override
             public void run() {
                 addDbcDlg.open();
+                selectedDbcData = dbcDataList.getList().get(dbcDataList.getList().size() - 1);
                 caServersTable.refresh();
             }
         };
@@ -444,7 +424,14 @@ public class MainForm extends ApplicationWindow {
                         "Подтверждение действия",
                         String.format("Вы действительно хотите удалить %s?", selectedDbcData.getName()));
                 if (okPress) {
+                    processTreeMap.remove(selectedDbcData);
+                    blockedProcessTreeMap.remove(selectedDbcData);
                     dbcDataList.delete(selectedDbcData);
+                    if (dbcDataList.getList().size() > 0) {
+                        selectedDbcData = dbcDataList.getList().get(dbcDataList.getList().size() - 1);
+                    } else {
+                        selectedDbcData = null;
+                    }
                 }
                 caServersTable.refresh();
             }
@@ -460,6 +447,9 @@ public class MainForm extends ApplicationWindow {
             public void run() {
                 AddDbcDataDlg editDbcDlg = new AddDbcDataDlg(shell, selectedDbcData);
                 editDbcDlg.open();
+                processTreeMap.remove(selectedDbcData);
+                blockedProcessTreeMap.remove(selectedDbcData);
+                selectedDbcData = dbcDataList.getList().get(dbcDataList.getList().size() - 1);
                 caServersTable.refresh();
             }
         };
@@ -480,7 +470,6 @@ public class MainForm extends ApplicationWindow {
                connectDB.setEnabled(false);
                disconnectDB.setEnabled(true);
                updateTree();
-               caServersTable.refresh();
                display.timerExec(1000, timer);
             }
         };
@@ -499,7 +488,6 @@ public class MainForm extends ApplicationWindow {
                 connectDB.setEnabled(true);
                 disconnectDB.setEnabled(false);
                 updateTree();
-                caServersTable.refresh();
             }
         };
 
@@ -514,7 +502,6 @@ public class MainForm extends ApplicationWindow {
             @Override
             public void run() {
                 updateTree();
-                caServersTable.refresh();
             }
         };
 
@@ -713,7 +700,6 @@ public class MainForm extends ApplicationWindow {
                             caMainTree.setInput(updateProcces);
                             caMainTree.refresh();
                             bhMainTree.refresh();
-                            caServersTable.refresh();
                         }
                     }); 
                 } catch (SWTException e) {
@@ -721,6 +707,7 @@ public class MainForm extends ApplicationWindow {
                 }
             }
         }.start();
+        caServersTable.refresh();
     }
 }
 
