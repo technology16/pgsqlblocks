@@ -61,8 +61,12 @@ import ru.taximaxim.pgsqlblocks.process.Process;
 import ru.taximaxim.pgsqlblocks.process.ProcessTreeBuilder;
 import ru.taximaxim.pgsqlblocks.process.ProcessTreeContentProvider;
 import ru.taximaxim.pgsqlblocks.process.ProcessTreeLabelProvider;
+import ru.taximaxim.pgsqlblocks.ui.AddDbcDataDlg;
+import ru.taximaxim.pgsqlblocks.ui.SettingsDlg;
+import ru.taximaxim.pgsqlblocks.ui.UIAppender;
 import ru.taximaxim.pgsqlblocks.utils.Images;
 import ru.taximaxim.pgsqlblocks.utils.PathBuilder;
+import ru.taximaxim.pgsqlblocks.utils.Settings;
 
 
 public class MainForm extends ApplicationWindow {

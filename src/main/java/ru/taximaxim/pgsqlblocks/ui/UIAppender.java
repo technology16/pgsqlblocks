@@ -1,4 +1,4 @@
-package ru.taximaxim.pgsqlblocks;
+package ru.taximaxim.pgsqlblocks.ui;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
