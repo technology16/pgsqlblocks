@@ -1,6 +1,6 @@
 package ru.taximaxim.pgsqlblocks.utils;
 
-public class Settings {
+public final class Settings {
     
     private int updatePeriod;
     
