@@ -37,27 +37,6 @@ public class DbcData {
         this.user = user;
         this.enabled = enabled;
         this.password = passwd;
-        // Считывание пароля из ./pgpass
-        if (passwd == null || passwd.isEmpty()) {
-            try (
-                    BufferedReader reader = Files.newBufferedReader(
-                            Paths.get(System.getProperty("user.home") + "/.pgpass"), StandardCharsets.UTF_8);
-                    ) {
-
-                String settingsLine = null;
-                while ((settingsLine = reader.readLine()) != null) {
-                    String[] settings = settingsLine.split(":");
-                    if (settings[0].equals(host) && (settings[1].equals(port)
-                            && settings[3].equals(user))) {
-                        this.password = settings[4];
-                    }
-                }
-            } catch (FileNotFoundException e1) {
-                LOG.error("Файл ./pgpass не найден");
-            } catch (IOException e1) {
-                LOG.error("Ошибка чтения файла ./pgpass");
-            }
-        }
     }
     
     public String getName() {
@@ -80,8 +59,33 @@ public class DbcData {
         return String.format("jdbc:postgresql://%1$s:%2$s/%3$s", getHost(), getPort(), getDbname());
     }
     
-    public String getPasswd() {
+    public String getPass() {
         return password;
+    }
+    
+    public String getPgPass() {
+        // Считывание пароля из ./pgpass
+        String pgPass = "";
+        try (
+                BufferedReader reader = Files.newBufferedReader(
+                        Paths.get(System.getProperty("user.home") + "/.pgpass"), StandardCharsets.UTF_8);
+                ) {
+
+            String settingsLine = null;
+            while ((settingsLine = reader.readLine()) != null) {
+                String[] settings = settingsLine.split(":");
+                if (settings[0].equals(host) && (settings[1].equals(port)
+                        && settings[3].equals(user))) {
+                    pgPass = settings[4];
+                }
+            }
+        } catch (FileNotFoundException e1) {
+            LOG.error("Файл ./pgpass не найден");
+        } catch (IOException e1) {
+            LOG.error("Ошибка чтения файла ./pgpass");
+        }
+        
+        return pgPass;
     }
     
     public String getDbname() {
@@ -99,7 +103,7 @@ public class DbcData {
     @Override
     public String toString() {
         return String.format("DbcData [name=%1$s, host=%2$s, port=%3$s, user=%4$s, passwd=%5$s, dbname=%6$s, enabled=%7$s]", 
-            getName(), getHost(), getPort(), getUser(), getPasswd(), getDbname(), isEnabled());
+            getName(), getHost(), getPort(), getUser(), getPass(), getDbname(), isEnabled());
     }
     
     @Override
@@ -170,8 +174,9 @@ public class DbcData {
             return;
         }
         try {
+            String pass = (getPass() == null || getPass().isEmpty()) ? getPgPass() : getPass();
             LOG.info(getName() + " Соединение...");
-            connection = DriverManager.getConnection(getUrl(), getUser(), getPasswd());
+            connection = DriverManager.getConnection(getUrl(), getUser(), pass);
             setStatus(DbcStatus.CONNECTED);
             LOG.info(getName() + " Соединение создано.");
         } catch (SQLException e) {

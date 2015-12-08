@@ -230,7 +230,10 @@ public class MainForm extends ApplicationWindow {
                             caServersTable.setContentProvider(new DbcDataListContentProvider());
                             caServersTable.setLabelProvider(new DbcDataListLabelProvider());
                             caServersTable.setInput(dbcDataList.getList());
+                            selectedDbcData = dbcDataList.getList().stream()
+                                    .filter(dbcData -> dbcData.getStatus() == DbcStatus.CONNECTED).findFirst().orElse(null);
                             caServersTable.refresh();
+                            updateTree();
                         }
                         
                         caTreeSf = new SashForm(currentActivitySf, SWT.VERTICAL);
@@ -369,14 +372,7 @@ public class MainForm extends ApplicationWindow {
                         procComposite.setVisible(false);
                         caTreeSf.layout(false, false);
                     }
-                    if (selectedDbcData != null &&
-                            (selectedDbcData.getStatus() == DbcStatus.ERROR ||
-                            selectedDbcData.getStatus() == DbcStatus.DISABLED)) {
-                        
-                        disconnectState();
-                    } else {
-                        connectState();
-                    }
+                    serversToolBarState();
                     updateTree();
                 }
             }
@@ -423,7 +419,9 @@ public class MainForm extends ApplicationWindow {
             @Override
             public void run() {
                 addDbcDlg.open();
+                serversToolBarState();
                 caServersTable.refresh();
+                updateTree();
             }
         };
 
@@ -448,6 +446,7 @@ public class MainForm extends ApplicationWindow {
                     }
                 }
                 caServersTable.refresh();
+                updateTree();
             }
         };
 
@@ -464,7 +463,9 @@ public class MainForm extends ApplicationWindow {
                 processTreeMap.remove(selectedDbcData);
                 blockedProcessTreeMap.remove(selectedDbcData);
                 selectedDbcData = dbcDataList.getList().get(dbcDataList.getList().size() - 1);
+                serversToolBarState();
                 caServersTable.refresh();
+                updateTree();
             }
         };
 
@@ -688,26 +689,28 @@ public class MainForm extends ApplicationWindow {
     private void updateTree() {
         new Thread() {
             public void run() {
-                synchronized (selectedDbcData) {
-                    if (selectedDbcData != null) {
-                        if (onlyBlockedMode) {
-                            updateProcces = getOnlyBlockedProcessTree(selectedDbcData);
-                        } else {
-                            updateProcces = getProcessTree(selectedDbcData);
+                if (selectedDbcData != null) {
+                    synchronized (selectedDbcData) {
+                        if (selectedDbcData != null) {
+                            if (onlyBlockedMode) {
+                                updateProcces = getOnlyBlockedProcessTree(selectedDbcData);
+                            } else {
+                                updateProcces = getProcessTree(selectedDbcData);
+                            }
                         }
                     }
-                }
-                try {
-                    display.syncExec(new Runnable() {
-                        @Override
-                        public void run() {
-                            caMainTree.setInput(updateProcces);
-                            caMainTree.refresh();
-                            bhMainTree.refresh();
-                        }
-                    }); 
-                } catch (SWTException e) {
-                    LOG.error("Ошибка при отрисовке таблицы!", e);
+                    try {
+                        display.syncExec(new Runnable() {
+                            @Override
+                            public void run() {
+                                caMainTree.setInput(updateProcces);
+                                caMainTree.refresh();
+                                bhMainTree.refresh();
+                            }
+                        }); 
+                    } catch (SWTException e) {
+                        LOG.error("Ошибка при отрисовке таблицы!", e);
+                    }
                 }
             }
         }.start();
@@ -717,11 +720,7 @@ public class MainForm extends ApplicationWindow {
         synchronized (selectedDbcData) {
             selectedDbcData.connect();
             caServersTable.refresh();
-            if (selectedDbcData.getStatus() == DbcStatus.ERROR) {
-                disconnectState();
-            } else {
-                connectState();
-            }
+            serversToolBarState();
         }
         updateTree();
         display.timerExec(1000, timer);
@@ -734,6 +733,17 @@ public class MainForm extends ApplicationWindow {
             disconnectState();
         }
         updateTree();
+    }
+    
+    private void serversToolBarState() {
+        if (selectedDbcData != null &&
+                (selectedDbcData.getStatus() == DbcStatus.ERROR ||
+                selectedDbcData.getStatus() == DbcStatus.DISABLED)) {
+            
+            disconnectState();
+        } else {
+            connectState();
+        }
     }
     
     private void connectState() {
