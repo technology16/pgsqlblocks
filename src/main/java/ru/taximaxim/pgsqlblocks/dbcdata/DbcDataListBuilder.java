@@ -44,7 +44,7 @@ public final class DbcDataListBuilder {
         return instance;
     }
     
-    public List<DbcData> getList() {
+    public synchronized List<DbcData> getList() {
         if (list == null) {
             list = new ArrayList<DbcData>();
         }

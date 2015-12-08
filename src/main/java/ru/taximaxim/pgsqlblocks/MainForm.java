@@ -408,7 +408,6 @@ public class MainForm extends ApplicationWindow {
             @Override
             public void run() {
                 addDbcDlg.open();
-                selectedDbcData = dbcDataList.getList().get(dbcDataList.getList().size() - 1);
                 caServersTable.refresh();
             }
         };
@@ -464,13 +463,16 @@ public class MainForm extends ApplicationWindow {
             
             @Override
             public void run() {
-               selectedDbcData.connect();
-               deleteDB.setEnabled(false);
-               editDB.setEnabled(false);
-               connectDB.setEnabled(false);
-               disconnectDB.setEnabled(true);
-               updateTree();
-               display.timerExec(1000, timer);
+                synchronized (selectedDbcData) {
+                    selectedDbcData.connect();
+                    caServersTable.refresh();
+                    deleteDB.setEnabled(false);
+                    editDB.setEnabled(false);
+                    connectDB.setEnabled(false);
+                    disconnectDB.setEnabled(true);
+                }
+                updateTree();
+                display.timerExec(1000, timer);
             }
         };
 
@@ -482,11 +484,14 @@ public class MainForm extends ApplicationWindow {
             
             @Override
             public void run() {
-                selectedDbcData.disconnect();
-                deleteDB.setEnabled(true);
-                editDB.setEnabled(true);
-                connectDB.setEnabled(true);
-                disconnectDB.setEnabled(false);
+                synchronized (selectedDbcData) {
+                    selectedDbcData.disconnect();
+                    caServersTable.refresh();
+                    deleteDB.setEnabled(true);
+                    editDB.setEnabled(true);
+                    connectDB.setEnabled(true);
+                    disconnectDB.setEnabled(false);
+                }
                 updateTree();
             }
         };
@@ -685,12 +690,13 @@ public class MainForm extends ApplicationWindow {
     private void updateTree() {
         new Thread() {
             public void run() {
-
-                if (selectedDbcData != null) {
-                    if (onlyBlockedMode) {
-                        updateProcces = getOnlyBlockedProcessTree(selectedDbcData);
-                    } else {
-                        updateProcces = getProcessTree(selectedDbcData);
+                synchronized (selectedDbcData) {
+                    if (selectedDbcData != null) {
+                        if (onlyBlockedMode) {
+                            updateProcces = getOnlyBlockedProcessTree(selectedDbcData);
+                        } else {
+                            updateProcces = getProcessTree(selectedDbcData);
+                        }
                     }
                 }
                 try {
@@ -707,7 +713,6 @@ public class MainForm extends ApplicationWindow {
                 }
             }
         }.start();
-        caServersTable.refresh();
     }
 }
 
