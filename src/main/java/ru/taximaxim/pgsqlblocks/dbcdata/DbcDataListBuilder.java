@@ -65,6 +65,11 @@ public final class DbcDataListBuilder {
             Element item = (Element) node;
             getList().add(dbcDataParcer.parseDbc(item));
         }
+        for (DbcData dbcData : getList()) {
+            if (dbcData.isEnabled()) {
+                dbcData.connect();
+            }
+        }
     }
     
     public void add(DbcData dbcData) {
@@ -73,6 +78,9 @@ public final class DbcDataListBuilder {
             return;
         }
         getList().add(dbcData);
+        if (dbcData.isEnabled()) {
+            dbcData.connect();
+        }
         Document doc = docWorker.open(serversFile);
         NodeList rootElement = doc.getElementsByTagName(SERVERS);
         rootElement.item(0).appendChild(dbcDataParcer.createServerElement(doc, dbcData, true));

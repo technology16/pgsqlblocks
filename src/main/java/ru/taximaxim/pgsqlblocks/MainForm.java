@@ -23,6 +23,8 @@ import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.viewers.DoubleClickEvent;
+import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
@@ -371,15 +373,9 @@ public class MainForm extends ApplicationWindow {
                             (selectedDbcData.getStatus() == DbcStatus.ERROR ||
                             selectedDbcData.getStatus() == DbcStatus.DISABLED)) {
                         
-                        deleteDB.setEnabled(true);
-                        editDB.setEnabled(true);
-                        connectDB.setEnabled(true);
-                        disconnectDB.setEnabled(false);
+                        disconnectState();
                     } else {
-                        deleteDB.setEnabled(false);
-                        editDB.setEnabled(false);
-                        connectDB.setEnabled(false);
-                        disconnectDB.setEnabled(true);
+                        connectState();
                     }
                     updateTree();
                 }
@@ -399,6 +395,21 @@ public class MainForm extends ApplicationWindow {
                 }
             });
         }
+        
+        caServersTable.addDoubleClickListener(new IDoubleClickListener() {
+            @Override
+            public void doubleClick(DoubleClickEvent event) {
+                if (!caServersTable.getSelection().isEmpty()) {
+                    IStructuredSelection selected = (IStructuredSelection) event.getSelection();
+                    selectedDbcData = (DbcData) selected.getFirstElement();
+                    if (selectedDbcData.getStatus() == DbcStatus.CONNECTED) {
+                        dbcDataDisconnect();
+                    } else {
+                        dbcDataConnect();
+                    }
+                }
+            }
+        });
         
         return parent;
     }
@@ -467,16 +478,7 @@ public class MainForm extends ApplicationWindow {
             
             @Override
             public void run() {
-                synchronized (selectedDbcData) {
-                    selectedDbcData.connect();
-                    caServersTable.refresh();
-                    deleteDB.setEnabled(false);
-                    editDB.setEnabled(false);
-                    connectDB.setEnabled(false);
-                    disconnectDB.setEnabled(true);
-                }
-                updateTree();
-                display.timerExec(1000, timer);
+                dbcDataConnect();
             }
         };
 
@@ -488,15 +490,7 @@ public class MainForm extends ApplicationWindow {
             
             @Override
             public void run() {
-                synchronized (selectedDbcData) {
-                    selectedDbcData.disconnect();
-                    caServersTable.refresh();
-                    deleteDB.setEnabled(true);
-                    editDB.setEnabled(true);
-                    connectDB.setEnabled(true);
-                    disconnectDB.setEnabled(false);
-                }
-                updateTree();
+                dbcDataDisconnect();
             }
         };
 
@@ -718,5 +712,41 @@ public class MainForm extends ApplicationWindow {
             }
         }.start();
     }
+    
+    private void dbcDataConnect() {
+        synchronized (selectedDbcData) {
+            selectedDbcData.connect();
+            caServersTable.refresh();
+            if (selectedDbcData.getStatus() == DbcStatus.ERROR) {
+                disconnectState();
+            } else {
+                connectState();
+            }
+        }
+        updateTree();
+        display.timerExec(1000, timer);
+    }
+    
+    private void dbcDataDisconnect() {
+        synchronized (selectedDbcData) {
+            selectedDbcData.disconnect();
+            caServersTable.refresh();
+            disconnectState();
+        }
+        updateTree();
+    }
+    
+    private void connectState() {
+        deleteDB.setEnabled(false);
+        editDB.setEnabled(false);
+        connectDB.setEnabled(false);
+        disconnectDB.setEnabled(true);
+    }
+    
+    private void disconnectState() {
+        deleteDB.setEnabled(true);
+        editDB.setEnabled(true);
+        connectDB.setEnabled(true);
+        disconnectDB.setEnabled(false);
+    }
 }
-
