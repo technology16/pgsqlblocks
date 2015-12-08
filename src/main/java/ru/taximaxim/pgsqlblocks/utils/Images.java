@@ -11,7 +11,8 @@ public enum Images {
     AUTOUPDATE,
     VIEW_ONLY_BLOCKED,
     EXPORT_BLOCKS,
-    IMPORT_BLOCKS;
+    IMPORT_BLOCKS,
+    SETTINGS;
     
     /**
      * Получение иконки
@@ -39,6 +40,8 @@ public enum Images {
             return "images/save_16.png";
         case IMPORT_BLOCKS:
             return "images/document_open_16.png";
+        case SETTINGS:
+            return "images/settings.png";
         default:
             return "images/void_16.png";
         }

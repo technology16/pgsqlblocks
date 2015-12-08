@@ -1,4 +1,4 @@
-package ru.taximaxim.pgsqlblocks;
+package ru.taximaxim.pgsqlblocks.ui;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -64,23 +64,23 @@ public class AddDbcDataDlg extends Dialog {
       textGd.widthHint = TEXT_WIDTH;
       
       Label nameLabel = new Label(container, SWT.HORIZONTAL);
-      nameLabel.setText("Имя соединения");
+      nameLabel.setText("Имя соединения*");
       nameText = new Text(container, SWT.BORDER);
       nameText.setLayoutData(textGd);
       
       Label hostLabel = new Label(container, SWT.HORIZONTAL);
-      hostLabel.setText("Хост");
+      hostLabel.setText("Хост*");
       hostText = new Text(container, SWT.BORDER);
       hostText.setLayoutData(textGd);
       
       Label portLabel = new Label(container, SWT.HORIZONTAL);
-      portLabel.setText("Порт");
+      portLabel.setText("Порт*");
       portText = new Text(container, SWT.BORDER);
       portText.setText(DEFAULT_PORT);
       portText.setLayoutData(textGd);
       
       Label userLabel = new Label(container, SWT.HORIZONTAL);
-      userLabel.setText("Имя пользователя");
+      userLabel.setText("Имя пользователя*");
       userText = new Text(container, SWT.BORDER);
       userText.setLayoutData(textGd);
       
@@ -90,11 +90,13 @@ public class AddDbcDataDlg extends Dialog {
       passwdText.setLayoutData(textGd);
       passwdText.setEchoChar('•');
       passwdText.addListener(SWT.FocusOut, event -> {
-          MessageDialog.openWarning(shell, "Внимание!", "Указание пароля здесь небезопасно. Используйте .pgpass файл.");
+          if (!passwdText.getText().isEmpty()) {
+              MessageDialog.openWarning(shell, "Внимание!", "Указание пароля здесь небезопасно. Используйте .pgpass файл.");
+          }
       });
       
       Label dbnameLabel = new Label(container, SWT.HORIZONTAL);
-      dbnameLabel.setText("Имя БД");
+      dbnameLabel.setText("Имя БД*");
       dbnameText = new Text(container, SWT.BORDER);
       dbnameText.setLayoutData(textGd);
       
@@ -108,7 +110,7 @@ public class AddDbcDataDlg extends Dialog {
           portText.setText(selectedDbcData.getPort());
           dbnameText.setText(selectedDbcData.getDbname());
           userText.setText(selectedDbcData.getUser());
-          passwdText.setText(selectedDbcData.getPasswd());
+          passwdText.setText(selectedDbcData.getPass());
           enabledButton.setSelection(selectedDbcData.isEnabled());
       }
 
@@ -144,6 +146,11 @@ public class AddDbcDataDlg extends Dialog {
         String user = userText.getText();
         String passwd = passwdText.getText();
         boolean enabled = enabledButton.getSelection();
+        if (name.isEmpty() || host.isEmpty() || port.isEmpty()
+                || dbname.isEmpty() || user.isEmpty()) {
+            MessageDialog.openError(shell, "Внимание!", "Не заполнено обязательное поле!");
+            return;
+        }
         DbcData newDbcData = new DbcData(name, host, port, dbname, user, passwd, enabled);
         switch (action) {
         case ADD:

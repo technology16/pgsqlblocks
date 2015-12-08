@@ -43,7 +43,7 @@ public class DbcDataParcer {
         createElement(server, doc.createElement(HOST), dbcData.getHost());
         createElement(server, doc.createElement(PORT), dbcData.getPort());
         createElement(server, doc.createElement(USER), dbcData.getUser());
-        createElement(server, doc.createElement(PASSWD), wp ? dbcData.getPasswd() : "******");
+        createElement(server, doc.createElement(PASSWD), wp ? dbcData.getPass() : "******");
         createElement(server, doc.createElement(DBNAME), dbcData.getDbname());
         createElement(server, doc.createElement(ENABLED), String.valueOf(dbcData.isEnabled()));
         

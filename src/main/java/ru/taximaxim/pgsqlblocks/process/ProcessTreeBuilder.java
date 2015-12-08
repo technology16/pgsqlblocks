@@ -72,6 +72,13 @@ public class ProcessTreeBuilder {
         if (dbcData.getConnection() == null) {
             return tempProcessList;
         }
+        try {
+            if (dbcData.getConnection().isClosed()) {
+                dbcData.connect();
+            }
+        } catch (SQLException e) {
+            LOG.error(String.format("Ошибка при переподключении к %s", dbcData.getName()), e);
+        }
         try (
                 PreparedStatement statement = dbcData.getConnection().prepareStatement(getQuery());
                 ResultSet processSet = statement.executeQuery();
