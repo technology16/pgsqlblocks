@@ -251,6 +251,7 @@ public class MainForm extends ApplicationWindow {
                             }
                             caMainTree.setContentProvider(new ProcessTreeContentProvider());
                             caMainTree.setLabelProvider(new ProcessTreeLabelProvider());
+                            display.timerExec(1000, timer);
                             
                             procComposite = new Composite(caTreeSf, SWT.BORDER);
                             {
