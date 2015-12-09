@@ -103,8 +103,6 @@ public class MainForm extends ApplicationWindow {
     private Action autoUpdate;
     private Action onlyBlocked;
     private AddDbcDataDlg addDbcDlg;
-   // private boolean autoUpdateMode = true;
-    //private boolean onlyBlockedMode = false;
     private SortColumn sortColumn = SortColumn.BLOCKED_COUNT;
     private SortDirection sortDirection = SortDirection.UP;
     private Settings settings = Settings.getInstance();
