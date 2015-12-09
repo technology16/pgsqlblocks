@@ -84,7 +84,6 @@ public class MainForm extends ApplicationWindow {
     private static final int SASH_WIDTH = 2;
     
     private static Display display;
-   // private static Shell shell;
     
     private Process updateProcces;
     private DbcData selectedDbcData;
