@@ -103,8 +103,8 @@ public class MainForm extends ApplicationWindow {
     private Action autoUpdate;
     private Action onlyBlocked;
     private AddDbcDataDlg addDbcDlg;
-    private boolean autoUpdateMode = true;
-    private boolean onlyBlockedMode = false;
+   // private boolean autoUpdateMode = true;
+    //private boolean onlyBlockedMode = false;
     private SortColumn sortColumn = SortColumn.BLOCKED_COUNT;
     private SortDirection sortDirection = SortDirection.UP;
     private Settings settings = Settings.getInstance();
@@ -517,16 +517,19 @@ public class MainForm extends ApplicationWindow {
             
             @Override
             public void run() {
+                Boolean autoUpdateMode;
                 if (autoUpdate.isChecked()) {
                     autoUpdateMode = true;
                     display.timerExec(1000, timer);
                 } else {
                     autoUpdateMode = false;
                 }
+                settings.setAutoUpdate(autoUpdateMode);
+                updateTree();
             }
         };
 
-        autoUpdate.setChecked(true);
+        autoUpdate.setChecked(settings.isAutoUpdate());
         toolBarManager.add(autoUpdate);
 
         toolBarManager.add(new Separator());
@@ -536,16 +539,18 @@ public class MainForm extends ApplicationWindow {
             
             @Override
             public void run() {
+                Boolean onlyBlockedMode;
                 if (onlyBlocked.isChecked()) {
                     onlyBlockedMode = true;
                 } else {
                     onlyBlockedMode = false;
                 }
+                settings.setOnlyBlocked(onlyBlockedMode);
                 updateTree();
             }
         };
 
-        onlyBlocked.setChecked(false);
+        onlyBlocked.setChecked(settings.isOnlyBlocked());
         toolBarManager.add(onlyBlocked);
 
         Action exportBlocks = new Action(Images.EXPORT_BLOCKS.getDescription(),
@@ -636,7 +641,7 @@ public class MainForm extends ApplicationWindow {
     private Runnable timer = new Runnable() {
         @Override
         public void run() {
-            if (autoUpdateMode) {
+            if (settings.isAutoUpdate()) {
                 updateTree();
                 display.timerExec(settings.getUpdatePeriod() * 1000, this);
             }
@@ -693,7 +698,7 @@ public class MainForm extends ApplicationWindow {
                 if (selectedDbcData != null) {
                     synchronized (selectedDbcData) {
                         if (selectedDbcData != null) {
-                            if (onlyBlockedMode) {
+                            if (settings.isOnlyBlocked()) {
                                 updateProcces = getOnlyBlockedProcessTree(selectedDbcData);
                             } else {
                                 updateProcces = getProcessTree(selectedDbcData);
