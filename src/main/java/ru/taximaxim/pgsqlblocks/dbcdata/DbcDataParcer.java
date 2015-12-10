@@ -19,7 +19,7 @@ public class DbcDataParcer {
     
     public DbcDataParcer() {}
     
-    public DbcData parseDbc(Element item) {
+    public DbcData parseDbc(Element item, boolean isLast) {
         Node nameNode = item.getElementsByTagName(NAME).item(0).getFirstChild();
         Node hostNode = item.getElementsByTagName(HOST).item(0).getFirstChild();
         Node portNode = item.getElementsByTagName(PORT).item(0).getFirstChild();
@@ -34,7 +34,7 @@ public class DbcDataParcer {
         String user = userNode == null ? "" : userNode.getNodeValue();
         String passwd = passwdNode == null ? "" : passwdNode.getNodeValue();
         boolean enabled = Boolean.valueOf(enabledNode == null ? FALSE : enabledNode.getNodeValue());
-        return new DbcData(name, host, port, dbname, user, passwd, enabled);
+        return new DbcData(name, host, port, dbname, user, passwd, enabled, isLast);
     }
     
     public Element createServerElement(Document doc, DbcData dbcData, boolean wp) {

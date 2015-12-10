@@ -151,7 +151,7 @@ public class AddDbcDataDlg extends Dialog {
             MessageDialog.openError(shell, "Внимание!", "Не заполнено обязательное поле!");
             return;
         }
-        DbcData newDbcData = new DbcData(name, host, port, dbname, user, passwd, enabled);
+        DbcData newDbcData = new DbcData(name, host, port, dbname, user, passwd, enabled, true);
         switch (action) {
         case ADD:
             DbcDataListBuilder.getInstance().add(newDbcData);

@@ -2,6 +2,7 @@ package ru.taximaxim.pgsqlblocks.dbcdata;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.log4j.Logger;
@@ -48,6 +49,7 @@ public final class DbcDataListBuilder {
         if (list == null) {
             list = new ArrayList<DbcData>();
         }
+        Collections.sort(list);
         return list;
     }
     
@@ -63,7 +65,11 @@ public final class DbcDataListBuilder {
                 continue;
             }
             Element item = (Element) node;
-            getList().add(dbcDataParcer.parseDbc(item));
+            if (i == items.getLength() - 1) {
+                getList().add(dbcDataParcer.parseDbc(item, true));
+            } else {
+                getList().add(dbcDataParcer.parseDbc(item, false));
+            }
         }
         for (DbcData dbcData : getList()) {
             if (dbcData.isEnabled()) {
@@ -78,9 +84,14 @@ public final class DbcDataListBuilder {
             return;
         }
         getList().add(dbcData);
+        Collections.sort(getList());
         if (dbcData.isEnabled()) {
             dbcData.connect();
         }
+        for (DbcData data : getList()) {
+            data.setLast(false);
+        }
+        dbcData.setLast(true);
         Document doc = docWorker.open(serversFile);
         NodeList rootElement = doc.getElementsByTagName(SERVERS);
         rootElement.item(0).appendChild(dbcDataParcer.createServerElement(doc, dbcData, true));
@@ -105,5 +116,23 @@ public final class DbcDataListBuilder {
         }
         getList().remove(oldDbc);
         docWorker.save(doc, serversFile);
+    }
+    
+    public int getOrderNum(DbcData dbcData) {
+        for (int i = 0; i < getList().size(); i++) {
+            if (getList().get(i).equals(dbcData)) {
+                return i;
+            }
+        }
+        return 0;
+    }
+    
+    public DbcData getLast() {
+        for (DbcData data : getList()) {
+            if (data.isLast()) {
+                return data;
+            }
+        }
+        return getList().get(getList().size() - 1);
     }
 }
