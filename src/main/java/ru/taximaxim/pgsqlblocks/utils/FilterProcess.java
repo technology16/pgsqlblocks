@@ -35,6 +35,14 @@ public final class FilterProcess {
         return instance;
     }
 
+    public void filterReset() {
+        getPid().itemReset();
+        getDbName().itemReset();
+        getUserName().itemReset();
+        getBackendStart().itemReset();
+        getQueryStart().itemReset();
+    }
+    
     public boolean isFiltered(Process element) {
         try {
             if (comparePid(element) && compareDbName(element) && compareUserName(element) &&

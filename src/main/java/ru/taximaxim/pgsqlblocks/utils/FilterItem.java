@@ -55,4 +55,9 @@ public class FilterItem {
     public void setValue(String value) {
         this.value = value;
     }
+    
+    public void itemReset() {
+        this.operation = "";
+        this.value = "";
+    }
 }

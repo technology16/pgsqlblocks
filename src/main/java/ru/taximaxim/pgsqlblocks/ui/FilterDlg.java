@@ -1,7 +1,7 @@
 package ru.taximaxim.pgsqlblocks.ui;
 
-import org.apache.log4j.Logger;
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
@@ -18,16 +18,14 @@ import org.eclipse.swt.widgets.Text;
 import ru.taximaxim.pgsqlblocks.utils.FilterProcess;
 
 public class FilterDlg extends Dialog {
-    
-    private static final Logger LOG = Logger.getLogger(FilterDlg.class);
-    
+
     private static final int TEXT_WIDTH = 200;
 
     private Text pidText;
     private Text dbNameText;
     private Text userNameText;
-    private Text backendStartText;
-    private Text queryStartText;
+    private Combo backendStartText;
+    private Combo queryStartText;
     private Combo pidCombo;
     private Combo dbNameCombo;
     private Combo userNameCombo;
@@ -89,22 +87,49 @@ public class FilterDlg extends Dialog {
       backendStartLabel.setText("backend_start");
       backendStartCombo = new Combo(container, SWT.BORDER | SWT.READ_ONLY);
       fillOperList(backendStartCombo);
-      backendStartText = new Text(container, SWT.BORDER);
+      backendStartText = new Combo(container, SWT.BORDER | SWT.READ_ONLY);
+      backendStartText.add("");
       backendStartText.setLayoutData(textGd);
+      backendStartText.addListener(SWT.FOCUSED, new Listener() {
+          @Override
+          public void handleEvent(Event arg0) {
+              DateTimeSelectDlg tt = new DateTimeSelectDlg(getShell(), filterProcess, filterProcess.getBackendStart().getKey());
+              tt.open();
+              backendStartText.removeAll();
+              backendStartText.add(filterProcess.getBackendStart().getValue());
+              backendStartText.select(0);
+          }
+      });
+      
 
-              
       Label queryStartLabel = new Label(container, SWT.HORIZONTAL);
       queryStartLabel.setText("query_start");
       queryStartCombo = new Combo(container, SWT.BORDER | SWT.READ_ONLY);
       fillOperList(queryStartCombo);
-      queryStartText = new Text(container, SWT.BORDER);
+      queryStartText = new Combo(container, SWT.BORDER | SWT.READ_ONLY);
+      queryStartText.add("");
       queryStartText.setLayoutData(textGd);
+      queryStartText.addListener(SWT.FOCUSED, new Listener() {
+          @Override
+          public void handleEvent(Event arg0) {
+              DateTimeSelectDlg tt = new DateTimeSelectDlg(getShell(), filterProcess, filterProcess.getQueryStart().getKey());
+              tt.open();
+              queryStartText.removeAll();
+              queryStartText.add(filterProcess.getQueryStart().getValue());
+              queryStartText.select(0);
+          }
+      });
 
       pidText.setText(filterProcess.getPid().getValue());
       dbNameText.setText(filterProcess.getDbName().getValue());
       userNameText.setText(filterProcess.getUserName().getValue());
-      backendStartText.setText(filterProcess.getBackendStart().getValue());
-      queryStartText.setText(filterProcess.getQueryStart().getValue());
+      backendStartText.removeAll();
+      backendStartText.add(filterProcess.getBackendStart().getValue());
+      backendStartText.select(0);
+      
+      queryStartText.removeAll();
+      queryStartText.add(filterProcess.getQueryStart().getValue());
+      queryStartText.select(0);
       
       pidCombo.setText(filterProcess.getPid().getOperation());
       dbNameCombo.setText(filterProcess.getDbName().getOperation());
@@ -145,6 +170,7 @@ public class FilterDlg extends Dialog {
     }
     
     private void fillOperList(Combo combo) {
+        combo.add("");
         combo.add("=");
         combo.add("!=");
         combo.add(">");
@@ -154,7 +180,47 @@ public class FilterDlg extends Dialog {
     }
     
     private void fillOperListString(Combo combo) {
+        combo.add("");
         combo.add("=");
         combo.add("!=");
+    }
+    
+    @Override
+    protected void createButtonsForButtonBar(Composite parent) {
+        createButton(parent, IDialogConstants.NO_ID, "Reset", false);
+        super.createButtonsForButtonBar(parent);
+    }
+    
+    @Override
+    protected void buttonPressed(int buttonId) {
+        if (buttonId == IDialogConstants.CANCEL_ID) {
+            filterProcess.filterReset();
+            backendStartText.removeAll();
+            backendStartText.add("");
+            backendStartText.select(0);
+            queryStartText.removeAll();
+            queryStartText.add("");
+            queryStartText.select(0);
+        }
+        if (buttonId == IDialogConstants.NO_ID) {
+            filterProcess.filterReset();
+            pidText.setText("");
+            dbNameText.setText("");
+            userNameText.setText("");
+            backendStartText.removeAll();
+            backendStartText.add("");
+            backendStartText.select(0);
+            queryStartText.removeAll();
+            queryStartText.add("");
+            queryStartText.select(0);
+            pidCombo.setText("");
+            dbNameCombo.setText("");
+            userNameCombo.setText("");
+            backendStartCombo.setText("");
+            queryStartCombo.setText("");
+            
+        } else {
+            super.buttonPressed(buttonId);
+        }
     }
 }
