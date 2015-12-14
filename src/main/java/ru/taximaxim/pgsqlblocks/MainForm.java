@@ -742,6 +742,7 @@ public class MainForm extends ApplicationWindow {
     }
     
     private void updateTree() {
+        caServersTable.refresh();
         new Thread() {
             public void run() {
                 if (selectedDbcData != null) {
