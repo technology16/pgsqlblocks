@@ -157,7 +157,7 @@ public class MainForm extends ApplicationWindow {
             MainForm wwin = new MainForm(new Shell(display));
             wwin.setBlockOnOpen(true);
             wwin.open();
-            Display.getCurrent().dispose();
+            display.dispose();
         } catch (Exception e) {
             LOG.error("Произошла ошибка:", e);
         }
@@ -178,6 +178,15 @@ public class MainForm extends ApplicationWindow {
     protected void configureShell(Shell shell) {
         super.configureShell(shell);
         shell.setText(APP_NAME);
+    }
+
+    @Override
+    protected boolean canHandleShellCloseEvent() {
+        if (!MessageDialog.openQuestion(getShell(), "Подтверждение действия",
+                "Вы действительно хотите выйти из pgSqlBlocks?")) {
+            return false;
+        }
+        return super.canHandleShellCloseEvent();
     }
 
     @Override
