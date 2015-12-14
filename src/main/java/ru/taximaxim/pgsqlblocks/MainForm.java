@@ -702,7 +702,9 @@ public class MainForm extends ApplicationWindow {
                         display.syncExec(new Runnable() {
                             @Override
                             public void run() {
+                                Object[] expanded = caMainTree.getExpandedElements();
                                 caMainTree.setInput(updateProcces);
+                                caMainTree.setExpandedElements(expanded);
                                 caMainTree.refresh();
                                 bhMainTree.refresh();
                             }

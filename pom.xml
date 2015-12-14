@@ -4,8 +4,7 @@
 
     <groupId>ru.taximaxim</groupId>
     <artifactId>pgSqlBlocks</artifactId>
-    
-    <version>1.0.2.9470</version>
+    <version>1.0.2.9470a</version>
     <packaging>jar</packaging>
 
     <name>pgSqlBlocks</name>
