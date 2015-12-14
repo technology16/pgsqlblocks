@@ -100,7 +100,6 @@ public class FilterDlg extends Dialog {
               backendStartText.select(0);
           }
       });
-      
 
       Label queryStartLabel = new Label(container, SWT.HORIZONTAL);
       queryStartLabel.setText("query_start");
@@ -153,7 +152,6 @@ public class FilterDlg extends Dialog {
     
     @Override
     protected void okPressed() {
-        
         filterProcess.getPid().setValue(pidText.getText());
         filterProcess.getDbName().setValue(dbNameText.getText());
         filterProcess.getUserName().setValue(userNameText.getText());
@@ -168,7 +166,7 @@ public class FilterDlg extends Dialog {
         
         super.okPressed();
     }
-    
+
     private void fillOperList(Combo combo) {
         combo.add("");
         combo.add("=");
@@ -178,7 +176,7 @@ public class FilterDlg extends Dialog {
         combo.add("<");
         combo.add("<=");
     }
-    
+
     private void fillOperListString(Combo combo) {
         combo.add("");
         combo.add("=");
@@ -190,7 +188,7 @@ public class FilterDlg extends Dialog {
         createButton(parent, IDialogConstants.NO_ID, "Reset", false);
         super.createButtonsForButtonBar(parent);
     }
-    
+
     @Override
     protected void buttonPressed(int buttonId) {
         if (buttonId == IDialogConstants.CANCEL_ID) {
@@ -218,7 +216,6 @@ public class FilterDlg extends Dialog {
             userNameCombo.setText("");
             backendStartCombo.setText("");
             queryStartCombo.setText("");
-            
         } else {
             super.buttonPressed(buttonId);
         }
