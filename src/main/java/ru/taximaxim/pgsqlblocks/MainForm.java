@@ -427,6 +427,9 @@ public class MainForm extends ApplicationWindow {
             @Override
             public void run() {
                 addDbcDlg.open();
+                selectedDbcData = dbcDataList.getLast();
+                caServersTable.refresh();
+                caServersTable.getTable().setSelection(dbcDataList.getOrderNum(selectedDbcData));
                 serversToolBarState();
                 caServersTable.refresh();
                 updateTree();
@@ -449,6 +452,8 @@ public class MainForm extends ApplicationWindow {
                     dbcDataList.delete(selectedDbcData);
                     if (dbcDataList.getList().size() > 0) {
                         selectedDbcData = dbcDataList.getList().get(dbcDataList.getList().size() - 1);
+                        caServersTable.refresh();
+                        caServersTable.getTable().setSelection(dbcDataList.getOrderNum(selectedDbcData));
                     } else {
                         selectedDbcData = null;
                     }
@@ -470,7 +475,9 @@ public class MainForm extends ApplicationWindow {
                 editDbcDlg.open();
                 processTreeMap.remove(selectedDbcData);
                 blockedProcessTreeMap.remove(selectedDbcData);
-                selectedDbcData = dbcDataList.getList().get(dbcDataList.getList().size() - 1);
+                selectedDbcData = dbcDataList.getLast();
+                caServersTable.refresh();
+                caServersTable.getTable().setSelection(dbcDataList.getOrderNum(selectedDbcData));
                 serversToolBarState();
                 caServersTable.refresh();
                 updateTree();

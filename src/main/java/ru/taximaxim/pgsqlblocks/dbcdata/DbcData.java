@@ -12,7 +12,7 @@ import java.sql.SQLException;
 
 import org.apache.log4j.Logger;
 
-public class DbcData {
+public class DbcData implements Comparable<DbcData> {
     
     private static final Logger LOG = Logger.getLogger(DbcData.class);
     
@@ -24,11 +24,12 @@ public class DbcData {
     private String dbname;
     private boolean enabled;
     private DbcStatus status = DbcStatus.DISABLED;
+    private boolean isLast;
     
     private Connection connection;
     
     public DbcData(String name,String host, String port,String dbname,
-            String user, String passwd, boolean enabled) {
+            String user, String passwd, boolean enabled, boolean isLast) {
         
         this.name = name;
         this.host = host;
@@ -37,6 +38,7 @@ public class DbcData {
         this.user = user;
         this.enabled = enabled;
         this.password = passwd;
+        this.isLast = isLast;
     }
     
     public String getName() {
@@ -100,6 +102,14 @@ public class DbcData {
         return connection;
     }
     
+    public void setLast(boolean isLast) {
+        this.isLast = isLast;
+    }
+    
+    public boolean isLast() {
+        return isLast;
+    }
+    
     @Override
     public String toString() {
         return String.format("DbcData [name=%1$s, host=%2$s, port=%3$s, user=%4$s, passwd=%5$s, dbname=%6$s, enabled=%7$s]", 
@@ -118,46 +128,15 @@ public class DbcData {
     }
     
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
+    public boolean equals(Object object) {
+        if ((object == null) || !(object instanceof DbcData)) {
+            return false;
+        }
+        DbcData table = (DbcData) object;
+        if (this.getName().equals(table.getName())) {
             return true;
         }
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        DbcData other = (DbcData) obj;
-        if (getDbname() == null) {
-            if (other.getDbname() != null) {
-                return false;
-            }
-        } else if (!getDbname().equals(other.getDbname())) {
-            return false;
-        }
-        if (getHost() == null) {
-            if (other.getHost() != null){
-                return false;
-            }
-        } else if (!getHost().equals(other.getHost())){
-            return false;
-        }
-        if (getPort() == null) {
-            if (other.getPort() != null){
-                return false;
-            }
-        } else if (!getPort().equals(other.getPort())){
-            return false;
-        }
-        if (getUser() == null) {
-            if (other.getUser() != null){
-                return false;
-            }
-        } else if (!getUser().equals(other.getUser())){
-            return false;
-        }
-        return true;
+        return false;
     }
     
     public DbcStatus getStatus() {
@@ -210,5 +189,9 @@ public class DbcData {
         }
         return true;
     }
-}
 
+    @Override
+    public int compareTo(DbcData other) {
+        return getName().compareTo(other.getName());
+    }
+}

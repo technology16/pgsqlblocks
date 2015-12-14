@@ -97,7 +97,7 @@ public final class BlocksHistory {
             return processTreeMap;
         }
         NodeList items = doc.getElementsByTagName(SERVER);
-        for(int i=0;i<items.getLength();i++) {
+        for(int i = 0; i < items.getLength(); i++) {
             DbcData dbc = null;
             Process proc = null;
             Node node = items.item(i);
@@ -105,7 +105,11 @@ public final class BlocksHistory {
                 continue;
             }
             Element el = (Element) node;
-            dbc = dbcDataParcer.parseDbc(el);
+            if (i == items.getLength() - 1) {
+                dbc = dbcDataParcer.parseDbc(el, true);
+            } else {
+                dbc = dbcDataParcer.parseDbc(el, false);
+            }
             XPathFactory xpf = XPathFactory.newInstance();
             XPath xp = xpf.newXPath();
             NodeList children = null;
