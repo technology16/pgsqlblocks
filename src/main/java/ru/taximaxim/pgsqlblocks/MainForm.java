@@ -84,7 +84,6 @@ public class MainForm extends ApplicationWindow {
     private static final int SASH_WIDTH = 2;
     
     private static Display display;
-    private static Shell shell;
     
     private Process updateProcces;
     private DbcData selectedDbcData;
@@ -155,11 +154,10 @@ public class MainForm extends ApplicationWindow {
                 LOG.error("Произошла ошибка при настройке логирования:", e);
             }
             display = new Display();
-            shell = new Shell(display);
-            MainForm wwin = new MainForm(shell);
+            MainForm wwin = new MainForm(new Shell(display));
             wwin.setBlockOnOpen(true);
             wwin.open();
-            Display.getCurrent().dispose();
+            display.dispose();
         } catch (Exception e) {
             LOG.error("Произошла ошибка:", e);
         }
@@ -183,12 +181,21 @@ public class MainForm extends ApplicationWindow {
     }
 
     @Override
+    protected boolean canHandleShellCloseEvent() {
+        if (!MessageDialog.openQuestion(getShell(), "Подтверждение действия",
+                "Вы действительно хотите выйти из pgSqlBlocks?")) {
+            return false;
+        }
+        return super.canHandleShellCloseEvent();
+    }
+
+    @Override
     protected Control createContents(Composite parent)
     {
         Composite composite = new Composite(parent, SWT.NONE);
         composite.setLayout(new GridLayout());
         
-        addDbcDlg = new AddDbcDataDlg(shell);
+        addDbcDlg = new AddDbcDataDlg(getShell());
 
         GridLayout gridLayout = new GridLayout();
         gridLayout.marginHeight = ZERO_MARGIN;
@@ -433,7 +440,7 @@ public class MainForm extends ApplicationWindow {
             
             @Override
             public void run() {
-                boolean okPress = MessageDialog.openQuestion(shell,
+                boolean okPress = MessageDialog.openQuestion(getShell(),
                         "Подтверждение действия",
                         String.format("Вы действительно хотите удалить %s?", selectedDbcData.getName()));
                 if (okPress) {
@@ -459,7 +466,7 @@ public class MainForm extends ApplicationWindow {
             
             @Override
             public void run() {
-                AddDbcDataDlg editDbcDlg = new AddDbcDataDlg(shell, selectedDbcData);
+                AddDbcDataDlg editDbcDlg = new AddDbcDataDlg(getShell(), selectedDbcData);
                 editDbcDlg.open();
                 processTreeMap.remove(selectedDbcData);
                 blockedProcessTreeMap.remove(selectedDbcData);
@@ -569,7 +576,7 @@ public class MainForm extends ApplicationWindow {
         Action importBlocks = new Action(Images.IMPORT_BLOCKS.getDescription()) {
             @Override
             public void run() {
-                FileDialog dialog = new FileDialog(shell);
+                FileDialog dialog = new FileDialog(getShell());
                 dialog.setFilterPath(PathBuilder.getInstance().getBlockHistoryDir().toString());
                 dialog.setText("Открыть историю блокировок");
                 dialog.setFilterExtensions(new String[]{"*.xml"});
@@ -598,7 +605,7 @@ public class MainForm extends ApplicationWindow {
             
             @Override
             public void run() {
-                SettingsDlg settingsDlg = new SettingsDlg(shell, settings);
+                SettingsDlg settingsDlg = new SettingsDlg(getShell(), settings);
                 settingsDlg.open();
             }
         };
@@ -704,7 +711,9 @@ public class MainForm extends ApplicationWindow {
                         display.syncExec(new Runnable() {
                             @Override
                             public void run() {
+                                Object[] expanded = caMainTree.getExpandedElements();
                                 caMainTree.setInput(updateProcces);
+                                caMainTree.setExpandedElements(expanded);
                                 caMainTree.refresh();
                                 bhMainTree.refresh();
                             }
