@@ -94,4 +94,16 @@ public final class PathBuilder {
         }
         return logsFile;
     }
+    
+    public Path getPropertiesPath() {
+        Path propPath = Paths.get(path.toString(), "pgsqlblocks.properties");
+        if (Files.notExists(propPath)) {
+            try {
+                Files.createFile(propPath);
+            } catch (IOException e) {
+                LOG.error(String.format("Ошибка создания файла %s: %s", propPath, e.getMessage()));
+            }
+        }
+        return propPath;
+    }
 }
