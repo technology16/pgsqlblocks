@@ -15,8 +15,8 @@ import ru.taximaxim.pgsqlblocks.utils.Settings;
 
 public class SettingsDlg extends Dialog {
 
-    Settings settings;
-    Spinner updatePeriod;
+    private Settings settings;
+    private Spinner updatePeriod;
     
     public SettingsDlg(Shell shell, Settings settings) {
         super(shell);

@@ -32,6 +32,8 @@ import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.TreeViewerColumn;
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.jface.window.ApplicationWindow;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTException;
@@ -64,8 +66,10 @@ import ru.taximaxim.pgsqlblocks.process.ProcessTreeBuilder;
 import ru.taximaxim.pgsqlblocks.process.ProcessTreeContentProvider;
 import ru.taximaxim.pgsqlblocks.process.ProcessTreeLabelProvider;
 import ru.taximaxim.pgsqlblocks.ui.AddDbcDataDlg;
+import ru.taximaxim.pgsqlblocks.ui.FilterDlg;
 import ru.taximaxim.pgsqlblocks.ui.SettingsDlg;
 import ru.taximaxim.pgsqlblocks.ui.UIAppender;
+import ru.taximaxim.pgsqlblocks.utils.FilterProcess;
 import ru.taximaxim.pgsqlblocks.utils.Images;
 import ru.taximaxim.pgsqlblocks.utils.PathBuilder;
 import ru.taximaxim.pgsqlblocks.utils.Settings;
@@ -102,12 +106,14 @@ public class MainForm extends ApplicationWindow {
     private Action disconnectDB;
     private Action autoUpdate;
     private Action onlyBlocked;
+    private Action filterSetting;
     private AddDbcDataDlg addDbcDlg;
     private boolean autoUpdateMode = true;
     private boolean onlyBlockedMode = false;
     private SortColumn sortColumn = SortColumn.BLOCKED_COUNT;
     private SortDirection sortDirection = SortDirection.UP;
     private Settings settings = Settings.getInstance();
+    private FilterProcess filterProcess = FilterProcess.getInstance();
     private DbcDataListBuilder dbcDataList = DbcDataListBuilder.getInstance();
     private ConcurrentMap<String, Image> imagesMap = new ConcurrentHashMap<String, Image>();
     private ConcurrentMap<DbcData, ProcessTreeBuilder> processTreeMap = new ConcurrentHashMap<>();
@@ -251,6 +257,22 @@ public class MainForm extends ApplicationWindow {
                             }
                             caMainTree.setContentProvider(new ProcessTreeContentProvider());
                             caMainTree.setLabelProvider(new ProcessTreeLabelProvider());
+                            ViewerFilter[] filters = new ViewerFilter[1];
+                            filters[0] = new ViewerFilter() {
+                                @Override
+                                public boolean select(Viewer viewer, Object parentElement, Object element) {
+                                    if (element instanceof Process) {
+                                        if (filterProcess.isFiltered((Process) element)) {
+                                            return true;
+                                        } else {
+                                            return false;
+                                        }
+                                    } else {
+                                        return true;
+                                    }
+                                }
+                            };
+                            caMainTree.setFilters(filters);
                             display.timerExec(1000, timer);
                             
                             procComposite = new Composite(caTreeSf, SWT.BORDER);
@@ -530,6 +552,19 @@ public class MainForm extends ApplicationWindow {
         toolBarManager.add(autoUpdate);
 
         toolBarManager.add(new Separator());
+        
+        filterSetting = new Action(Images.FILTER.getDescription(),
+                ImageDescriptor.createFromImage(getImage(Images.FILTER))) {
+            
+            @Override
+            public void run() {
+                FilterDlg filterDlg = new FilterDlg(getShell(), filterProcess);
+                filterDlg.open();
+                updateTree();
+            }
+        };
+        
+        toolBarManager.add(filterSetting);
 
         onlyBlocked = new Action(Images.VIEW_ONLY_BLOCKED.getDescription(),
                 ImageDescriptor.createFromImage(getImage(Images.VIEW_ONLY_BLOCKED))) {
@@ -547,6 +582,8 @@ public class MainForm extends ApplicationWindow {
 
         onlyBlocked.setChecked(false);
         toolBarManager.add(onlyBlocked);
+
+        toolBarManager.add(new Separator());
 
         Action exportBlocks = new Action(Images.EXPORT_BLOCKS.getDescription(),
                 ImageDescriptor.createFromImage(getImage(Images.EXPORT_BLOCKS))) {

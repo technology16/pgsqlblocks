@@ -140,5 +140,10 @@
             <artifactId>postgresql</artifactId>
             <version>9.3-1102-jdbc41</version>
         </dependency> 
+        <dependency>
+            <groupId>com.netflix.nebula</groupId>
+            <artifactId>nebula-release-plugin</artifactId>
+            <version>3.1.1</version>
+        </dependency>
     </dependencies>
 </project>

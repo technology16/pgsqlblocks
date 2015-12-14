@@ -12,7 +12,8 @@ public enum Images {
     VIEW_ONLY_BLOCKED,
     EXPORT_BLOCKS,
     IMPORT_BLOCKS,
-    SETTINGS;
+    SETTINGS,
+    FILTER;
     
     /**
      * Получение иконки
@@ -42,6 +43,8 @@ public enum Images {
             return "images/document_open_16.png";
         case SETTINGS:
             return "images/settings.png";
+        case FILTER:
+            return "images/filter.png";
         default:
             return "images/void_16.png";
         }
@@ -69,6 +72,10 @@ public enum Images {
             return "Выгрузить историю блокировок";
         case IMPORT_BLOCKS:
             return "Открыть файл с историей блокировок";
+        case SETTINGS:
+            return "Настройки";
+        case FILTER:
+            return "Фильтр";
         default:
             return "Действие по-умолчанию";
         }
