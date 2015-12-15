@@ -54,7 +54,7 @@ public class DateTimeSelectDlg extends Dialog {
     
     @Override
     protected void okPressed() {
-        DateTimeFormatter format = DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm:ss");
+        DateTimeFormatter format = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         LocalDateTime ddd = LocalDateTime.of(calendar.getYear(), calendar.getMonth() + 1,
                 calendar.getDay(), time.getHours(), time.getMinutes(), time.getSeconds());
         String fltDate = ddd.format(format);
