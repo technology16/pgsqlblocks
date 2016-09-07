@@ -15,7 +15,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <swt.artifactId>org.eclipse.swt.gtk.linux.x86_64</swt.artifactId>
         <swt.id>Linux-x86_64</swt.id>
-        <swt.version>4.2.1</swt.version>
+        <swt.version>4.3</swt.version>
         <mainClass>ru.taximaxim.pgsqlblocks.MainForm</mainClass>
     </properties>
 
@@ -53,7 +53,7 @@
     <repositories>
         <repository>
             <id>swt-repo</id>
-            <url>https://swt-repo.googlecode.com/svn/repo</url>
+            <url>http://swt-maven.googlecode.com/git-history/master/</url>
         </repository>
     </repositories>
 
@@ -130,9 +130,9 @@
             <version>${swt.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.eclipse.jface</groupId>
+            <groupId>org.eclipse.scout.sdk.deps</groupId>
             <artifactId>org.eclipse.jface</artifactId>
-            <version>3.8.0.v20120521-2329</version>
+            <version>3.12.0.v20160518-1929</version>
         </dependency>
          <dependency>
             <groupId>org.postgresql</groupId>
