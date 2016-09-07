@@ -1,5 +1,6 @@
 #!/bin/bash
-mvn assembly:single -P win32
-mvn assembly:single -P linux86
-mvn assembly:single -P win32_64
-mvn assembly:single -P linux64
+mvn clean
+mvn package -P win32
+mvn package -P linux86
+mvn package -P win32_64
+mvn package -P linux64
