@@ -64,4 +64,5 @@ SELECT
     FROM pg_stat_activity p 
     LEFT JOIN bl
     ON bl.blocked_pid = p.pid
+    WHERE p.state != 'idle' OR p.state IS NULL
     ORDER BY 1 ASC
