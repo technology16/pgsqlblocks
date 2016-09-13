@@ -168,7 +168,7 @@ public class MainForm extends ApplicationWindow {
     }
 
     public MainForm(Shell shell) {
-        super(shell);
+        super(null);
         addToolBar(SWT.RIGHT | SWT.FLAT);
     }
 
