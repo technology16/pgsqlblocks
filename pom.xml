@@ -15,7 +15,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <swt.artifactId>org.eclipse.swt.gtk.linux.x86_64</swt.artifactId>
         <swt.id>Linux-x86_64</swt.id>
-        <swt.version>4.3</swt.version>
+        <swt.version>4.5.1</swt.version>
         <mainClass>ru.taximaxim.pgsqlblocks.MainForm</mainClass>
     </properties>
 
@@ -53,7 +53,11 @@
     <repositories>
         <repository>
             <id>swt-repo</id>
-            <url>http://swt-maven.googlecode.com/git-history/master/</url>
+            <url>http://maven-eclipse.github.io/maven</url>
+        </repository>
+        <repository>
+            <id>in-house</id>
+            <url>ftp://ftp:ftp@storage.chelny.taximaxim.ru/mvn</url>
         </repository>
     </repositories>
 
@@ -126,13 +130,13 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>4.11</version>
+            <version>RELEASE</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>log4j</groupId>
             <artifactId>log4j</artifactId>
-            <version>1.2.17</version>
+            <version>RELEASE</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.swt</groupId>
@@ -142,7 +146,7 @@
         <dependency>
             <groupId>org.eclipse.scout.sdk.deps</groupId>
             <artifactId>org.eclipse.jface</artifactId>
-            <version>3.12.0.v20160518-1929</version>
+            <version>RELEASE</version>
         </dependency>
          <dependency>
             <groupId>org.postgresql</groupId>
