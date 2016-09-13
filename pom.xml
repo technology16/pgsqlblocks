@@ -130,13 +130,13 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>RELEASE</version>
+            <version>4.11</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>log4j</groupId>
             <artifactId>log4j</artifactId>
-            <version>RELEASE</version>
+            <version>1.2.17</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.swt</groupId>
@@ -146,7 +146,7 @@
         <dependency>
             <groupId>org.eclipse.scout.sdk.deps</groupId>
             <artifactId>org.eclipse.jface</artifactId>
-            <version>RELEASE</version>
+            <version>3.12.0.v20160518-1929</version>
         </dependency>
          <dependency>
             <groupId>org.postgresql</groupId>
