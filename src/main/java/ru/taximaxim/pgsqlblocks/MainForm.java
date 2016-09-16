@@ -5,6 +5,7 @@ import java.net.URL;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -86,6 +87,8 @@ public class MainForm extends ApplicationWindow {
     private static final int[] VERTICAL_WEIGHTS = new int[] {80, 20};
     private static final int[] HORIZONTAL_WEIGHTS = new int[] {12, 88};
     private static final int SASH_WIDTH = 2;
+    // some problem with 512px: (SWT:4175): Gdk-WARNING **: gdk_window_set_icon_list: icons too large
+    private static final int ICON_SIZES[] = { 32, 48, 256/*, 512*/ };
     
     private static Display display;
     
@@ -182,6 +185,17 @@ public class MainForm extends ApplicationWindow {
     protected void configureShell(Shell shell) {
         super.configureShell(shell);
         shell.setText(APP_NAME);
+        shell.setImages(loadIcons());
+    }
+
+    private Image[] loadIcons() {
+        Image[] icons = new Image[ICON_SIZES.length];
+        for (int i = 0; i < ICON_SIZES.length; ++i) {
+            icons[i] = new Image(null,
+                    getClass().getClassLoader().getResourceAsStream(MessageFormat.format("images/block-{0}x{0}.png",
+                            ICON_SIZES[i])));
+        }
+        return icons;
     }
 
     @Override
