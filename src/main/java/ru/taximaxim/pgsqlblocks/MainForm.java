@@ -5,11 +5,12 @@ import java.net.URL;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
+import java.util.Optional;
+import java.util.concurrent.*;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 
@@ -86,10 +87,11 @@ public class MainForm extends ApplicationWindow {
     private static final int[] VERTICAL_WEIGHTS = new int[] {80, 20};
     private static final int[] HORIZONTAL_WEIGHTS = new int[] {12, 88};
     private static final int SASH_WIDTH = 2;
+    // some problem with 512px: (SWT:4175): Gdk-WARNING **: gdk_window_set_icon_list: icons too large
+    private static final int ICON_SIZES[] = { 32, 48, 256/*, 512*/ };
     
     private static Display display;
-    
-    private Process updateProcces;
+
     private DbcData selectedDbcData;
     private Process selectedProcess;
     private Text procText;
@@ -105,17 +107,18 @@ public class MainForm extends ApplicationWindow {
     private Action disconnectDB;
     private Action autoUpdate;
     private Action onlyBlocked;
-    private Action filterSetting;
     private AddDbcDataDlg addDbcDlg;
-    private SortColumn sortColumn = SortColumn.BLOCKED_COUNT;
-    private SortDirection sortDirection = SortDirection.UP;
+    private static SortColumn sortColumn = SortColumn.BLOCKED_COUNT;
+    private static SortDirection sortDirection = SortDirection.UP;
     private Settings settings = Settings.getInstance();
     private FilterProcess filterProcess = FilterProcess.getInstance();
-    private DbcDataListBuilder dbcDataList = DbcDataListBuilder.getInstance();
+    public static Optional<ScheduledExecutorService> mainService = Optional.of(Executors.newScheduledThreadPool(1));
+    public static final int UPDATER_PERIOD = 5;
+    private DbcDataListBuilder dbcDataBuilder = DbcDataListBuilder.getInstance(mainService);
     private ConcurrentMap<String, Image> imagesMap = new ConcurrentHashMap<String, Image>();
-    private ConcurrentMap<DbcData, ProcessTreeBuilder> processTreeMap = new ConcurrentHashMap<>();
-    private ConcurrentMap<DbcData, ProcessTreeBuilder> blockedProcessTreeMap = new ConcurrentHashMap<>();
-    
+    private static ConcurrentMap<DbcData, ProcessTreeBuilder> processTreeMap = new ConcurrentHashMap<>();
+    private static ConcurrentMap<DbcData, ProcessTreeBuilder> blockedProcessTreeMap = new ConcurrentHashMap<>();
+
     private int[] caMainTreeColsSize = new int[]{80, 110, 150, 110, 110, 110, 145, 145, 145, 55, 145, 70, 65, 150, 80};
     private String[] caMainTreeColsName = new String[]{
             "pid", "blocked_count", "application_name", "datname", "usename", "client", "backend_start", "query_start",
@@ -124,7 +127,7 @@ public class MainForm extends ApplicationWindow {
     private String[] caColName = {"PID", "BLOCKED_COUNT", "APPLICATION_NAME", "DATNAME", "USENAME", "CLIENT", "BACKEND_START", "QUERY_START",
             "XACT_STAT", "STATE", "STATE_CHANGE", "BLOCKED", "WAITING", "QUERY", "SLOWQUERY"};
     
-    public Process getProcessTree(DbcData dbcData) {
+    public static Process getProcessTree(DbcData dbcData) {
         ProcessTreeBuilder processTree = processTreeMap.get(dbcData);
         if(processTree == null){
             processTree = new ProcessTreeBuilder(dbcData);
@@ -135,7 +138,7 @@ public class MainForm extends ApplicationWindow {
         return rootProcess;
     }
     
-    public Process getOnlyBlockedProcessTree(DbcData dbcData) {
+    public static Process getOnlyBlockedProcessTree(DbcData dbcData) {
         ProcessTreeBuilder processTree = blockedProcessTreeMap.get(dbcData);
         if(processTree == null){
             processTree = new ProcessTreeBuilder(dbcData);
@@ -182,6 +185,17 @@ public class MainForm extends ApplicationWindow {
     protected void configureShell(Shell shell) {
         super.configureShell(shell);
         shell.setText(APP_NAME);
+        shell.setImages(loadIcons());
+    }
+
+    private Image[] loadIcons() {
+        Image[] icons = new Image[ICON_SIZES.length];
+        for (int i = 0; i < ICON_SIZES.length; ++i) {
+            icons[i] = new Image(null,
+                    getClass().getClassLoader().getResourceAsStream(MessageFormat.format("images/block-{0}x{0}.png",
+                            ICON_SIZES[i])));
+        }
+        return icons;
     }
 
     @Override
@@ -190,6 +204,7 @@ public class MainForm extends ApplicationWindow {
                 "Вы действительно хотите выйти из pgSqlBlocks?")) {
             return false;
         }
+        DbcDataListBuilder.mainService.ifPresent(ExecutorService::shutdown);
         return super.canHandleShellCloseEvent();
     }
 
@@ -240,8 +255,8 @@ public class MainForm extends ApplicationWindow {
                             tvColumn.getColumn().setWidth(200);
                             caServersTable.setContentProvider(new DbcDataListContentProvider());
                             caServersTable.setLabelProvider(new DbcDataListLabelProvider());
-                            caServersTable.setInput(dbcDataList.getList());
-                            selectedDbcData = dbcDataList.getList().stream()
+                            caServersTable.setInput(dbcDataBuilder.getDbcDataList());
+                            selectedDbcData = dbcDataBuilder.getDbcDataList().stream()
                                     .filter(dbcData -> dbcData.getStatus() == DbcStatus.CONNECTED).findFirst().orElse(null);
                             caServersTable.refresh();
                             updateTree();
@@ -266,15 +281,7 @@ public class MainForm extends ApplicationWindow {
                             filters[0] = new ViewerFilter() {
                                 @Override
                                 public boolean select(Viewer viewer, Object parentElement, Object element) {
-                                    if (element instanceof Process) {
-                                        if (filterProcess.isFiltered((Process) element)) {
-                                            return true;
-                                        } else {
-                                            return false;
-                                        }
-                                    } else {
-                                        return true;
-                                    }
+                                    return !(element instanceof Process) || filterProcess.isFiltered((Process) element);
                                 }
                             };
                             caMainTree.setFilters(filters);
@@ -447,9 +454,9 @@ public class MainForm extends ApplicationWindow {
             @Override
             public void run() {
                 addDbcDlg.open();
-                selectedDbcData = dbcDataList.getLast();
+                selectedDbcData = dbcDataBuilder.getLast();
                 caServersTable.refresh();
-                caServersTable.getTable().setSelection(dbcDataList.getOrderNum(selectedDbcData));
+                caServersTable.getTable().setSelection(dbcDataBuilder.getOrderNum(selectedDbcData));
                 serversToolBarState();
                 caServersTable.refresh();
                 updateTree();
@@ -469,11 +476,11 @@ public class MainForm extends ApplicationWindow {
                 if (okPress) {
                     processTreeMap.remove(selectedDbcData);
                     blockedProcessTreeMap.remove(selectedDbcData);
-                    dbcDataList.delete(selectedDbcData);
-                    if (dbcDataList.getList().size() > 0) {
-                        selectedDbcData = dbcDataList.getList().get(dbcDataList.getList().size() - 1);
+                    dbcDataBuilder.delete(selectedDbcData);
+                    if (dbcDataBuilder.getDbcDataList().size() > 0) {
+                        selectedDbcData = dbcDataBuilder.getDbcDataList().get(dbcDataBuilder.getDbcDataList().size() - 1);
                         caServersTable.refresh();
-                        caServersTable.getTable().setSelection(dbcDataList.getOrderNum(selectedDbcData));
+                        caServersTable.getTable().setSelection(dbcDataBuilder.getOrderNum(selectedDbcData));
                     } else {
                         selectedDbcData = null;
                     }
@@ -495,9 +502,9 @@ public class MainForm extends ApplicationWindow {
                 editDbcDlg.open();
                 processTreeMap.remove(selectedDbcData);
                 blockedProcessTreeMap.remove(selectedDbcData);
-                selectedDbcData = dbcDataList.getLast();
+                selectedDbcData = dbcDataBuilder.getLast();
                 caServersTable.refresh();
-                caServersTable.getTable().setSelection(dbcDataList.getOrderNum(selectedDbcData));
+                caServersTable.getTable().setSelection(dbcDataBuilder.getOrderNum(selectedDbcData));
                 serversToolBarState();
                 caServersTable.refresh();
                 updateTree();
@@ -567,10 +574,10 @@ public class MainForm extends ApplicationWindow {
         toolBarManager.add(autoUpdate);
 
         toolBarManager.add(new Separator());
-        
-        filterSetting = new Action(Images.FILTER.getDescription(),
+
+        Action filterSetting = new Action(Images.FILTER.getDescription(),
                 ImageDescriptor.createFromImage(getImage(Images.FILTER))) {
-            
+
             @Override
             public void run() {
                 FilterDlg filterDlg = new FilterDlg(getShell(), filterProcess);
@@ -587,11 +594,7 @@ public class MainForm extends ApplicationWindow {
             @Override
             public void run() {
                 Boolean onlyBlockedMode;
-                if (onlyBlocked.isChecked()) {
-                    onlyBlockedMode = true;
-                } else {
-                    onlyBlockedMode = false;
-                }
+                onlyBlockedMode = onlyBlocked.isChecked();
                 settings.setOnlyBlocked(onlyBlockedMode);
                 updateTree();
             }
@@ -675,12 +678,12 @@ public class MainForm extends ApplicationWindow {
         URL manifestPath = MainForm.class.getClassLoader().getResource("META-INF/MANIFEST.MF");
         Manifest manifest = null;
         try {
-            manifest = new Manifest(manifestPath.openStream());
+            manifest = new Manifest(manifestPath != null ? manifestPath.openStream() : null);
         } catch (IOException e) {
             LOG.error("Ошибка при чтении манифеста", e);
         }
-        Attributes manifestAttributes = manifest.getMainAttributes();
-        String appVersion = manifestAttributes.getValue("Implementation-Version");
+        Attributes manifestAttributes = manifest != null ? manifest.getMainAttributes() : null;
+        String appVersion = manifestAttributes != null ? manifestAttributes.getValue("Implementation-Version") : null;
         if(appVersion == null) {
             return "";
         }
@@ -701,7 +704,7 @@ public class MainForm extends ApplicationWindow {
         String term = "select pg_terminate_backend(?);";
         boolean kill = false;
         int pid = process.getPid();
-        try (PreparedStatement termPs = selectedDbcData.getConnection().prepareStatement(term);) {
+        try (PreparedStatement termPs = selectedDbcData.getConnection().prepareStatement(term)) {
             termPs.setInt(1, pid);
             try (ResultSet resultSet = termPs.executeQuery()) {
                 if (resultSet.next()) {
@@ -723,7 +726,7 @@ public class MainForm extends ApplicationWindow {
         String cancel = "select pg_cancel_backend(?);";
         int pid = process.getPid();
         boolean kill = false;
-        try (PreparedStatement cancelPs = selectedDbcData.getConnection().prepareStatement(cancel);) {
+        try (PreparedStatement cancelPs = selectedDbcData.getConnection().prepareStatement(cancel)) {
             cancelPs.setInt(1, pid);
             try (ResultSet resultSet = cancelPs.executeQuery()) {
                 if (resultSet.next()) {
@@ -748,36 +751,32 @@ public class MainForm extends ApplicationWindow {
                 if (selectedDbcData != null) {
                     synchronized (selectedDbcData) {
                         if (selectedDbcData != null) {
-                            if (settings.isOnlyBlocked()) {
-                                updateProcces = getOnlyBlockedProcessTree(selectedDbcData);
-                            } else {
-                                updateProcces = getProcessTree(selectedDbcData);
+                            try {
+                                display.asyncExec(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        Object[] expanded = caMainTree.getExpandedElements();
+                                        caMainTree.setInput(selectedDbcData.getProcess());
+                                        caMainTree.setExpandedElements(expanded);
+                                        caMainTree.refresh();
+                                        bhMainTree.refresh();
+                                    }
+                                });
+                            } catch (SWTException e) {
+                                LOG.error("Ошибка при отрисовке таблицы!", e);
                             }
                         }
-                    }
-                    try {
-                        display.syncExec(new Runnable() {
-                            @Override
-                            public void run() {
-                                Object[] expanded = caMainTree.getExpandedElements();
-                                caMainTree.setInput(updateProcces);
-                                caMainTree.setExpandedElements(expanded);
-                                caMainTree.refresh();
-                                bhMainTree.refresh();
-                            }
-                        }); 
-                    } catch (SWTException e) {
-                        LOG.error("Ошибка при отрисовке таблицы!", e);
                     }
                 }
             }
         }.start();
     }
-    
+
     private void dbcDataConnect() {
         synchronized (selectedDbcData) {
-            selectedDbcData.connect();
-            caServersTable.refresh();
+            LOG.debug(MessageFormat.format("Add on connect dbcData \"{0}\" to updaterList",
+                    selectedDbcData.getName()));
+            dbcDataBuilder.addScheduledUpdater(selectedDbcData);
             serversToolBarState();
         }
         updateTree();
@@ -786,8 +785,10 @@ public class MainForm extends ApplicationWindow {
     
     private void dbcDataDisconnect() {
         synchronized (selectedDbcData) {
+            LOG.debug(MessageFormat.format("Remove dbcData on disconnect \"{0}\" from updaterList",
+                    selectedDbcData.getName()));
             selectedDbcData.disconnect();
-            caServersTable.refresh();
+            dbcDataBuilder.removeScheduledUpdater(selectedDbcData);
             disconnectState();
         }
         updateTree();

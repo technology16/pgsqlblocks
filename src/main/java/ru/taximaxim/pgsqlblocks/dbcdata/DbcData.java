@@ -11,11 +11,14 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 import org.apache.log4j.Logger;
+import ru.taximaxim.pgsqlblocks.process.Process;
 
 public class DbcData implements Comparable<DbcData> {
     
     private static final Logger LOG = Logger.getLogger(DbcData.class);
-    
+
+    private Process process;
+
     private String name;
     private String host;
     private String port;
@@ -40,7 +43,15 @@ public class DbcData implements Comparable<DbcData> {
         this.password = passwd;
         this.isLast = isLast;
     }
-    
+
+    public void setProcess(Process process){
+        this.process = process;
+    }
+
+    public Process getProcess(){
+        return process;
+    }
+
     public String getName() {
         return name;
     }
@@ -133,10 +144,7 @@ public class DbcData implements Comparable<DbcData> {
             return false;
         }
         DbcData table = (DbcData) object;
-        if (this.getName().equals(table.getName())) {
-            return true;
-        }
-        return false;
+        return this.getName().equals(table.getName());
     }
     
     public DbcStatus getStatus() {
