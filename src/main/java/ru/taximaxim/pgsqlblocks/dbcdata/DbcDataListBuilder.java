@@ -1,9 +1,10 @@
 package ru.taximaxim.pgsqlblocks.dbcdata;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.text.MessageFormat;
+import java.util.*;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 
 import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
@@ -12,8 +13,11 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import ru.taximaxim.pgsqlblocks.MainForm;
 import ru.taximaxim.pgsqlblocks.utils.PathBuilder;
 import ru.taximaxim.pgsqlblocks.utils.XmlDocumentWorker;
+
+import static java.util.concurrent.TimeUnit.SECONDS;
 
 public final class DbcDataListBuilder {
     
@@ -23,7 +27,9 @@ public final class DbcDataListBuilder {
     private static final String SERVERS = "servers";
     private static final String SERVER = "server";
     
-    private List<DbcData> list;
+    private List<DbcData> dbcDataList;
+    public Map<DbcData, ScheduledFuture<?>> updaterList = new HashMap<>();
+    public static Optional<ScheduledExecutorService> mainService = Optional.empty();
     private DbcDataParcer dbcDataParcer = new DbcDataParcer();
     private XmlDocumentWorker docWorker = new XmlDocumentWorker();
     private File serversFile = PathBuilder.getInstance().getServersPath().toFile();
@@ -34,23 +40,26 @@ public final class DbcDataListBuilder {
         init();
     }
     
-    public static DbcDataListBuilder getInstance() {
+    public static DbcDataListBuilder getInstance(Optional<ScheduledExecutorService> mainExecutorService) {
+        if (mainExecutorService.isPresent())
+            mainService = mainExecutorService;
         if(instance == null) {
             synchronized(DbcDataListBuilder.class) {
                 if(instance == null) {
-                    instance=new DbcDataListBuilder();
+                    instance = new DbcDataListBuilder();
                 }
             }
         }
+        LOG.debug("Set ExecutorService in DbcDataListBuilder");
         return instance;
     }
     
-    public synchronized List<DbcData> getList() {
-        if (list == null) {
-            list = new ArrayList<DbcData>();
+    public synchronized List<DbcData> getDbcDataList() {
+        if (dbcDataList == null) {
+            dbcDataList = new ArrayList<DbcData>();
         }
-        Collections.sort(list);
-        return list;
+        Collections.sort(dbcDataList);
+        return dbcDataList;
     }
     
     public void init() {
@@ -66,29 +75,30 @@ public final class DbcDataListBuilder {
             }
             Element item = (Element) node;
             if (i == items.getLength() - 1) {
-                getList().add(dbcDataParcer.parseDbc(item, true));
+                getDbcDataList().add(dbcDataParcer.parseDbc(item, true));
             } else {
-                getList().add(dbcDataParcer.parseDbc(item, false));
+                getDbcDataList().add(dbcDataParcer.parseDbc(item, false));
             }
         }
-        for (DbcData dbcData : getList()) {
-            if (dbcData.isEnabled()) {
-                dbcData.connect();
-            }
+        LOG.debug("Fill updaterList in DbcDataListBuilder");
+        for (DbcData dbcData : getDbcDataList()) {
+            addScheduledUpdater(dbcData);
         }
     }
     
     public void add(DbcData dbcData) {
-        if(getList().contains(dbcData)) {
+        if(getDbcDataList().contains(dbcData)) {
             LOG.error("Данный сервер уже есть в конфигурационном файле");
             return;
         }
-        getList().add(dbcData);
-        Collections.sort(getList());
+        getDbcDataList().add(dbcData);
+        Collections.sort(getDbcDataList());
         if (dbcData.isEnabled()) {
-            dbcData.connect();
+            LOG.debug(MessageFormat.format("Add new dbcData \"{0}\" to updaterList",
+                    dbcData.getName()));
+            addScheduledUpdater(dbcData);
         }
-        for (DbcData data : getList()) {
+        for (DbcData data : getDbcDataList()) {
             data.setLast(false);
         }
         dbcData.setLast(true);
@@ -97,10 +107,19 @@ public final class DbcDataListBuilder {
         rootElement.item(0).appendChild(dbcDataParcer.createServerElement(doc, dbcData, true));
         docWorker.save(doc, serversFile);
     }
-    
+
     public void edit(DbcData oldDbc, DbcData newDbc) {
         delete(oldDbc);
         add(newDbc);
+        removeScheduledUpdater(oldDbc);
+        if (newDbc.isEnabled()) {
+            LOG.debug(MessageFormat.format("Replace old dbcData \"{0}\" by new dbcData \"{1}\" in updaterList",
+                    oldDbc.getName(), newDbc.getName()));
+            addScheduledUpdater(newDbc);
+        } else {
+            LOG.debug(MessageFormat.format("Remove dbcData \"{0}\" from updaterList",
+                    oldDbc.getName()));
+        }
     }
     
     public void delete(DbcData oldDbc) {
@@ -114,13 +133,16 @@ public final class DbcDataListBuilder {
                 break;
             }
         }
-        getList().remove(oldDbc);
+        getDbcDataList().remove(oldDbc);
+        LOG.info(MessageFormat.format("Remove dbcData \"{0}\" from updaterList",
+                oldDbc.getName()));
+        removeScheduledUpdater(oldDbc);
         docWorker.save(doc, serversFile);
     }
     
     public int getOrderNum(DbcData dbcData) {
-        for (int i = 0; i < getList().size(); i++) {
-            if (getList().get(i).equals(dbcData)) {
+        for (int i = 0; i < getDbcDataList().size(); i++) {
+            if (getDbcDataList().get(i).equals(dbcData)) {
                 return i;
             }
         }
@@ -128,11 +150,37 @@ public final class DbcDataListBuilder {
     }
     
     public DbcData getLast() {
-        for (DbcData data : getList()) {
+        for (DbcData data : getDbcDataList()) {
             if (data.isLast()) {
                 return data;
             }
         }
-        return getList().get(getList().size() - 1);
+        return getDbcDataList().get(getDbcDataList().size() - 1);
+    }
+
+    /**
+     * Add new dbcData to updaterList
+     */
+    public void addScheduledUpdater(DbcData dbcData) {
+        if (mainService.isPresent() && !updaterList.containsKey(dbcData)) { // TODO: need to check status too
+            LOG.debug(MessageFormat.format("updaterList.size() before add \"{0}\": {1} ...", dbcData.getName(), updaterList.size()));
+            updaterList.put(dbcData,
+                    mainService.get().scheduleWithFixedDelay(new DbcDataRunner(dbcData),
+                            0,
+                            MainForm.UPDATER_PERIOD,
+                            SECONDS));
+            LOG.debug(MessageFormat.format("updaterList.size() after add \"{0}\": {1} ...", dbcData.getName(), updaterList.size()));
+        }
+    }
+
+    /**
+     * Remove dbcData from updaterList
+     */
+    public void removeScheduledUpdater(DbcData dbcData) {
+        if (mainService.isPresent() && updaterList.containsKey(dbcData)) {
+            LOG.debug(MessageFormat.format("updaterList.size() before remove \"{0}\": {1} ...", dbcData.getName(), updaterList.size()));
+            updaterList.remove(dbcData).cancel(true);
+            LOG.debug(MessageFormat.format("updaterList.size() after remove \"{0}\": {1} ...", dbcData.getName(), updaterList.size()));
+        }
     }
 }
