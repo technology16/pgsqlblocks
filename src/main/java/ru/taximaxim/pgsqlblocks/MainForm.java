@@ -204,7 +204,7 @@ public class MainForm extends ApplicationWindow {
                 "Вы действительно хотите выйти из pgSqlBlocks?")) {
             return false;
         }
-        dbcDataBuilder.mainService.ifPresent(ExecutorService::shutdown);
+        DbcDataListBuilder.mainService.ifPresent(ExecutorService::shutdown);
         return super.canHandleShellCloseEvent();
     }
 
@@ -704,7 +704,7 @@ public class MainForm extends ApplicationWindow {
         String term = "select pg_terminate_backend(?);";
         boolean kill = false;
         int pid = process.getPid();
-        try (PreparedStatement termPs = selectedDbcData.getConnection().prepareStatement(term);) {
+        try (PreparedStatement termPs = selectedDbcData.getConnection().prepareStatement(term)) {
             termPs.setInt(1, pid);
             try (ResultSet resultSet = termPs.executeQuery()) {
                 if (resultSet.next()) {
@@ -726,7 +726,7 @@ public class MainForm extends ApplicationWindow {
         String cancel = "select pg_cancel_backend(?);";
         int pid = process.getPid();
         boolean kill = false;
-        try (PreparedStatement cancelPs = selectedDbcData.getConnection().prepareStatement(cancel);) {
+        try (PreparedStatement cancelPs = selectedDbcData.getConnection().prepareStatement(cancel)) {
             cancelPs.setInt(1, pid);
             try (ResultSet resultSet = cancelPs.executeQuery()) {
                 if (resultSet.next()) {

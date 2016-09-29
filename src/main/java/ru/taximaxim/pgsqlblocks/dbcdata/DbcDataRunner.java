@@ -17,21 +17,19 @@ public class DbcDataRunner implements Runnable {
 
     @Override
     public void run() {
-        if (dbcData.isEnabled()){
-            try {
-                if (!dbcData.isConnected()) {
-                    LOG.debug(MessageFormat.format("  Connecting \"{0}\"...", dbcData.getName()));
-                    dbcData.connect();
-                }
-                LOG.info(MessageFormat.format("  Updating \"{0}\"...", dbcData.getName()));
-                if (settings.isOnlyBlocked()) {
-                    dbcData.setProcess(MainForm.getOnlyBlockedProcessTree(dbcData));
-                } else {
-                    dbcData.setProcess(MainForm.getProcessTree(dbcData));
-                }
-            } catch (Exception e) {
-                LOG.error(MessageFormat.format("  Error on connect or update DbcData: {0}", e.getMessage()));
+        try {
+            if (!dbcData.isConnected()) {
+                LOG.debug(MessageFormat.format("  Connecting \"{0}\"...", dbcData.getName()));
+                dbcData.connect();
             }
+            LOG.info(MessageFormat.format("  Updating \"{0}\"...", dbcData.getName()));
+            if (settings.isOnlyBlocked()) {
+                dbcData.setProcess(MainForm.getOnlyBlockedProcessTree(dbcData));
+            } else {
+                dbcData.setProcess(MainForm.getProcessTree(dbcData));
+            }
+        } catch (Exception e) {
+            LOG.error(MessageFormat.format("  Error on connect or update DbcData: {0}", e.getMessage()));
         }
     }
 }
