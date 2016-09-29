@@ -144,10 +144,7 @@ public class DbcData implements Comparable<DbcData> {
             return false;
         }
         DbcData table = (DbcData) object;
-        if (this.getName().equals(table.getName())) {
-            return true;
-        }
-        return false;
+        return this.getName().equals(table.getName());
     }
     
     public DbcStatus getStatus() {

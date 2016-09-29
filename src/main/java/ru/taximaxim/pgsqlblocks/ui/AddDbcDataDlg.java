@@ -36,7 +36,7 @@ public class AddDbcDataDlg extends Dialog {
     
     private enum Action {
         ADD,
-        EDIT;
+        EDIT
     }
     
     public AddDbcDataDlg(Shell shell) {

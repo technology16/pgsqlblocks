@@ -12,13 +12,11 @@ public class DbcDataRunner implements Runnable {
     private Settings settings = Settings.getInstance();
 
     public DbcDataRunner(DbcData data) {
-        LOG.debug("> runner " + data);
         dbcData = data;
     }
 
     @Override
     public void run() {
-        LOG.info("Begin DbcDataRunner.run() for " + dbcData);
         if (dbcData.isEnabled()){
             try {
                 if (!dbcData.isConnected()) {
@@ -35,6 +33,5 @@ public class DbcDataRunner implements Runnable {
                 LOG.error(MessageFormat.format("  Error on connect or update DbcData: {0}", e.getMessage()));
             }
         }
-        LOG.debug("Finish DbcDataRunner.run() for " + dbcData);
     }
 }

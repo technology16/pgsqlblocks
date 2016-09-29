@@ -1,7 +1,6 @@
 package ru.taximaxim.pgsqlblocks.dbcdata;
 
 import java.io.File;
-import java.text.MessageFormat;
 import java.util.*;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -80,7 +79,6 @@ public final class DbcDataListBuilder {
                 getDbcDataList().add(dbcDataParcer.parseDbc(item, false));
             }
         }
-        LOG.debug("Fill updaterList in DbcDataListBuilder");
         for (DbcData dbcData : getDbcDataList()) {
             addScheduledUpdater(dbcData);
         }
@@ -94,8 +92,6 @@ public final class DbcDataListBuilder {
         getDbcDataList().add(dbcData);
         Collections.sort(getDbcDataList());
         if (dbcData.isEnabled()) {
-            LOG.debug(MessageFormat.format("Add new dbcData \"{0}\" to updaterList",
-                    dbcData.getName()));
             addScheduledUpdater(dbcData);
         }
         for (DbcData data : getDbcDataList()) {
@@ -113,12 +109,7 @@ public final class DbcDataListBuilder {
         add(newDbc);
         removeScheduledUpdater(oldDbc);
         if (newDbc.isEnabled()) {
-            LOG.debug(MessageFormat.format("Replace old dbcData \"{0}\" by new dbcData \"{1}\" in updaterList",
-                    oldDbc.getName(), newDbc.getName()));
             addScheduledUpdater(newDbc);
-        } else {
-            LOG.debug(MessageFormat.format("Remove dbcData \"{0}\" from updaterList",
-                    oldDbc.getName()));
         }
     }
     
@@ -134,8 +125,6 @@ public final class DbcDataListBuilder {
             }
         }
         getDbcDataList().remove(oldDbc);
-        LOG.info(MessageFormat.format("Remove dbcData \"{0}\" from updaterList",
-                oldDbc.getName()));
         removeScheduledUpdater(oldDbc);
         docWorker.save(doc, serversFile);
     }
@@ -163,13 +152,11 @@ public final class DbcDataListBuilder {
      */
     public void addScheduledUpdater(DbcData dbcData) {
         if (mainService.isPresent() && !updaterList.containsKey(dbcData)) { // TODO: need to check status too
-            LOG.debug(MessageFormat.format("updaterList.size() before add \"{0}\": {1} ...", dbcData.getName(), updaterList.size()));
             updaterList.put(dbcData,
                     mainService.get().scheduleWithFixedDelay(new DbcDataRunner(dbcData),
                             0,
                             MainForm.UPDATER_PERIOD,
                             SECONDS));
-            LOG.debug(MessageFormat.format("updaterList.size() after add \"{0}\": {1} ...", dbcData.getName(), updaterList.size()));
         }
     }
 
@@ -178,9 +165,7 @@ public final class DbcDataListBuilder {
      */
     public void removeScheduledUpdater(DbcData dbcData) {
         if (mainService.isPresent() && updaterList.containsKey(dbcData)) {
-            LOG.debug(MessageFormat.format("updaterList.size() before remove \"{0}\": {1} ...", dbcData.getName(), updaterList.size()));
             updaterList.remove(dbcData).cancel(true);
-            LOG.debug(MessageFormat.format("updaterList.size() after remove \"{0}\": {1} ...", dbcData.getName(), updaterList.size()));
         }
     }
 }

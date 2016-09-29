@@ -107,7 +107,6 @@ public class MainForm extends ApplicationWindow {
     private Action disconnectDB;
     private Action autoUpdate;
     private Action onlyBlocked;
-    private Action filterSetting;
     private AddDbcDataDlg addDbcDlg;
     private static SortColumn sortColumn = SortColumn.BLOCKED_COUNT;
     private static SortDirection sortDirection = SortDirection.UP;
@@ -575,10 +574,10 @@ public class MainForm extends ApplicationWindow {
         toolBarManager.add(autoUpdate);
 
         toolBarManager.add(new Separator());
-        
-        filterSetting = new Action(Images.FILTER.getDescription(),
+
+        Action filterSetting = new Action(Images.FILTER.getDescription(),
                 ImageDescriptor.createFromImage(getImage(Images.FILTER))) {
-            
+
             @Override
             public void run() {
                 FilterDlg filterDlg = new FilterDlg(getShell(), filterProcess);
@@ -595,11 +594,7 @@ public class MainForm extends ApplicationWindow {
             @Override
             public void run() {
                 Boolean onlyBlockedMode;
-                if (onlyBlocked.isChecked()) {
-                    onlyBlockedMode = true;
-                } else {
-                    onlyBlockedMode = false;
-                }
+                onlyBlockedMode = onlyBlocked.isChecked();
                 settings.setOnlyBlocked(onlyBlockedMode);
                 updateTree();
             }
@@ -683,12 +678,12 @@ public class MainForm extends ApplicationWindow {
         URL manifestPath = MainForm.class.getClassLoader().getResource("META-INF/MANIFEST.MF");
         Manifest manifest = null;
         try {
-            manifest = new Manifest(manifestPath.openStream());
+            manifest = new Manifest(manifestPath != null ? manifestPath.openStream() : null);
         } catch (IOException e) {
             LOG.error("Ошибка при чтении манифеста", e);
         }
-        Attributes manifestAttributes = manifest.getMainAttributes();
-        String appVersion = manifestAttributes.getValue("Implementation-Version");
+        Attributes manifestAttributes = manifest != null ? manifest.getMainAttributes() : null;
+        String appVersion = manifestAttributes != null ? manifestAttributes.getValue("Implementation-Version") : null;
         if(appVersion == null) {
             return "";
         }
