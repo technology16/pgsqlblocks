@@ -12,10 +12,13 @@ import java.sql.SQLException;
 
 import org.apache.log4j.Logger;
 import ru.taximaxim.pgsqlblocks.process.Process;
+import ru.taximaxim.pgsqlblocks.process.ProcessTreeBuilder;
+import ru.taximaxim.pgsqlblocks.utils.Settings;
 
 public class DbcData implements Comparable<DbcData> {
     
     private static final Logger LOG = Logger.getLogger(DbcData.class);
+    private Settings settings = Settings.getInstance();
 
     private Process process;
 
@@ -30,7 +33,9 @@ public class DbcData implements Comparable<DbcData> {
     private boolean isLast;
     
     private Connection connection;
-    
+    private ProcessTreeBuilder processTree = null;
+    private ProcessTreeBuilder blockedProcessTree = null;
+
     public DbcData(String name,String host, String port,String dbname,
             String user, String passwd, boolean enabled, boolean isLast) {
         
@@ -42,6 +47,22 @@ public class DbcData implements Comparable<DbcData> {
         this.enabled = enabled;
         this.password = passwd;
         this.isLast = isLast;
+    }
+
+    public ProcessTreeBuilder getProcessTree() {
+        return processTree;
+    }
+
+    public void setProcessTree(ProcessTreeBuilder processTree) {
+        this.processTree = processTree;
+    }
+
+    public ProcessTreeBuilder getBlockedProcessTree() {
+        return blockedProcessTree;
+    }
+
+    public void setBlockedProcessTree(ProcessTreeBuilder blockedProcessTree) {
+        this.blockedProcessTree = blockedProcessTree;
     }
 
     public void setProcess(Process process){
@@ -163,6 +184,7 @@ public class DbcData implements Comparable<DbcData> {
         try {
             String pass = (getPass() == null || getPass().isEmpty()) ? getPgPass() : getPass();
             LOG.info(getName() + " Соединение...");
+            DriverManager.setLoginTimeout(settings.getLoginTimeout());
             connection = DriverManager.getConnection(getUrl(), getUser(), pass);
             setStatus(DbcStatus.CONNECTED);
             LOG.info(getName() + " Соединение создано.");

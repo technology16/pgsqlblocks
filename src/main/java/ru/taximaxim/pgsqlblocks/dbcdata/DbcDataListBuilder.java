@@ -6,14 +6,15 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 
 import org.apache.log4j.Logger;
+import org.eclipse.jface.viewers.TableViewer;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import ru.taximaxim.pgsqlblocks.MainForm;
 import ru.taximaxim.pgsqlblocks.utils.PathBuilder;
+import ru.taximaxim.pgsqlblocks.utils.Settings;
 import ru.taximaxim.pgsqlblocks.utils.XmlDocumentWorker;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
@@ -28,10 +29,12 @@ public final class DbcDataListBuilder {
     
     private List<DbcData> dbcDataList;
     public Map<DbcData, ScheduledFuture<?>> updaterList = new HashMap<>();
+    private static TableViewer caServersTable;
     public static Optional<ScheduledExecutorService> mainService = Optional.empty();
     private DbcDataParcer dbcDataParcer = new DbcDataParcer();
     private XmlDocumentWorker docWorker = new XmlDocumentWorker();
     private File serversFile = PathBuilder.getInstance().getServersPath().toFile();
+    private Settings settings = Settings.getInstance();
     
     private static volatile DbcDataListBuilder instance;
     
@@ -52,7 +55,7 @@ public final class DbcDataListBuilder {
         LOG.debug("Set ExecutorService in DbcDataListBuilder");
         return instance;
     }
-    
+
     public synchronized List<DbcData> getDbcDataList() {
         if (dbcDataList == null) {
             dbcDataList = new ArrayList<DbcData>();
@@ -79,8 +82,8 @@ public final class DbcDataListBuilder {
                 getDbcDataList().add(dbcDataParcer.parseDbc(item, false));
             }
         }
-        for (DbcData dbcData : getDbcDataList()) {
-            addScheduledUpdater(dbcData);
+        if (settings.isAutoUpdate()) {
+            getDbcDataList().stream().filter(DbcData::isEnabled).forEach(this::addScheduledUpdater);
         }
     }
     
@@ -91,8 +94,10 @@ public final class DbcDataListBuilder {
         }
         getDbcDataList().add(dbcData);
         Collections.sort(getDbcDataList());
-        if (dbcData.isEnabled()) {
+        if (settings.isAutoUpdate()) {
             addScheduledUpdater(dbcData);
+        } else if (dbcData.isEnabled()) {
+            mainService.get().schedule(new DbcDataRunner(dbcData), 0, SECONDS);
         }
         for (DbcData data : getDbcDataList()) {
             data.setLast(false);
@@ -108,8 +113,10 @@ public final class DbcDataListBuilder {
         delete(oldDbc);
         add(newDbc);
         removeScheduledUpdater(oldDbc);
-        if (newDbc.isEnabled()) {
+        if (settings.isAutoUpdate()) {
             addScheduledUpdater(newDbc);
+        } else if (newDbc.isEnabled()) {
+            mainService.get().schedule(new DbcDataRunner(newDbc), 0, SECONDS);
         }
     }
     
@@ -139,23 +146,26 @@ public final class DbcDataListBuilder {
     }
     
     public DbcData getLast() {
-        for (DbcData data : getDbcDataList()) {
-            if (data.isLast()) {
-                return data;
+        if (getDbcDataList().size() > 0) {
+            for (DbcData data : getDbcDataList()) {
+                if (data.isLast()) {
+                    return data;
+                }
             }
+            return getDbcDataList().get(getDbcDataList().size() - 1);
         }
-        return getDbcDataList().get(getDbcDataList().size() - 1);
+        return null;
     }
 
     /**
      * Add new dbcData to updaterList
      */
     public void addScheduledUpdater(DbcData dbcData) {
-        if (mainService.isPresent() && !updaterList.containsKey(dbcData)) { // TODO: need to check status too
+        if (mainService.isPresent() && !updaterList.containsKey(dbcData)) {
             updaterList.put(dbcData,
                     mainService.get().scheduleWithFixedDelay(new DbcDataRunner(dbcData),
                             0,
-                            MainForm.UPDATER_PERIOD,
+                            settings.getUpdatePeriod(),
                             SECONDS));
         }
     }
@@ -167,5 +177,13 @@ public final class DbcDataListBuilder {
         if (mainService.isPresent() && updaterList.containsKey(dbcData)) {
             updaterList.remove(dbcData).cancel(true);
         }
+    }
+
+    public static void setCaServersTable(TableViewer table) {
+        caServersTable = table;
+    }
+
+    public static TableViewer getCaServersTable() {
+        return caServersTable;
     }
 }

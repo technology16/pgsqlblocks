@@ -22,14 +22,33 @@ public class DbcDataRunner implements Runnable {
                 LOG.debug(MessageFormat.format("  Connecting \"{0}\"...", dbcData.getName()));
                 dbcData.connect();
             }
-            LOG.info(MessageFormat.format("  Updating \"{0}\"...", dbcData.getName()));
-            if (settings.isOnlyBlocked()) {
-                dbcData.setProcess(MainForm.getOnlyBlockedProcessTree(dbcData));
+            if (dbcData.isConnected()) {
+                switch (dbcData.getStatus()) {
+                    case CONNECTED:
+                        dbcData.setStatus(DbcStatus.UPDATE);
+                        break;
+                    case UPDATE:
+                        dbcData.setStatus(DbcStatus.CONNECTED);
+                        break;
+                    default:
+                        dbcData.setStatus(DbcStatus.UPDATE);
+                }
+
+                LOG.info(MessageFormat.format("  Updating \"{0}\"...", dbcData.getName()));
+                if (settings.isOnlyBlocked()) {
+                    dbcData.setProcess(MainForm.getOnlyBlockedProcessTree(dbcData));
+                } else {
+                    dbcData.setProcess(MainForm.getProcessTree(dbcData));
+                }
             } else {
-                dbcData.setProcess(MainForm.getProcessTree(dbcData));
+                LOG.warn(MessageFormat.format(" DbcData not connected: \"{0}\"", dbcData.getName()));
             }
         } catch (Exception e) {
             LOG.error(MessageFormat.format("  Error on connect or update DbcData: {0}", e.getMessage()));
         }
+        if (dbcData.isConnected()) {
+            dbcData.setStatus(DbcStatus.CONNECTED);
+        }
+        LOG.info(MessageFormat.format("  Finish updating \"{0}\"...", dbcData.getName()));
     }
 }
