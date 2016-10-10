@@ -155,10 +155,10 @@ public class AddDbcDataDlg extends Dialog {
         DbcData newDbcData = new DbcData(name, host, port, dbname, user, passwd, enabled, true);
         switch (action) {
         case ADD:
-            DbcDataListBuilder.getInstance(MainForm.mainService).add(newDbcData);
+            DbcDataListBuilder.getInstance(MainForm.getMainService()).add(newDbcData);
             break;
         case EDIT:
-            DbcDataListBuilder.getInstance(MainForm.mainService).edit(selectedDbcData, newDbcData);
+            DbcDataListBuilder.getInstance(MainForm.getMainService()).edit(selectedDbcData, newDbcData);
         }
         
         super.okPressed();

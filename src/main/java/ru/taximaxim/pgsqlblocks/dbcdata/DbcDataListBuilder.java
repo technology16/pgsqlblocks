@@ -28,9 +28,9 @@ public final class DbcDataListBuilder {
     private static final String SERVER = "server";
     
     private List<DbcData> dbcDataList;
-    public Map<DbcData, ScheduledFuture<?>> updaterList = new HashMap<>();
+    private Map<DbcData, ScheduledFuture<?>> updaterList = new HashMap<>();
     private static TableViewer caServersTable;
-    public static Optional<ScheduledExecutorService> mainService = Optional.empty();
+    protected static Optional<ScheduledExecutorService> mainService = Optional.empty();
     private DbcDataParcer dbcDataParcer = new DbcDataParcer();
     private XmlDocumentWorker docWorker = new XmlDocumentWorker();
     private File serversFile = PathBuilder.getInstance().getServersPath().toFile();
@@ -40,6 +40,10 @@ public final class DbcDataListBuilder {
     
     private DbcDataListBuilder() {
         init();
+    }
+
+    public static Optional<ScheduledExecutorService> getMainService() {
+        return mainService;
     }
     
     public static DbcDataListBuilder getInstance(Optional<ScheduledExecutorService> mainExecutorService) {
@@ -146,7 +150,7 @@ public final class DbcDataListBuilder {
     }
     
     public DbcData getLast() {
-        if (getDbcDataList().size() > 0) {
+        if (!getDbcDataList().isEmpty()) {
             for (DbcData data : getDbcDataList()) {
                 if (data.isLast()) {
                     return data;

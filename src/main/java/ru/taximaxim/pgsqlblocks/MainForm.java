@@ -6,9 +6,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.MessageFormat;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.*;
 import java.util.jar.Attributes;
@@ -83,7 +81,7 @@ public class MainForm extends ApplicationWindow {
     private static final int[] HORIZONTAL_WEIGHTS = new int[] {12, 88};
     private static final int SASH_WIDTH = 2;
     // some problem with 512px: (SWT:4175): Gdk-WARNING **: gdk_window_set_icon_list: icons too large
-    private static final int ICON_SIZES[] = { 32, 48, 256/*, 512*/ };
+    private static final int[] ICON_SIZES = { 32, 48, 256/*, 512*/ };
     
     private static Display display;
 
@@ -91,7 +89,7 @@ public class MainForm extends ApplicationWindow {
     private Process selectedProcess;
     private Text procText;
     private SashForm caTreeSf;
-    public TableViewer caServersTable;
+    protected TableViewer caServersTable;
     private TreeViewer caMainTree;
     private Composite procComposite;
     private TableViewer bhServersTable;
@@ -107,7 +105,7 @@ public class MainForm extends ApplicationWindow {
     private static SortDirection sortDirection = SortDirection.UP;
     private Settings settings = Settings.getInstance();
     private FilterProcess filterProcess = FilterProcess.getInstance();
-    public static Optional<ScheduledExecutorService> mainService = Optional.of(Executors.newScheduledThreadPool(1));
+    protected static Optional<ScheduledExecutorService> mainService = Optional.of(Executors.newScheduledThreadPool(1));
     private DbcDataListBuilder dbcDataBuilder = DbcDataListBuilder.getInstance(mainService);
     private ConcurrentMap<String, Image> imagesMap = new ConcurrentHashMap<String, Image>();
 
@@ -118,6 +116,10 @@ public class MainForm extends ApplicationWindow {
     
     private String[] caColName = {"PID", "BLOCKED_COUNT", "APPLICATION_NAME", "DATNAME", "USENAME", "CLIENT", "BACKEND_START", "QUERY_START",
             "XACT_STAT", "STATE", "STATE_CHANGE", "BLOCKED", "WAITING", "QUERY", "SLOWQUERY"};
+
+    public static Optional<ScheduledExecutorService> getMainService() {
+        return mainService;
+    }
 
     public static Process getProcessTree(DbcData dbcData) {
         ProcessTreeBuilder processTree = dbcData.getProcessTree();
@@ -196,7 +198,7 @@ public class MainForm extends ApplicationWindow {
                 "Вы действительно хотите выйти из pgSqlBlocks?")) {
             return false;
         }
-        DbcDataListBuilder.mainService.ifPresent(ExecutorService::shutdown);
+        DbcDataListBuilder.getMainService().ifPresent(ExecutorService::shutdown);
         return super.canHandleShellCloseEvent();
     }
 
@@ -628,7 +630,7 @@ public class MainForm extends ApplicationWindow {
                 dialog.setFilterExtensions(new String[]{"*.xml"});
 
                 List<DbcData> blockedDbsDataList = BlocksHistory.getInstance().open(dialog.open());
-                if (blockedDbsDataList.size() > 0) {
+                if (!blockedDbsDataList.isEmpty()) {
                     bhServersTable.setInput(blockedDbsDataList);
                     bhMainTree.setInput(blockedDbsDataList.get(0).getProcess());
                     bhMainTree.refresh();
