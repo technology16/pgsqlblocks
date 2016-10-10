@@ -147,18 +147,26 @@ public class AddDbcDataDlg extends Dialog {
         String user = userText.getText();
         String passwd = passwdText.getText();
         boolean enabled = enabledButton.getSelection();
-        if (name.isEmpty() || host.isEmpty() || port.isEmpty()
-                || dbname.isEmpty() || user.isEmpty()) {
-            MessageDialog.openError(shell, "Внимание!", "Не заполнено обязательное поле!");
+        if (name.isEmpty()) {
+            MessageDialog.openError(shell, "Внимание!", "Не заполнено обязательное поле: Имя соединения!");
+            return;
+        } else if (host.isEmpty() || port.isEmpty()) {
+            MessageDialog.openError(shell, "Внимание!", "Не заполнены обязательные поля: Хост и/или Порт!");
+            return;
+        } else if (dbname.isEmpty() || user.isEmpty()) {
+            MessageDialog.openError(shell, "Внимание!", "Не заполнены обязательные поля: Имя БД и/или Имя пользователя!");
             return;
         }
         DbcData newDbcData = new DbcData(name, host, port, dbname, user, passwd, enabled, true);
         switch (action) {
-        case ADD:
-            DbcDataListBuilder.getInstance(MainForm.getMainService()).add(newDbcData);
-            break;
-        case EDIT:
-            DbcDataListBuilder.getInstance(MainForm.getMainService()).edit(selectedDbcData, newDbcData);
+            case ADD:
+                DbcDataListBuilder.getInstance(MainForm.getMainService()).add(newDbcData);
+                break;
+            case EDIT:
+                DbcDataListBuilder.getInstance(MainForm.getMainService()).edit(selectedDbcData, newDbcData);
+                break;
+            default:
+                break;
         }
         
         super.okPressed();
