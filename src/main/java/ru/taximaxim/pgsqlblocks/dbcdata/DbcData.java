@@ -224,7 +224,7 @@ public class DbcData implements Comparable<DbcData> {
             setProcessTree(processTree);
         }
         Process rootProcess = processTree.getProcessTree();
-        processTree.processSort(rootProcess, MainForm.sortColumn, MainForm.sortDirection);
+        processTree.processSort(rootProcess, MainForm.getSortColumn(), MainForm.getSortDirection());
         return rootProcess;
     }
 

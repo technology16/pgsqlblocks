@@ -86,12 +86,12 @@ public class MainForm extends ApplicationWindow {
     private Action autoUpdate;
     private Action onlyBlocked;
     private AddDbcDataDlg addDbcDlg;
-    public static SortColumn sortColumn = SortColumn.BLOCKED_COUNT;
-    public static SortDirection sortDirection = SortDirection.UP;
+    private static SortColumn sortColumn = SortColumn.BLOCKED_COUNT;
+    private static SortDirection sortDirection = SortDirection.UP;
     private Settings settings = Settings.getInstance();
     private FilterProcess filterProcess = FilterProcess.getInstance();
-    private final static ScheduledExecutorService mainService = Executors.newScheduledThreadPool(1);
-    private final static ScheduledExecutorService otherService = Executors.newScheduledThreadPool(1);
+    private static final ScheduledExecutorService mainService = Executors.newScheduledThreadPool(1);
+    private static final ScheduledExecutorService otherService = Executors.newScheduledThreadPool(1);
     private final DbcDataListBuilder dbcDataBuilder = DbcDataListBuilder.getInstance(mainService);
     private ConcurrentMap<String, Image> imagesMap = new ConcurrentHashMap<>();
 
@@ -102,7 +102,6 @@ public class MainForm extends ApplicationWindow {
     
     private String[] caColName = {"PID", "BLOCKED_COUNT", "APPLICATION_NAME", "DATNAME", "USENAME", "CLIENT", "BACKEND_START", "QUERY_START",
             "XACT_STAT", "STATE", "STATE_CHANGE", "BLOCKED", "WAITING", "QUERY", "SLOWQUERY"};
-    private ScheduledFuture<?> timer;
 
     public static ScheduledExecutorService getMainService() {
         return mainService;
@@ -123,6 +122,15 @@ public class MainForm extends ApplicationWindow {
     public MainForm(Shell shell) {
         super(null);
         addToolBar(SWT.RIGHT | SWT.FLAT);
+    }
+
+    // TODO temporary getter, should not be used outside this class
+    public static SortColumn getSortColumn() {
+        return sortColumn;
+    }
+    // TODO temporary getter, should not be used outside this class
+    public static SortDirection getSortDirection() {
+        return sortDirection;
     }
 
     @Override
@@ -391,7 +399,7 @@ public class MainForm extends ApplicationWindow {
             }
         });
 
-        timer = otherService.scheduleAtFixedRate(this::updateUi, 0, settings.getUpdateUIPeriod(), TimeUnit.SECONDS);
+        otherService.scheduleAtFixedRate(this::updateUi, 0, settings.getUpdateUIPeriod(), TimeUnit.SECONDS);
         return parent;
     }
     
