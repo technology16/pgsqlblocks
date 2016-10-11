@@ -93,7 +93,6 @@ public class MainForm extends ApplicationWindow {
     protected static Optional<ScheduledExecutorService> mainService = Optional.of(Executors.newScheduledThreadPool(1));
     private DbcDataListBuilder dbcDataBuilder = DbcDataListBuilder.getInstance(mainService);
     private ConcurrentMap<String, Image> imagesMap = new ConcurrentHashMap<String, Image>();
-    private MenuManager serversTableMenuMgr = new MenuManager();
 
     private int[] caMainTreeColsSize = new int[]{80, 110, 150, 110, 110, 110, 145, 145, 145, 55, 145, 70, 65, 150, 80};
     private String[] caMainTreeColsName = new String[]{
