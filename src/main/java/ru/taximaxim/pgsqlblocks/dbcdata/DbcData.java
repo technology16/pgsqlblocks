@@ -11,6 +11,7 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 import org.apache.log4j.Logger;
+import ru.taximaxim.pgsqlblocks.MainForm;
 import ru.taximaxim.pgsqlblocks.process.Process;
 import ru.taximaxim.pgsqlblocks.process.ProcessTreeBuilder;
 import ru.taximaxim.pgsqlblocks.utils.Settings;
@@ -49,16 +50,8 @@ public class DbcData implements Comparable<DbcData> {
         this.isLast = isLast;
     }
 
-    public ProcessTreeBuilder getProcessTree() {
-        return processTree;
-    }
-
     public void setProcessTree(ProcessTreeBuilder processTree) {
         this.processTree = processTree;
-    }
-
-    public ProcessTreeBuilder getBlockedProcessTree() {
-        return blockedProcessTree;
     }
 
     public void setBlockedProcessTree(ProcessTreeBuilder blockedProcessTree) {
@@ -223,5 +216,24 @@ public class DbcData implements Comparable<DbcData> {
     @Override
     public int compareTo(DbcData other) {
         return getName().compareTo(other.getName());
+    }
+
+    public Process getProcessTree() {
+        if(processTree == null){
+            processTree = new ProcessTreeBuilder(this);
+            setProcessTree(processTree);
+        }
+        Process rootProcess = processTree.getProcessTree();
+        processTree.processSort(rootProcess, MainForm.sortColumn, MainForm.sortDirection);
+        return rootProcess;
+    }
+
+    public Process getOnlyBlockedProcessTree() {
+        if(blockedProcessTree == null){
+            blockedProcessTree = new ProcessTreeBuilder(this);
+            setBlockedProcessTree(blockedProcessTree);
+        }
+
+        return blockedProcessTree.getOnlyBlockedProcessTree();
     }
 }

@@ -2,8 +2,10 @@ package ru.taximaxim.pgsqlblocks.dbcdata;
 
 import java.io.File;
 import java.util.*;
+import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.log4j.Logger;
 import org.eclipse.jface.viewers.TableViewer;
@@ -29,8 +31,8 @@ public final class DbcDataListBuilder {
     
     private List<DbcData> dbcDataList;
     private Map<DbcData, ScheduledFuture<?>> updaterList = new HashMap<>();
-    private static TableViewer caServersTable;
-    protected static Optional<ScheduledExecutorService> mainService = Optional.empty();
+    //private static TableViewer caServersTable;
+    private static ScheduledExecutorService mainService;
     private DbcDataParcer dbcDataParcer = new DbcDataParcer();
     private XmlDocumentWorker docWorker = new XmlDocumentWorker();
     private File serversFile = PathBuilder.getInstance().getServersPath().toFile();
@@ -42,13 +44,8 @@ public final class DbcDataListBuilder {
         init();
     }
 
-    public static Optional<ScheduledExecutorService> getMainService() {
-        return mainService;
-    }
-    
-    public static DbcDataListBuilder getInstance(Optional<ScheduledExecutorService> mainExecutorService) {
-        if (mainExecutorService.isPresent())
-            mainService = mainExecutorService;
+    public static DbcDataListBuilder getInstance(ScheduledExecutorService mainExecutorService) {
+        mainService = mainExecutorService;
         if(instance == null) {
             synchronized(DbcDataListBuilder.class) {
                 if(instance == null) {
@@ -56,7 +53,6 @@ public final class DbcDataListBuilder {
                 }
             }
         }
-        LOG.debug("Set ExecutorService in DbcDataListBuilder");
         return instance;
     }
 
@@ -101,7 +97,7 @@ public final class DbcDataListBuilder {
         if (settings.isAutoUpdate()) {
             addScheduledUpdater(dbcData);
         } else if (dbcData.isEnabled()) {
-            mainService.get().schedule(new DbcDataRunner(dbcData), 0, SECONDS);
+            mainService.schedule(new DbcDataRunner(dbcData), 0, SECONDS);
         }
         for (DbcData data : getDbcDataList()) {
             data.setLast(false);
@@ -120,7 +116,7 @@ public final class DbcDataListBuilder {
         if (settings.isAutoUpdate()) {
             addScheduledUpdater(newDbc);
         } else if (newDbc.isEnabled()) {
-            mainService.get().schedule(new DbcDataRunner(newDbc), 0, SECONDS);
+            mainService.schedule(new DbcDataRunner(newDbc), 0, SECONDS);
         }
     }
     
@@ -165,9 +161,9 @@ public final class DbcDataListBuilder {
      * Add new dbcData to updaterList
      */
     public void addScheduledUpdater(DbcData dbcData) {
-        if (mainService.isPresent() && !updaterList.containsKey(dbcData)) {
+        if (/*mainService.isPresent() && */!updaterList.containsKey(dbcData)) {
             updaterList.put(dbcData,
-                    mainService.get().scheduleWithFixedDelay(new DbcDataRunner(dbcData),
+                    mainService.scheduleWithFixedDelay(new DbcDataRunner(dbcData),
                             0,
                             settings.getUpdatePeriod(),
                             SECONDS));
@@ -178,16 +174,8 @@ public final class DbcDataListBuilder {
      * Remove dbcData from updaterList
      */
     public void removeScheduledUpdater(DbcData dbcData) {
-        if (mainService.isPresent() && updaterList.containsKey(dbcData)) {
+        if (/*mainService.isPresent() && */updaterList.containsKey(dbcData)) {
             updaterList.remove(dbcData).cancel(true);
         }
-    }
-
-    public static void setCaServersTable(TableViewer table) {
-        caServersTable = table;
-    }
-
-    public static TableViewer getCaServersTable() {
-        return caServersTable;
     }
 }
