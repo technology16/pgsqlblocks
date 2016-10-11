@@ -51,16 +51,8 @@ public class DbcData implements Comparable<DbcData> {
         this.isLast = isLast;
     }
 
-    public ProcessTreeBuilder getProcessTree() {
-        return processTree;
-    }
-
     public void setProcessTree(ProcessTreeBuilder processTree) {
         this.processTree = processTree;
-    }
-
-    public ProcessTreeBuilder getBlockedProcessTree() {
-        return blockedProcessTree;
     }
 
     public void setBlockedProcessTree(ProcessTreeBuilder blockedProcessTree) {

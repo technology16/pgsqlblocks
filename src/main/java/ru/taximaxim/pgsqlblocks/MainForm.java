@@ -1,23 +1,10 @@
 package ru.taximaxim.pgsqlblocks;
 
-import java.io.IOException;
-import java.net.URL;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.text.MessageFormat;
-import java.util.List;
-import java.util.concurrent.*;
-import java.util.jar.Attributes;
-import java.util.jar.Manifest;
-
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.action.ToolBarManager;
-import org.apache.log4j.PatternLayout;
-import org.eclipse.jface.action.*;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.*;
@@ -29,16 +16,29 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.*;
-
 import ru.taximaxim.pgsqlblocks.dbcdata.*;
 import ru.taximaxim.pgsqlblocks.process.Process;
 import ru.taximaxim.pgsqlblocks.process.ProcessTreeContentProvider;
 import ru.taximaxim.pgsqlblocks.process.ProcessTreeLabelProvider;
-import ru.taximaxim.pgsqlblocks.ui.*;
+import ru.taximaxim.pgsqlblocks.ui.AddDbcDataDlg;
+import ru.taximaxim.pgsqlblocks.ui.FilterDlg;
+import ru.taximaxim.pgsqlblocks.ui.SettingsDlg;
+import ru.taximaxim.pgsqlblocks.ui.UIAppender;
 import ru.taximaxim.pgsqlblocks.utils.FilterProcess;
 import ru.taximaxim.pgsqlblocks.utils.Images;
 import ru.taximaxim.pgsqlblocks.utils.PathBuilder;
 import ru.taximaxim.pgsqlblocks.utils.Settings;
+
+import java.io.IOException;
+import java.net.URL;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.text.MessageFormat;
+import java.util.List;
+import java.util.concurrent.*;
+import java.util.jar.Attributes;
+import java.util.jar.Manifest;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
 
