@@ -31,7 +31,6 @@ public class DbcData extends UpdateProvider implements Comparable<DbcData> {
     private String dbname;
     private boolean enabled;
     private DbcStatus status = DbcStatus.DISABLED;
-    private boolean isLast; // FIXME remove isLast
     private boolean containBlockedProcess;
     
     private Connection connection;
@@ -48,7 +47,6 @@ public class DbcData extends UpdateProvider implements Comparable<DbcData> {
         this.user = user;
         this.enabled = enabled;
         this.password = passwd;
-        this.isLast = isLast;
     }
 
     private void setProcessTree(ProcessTreeBuilder processTree) {
@@ -126,14 +124,6 @@ public class DbcData extends UpdateProvider implements Comparable<DbcData> {
     
     public Connection getConnection() {
         return connection;
-    }
-    
-    void setLast(boolean isLast) {
-        this.isLast = isLast;
-    }
-    
-    boolean isLast() {
-        return isLast;
     }
     
     @Override

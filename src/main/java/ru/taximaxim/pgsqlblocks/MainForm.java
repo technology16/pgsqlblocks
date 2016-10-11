@@ -9,6 +9,7 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.*;
 import org.eclipse.jface.window.ApplicationWindow;
+import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTException;
 import org.eclipse.swt.custom.SashForm;
@@ -39,8 +40,6 @@ import java.util.List;
 import java.util.concurrent.*;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
-
-import static java.util.concurrent.TimeUnit.SECONDS;
 
 
 public class MainForm extends ApplicationWindow implements IUpdateListener {
@@ -325,8 +324,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
             }
 
             dbcDataBuilder.getDbcDataList().stream().filter(DbcData::isEnabled)
-                    // FIXME тут тоже
-                    .forEach(dbcData -> mainService.schedule(new DbcDataRunner(dbcData), 0, SECONDS));
+                    .forEach(dbcDataBuilder::addOnceScheduledUpdater);
         }
 
         caMainTree.addSelectionChangedListener(new ISelectionChangedListener() {
@@ -401,9 +399,11 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
             
             @Override
             public void run() {
-                if (addDbcDlg.open() == 0) {
-                    selectedDbcData = dbcDataBuilder.getLast();
+
+                if (Window.OK == addDbcDlg.open()) {
+                    selectedDbcData = addDbcDlg.getNewDbcData();
                     if (selectedDbcData != null) {
+                        dbcDataBuilder.add(selectedDbcData);
                         caServersTable.getTable().setSelection(dbcDataBuilder.getOrderNum(selectedDbcData));
                     }
                     serversToolBarState();
@@ -424,8 +424,11 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
                         String.format("Вы действительно хотите удалить %s?", selectedDbcData.getName()));
                 if (okPress) {
                     dbcDataBuilder.delete(selectedDbcData);
-                    selectedDbcData = dbcDataBuilder.getLast();
-                    if (selectedDbcData != null) {
+                    if (dbcDataBuilder.getDbcDataList().isEmpty()) {
+                        selectedDbcData = null;
+                    } else {
+                        selectedDbcData = dbcDataBuilder.getDbcDataList()
+                                .get(dbcDataBuilder.getDbcDataList().size() - 1);
                         caServersTable.getTable().setSelection(dbcDataBuilder.getOrderNum(selectedDbcData));
                     }
                     updateUi();
@@ -442,13 +445,13 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
             @Override
             public void run() {
                 AddDbcDataDlg editDbcDlg = new AddDbcDataDlg(getShell(), selectedDbcData);
-                if (editDbcDlg.open() != 0) {
-                    selectedDbcData = dbcDataBuilder.getLast();
+                if (Window.OK == editDbcDlg.open()) {
+                    dbcDataBuilder.delete(selectedDbcData);
+                    selectedDbcData = addDbcDlg.getNewDbcData();
                     if (selectedDbcData != null) {
+                        dbcDataBuilder.add(selectedDbcData);
                         caServersTable.getTable().setSelection(dbcDataBuilder.getOrderNum(selectedDbcData));
                     }
-                    serversToolBarState();
-                    updateUi();
                 }
             }
         };
@@ -490,8 +493,13 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
             @Override
             public void run() {
                 if (selectedDbcData != null) {
-                    // FIXME мы должны остановить старый обновляльщик этой даты и записать новый - иначе как ты его остоновишь то?
-                    mainService.schedule(new DbcDataRunner(selectedDbcData), 0, SECONDS);
+                    dbcDataBuilder.removeScheduledUpdater(selectedDbcData);
+                    dbcDataBuilder.removeOnceScheduledUpdater(selectedDbcData);
+                    if (settings.isAutoUpdate()) {
+                        dbcDataBuilder.addScheduledUpdater(selectedDbcData);
+                    } else {
+                        dbcDataBuilder.addOnceScheduledUpdater(selectedDbcData);
+                    }
                 }
             }
         };
@@ -678,8 +686,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
                         selectedDbcData.getName()));
                 dbcDataBuilder.addScheduledUpdater(selectedDbcData);
             } else {
-                // FIXME мы должны остановить старый обновляльщик этой даты и записать новый - иначе как ты его остоновишь то?
-                mainService.schedule(new DbcDataRunner(selectedDbcData), 0, SECONDS);
+                dbcDataBuilder.addOnceScheduledUpdater(selectedDbcData);
             }
             connectState();
         }
@@ -691,6 +698,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
                     selectedDbcData.getName()));
             selectedDbcData.disconnect();
             dbcDataBuilder.removeScheduledUpdater(selectedDbcData);
+            dbcDataBuilder.removeOnceScheduledUpdater(selectedDbcData);
             disconnectState();
         }
         updateUi();
