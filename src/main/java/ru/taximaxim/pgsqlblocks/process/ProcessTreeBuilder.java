@@ -109,6 +109,7 @@ public class ProcessTreeBuilder {
         
         // Пробегаем по списку процессов, ищем ожидающие и блокированные процессы
         dbcData.setStatus(DbcStatus.CONNECTED);
+        dbcData.setContainBlockedProcess(false);
         for (Process process : tempProcessList) {
             if ((process.getBlockingLocks() != 0) && (process.getBlockedBy() == 0)) {
                 //Добавляем для данного процесса родителя с pid = process.getBlockingLocks()
