@@ -4,7 +4,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
-public class DbcDataParcer {
+public class DbcDataParser {
 
     private static final String ID = "id";
     private static final String NAME = "name";
@@ -17,7 +17,7 @@ public class DbcDataParcer {
     private static final String FALSE = "false";
     private static final String SERVER = "server";
     
-    public DbcDataParcer() {}
+    public DbcDataParser() {}
     
     public DbcData parseDbc(Element item, boolean isLast) {
         Node nameNode = item.getElementsByTagName(NAME).item(0).getFirstChild();

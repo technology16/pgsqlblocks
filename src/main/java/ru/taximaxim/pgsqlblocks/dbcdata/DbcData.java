@@ -16,8 +16,8 @@ import ru.taximaxim.pgsqlblocks.process.Process;
 import ru.taximaxim.pgsqlblocks.process.ProcessTreeBuilder;
 import ru.taximaxim.pgsqlblocks.utils.Settings;
 
-public class DbcData implements Comparable<DbcData> {
-    
+public class DbcData extends UpdateProvider implements Comparable<DbcData> {
+
     private static final Logger LOG = Logger.getLogger(DbcData.class);
     private Settings settings = Settings.getInstance();
 
@@ -31,7 +31,7 @@ public class DbcData implements Comparable<DbcData> {
     private String dbname;
     private boolean enabled;
     private DbcStatus status = DbcStatus.DISABLED;
-    private boolean isLast;
+    private boolean isLast; // FIXME remove isLast
     private boolean containBlockedProcess;
     
     private Connection connection;
@@ -51,11 +51,11 @@ public class DbcData implements Comparable<DbcData> {
         this.isLast = isLast;
     }
 
-    public void setProcessTree(ProcessTreeBuilder processTree) {
+    private void setProcessTree(ProcessTreeBuilder processTree) {
         this.processTree = processTree;
     }
 
-    public void setBlockedProcessTree(ProcessTreeBuilder blockedProcessTree) {
+    private void setBlockedProcessTree(ProcessTreeBuilder blockedProcessTree) {
         this.blockedProcessTree = blockedProcessTree;
     }
 
@@ -83,7 +83,7 @@ public class DbcData implements Comparable<DbcData> {
         return user;
     }
     
-    public String getUrl() {
+    private String getUrl() {
         return String.format("jdbc:postgresql://%1$s:%2$s/%3$s", getHost(), getPort(), getDbname());
     }
     
@@ -91,7 +91,7 @@ public class DbcData implements Comparable<DbcData> {
         return password;
     }
     
-    public String getPgPass() {
+    private String getPgPass() {
         // Считывание пароля из ./pgpass
         String pgPass = "";
         try (
@@ -128,11 +128,11 @@ public class DbcData implements Comparable<DbcData> {
         return connection;
     }
     
-    public void setLast(boolean isLast) {
+    void setLast(boolean isLast) {
         this.isLast = isLast;
     }
     
-    public boolean isLast() {
+    boolean isLast() {
         return isLast;
     }
     
@@ -229,7 +229,7 @@ public class DbcData implements Comparable<DbcData> {
         return rootProcess;
     }
 
-    public Process getOnlyBlockedProcessTree() {
+    Process getOnlyBlockedProcessTree() {
         if(blockedProcessTree == null){
             blockedProcessTree = new ProcessTreeBuilder(this);
             setBlockedProcessTree(blockedProcessTree);

@@ -2,19 +2,17 @@ package ru.taximaxim.pgsqlblocks.dbcdata;
 
 import java.io.File;
 import java.util.*;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.log4j.Logger;
-import org.eclipse.jface.viewers.TableViewer;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import ru.taximaxim.pgsqlblocks.MainForm;
 import ru.taximaxim.pgsqlblocks.utils.PathBuilder;
 import ru.taximaxim.pgsqlblocks.utils.Settings;
 import ru.taximaxim.pgsqlblocks.utils.XmlDocumentWorker;
@@ -30,26 +28,29 @@ public final class DbcDataListBuilder {
     private static final String SERVER = "server";
     
     private List<DbcData> dbcDataList;
-    private Map<DbcData, ScheduledFuture<?>> updaterList = new HashMap<>();
+    private Map<DbcData, ScheduledFuture<?>> updaterMap = new HashMap<>();
     //private static TableViewer caServersTable;
-    private static ScheduledExecutorService mainService;
-    private DbcDataParcer dbcDataParcer = new DbcDataParcer();
+    private final ScheduledExecutorService mainService;
+    private final MainForm mainForm;
+    private DbcDataParser dbcDataParcer = new DbcDataParser();
     private XmlDocumentWorker docWorker = new XmlDocumentWorker();
     private File serversFile = PathBuilder.getInstance().getServersPath().toFile();
     private Settings settings = Settings.getInstance();
     
     private static volatile DbcDataListBuilder instance;
-    
-    private DbcDataListBuilder() {
-        init();
+
+
+    private DbcDataListBuilder(MainForm listener) {
+        this.mainForm = listener;
+        this.mainService = mainForm.getMainService();
+        readFromFile();
     }
 
-    public static DbcDataListBuilder getInstance(ScheduledExecutorService mainExecutorService) {
-        mainService = mainExecutorService;
+    public static DbcDataListBuilder getInstance(MainForm mainForm) {
         if(instance == null) {
             synchronized(DbcDataListBuilder.class) {
                 if(instance == null) {
-                    instance = new DbcDataListBuilder();
+                    instance = new DbcDataListBuilder(mainForm);
                 }
             }
         }
@@ -58,13 +59,13 @@ public final class DbcDataListBuilder {
 
     public synchronized List<DbcData> getDbcDataList() {
         if (dbcDataList == null) {
-            dbcDataList = new ArrayList<DbcData>();
+            dbcDataList = new ArrayList<>();
         }
         Collections.sort(dbcDataList);
         return dbcDataList;
     }
     
-    public void init() {
+    private void readFromFile() {
         Document doc = docWorker.open(serversFile);
         if(doc == null) {
             return;
@@ -76,11 +77,10 @@ public final class DbcDataListBuilder {
                 continue;
             }
             Element item = (Element) node;
-            if (i == items.getLength() - 1) {
-                getDbcDataList().add(dbcDataParcer.parseDbc(item, true));
-            } else {
-                getDbcDataList().add(dbcDataParcer.parseDbc(item, false));
-            }
+
+            DbcData data = dbcDataParcer.parseDbc(item, i == items.getLength() - 1);
+            data.setUpdateListener(mainForm);
+            getDbcDataList().add(data);
         }
         if (settings.isAutoUpdate()) {
             getDbcDataList().stream().filter(DbcData::isEnabled).forEach(this::addScheduledUpdater);
@@ -97,6 +97,7 @@ public final class DbcDataListBuilder {
         if (settings.isAutoUpdate()) {
             addScheduledUpdater(dbcData);
         } else if (dbcData.isEnabled()) {
+            // FIXME
             mainService.schedule(new DbcDataRunner(dbcData), 0, SECONDS);
         }
         for (DbcData data : getDbcDataList()) {
@@ -116,6 +117,7 @@ public final class DbcDataListBuilder {
         if (settings.isAutoUpdate()) {
             addScheduledUpdater(newDbc);
         } else if (newDbc.isEnabled()) {
+            // FIXME
             mainService.schedule(new DbcDataRunner(newDbc), 0, SECONDS);
         }
     }
@@ -158,24 +160,20 @@ public final class DbcDataListBuilder {
     }
 
     /**
-     * Add new dbcData to updaterList
+     * Add new dbcData to updaterMap
      */
     public void addScheduledUpdater(DbcData dbcData) {
-        if (/*mainService.isPresent() && */!updaterList.containsKey(dbcData)) {
-            updaterList.put(dbcData,
-                    mainService.scheduleWithFixedDelay(new DbcDataRunner(dbcData),
-                            0,
-                            settings.getUpdatePeriod(),
-                            SECONDS));
-        }
+        dbcData.setUpdateListener(mainForm);
+        updaterMap.putIfAbsent(dbcData, 
+                mainService.scheduleWithFixedDelay(new DbcDataRunner(dbcData), 0, settings.getUpdatePeriod(), SECONDS));
     }
 
     /**
-     * Remove dbcData from updaterList
+     * Remove dbcData from updaterMap
      */
     public void removeScheduledUpdater(DbcData dbcData) {
-        if (/*mainService.isPresent() && */updaterList.containsKey(dbcData)) {
-            updaterList.remove(dbcData).cancel(true);
+        if (updaterMap.containsKey(dbcData)) {
+            updaterMap.remove(dbcData).cancel(true);
         }
     }
 }

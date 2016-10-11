@@ -67,7 +67,7 @@ public class ProcessTreeBuilder {
         return blockedRootProcess;
     }
 
-    public Set<Process> buildProcessTree() {
+    private Set<Process> buildProcessTree() {
         tempProcessList.clear();
         if (dbcData.getConnection() == null) {
             return tempProcessList;
@@ -143,7 +143,7 @@ public class ProcessTreeBuilder {
                 getSortDirectionByColumn(sortColumn, sortDirection, process1, process2));
     }
 
-    protected int getSortDirectionByColumn(SortColumn sortColumn, SortDirection sortDirection,
+    private int getSortDirectionByColumn(SortColumn sortColumn, SortDirection sortDirection,
                                            Process process1, Process process2) {
         switch (sortColumn) {
             case PID:

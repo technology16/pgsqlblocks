@@ -13,7 +13,6 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
-import ru.taximaxim.pgsqlblocks.MainForm;
 import ru.taximaxim.pgsqlblocks.dbcdata.DbcData;
 import ru.taximaxim.pgsqlblocks.dbcdata.DbcDataListBuilder;
 
@@ -160,10 +159,12 @@ public class AddDbcDataDlg extends Dialog {
         DbcData newDbcData = new DbcData(name, host, port, dbname, user, passwd, enabled, true);
         switch (action) {
             case ADD:
-                DbcDataListBuilder.getInstance(MainForm.getMainService()).add(newDbcData);
+                // FIXME refactor to main form
+                DbcDataListBuilder.getInstance(null).add(newDbcData);
                 break;
             case EDIT:
-                DbcDataListBuilder.getInstance(MainForm.getMainService()).edit(selectedDbcData, newDbcData);
+                // FIXME refactor to main form
+                DbcDataListBuilder.getInstance(null).edit(selectedDbcData, newDbcData);
                 break;
             default:
                 break;

@@ -1,7 +1,6 @@
 package ru.taximaxim.pgsqlblocks.dbcdata;
 
 import org.apache.log4j.Logger;
-import ru.taximaxim.pgsqlblocks.MainForm;
 import ru.taximaxim.pgsqlblocks.utils.Settings;
 
 import java.text.MessageFormat;
@@ -37,5 +36,6 @@ public class DbcDataRunner implements Runnable {
             LOG.error(MessageFormat.format("  Error on connect or update DbcData: {0}", e.getMessage()));
         }
         LOG.info(MessageFormat.format("  Finish updating \"{0}\"...", dbcData.getName()));
+        dbcData.notifyUpdated();
     }
 }

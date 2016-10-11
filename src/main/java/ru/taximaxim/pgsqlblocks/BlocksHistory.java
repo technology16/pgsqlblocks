@@ -19,8 +19,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import ru.taximaxim.pgsqlblocks.dbcdata.DbcData;
-import ru.taximaxim.pgsqlblocks.dbcdata.DbcDataParcer;
-import ru.taximaxim.pgsqlblocks.dbcdata.DbcStatus;
+import ru.taximaxim.pgsqlblocks.dbcdata.DbcDataParser;
 import ru.taximaxim.pgsqlblocks.process.Process;
 import ru.taximaxim.pgsqlblocks.process.ProcessParcer;
 import ru.taximaxim.pgsqlblocks.process.ProcessStatus;
@@ -42,7 +41,7 @@ public final class BlocksHistory {
     private static volatile BlocksHistory instance;
     
     private XmlDocumentWorker docWorker;
-    private DbcDataParcer dbcDataParcer = new DbcDataParcer();
+    private DbcDataParser dbcDataParcer = new DbcDataParser();
     private ProcessParcer processParcer = new ProcessParcer();
     
     public static BlocksHistory getInstance() {

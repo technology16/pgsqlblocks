@@ -43,7 +43,7 @@ import java.util.jar.Manifest;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
 
-public class MainForm extends ApplicationWindow {
+public class MainForm extends ApplicationWindow implements IUpdateListener {
 
     private static final Logger LOG = Logger.getLogger(MainForm.class);
     
@@ -79,9 +79,9 @@ public class MainForm extends ApplicationWindow {
     private static SortDirection sortDirection = SortDirection.UP;
     private Settings settings = Settings.getInstance();
     private FilterProcess filterProcess = FilterProcess.getInstance();
-    private static final ScheduledExecutorService mainService = Executors.newScheduledThreadPool(1);
-    private static final ScheduledExecutorService otherService = Executors.newScheduledThreadPool(1);
-    private final DbcDataListBuilder dbcDataBuilder = DbcDataListBuilder.getInstance(mainService);
+    private final ScheduledExecutorService mainService = Executors.newScheduledThreadPool(1);
+    private final ScheduledExecutorService otherService = Executors.newScheduledThreadPool(1);
+    private final DbcDataListBuilder dbcDataBuilder = DbcDataListBuilder.getInstance(this);
     private ConcurrentMap<String, Image> imagesMap = new ConcurrentHashMap<>();
 
     private int[] caMainTreeColsSize = new int[]{80, 110, 150, 110, 110, 110, 145, 145, 145, 55, 145, 70, 65, 150, 80};
@@ -91,10 +91,6 @@ public class MainForm extends ApplicationWindow {
     
     private String[] caColName = {"PID", "BLOCKED_COUNT", "APPLICATION_NAME", "DATNAME", "USENAME", "CLIENT", "BACKEND_START", "QUERY_START",
             "XACT_STAT", "STATE", "STATE_CHANGE", "BLOCKED", "WAITING", "QUERY", "SLOWQUERY"};
-
-    public static ScheduledExecutorService getMainService() {
-        return mainService;
-    }
 
     public static void main(String[] args) {
         try {
@@ -120,6 +116,10 @@ public class MainForm extends ApplicationWindow {
     // TODO temporary getter, should not be used outside this class
     public static SortDirection getSortDirection() {
         return sortDirection;
+    }
+
+    public ScheduledExecutorService getMainService() {
+        return mainService;
     }
 
     @Override
@@ -325,6 +325,7 @@ public class MainForm extends ApplicationWindow {
             }
 
             dbcDataBuilder.getDbcDataList().stream().filter(DbcData::isEnabled)
+                    // FIXME тут тоже
                     .forEach(dbcData -> mainService.schedule(new DbcDataRunner(dbcData), 0, SECONDS));
         }
 
@@ -738,5 +739,10 @@ public class MainForm extends ApplicationWindow {
                 LOG.debug("  Finish updating tree.");
             }
         });
+    }
+
+    @Override
+    public void serverUpdated() {
+        updateUi();
     }
 }
