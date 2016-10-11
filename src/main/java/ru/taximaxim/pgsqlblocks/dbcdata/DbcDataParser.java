@@ -17,8 +17,6 @@ public class DbcDataParser {
     private static final String FALSE = "false";
     private static final String SERVER = "server";
     
-    public DbcDataParser() {}
-    
     public DbcData parseDbc(Element item, boolean isLast) {
         Node nameNode = item.getElementsByTagName(NAME).item(0).getFirstChild();
         Node hostNode = item.getElementsByTagName(HOST).item(0).getFirstChild();
