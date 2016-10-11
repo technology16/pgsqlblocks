@@ -126,7 +126,7 @@ public class ProcessTreeBuilder {
                     parentProcess.addChildren(process);
                     parentProcess.setStatus(ProcessStatus.BLOCKING);
                     process.setStatus(ProcessStatus.BLOCKED);
-                    dbcData.setStatus(DbcStatus.BLOCKED);
+                    dbcData.setContainBlockedProcess(true);
                 }
             }
         }

@@ -67,7 +67,7 @@ public final class BlocksHistory {
             Document doc = docBuilder.newDocument();
             Element rootElement = doc.createElement(SERVERS);
             dbcDataList.stream()
-                    .filter(dbcData -> dbcData.getStatus() == DbcStatus.BLOCKED)
+                    .filter(DbcData::hasBlockedProcess)
                     .forEach(dbcData -> {
                 Element server = dbcDataParcer.createServerElement(doc, dbcData, false);
                 dbcData.getProcessTree().getProcessTree().getChildren().stream()
@@ -128,7 +128,7 @@ public final class BlocksHistory {
                     } else if (process.getBlockedBy() != 0) {
                         process.getParent().setStatus(ProcessStatus.BLOCKING);
                         process.setStatus(ProcessStatus.BLOCKED);
-                        dbc.setStatus(DbcStatus.BLOCKED);
+                        dbc.setContainBlockedProcess(true);
                     }
                 }
                 rootProcess.addChildren(proc);

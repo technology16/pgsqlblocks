@@ -23,17 +23,7 @@ public class DbcDataRunner implements Runnable {
                 dbcData.connect();
             }
             if (dbcData.isConnected()) {
-                switch (dbcData.getStatus()) {
-                    case CONNECTED:
-                        dbcData.setStatus(DbcStatus.UPDATE);
-                        break;
-                    case UPDATE:
-                        dbcData.setStatus(DbcStatus.CONNECTED);
-                        break;
-                    default:
-                        dbcData.setStatus(DbcStatus.UPDATE);
-                }
-
+                dbcData.setStatus(DbcStatus.UPDATE);
                 LOG.info(MessageFormat.format("  Updating \"{0}\"...", dbcData.getName()));
                 if (settings.isOnlyBlocked()) {
                     dbcData.setProcess(MainForm.getOnlyBlockedProcessTree(dbcData));
@@ -45,9 +35,6 @@ public class DbcDataRunner implements Runnable {
             }
         } catch (Exception e) {
             LOG.error(MessageFormat.format("  Error on connect or update DbcData: {0}", e.getMessage()));
-        }
-        if (dbcData.isConnected()) {
-            dbcData.setStatus(DbcStatus.CONNECTED);
         }
         LOG.info(MessageFormat.format("  Finish updating \"{0}\"...", dbcData.getName()));
     }

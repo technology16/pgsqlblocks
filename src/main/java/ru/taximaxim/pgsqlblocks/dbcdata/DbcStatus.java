@@ -4,7 +4,6 @@ public enum DbcStatus {
     DISABLED,
     CONNECTED,
     ERROR,
-    BLOCKED,
     UPDATE;
 
     /**
@@ -19,8 +18,6 @@ public enum DbcStatus {
             return "images/db_t_16.png";
         case ERROR:
             return "images/db_e_16.png";
-        case BLOCKED:
-            return "images/locked_16.png";
         case UPDATE:
             return "images/on_update_16.png";
         default:

@@ -31,6 +31,7 @@ public class DbcData implements Comparable<DbcData> {
     private boolean enabled;
     private DbcStatus status = DbcStatus.DISABLED;
     private boolean isLast;
+    private boolean containBlockedProcess;
     
     private Connection connection;
     private ProcessTreeBuilder processTree = null;
@@ -223,5 +224,13 @@ public class DbcData implements Comparable<DbcData> {
     @Override
     public int compareTo(DbcData other) {
         return getName().compareTo(other.getName());
+    }
+
+    public boolean hasBlockedProcess() {
+        return containBlockedProcess;
+    }
+
+    public void setContainBlockedProcess(boolean containBlockedProcess) {
+        this.containBlockedProcess = containBlockedProcess;
     }
 }
