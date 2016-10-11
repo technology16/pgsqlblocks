@@ -72,29 +72,7 @@ public final class PathBuilder {
         }
         return serversPath;
     }
-    
-    public Path getLogsPath() {
-        Path logsDir = Paths.get(path.toString(), "logs");
-        if (Files.notExists(logsDir)) {
-            try {
-                Files.createDirectory(logsDir);
-            } catch (IOException e) {
-                LOG.error(String.format("Ошибка создания директории %s: %s", logsDir, e.getMessage()));
-            }
-        }
-        SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
-        String date = sdf.format(new Date(System.currentTimeMillis()));
-        Path logsFile = Paths.get(logsDir.toString(), String.format("log-%s.log", date));
-        if (Files.notExists(logsFile)) {
-            try {
-                Files.createFile(logsFile);
-            } catch (IOException e) {
-                LOG.error(String.format("Ошибка создания файла %s: %s", logsFile, e.getMessage()));
-            }
-        }
-        return logsFile;
-    }
-    
+    // TODO разные конфиги log4j.propertires для разных ОС 
     public Path getPropertiesPath() {
         Path propPath = Paths.get(path.toString(), "pgsqlblocks.properties");
         if (Files.notExists(propPath)) {

@@ -70,7 +70,7 @@ public final class BlocksHistory {
                     .filter(DbcData::hasBlockedProcess)
                     .forEach(dbcData -> {
                 Element server = dbcDataParcer.createServerElement(doc, dbcData, false);
-                dbcData.getProcessTree().getProcessTree().getChildren().stream()
+                dbcData.getProcessTree().getChildren().stream()
                         .filter(Process::hasChildren)
                         .forEach(process -> server.appendChild(processParcer.createProcessElement(doc, process)));
                 rootElement.appendChild(server);

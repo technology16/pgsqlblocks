@@ -26,9 +26,9 @@ public class DbcDataRunner implements Runnable {
                 dbcData.setStatus(DbcStatus.UPDATE);
                 LOG.info(MessageFormat.format("  Updating \"{0}\"...", dbcData.getName()));
                 if (settings.isOnlyBlocked()) {
-                    dbcData.setProcess(MainForm.getOnlyBlockedProcessTree(dbcData));
+                    dbcData.setProcess(dbcData.getOnlyBlockedProcessTree());
                 } else {
-                    dbcData.setProcess(MainForm.getProcessTree(dbcData));
+                    dbcData.setProcess(dbcData.getProcessTree());
                 }
             } else {
                 LOG.warn(MessageFormat.format(" DbcData not connected: \"{0}\"", dbcData.getName()));
