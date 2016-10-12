@@ -2,9 +2,7 @@ package ru.taximaxim.pgsqlblocks;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
-import org.eclipse.jface.action.Action;
-import org.eclipse.jface.action.Separator;
-import org.eclipse.jface.action.ToolBarManager;
+import org.eclipse.jface.action.*;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.*;
@@ -67,11 +65,14 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
     private Composite procComposite;
     private TableViewer bhServersTable;
     private TreeViewer bhMainTree;
+    private Action addDb;
     private Action deleteDB;
     private Action editDB;
     private Action connectDB;
     private Action disconnectDB;
+    private Action update;
     private Action autoUpdate;
+    private Action cancelUpdate;
     private Action onlyBlocked;
     private AddDbcDataDlg addDbcDlg;
     private static SortColumn sortColumn = SortColumn.BLOCKED_COUNT;
@@ -82,6 +83,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
     private final ScheduledExecutorService otherService = Executors.newScheduledThreadPool(1);
     private final DbcDataListBuilder dbcDataBuilder = DbcDataListBuilder.getInstance(this);
     private ConcurrentMap<String, Image> imagesMap = new ConcurrentHashMap<>();
+    private MenuManager serversTableMenuMgr = new MenuManager();
 
     private int[] caMainTreeColsSize = new int[]{80, 110, 150, 110, 110, 110, 145, 145, 145, 55, 145, 70, 65, 150, 80};
     private String[] caMainTreeColsName = new String[]{
@@ -204,6 +206,24 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
                             caServersTable.setLabelProvider(new DbcDataListLabelProvider());
                             caServersTable.setInput(dbcDataBuilder.getDbcDataList());
                         }
+
+                        Menu menu = serversTableMenuMgr.createContextMenu(caServersTable.getControl());
+                        serversTableMenuMgr.addMenuListener(new IMenuListener() {
+                            @Override
+                            public void menuAboutToShow(IMenuManager manager) {
+                                if (caServersTable.getSelection() instanceof IStructuredSelection) {
+                                    manager.add(cancelUpdate);
+                                    manager.add(update);
+                                    manager.add(connectDB);
+                                    manager.add(disconnectDB);
+                                    manager.add(addDb);
+                                    manager.add(editDB);
+                                    manager.add(deleteDB);
+                                }
+                            }
+                        });
+                        serversTableMenuMgr.setRemoveAllWhenShown(true);
+                        caServersTable.getControl().setMenu(menu);
 
                         caTreeSf = new SashForm(currentActivitySf, SWT.VERTICAL);
                         {
@@ -394,7 +414,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
     protected ToolBarManager createToolBarManager(int style) {
         ToolBarManager toolBarManager = new ToolBarManager(style);
 
-        Action addDb = new Action(Images.ADD_DATABASE.getDescription(),
+        addDb = new Action(Images.ADD_DATABASE.getDescription(),
                 ImageDescriptor.createFromImage(getImage(Images.ADD_DATABASE))) {
             
             @Override
@@ -487,7 +507,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
 
         toolBarManager.add(new Separator());
 
-        Action update = new Action(Images.UPDATE.getDescription(),
+        update =  new Action(Images.UPDATE.getDescription(),
                 ImageDescriptor.createFromImage(getImage(Images.UPDATE))) {
             
             @Override
@@ -524,6 +544,21 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
         autoUpdate.setChecked(settings.isAutoUpdate());
         toolBarManager.add(autoUpdate);
 
+        cancelUpdate = new Action(Images.CANCEL_UPDATE.getDescription(),
+                ImageDescriptor.createFromImage(getImage(Images.CANCEL_UPDATE))) {
+
+            @Override
+            public void run() {
+                if (selectedDbcData != null) {
+                    dbcDataBuilder.removeOnceScheduledUpdater(selectedDbcData);
+                    if (selectedDbcData.isConnected()){
+                        selectedDbcData.setStatus(DbcStatus.CONNECTED);
+                    }
+                }
+            }
+        };
+
+        toolBarManager.add(cancelUpdate);
         toolBarManager.add(new Separator());
 
         Action filterSetting = new Action(Images.FILTER.getDescription(),
