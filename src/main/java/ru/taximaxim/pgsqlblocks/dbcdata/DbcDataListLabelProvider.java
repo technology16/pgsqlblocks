@@ -55,7 +55,7 @@ public class DbcDataListLabelProvider implements ITableLabelProvider {
     public String getColumnText(Object element, int columnIndex) {
         DbcData dbcData = (DbcData) element;
         switch (columnIndex) {
-        case 0: return dbcData.getName();
+        case 0: return (dbcData.hasBlockedProcess() ? "* " : "") + dbcData.getName(); // TODO: need to remake, after create new icons
         }
         return null;
     }
