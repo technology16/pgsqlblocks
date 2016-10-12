@@ -72,7 +72,6 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
     private Action disconnectDB;
     private Action update;
     private Action autoUpdate;
-    private Action cancelUpdate;
     private Action onlyBlocked;
     private AddDbcDataDlg addDbcDlg;
     private static SortColumn sortColumn = SortColumn.BLOCKED_COUNT;
@@ -208,18 +207,26 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
                         }
 
                         Menu menu = serversTableMenuMgr.createContextMenu(caServersTable.getControl());
-                        serversTableMenuMgr.addMenuListener(new IMenuListener() {
-                            @Override
-                            public void menuAboutToShow(IMenuManager manager) {
-                                if (caServersTable.getSelection() instanceof IStructuredSelection) {
-                                    manager.add(cancelUpdate);
-                                    manager.add(update);
-                                    manager.add(connectDB);
-                                    manager.add(disconnectDB);
-                                    manager.add(addDb);
-                                    manager.add(editDB);
-                                    manager.add(deleteDB);
-                                }
+                        serversTableMenuMgr.addMenuListener(manager -> {
+                            if (caServersTable.getSelection() instanceof IStructuredSelection) {
+                                manager.add(new Action(Images.CANCEL_UPDATE.getDescription(),
+                                        ImageDescriptor.createFromImage(getImage(Images.CANCEL_UPDATE))) {
+                                    @Override
+                                    public void run() {
+                                        if (selectedDbcData != null) {
+                                            dbcDataBuilder.removeOnceScheduledUpdater(selectedDbcData);
+                                            if (selectedDbcData.isConnected()){
+                                                selectedDbcData.setStatus(DbcStatus.CONNECTED);
+                                            }
+                                        }
+                                    }
+                                });
+                                manager.add(update);
+                                manager.add(connectDB);
+                                manager.add(disconnectDB);
+                                manager.add(addDb);
+                                manager.add(editDB);
+                                manager.add(deleteDB);
                             }
                         });
                         serversTableMenuMgr.setRemoveAllWhenShown(true);
@@ -473,6 +480,10 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
                             dbcDataBuilder.add(selectedDbcData);
                             caServersTable.getTable().setSelection(dbcDataBuilder.getOrderNum(selectedDbcData));
                         }
+                    } else {
+                        MessageDialog.openInformation(getShell(),
+                                "Редактирование БД",
+                                "Изменений не обнаружено");
                     }
                 }
             }
@@ -546,21 +557,6 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
         autoUpdate.setChecked(settings.isAutoUpdate());
         toolBarManager.add(autoUpdate);
 
-        cancelUpdate = new Action(Images.CANCEL_UPDATE.getDescription(),
-                ImageDescriptor.createFromImage(getImage(Images.CANCEL_UPDATE))) {
-
-            @Override
-            public void run() {
-                if (selectedDbcData != null) {
-                    dbcDataBuilder.removeOnceScheduledUpdater(selectedDbcData);
-                    if (selectedDbcData.isConnected()){
-                        selectedDbcData.setStatus(DbcStatus.CONNECTED);
-                    }
-                }
-            }
-        };
-
-        toolBarManager.add(cancelUpdate);
         toolBarManager.add(new Separator());
 
         Action filterSetting = new Action(Images.FILTER.getDescription(),
