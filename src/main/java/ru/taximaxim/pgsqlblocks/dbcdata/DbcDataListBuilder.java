@@ -78,7 +78,7 @@ public final class DbcDataListBuilder {
             }
             Element item = (Element) node;
 
-            DbcData data = dbcDataParcer.parseDbc(item, i == items.getLength() - 1);
+            DbcData data = dbcDataParcer.parseDbc(item);
             data.setUpdateListener(mainForm);
             getDbcDataList().add(data);
         }

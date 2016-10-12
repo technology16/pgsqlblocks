@@ -461,16 +461,18 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
 
         editDB = new Action(Images.EDIT_DATABASE.getDescription(),
                 ImageDescriptor.createFromImage(getImage(Images.EDIT_DATABASE))) {
-            
+
             @Override
             public void run() {
                 AddDbcDataDlg editDbcDlg = new AddDbcDataDlg(getShell(), selectedDbcData);
                 if (Window.OK == editDbcDlg.open()) {
-                    dbcDataBuilder.delete(selectedDbcData);
-                    selectedDbcData = addDbcDlg.getNewDbcData();
-                    if (selectedDbcData != null) {
-                        dbcDataBuilder.add(selectedDbcData);
-                        caServersTable.getTable().setSelection(dbcDataBuilder.getOrderNum(selectedDbcData));
+                    if (selectedDbcData.compareTo(editDbcDlg.getNewDbcData()) != 0) {
+                        dbcDataBuilder.delete(selectedDbcData);
+                        selectedDbcData = editDbcDlg.getNewDbcData();
+                        if (selectedDbcData != null) {
+                            dbcDataBuilder.add(selectedDbcData);
+                            caServersTable.getTable().setSelection(dbcDataBuilder.getOrderNum(selectedDbcData));
+                        }
                     }
                 }
             }

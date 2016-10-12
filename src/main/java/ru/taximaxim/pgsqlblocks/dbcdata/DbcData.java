@@ -38,7 +38,7 @@ public class DbcData extends UpdateProvider implements Comparable<DbcData> {
     private ProcessTreeBuilder blockedProcessTree = null;
 
     public DbcData(String name,String host, String port,String dbname,
-            String user, String passwd, boolean enabled, boolean isLast) {
+            String user, String passwd, boolean enabled) {
         
         this.name = name;
         this.host = host;
@@ -206,7 +206,24 @@ public class DbcData extends UpdateProvider implements Comparable<DbcData> {
 
     @Override
     public int compareTo(DbcData other) {
-        return getName().compareTo(other.getName());
+        int result = getName().compareTo(other.getName());
+        if (result==0) {
+            result = getPort().compareTo(other.getPort());
+        }
+        if (result==0) {
+            result = getDbname().compareTo(other.getDbname());
+        }
+        if (result==0) {
+            result = getUser().compareTo(other.getUser());
+        }
+        if (result==0) {
+            result = getPass().compareTo(other.getPass());
+        }
+        if (result==0) {
+            result = isEnabled() ^ other.isEnabled() ? 1 : 0;
+        }
+
+        return result;
     }
 
     public Process getProcessTree() {

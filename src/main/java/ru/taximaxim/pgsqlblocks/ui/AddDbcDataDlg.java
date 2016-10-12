@@ -14,7 +14,6 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
 import ru.taximaxim.pgsqlblocks.dbcdata.DbcData;
-import ru.taximaxim.pgsqlblocks.dbcdata.DbcDataListBuilder;
 
 public class AddDbcDataDlg extends Dialog {
 
@@ -163,7 +162,7 @@ public class AddDbcDataDlg extends Dialog {
             return;
         }
 
-        newDbcData = new DbcData(name, host, port, dbname, user, passwd, enabled, true);
+        newDbcData = new DbcData(name, host, port, dbname, user, passwd, enabled);
 
         super.okPressed();
     }

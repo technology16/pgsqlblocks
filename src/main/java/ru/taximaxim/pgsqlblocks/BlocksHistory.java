@@ -100,11 +100,7 @@ public final class BlocksHistory {
                 continue;
             }
             Element el = (Element) node;
-            if (i == items.getLength() - 1) {
-                dbc = dbcDataParcer.parseDbc(el, true);
-            } else {
-                dbc = dbcDataParcer.parseDbc(el, false);
-            }
+            dbc = dbcDataParcer.parseDbc(el);
             XPathFactory xpf = XPathFactory.newInstance();
             XPath xp = xpf.newXPath();
             NodeList children = null;

@@ -17,7 +17,7 @@ public class DbcDataParser {
     private static final String FALSE = "false";
     private static final String SERVER = "server";
     
-    public DbcData parseDbc(Element item, boolean isLast) {
+    public DbcData parseDbc(Element item) {
         Node nameNode = item.getElementsByTagName(NAME).item(0).getFirstChild();
         Node hostNode = item.getElementsByTagName(HOST).item(0).getFirstChild();
         Node portNode = item.getElementsByTagName(PORT).item(0).getFirstChild();
@@ -32,7 +32,7 @@ public class DbcDataParser {
         String user = userNode == null ? "" : userNode.getNodeValue();
         String passwd = passwdNode == null ? "" : passwdNode.getNodeValue();
         boolean enabled = Boolean.valueOf(enabledNode == null ? FALSE : enabledNode.getNodeValue());
-        return new DbcData(name, host, port, dbname, user, passwd, enabled, isLast);
+        return new DbcData(name, host, port, dbname, user, passwd, enabled);
     }
     
     public Element createServerElement(Document doc, DbcData dbcData, boolean wp) {
