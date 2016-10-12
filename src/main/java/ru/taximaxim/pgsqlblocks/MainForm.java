@@ -96,7 +96,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
     public static void main(String[] args) {
         try {
             display = new Display();
-            MainForm wwin = new MainForm(new Shell(display));
+            MainForm wwin = new MainForm();
             wwin.setBlockOnOpen(true);
             wwin.open();
             display.dispose();
@@ -105,7 +105,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
         }
     }
 
-    public MainForm(Shell shell) {
+    public MainForm() {
         super(null);
         addToolBar(SWT.RIGHT | SWT.FLAT);
     }
@@ -208,18 +208,15 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
                         }
 
                         Menu menu = serversTableMenuMgr.createContextMenu(caServersTable.getControl());
-                        serversTableMenuMgr.addMenuListener(new IMenuListener() {
-                            @Override
-                            public void menuAboutToShow(IMenuManager manager) {
-                                if (caServersTable.getSelection() instanceof IStructuredSelection) {
-                                    manager.add(cancelUpdate);
-                                    manager.add(update);
-                                    manager.add(connectDB);
-                                    manager.add(disconnectDB);
-                                    manager.add(addDb);
-                                    manager.add(editDB);
-                                    manager.add(deleteDB);
-                                }
+                        serversTableMenuMgr.addMenuListener(manager -> {
+                            if (caServersTable.getSelection() instanceof IStructuredSelection) {
+                                manager.add(cancelUpdate);
+                                manager.add(update);
+                                manager.add(connectDB);
+                                manager.add(disconnectDB);
+                                manager.add(addDb);
+                                manager.add(editDB);
+                                manager.add(deleteDB);
                             }
                         });
                         serversTableMenuMgr.setRemoveAllWhenShown(true);
@@ -347,62 +344,50 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
                     .forEach(dbcDataBuilder::addOnceScheduledUpdater);
         }
 
-        caMainTree.addSelectionChangedListener(new ISelectionChangedListener() {
-            @Override
-            public void selectionChanged(SelectionChangedEvent event) {
-                if (!caMainTree.getSelection().isEmpty()) {
-                    IStructuredSelection selected = (IStructuredSelection) event.getSelection();
-                    selectedProcess = (Process) selected.getFirstElement();
-                    if(!procComposite.isVisible()) {
-                        procComposite.setVisible(true);
-                        caTreeSf.layout(true, true);
-                    }
-                    procText.setText(String.format("pid=%s%n%s", selectedProcess.getPid(), selectedProcess.getQuery()));
+        caMainTree.addSelectionChangedListener(event -> {
+            if (!caMainTree.getSelection().isEmpty()) {
+                IStructuredSelection selected = (IStructuredSelection) event.getSelection();
+                selectedProcess = (Process) selected.getFirstElement();
+                if(!procComposite.isVisible()) {
+                    procComposite.setVisible(true);
+                    caTreeSf.layout(true, true);
                 }
+                procText.setText(String.format("pid=%s%n%s", selectedProcess.getPid(), selectedProcess.getQuery()));
             }
         });
         
-        caServersTable.addSelectionChangedListener(new ISelectionChangedListener() {
-            @Override
-            public void selectionChanged(SelectionChangedEvent event) {
-                if (!caServersTable.getSelection().isEmpty()) {
-                    IStructuredSelection selected = (IStructuredSelection) event.getSelection();
-                    selectedDbcData = (DbcData) selected.getFirstElement();
-                    if(procComposite.isVisible()) {
-                        procComposite.setVisible(false);
-                        caTreeSf.layout(false, false);
-                    }
-                    serversToolBarState();
-                    updateUi();
+        caServersTable.addSelectionChangedListener(event -> {
+            if (!caServersTable.getSelection().isEmpty()) {
+                IStructuredSelection selected = (IStructuredSelection) event.getSelection();
+                selectedDbcData = (DbcData) selected.getFirstElement();
+                if(procComposite.isVisible()) {
+                    procComposite.setVisible(false);
+                    caTreeSf.layout(false, false);
                 }
+                serversToolBarState();
+                updateUi();
             }
         });
         
         for (TreeColumn column : caMainTree.getTree().getColumns()) {
-            column.addListener(SWT.Selection, new Listener() {
-                @Override
-                public void handleEvent(Event event) {
-                    caMainTree.getTree().setSortColumn(column);
-                    column.setData(SORT_DIRECTION, ((SortDirection)column.getData(SORT_DIRECTION)).getOpposite());
-                    sortDirection = (SortDirection)column.getData(SORT_DIRECTION);
-                    caMainTree.getTree().setSortDirection(sortDirection.getSwtData());
-                    sortColumn = SortColumn.valueOf((String)column.getData("colName"));
-                    updateUi();
-                }
+            column.addListener(SWT.Selection, event -> {
+                caMainTree.getTree().setSortColumn(column);
+                column.setData(SORT_DIRECTION, ((SortDirection)column.getData(SORT_DIRECTION)).getOpposite());
+                sortDirection = (SortDirection)column.getData(SORT_DIRECTION);
+                caMainTree.getTree().setSortDirection(sortDirection.getSwtData());
+                sortColumn = SortColumn.valueOf((String)column.getData("colName"));
+                updateUi();
             });
         }
         
-        caServersTable.addDoubleClickListener(new IDoubleClickListener() {
-            @Override
-            public void doubleClick(DoubleClickEvent event) {
-                if (!caServersTable.getSelection().isEmpty()) {
-                    IStructuredSelection selected = (IStructuredSelection) event.getSelection();
-                    selectedDbcData = (DbcData) selected.getFirstElement();
-                    if (selectedDbcData.getStatus() == DbcStatus.CONNECTED) {
-                        dbcDataDisconnect();
-                    } else {
-                        dbcDataConnect();
-                    }
+        caServersTable.addDoubleClickListener(event -> {
+            if (!caServersTable.getSelection().isEmpty()) {
+                IStructuredSelection selected = (IStructuredSelection) event.getSelection();
+                selectedDbcData = (DbcData) selected.getFirstElement();
+                if (selectedDbcData.getStatus() == DbcStatus.CONNECTED) {
+                    dbcDataDisconnect();
+                } else {
+                    dbcDataConnect();
                 }
             }
         });
@@ -562,7 +547,6 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
             }
         };
 
-        toolBarManager.add(cancelUpdate);
         toolBarManager.add(new Separator());
 
         Action filterSetting = new Action(Images.FILTER.getDescription(),
