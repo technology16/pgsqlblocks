@@ -1,9 +1,8 @@
 package ru.taximaxim.pgsqlblocks;
 
 import java.nio.file.Paths;
-import java.util.Map.Entry;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -20,12 +19,10 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import ru.taximaxim.pgsqlblocks.dbcdata.DbcData;
-import ru.taximaxim.pgsqlblocks.dbcdata.DbcDataParcer;
-import ru.taximaxim.pgsqlblocks.dbcdata.DbcStatus;
+import ru.taximaxim.pgsqlblocks.dbcdata.DbcDataParser;
 import ru.taximaxim.pgsqlblocks.process.Process;
 import ru.taximaxim.pgsqlblocks.process.ProcessParcer;
 import ru.taximaxim.pgsqlblocks.process.ProcessStatus;
-import ru.taximaxim.pgsqlblocks.process.ProcessTreeBuilder;
 import ru.taximaxim.pgsqlblocks.utils.PathBuilder;
 import ru.taximaxim.pgsqlblocks.utils.XmlDocumentWorker;
 
@@ -44,7 +41,7 @@ public final class BlocksHistory {
     private static volatile BlocksHistory instance;
     
     private XmlDocumentWorker docWorker;
-    private DbcDataParcer dbcDataParcer = new DbcDataParcer();
+    private DbcDataParser dbcDataParcer = new DbcDataParser();
     private ProcessParcer processParcer = new ProcessParcer();
     
     public static BlocksHistory getInstance() {
@@ -61,24 +58,22 @@ public final class BlocksHistory {
     private BlocksHistory() {
         docWorker = new XmlDocumentWorker();
     }
-    
-    public void save(ConcurrentMap<DbcData, ProcessTreeBuilder> processTreeMap) {
+
+    public void save(List<DbcData> dbcDataList) {
         DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
         try {
             DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
             Document doc = docBuilder.newDocument();
             Element rootElement = doc.createElement(SERVERS);
-            for(Entry<DbcData, ProcessTreeBuilder> map : processTreeMap.entrySet()) {
-                if (map.getKey().getStatus() == DbcStatus.BLOCKED) {
-                    Element server = dbcDataParcer.createServerElement(doc, map.getKey(), false);
-                    for(Process process : map.getValue().getProcessTree().getChildren()) {
-                        if (process.hasChildren()) {
-                            server.appendChild(processParcer.createProcessElement(doc, process));
-                        }
-                    }
-                    rootElement.appendChild(server);
-                }
-            }
+            dbcDataList.stream()
+                    .filter(DbcData::hasBlockedProcess)
+                    .forEach(dbcData -> {
+                Element server = dbcDataParcer.createServerElement(doc, dbcData, false);
+                dbcData.getProcessTree().getChildren().stream()
+                        .filter(Process::hasChildren)
+                        .forEach(process -> server.appendChild(processParcer.createProcessElement(doc, process)));
+                rootElement.appendChild(server);
+            });
             doc.appendChild(rootElement);
             docWorker.save(doc, PathBuilder.getInstance().getBlockHistoryPath().toFile());
         } catch (ParserConfigurationException e) {
@@ -86,15 +81,15 @@ public final class BlocksHistory {
         }
     }
     
-    public ConcurrentMap<DbcData, Process> open(String path) {
-        ConcurrentMap<DbcData, Process> processTreeMap = new ConcurrentHashMap<DbcData, Process>();
+    public List<DbcData> open(String path) {
+        List<DbcData> dbcDataList = new ArrayList<DbcData>();
         Process rootProcess = new Process();
         if(path == null) {
-            return processTreeMap;
+            return dbcDataList;
         }
         Document doc = docWorker.open(Paths.get(path).toFile());
         if(doc == null) {
-            return processTreeMap;
+            return dbcDataList;
         }
         NodeList items = doc.getElementsByTagName(SERVER);
         for(int i = 0; i < items.getLength(); i++) {
@@ -105,11 +100,7 @@ public final class BlocksHistory {
                 continue;
             }
             Element el = (Element) node;
-            if (i == items.getLength() - 1) {
-                dbc = dbcDataParcer.parseDbc(el, true);
-            } else {
-                dbc = dbcDataParcer.parseDbc(el, false);
-            }
+            dbc = dbcDataParcer.parseDbc(el);
             XPathFactory xpf = XPathFactory.newInstance();
             XPath xp = xpf.newXPath();
             NodeList children = null;
@@ -118,7 +109,7 @@ public final class BlocksHistory {
             } catch (XPathExpressionException e) {
                 LOG.error("Ошибка XPathExpressionException: " + e.getMessage());
             }
-            for(int j = 0; j < children.getLength(); j++) {
+            for(int j = 0; j < (children != null ? children.getLength() : 0); j++) {
                 Node processNode = children.item(j);
                 if (processNode.getNodeType() != Node.ELEMENT_NODE) {
                     continue;
@@ -132,14 +123,15 @@ public final class BlocksHistory {
                     } else if (process.getBlockedBy() != 0) {
                         process.getParent().setStatus(ProcessStatus.BLOCKING);
                         process.setStatus(ProcessStatus.BLOCKED);
-                        dbc.setStatus(DbcStatus.BLOCKED);
+                        dbc.setContainBlockedProcess(true);
                     }
                 }
                 rootProcess.addChildren(proc);
+                dbc.setProcess(rootProcess);
             }
-            processTreeMap.put(dbc, rootProcess);
+            dbcDataList.add(dbc);
         }
         
-        return processTreeMap;
+        return dbcDataList;
     }
 }

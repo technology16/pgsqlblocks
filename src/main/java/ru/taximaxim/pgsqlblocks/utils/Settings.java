@@ -19,10 +19,14 @@ public final class Settings {
     private static final Logger LOG = Logger.getLogger(Settings.class);
 
     private static final String UPDATE_PERIOD = "update_period";
+    private static final String UPDATE_UI_PERIOD = "update_UI_period";
+    private static final String LOGIN_TIMEOUT = "login_timeout";
     private static final String AUTO_UPDATE = "auto_update";
     private static final String ONLY_BLOCKED = "only_blocked";
 
     private int updatePeriod;
+    private int updateUIPeriod;
+    private int loginTimeout;
 
     private boolean autoUpdate;
 
@@ -43,7 +47,7 @@ public final class Settings {
         } catch (IOException e) {
             LOG.error(String.format("Ошибка чтения файла %s!", propFile.toString()));
         }
-        
+
         if (properties.getProperty(UPDATE_PERIOD) != null &&
                 !properties.getProperty(UPDATE_PERIOD).isEmpty()) {
             this.updatePeriod = Integer.parseInt(properties.getProperty(UPDATE_PERIOD));
@@ -61,6 +65,18 @@ public final class Settings {
             this.onlyBlocked = Boolean.parseBoolean(properties.getProperty(ONLY_BLOCKED));
         } else {
             this.onlyBlocked = false;
+        }
+        if (properties.getProperty(UPDATE_UI_PERIOD) != null &&
+                !properties.getProperty(UPDATE_UI_PERIOD).isEmpty()) {
+            this.updateUIPeriod = Integer.parseInt(properties.getProperty(UPDATE_UI_PERIOD));
+        } else {
+            this.updateUIPeriod = 1;
+        }
+        if (properties.getProperty(LOGIN_TIMEOUT) != null &&
+                !properties.getProperty(LOGIN_TIMEOUT).isEmpty()) {
+            this.loginTimeout = Integer.parseInt(properties.getProperty(LOGIN_TIMEOUT));
+        } else {
+            this.loginTimeout = 10;
         }
     }
 
@@ -82,12 +98,50 @@ public final class Settings {
 
     /**
      * Получаем период обновления
-     * @return
+     * @return the updatePeriod
      */
     public int getUpdatePeriod() {
         return updatePeriod;
     }
 
+    /**
+     * Устанавливаем период обновления UI
+     * @param updateUIPeriod
+     */
+    public void setUpdateUIPeriod(int updateUIPeriod) {
+        this.updateUIPeriod = updateUIPeriod;
+        saveProperties(UPDATE_UI_PERIOD, Integer.toString(updateUIPeriod));
+    }
+
+    /**
+     * Получаем период обновления UI
+     * @return the updateUIPeriod
+     */
+    public int getUpdateUIPeriod() {
+        return updateUIPeriod;
+    }
+    /**
+     * Sets the maximum time in seconds that a driver will wait
+     * while attempting to connect to a database once the driver has
+     * been identified.
+     *
+     * @param seconds the login time limit in seconds; zero means there is no limit
+     * @see #getLoginTimeout
+     */
+    public void setLoginTimeout(int seconds) {
+        this.loginTimeout = seconds;
+        saveProperties(LOGIN_TIMEOUT, Integer.toString(seconds));
+    }
+    /**
+     * Gets the maximum time in seconds that a driver can wait
+     * when attempting to log in to a database.
+     *
+     * @return the driver login time limit in seconds
+     * @see #setLoginTimeout
+     */
+    public int getLoginTimeout() {
+        return loginTimeout;
+    }
     /**
      * Получаем флаг автообновления
      * @return the autoUpdate
@@ -106,7 +160,7 @@ public final class Settings {
     }
 
     /**
-     * Получаем флаг отображения тоьлко блокированных процессов
+     * Получаем флаг отображения только блокированных процессов
      * @return the onlyBlocked
      */
     public boolean isOnlyBlocked() {

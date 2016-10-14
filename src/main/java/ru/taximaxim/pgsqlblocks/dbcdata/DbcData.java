@@ -11,11 +11,18 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 import org.apache.log4j.Logger;
+import ru.taximaxim.pgsqlblocks.MainForm;
+import ru.taximaxim.pgsqlblocks.process.Process;
+import ru.taximaxim.pgsqlblocks.process.ProcessTreeBuilder;
+import ru.taximaxim.pgsqlblocks.utils.Settings;
 
-public class DbcData implements Comparable<DbcData> {
-    
+public class DbcData extends UpdateProvider implements Comparable<DbcData> {
+
     private static final Logger LOG = Logger.getLogger(DbcData.class);
-    
+    private Settings settings = Settings.getInstance();
+
+    private Process process;
+
     private String name;
     private String host;
     private String port;
@@ -24,12 +31,14 @@ public class DbcData implements Comparable<DbcData> {
     private String dbname;
     private boolean enabled;
     private DbcStatus status = DbcStatus.DISABLED;
-    private boolean isLast;
+    private boolean containBlockedProcess;
     
     private Connection connection;
-    
+    private ProcessTreeBuilder processTree = null;
+    private ProcessTreeBuilder blockedProcessTree = null;
+
     public DbcData(String name,String host, String port,String dbname,
-            String user, String passwd, boolean enabled, boolean isLast) {
+            String user, String passwd, boolean enabled) {
         
         this.name = name;
         this.host = host;
@@ -38,9 +47,24 @@ public class DbcData implements Comparable<DbcData> {
         this.user = user;
         this.enabled = enabled;
         this.password = passwd;
-        this.isLast = isLast;
     }
-    
+
+    private void setProcessTree(ProcessTreeBuilder processTree) {
+        this.processTree = processTree;
+    }
+
+    private void setBlockedProcessTree(ProcessTreeBuilder blockedProcessTree) {
+        this.blockedProcessTree = blockedProcessTree;
+    }
+
+    public void setProcess(Process process){
+        this.process = process;
+    }
+
+    public Process getProcess(){
+        return process;
+    }
+
     public String getName() {
         return name;
     }
@@ -57,7 +81,7 @@ public class DbcData implements Comparable<DbcData> {
         return user;
     }
     
-    public String getUrl() {
+    private String getUrl() {
         return String.format("jdbc:postgresql://%1$s:%2$s/%3$s", getHost(), getPort(), getDbname());
     }
     
@@ -65,7 +89,7 @@ public class DbcData implements Comparable<DbcData> {
         return password;
     }
     
-    public String getPgPass() {
+    private String getPgPass() {
         // Считывание пароля из ./pgpass
         String pgPass = "";
         try (
@@ -102,14 +126,6 @@ public class DbcData implements Comparable<DbcData> {
         return connection;
     }
     
-    public void setLast(boolean isLast) {
-        this.isLast = isLast;
-    }
-    
-    public boolean isLast() {
-        return isLast;
-    }
-    
     @Override
     public String toString() {
         return String.format("DbcData [name=%1$s, host=%2$s, port=%3$s, user=%4$s, passwd=%5$s, dbname=%6$s, enabled=%7$s]", 
@@ -133,10 +149,7 @@ public class DbcData implements Comparable<DbcData> {
             return false;
         }
         DbcData table = (DbcData) object;
-        if (this.getName().equals(table.getName())) {
-            return true;
-        }
-        return false;
+        return this.getName().equals(table.getName());
     }
     
     public DbcStatus getStatus() {
@@ -155,6 +168,7 @@ public class DbcData implements Comparable<DbcData> {
         try {
             String pass = (getPass() == null || getPass().isEmpty()) ? getPgPass() : getPass();
             LOG.info(getName() + " Соединение...");
+            DriverManager.setLoginTimeout(settings.getLoginTimeout());
             connection = DriverManager.getConnection(getUrl(), getUser(), pass);
             setStatus(DbcStatus.CONNECTED);
             LOG.info(getName() + " Соединение создано.");
@@ -192,6 +206,50 @@ public class DbcData implements Comparable<DbcData> {
 
     @Override
     public int compareTo(DbcData other) {
-        return getName().compareTo(other.getName());
+        int result = getName().compareTo(other.getName());
+        if (result==0) {
+            result = getPort().compareTo(other.getPort());
+        }
+        if (result==0) {
+            result = getDbname().compareTo(other.getDbname());
+        }
+        if (result==0) {
+            result = getUser().compareTo(other.getUser());
+        }
+        if (result==0) {
+            result = getPass().compareTo(other.getPass());
+        }
+        if (result==0) {
+            result = isEnabled() ^ other.isEnabled() ? 1 : 0;
+        }
+
+        return result;
+    }
+
+    public Process getProcessTree() {
+        if(processTree == null){
+            processTree = new ProcessTreeBuilder(this);
+            setProcessTree(processTree);
+        }
+        Process rootProcess = processTree.getProcessTree();
+        processTree.processSort(rootProcess, MainForm.getSortColumn(), MainForm.getSortDirection());
+        return rootProcess;
+    }
+
+    Process getOnlyBlockedProcessTree() {
+        if(blockedProcessTree == null){
+            blockedProcessTree = new ProcessTreeBuilder(this);
+            setBlockedProcessTree(blockedProcessTree);
+        }
+
+        return blockedProcessTree.getOnlyBlockedProcessTree();
+    }
+
+    public boolean hasBlockedProcess() {
+        return containBlockedProcess;
+    }
+
+    public void setContainBlockedProcess(boolean containBlockedProcess) {
+        this.containBlockedProcess = containBlockedProcess;
     }
 }

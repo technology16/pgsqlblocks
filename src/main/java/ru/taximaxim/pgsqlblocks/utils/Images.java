@@ -13,7 +13,8 @@ public enum Images {
     EXPORT_BLOCKS,
     IMPORT_BLOCKS,
     SETTINGS,
-    FILTER;
+    FILTER,
+    CANCEL_UPDATE;
     
     /**
      * Получение иконки
@@ -45,6 +46,8 @@ public enum Images {
             return "images/settings.png";
         case FILTER:
             return "images/filter.png";
+        case CANCEL_UPDATE:
+            return "images/cancel_update_16.png";
         default:
             return "images/void_16.png";
         }
@@ -76,6 +79,8 @@ public enum Images {
             return "Настройки";
         case FILTER:
             return "Фильтр";
+        case CANCEL_UPDATE:
+            return "Отменить обновление";
         default:
             return "Действие по-умолчанию";
         }

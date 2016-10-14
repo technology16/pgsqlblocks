@@ -14,7 +14,6 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
 import ru.taximaxim.pgsqlblocks.dbcdata.DbcData;
-import ru.taximaxim.pgsqlblocks.dbcdata.DbcDataListBuilder;
 
 public class AddDbcDataDlg extends Dialog {
 
@@ -22,7 +21,8 @@ public class AddDbcDataDlg extends Dialog {
     private static final int TEXT_WIDTH = 200;
 
     private Shell shell;
-    private DbcData selectedDbcData;
+    private DbcData editedDbcData;
+    private DbcData newDbcData;
     private Action action;
 
     private Text nameText;
@@ -32,10 +32,14 @@ public class AddDbcDataDlg extends Dialog {
     private Text passwdText;
     private Text dbnameText;
     private Button enabledButton;
-    
+
+    public DbcData getNewDbcData() {
+        return newDbcData;
+    }
+
     private enum Action {
         ADD,
-        EDIT;
+        EDIT
     }
     
     public AddDbcDataDlg(Shell shell) {
@@ -47,7 +51,7 @@ public class AddDbcDataDlg extends Dialog {
     public AddDbcDataDlg(Shell shell, DbcData dbcData) {
         super(shell);
         this.shell = new Shell(shell, SWT.DIALOG_TRIM | SWT.APPLICATION_MODAL);
-        this.selectedDbcData = dbcData;
+        this.editedDbcData = dbcData;
         this.action = Action.EDIT;
     }
     
@@ -91,7 +95,8 @@ public class AddDbcDataDlg extends Dialog {
       passwdText.setEchoChar('•');
       passwdText.addListener(SWT.FocusOut, event -> {
           if (!passwdText.getText().isEmpty()) {
-              MessageDialog.openWarning(shell, "Внимание!", "Указание пароля здесь небезопасно. Используйте .pgpass файл.");
+              MessageDialog.openWarning(null,
+                      "Внимание!", "Указание пароля здесь небезопасно. Используйте .pgpass файл.");
           }
       });
       
@@ -105,13 +110,13 @@ public class AddDbcDataDlg extends Dialog {
       enabledButton = new Button(container, SWT.CHECK);
       
       if (action == Action.EDIT) {
-          nameText.setText(selectedDbcData.getName());
-          hostText.setText(selectedDbcData.getHost());
-          portText.setText(selectedDbcData.getPort());
-          dbnameText.setText(selectedDbcData.getDbname());
-          userText.setText(selectedDbcData.getUser());
-          passwdText.setText(selectedDbcData.getPass());
-          enabledButton.setSelection(selectedDbcData.isEnabled());
+          nameText.setText(editedDbcData.getName());
+          hostText.setText(editedDbcData.getHost());
+          portText.setText(editedDbcData.getPort());
+          dbnameText.setText(editedDbcData.getDbname());
+          userText.setText(editedDbcData.getUser());
+          passwdText.setText(editedDbcData.getPass());
+          enabledButton.setSelection(editedDbcData.isEnabled());
       }
 
       return container;
@@ -146,20 +151,19 @@ public class AddDbcDataDlg extends Dialog {
         String user = userText.getText();
         String passwd = passwdText.getText();
         boolean enabled = enabledButton.getSelection();
-        if (name.isEmpty() || host.isEmpty() || port.isEmpty()
-                || dbname.isEmpty() || user.isEmpty()) {
-            MessageDialog.openError(shell, "Внимание!", "Не заполнено обязательное поле!");
+        if (name.isEmpty()) {
+            MessageDialog.openError(shell, "Внимание!", "Не заполнено обязательное поле: Имя соединения!");
+            return;
+        } else if (host.isEmpty() || port.isEmpty()) {
+            MessageDialog.openError(shell, "Внимание!", "Не заполнены обязательные поля: Хост и/или Порт!");
+            return;
+        } else if (dbname.isEmpty() || user.isEmpty()) {
+            MessageDialog.openError(shell, "Внимание!", "Не заполнены обязательные поля: Имя БД и/или Имя пользователя!");
             return;
         }
-        DbcData newDbcData = new DbcData(name, host, port, dbname, user, passwd, enabled, true);
-        switch (action) {
-        case ADD:
-            DbcDataListBuilder.getInstance().add(newDbcData);
-            break;
-        case EDIT:
-            DbcDataListBuilder.getInstance().edit(selectedDbcData, newDbcData);
-        }
-        
+
+        newDbcData = new DbcData(name, host, port, dbname, user, passwd, enabled);
+
         super.okPressed();
     }
 }

@@ -67,7 +67,7 @@ public class ProcessTreeBuilder {
         return blockedRootProcess;
     }
 
-    public Set<Process> buildProcessTree() {
+    private Set<Process> buildProcessTree() {
         tempProcessList.clear();
         if (dbcData.getConnection() == null) {
             return tempProcessList;
@@ -109,6 +109,7 @@ public class ProcessTreeBuilder {
         
         // Пробегаем по списку процессов, ищем ожидающие и блокированные процессы
         dbcData.setStatus(DbcStatus.CONNECTED);
+        dbcData.setContainBlockedProcess(false);
         for (Process process : tempProcessList) {
             if ((process.getBlockingLocks() != 0) && (process.getBlockedBy() == 0)) {
                 //Добавляем для данного процесса родителя с pid = process.getBlockingLocks()
@@ -126,7 +127,7 @@ public class ProcessTreeBuilder {
                     parentProcess.addChildren(process);
                     parentProcess.setStatus(ProcessStatus.BLOCKING);
                     process.setStatus(ProcessStatus.BLOCKED);
-                    dbcData.setStatus(DbcStatus.BLOCKED);
+                    dbcData.setContainBlockedProcess(true);
                 }
             }
         }
@@ -139,10 +140,13 @@ public class ProcessTreeBuilder {
     }
     
     public void processSort(Process rootProcess, SortColumn sortColumn, SortDirection sortDirection) {
-        rootProcess.getChildren().sort((Process process1, Process process2) -> {
-            switch (sortColumn) {
-            case DEFAULT:
-                return 0;
+        rootProcess.getChildren().sort((Process process1, Process process2) ->
+                getSortDirectionByColumn(sortColumn, sortDirection, process1, process2));
+    }
+
+    private int getSortDirectionByColumn(SortColumn sortColumn, SortDirection sortDirection,
+                                           Process process1, Process process2) {
+        switch (sortColumn) {
             case PID:
                 if(process1.getPid() > process2.getPid()) {
                     return sortDirection == SortDirection.UP ? -1 : 1;
@@ -177,38 +181,40 @@ public class ProcessTreeBuilder {
                 return stringCompare(process1.getState(), process2.getState(), sortDirection);
             case STATE_CHANGE:
                 return stringCompare(process1.getStateChange(), process2.getStateChange(), sortDirection);
-            case BLOCKED:
-                return 0;
-            case WAITING:
-                return 0;
             case QUERY:
                 return stringCompare(process1.getQuery(), process2.getQuery(), sortDirection);
             case SLOWQUERY:
-                if(sortDirection == SortDirection.UP) {
-                    if(process1.isSlowQuery() && process2.isSlowQuery()) {
-                        return 0;
-                    } else if(process1.isSlowQuery() && !process2.isSlowQuery()) {
-                        return 1;
-                    } else if(!process1.isSlowQuery() && process2.isSlowQuery()) {
-                        return -1;
-                    } else {
-                        return 0;
-                    }
-                } else {
-                    if(process1.isSlowQuery() && process2.isSlowQuery()) {
-                        return 0;
-                    } else if(!process1.isSlowQuery() && process2.isSlowQuery()) {
-                        return 1;
-                    } else if(process1.isSlowQuery() && !process2.isSlowQuery()) {
-                        return -1;
-                    } else {
-                        return 0;
-                    }
-                }
+                return getSortDirectionBySlowQueryColumn(sortDirection, process1, process2);
+            case DEFAULT:
+            case BLOCKED:
+            case WAITING:
             default:
                 return 0;
+        }
+    }
+
+    private int getSortDirectionBySlowQueryColumn(SortDirection sortDirection, Process process1, Process process2) {
+        if(sortDirection == SortDirection.UP) {
+            if(process1.isSlowQuery() && process2.isSlowQuery()) {
+                return 0;
+            } else if(process1.isSlowQuery() && !process2.isSlowQuery()) {
+                return 1;
+            } else if(!process1.isSlowQuery() && process2.isSlowQuery()) {
+                return -1;
+            } else {
+                return 0;
             }
-        });
+        } else {
+            if(process1.isSlowQuery() && process2.isSlowQuery()) {
+                return 0;
+            } else if(!process1.isSlowQuery() && process2.isSlowQuery()) {
+                return 1;
+            } else if(process1.isSlowQuery() && !process2.isSlowQuery()) {
+                return -1;
+            } else {
+                return 0;
+            }
+        }
     }
 
     private String dateParse(String dateString) {

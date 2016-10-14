@@ -46,18 +46,22 @@ public class DbcDataListLabelProvider implements ITableLabelProvider {
     public Image getColumnImage(Object element, int columnIndex) {
         DbcData dbcData = (DbcData) element;
         switch (columnIndex) {
-        case 0: return getImage(dbcData.getStatus().getImageAddr());
+        case 0:
+            return getImage(dbcData.getStatus().getImageAddr());
+        default:
+            return null;
         }
-        return null;
     }
 
     @Override
     public String getColumnText(Object element, int columnIndex) {
         DbcData dbcData = (DbcData) element;
         switch (columnIndex) {
-        case 0: return dbcData.getName();
+        case 0:
+            return (dbcData.hasBlockedProcess() ? "* " : "") + dbcData.getName(); // TODO: need to remake, after create new icons
+        default:
+            return null;
         }
-        return null;
     }
 
     private Image getImage(String path) {

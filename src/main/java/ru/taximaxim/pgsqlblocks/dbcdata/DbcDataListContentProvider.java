@@ -9,10 +9,6 @@ public class DbcDataListContentProvider implements IStructuredContentProvider {
 
     /**
      * Gets the root element(s) of the tree
-     * 
-     * @param arg0
-     *            the input data
-     * @return Object[]
      */
     public Object[] getElements(Object arg0) {
         return ((List<?>) arg0).toArray();
@@ -27,13 +23,6 @@ public class DbcDataListContentProvider implements IStructuredContentProvider {
 
     /**
      * Called when the input changes
-     * 
-     * @param arg0
-     *            the viewer
-     * @param arg1
-     *            the old input
-     * @param arg2
-     *            the new input
      */
     public void inputChanged(Viewer arg0, Object arg1, Object arg2) {
         // TODO Auto-generated method stub
