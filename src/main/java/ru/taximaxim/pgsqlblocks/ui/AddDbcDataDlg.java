@@ -20,7 +20,6 @@ public class AddDbcDataDlg extends Dialog {
     private static final String DEFAULT_PORT = "5432";
     private static final int TEXT_WIDTH = 200;
 
-    private Shell shell;
     private DbcData editedDbcData;
     private DbcData newDbcData;
     private Action action;
@@ -44,13 +43,11 @@ public class AddDbcDataDlg extends Dialog {
     
     public AddDbcDataDlg(Shell shell) {
         super(shell);
-        this.shell = new Shell(shell, SWT.DIALOG_TRIM | SWT.APPLICATION_MODAL);
         this.action = Action.ADD;
     }
     
     public AddDbcDataDlg(Shell shell, DbcData dbcData) {
         super(shell);
-        this.shell = new Shell(shell, SWT.DIALOG_TRIM | SWT.APPLICATION_MODAL);
         this.editedDbcData = dbcData;
         this.action = Action.EDIT;
     }
