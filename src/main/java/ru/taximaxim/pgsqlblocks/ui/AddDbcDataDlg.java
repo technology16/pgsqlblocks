@@ -152,13 +152,13 @@ public class AddDbcDataDlg extends Dialog {
         String passwd = passwdText.getText();
         boolean enabled = enabledButton.getSelection();
         if (name.isEmpty()) {
-            MessageDialog.openError(shell, "Внимание!", "Не заполнено обязательное поле: Имя соединения!");
+            MessageDialog.openError(null, "Внимание!", "Не заполнено обязательное поле: Имя соединения!");
             return;
         } else if (host.isEmpty() || port.isEmpty()) {
-            MessageDialog.openError(shell, "Внимание!", "Не заполнены обязательные поля: Хост и/или Порт!");
+            MessageDialog.openError(null, "Внимание!", "Не заполнены обязательные поля: Хост и/или Порт!");
             return;
         } else if (dbname.isEmpty() || user.isEmpty()) {
-            MessageDialog.openError(shell, "Внимание!", "Не заполнены обязательные поля: Имя БД и/или Имя пользователя!");
+            MessageDialog.openError(null, "Внимание!", "Не заполнены обязательные поля: Имя БД и/или Имя пользователя!");
             return;
         }
 
