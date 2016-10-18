@@ -23,7 +23,6 @@ public final class DbcDataListBuilder {
     
     private static final Logger LOG = Logger.getLogger(DbcDataListBuilder.class);
     
-    private static final String ID = "id";
     private static final String NAME = "name";
     private static final String SERVERS = "servers";
     private static final String SERVER = "server";

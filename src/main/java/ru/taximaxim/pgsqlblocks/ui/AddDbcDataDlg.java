@@ -21,6 +21,7 @@ public class AddDbcDataDlg extends Dialog {
 
     private static final String DEFAULT_PORT = "5432";
     private static final int TEXT_WIDTH = 200;
+    public static final String ATTENTION_WORD = "Внимание!";
 
     private final DbcData editedDbcData;
     private final List<DbcData> dbcDataList;
@@ -89,7 +90,7 @@ public class AddDbcDataDlg extends Dialog {
       passwdText.addListener(SWT.FocusOut, event -> {
           if (!passwdText.getText().isEmpty()) {
               MessageDialog.openWarning(null,
-                      "Внимание!", "Указание пароля здесь небезопасно. Используйте .pgpass файл.");
+                      ATTENTION_WORD, "Указание пароля здесь небезопасно. Используйте .pgpass файл.");
           }
       });
       
@@ -140,16 +141,16 @@ public class AddDbcDataDlg extends Dialog {
         String passwd = passwdText.getText();
         boolean enabled = enabledButton.getSelection();
         if (name.isEmpty()) {
-            MessageDialog.openError(null, "Внимание!", "Не заполнено обязательное поле: Имя соединения!");
+            MessageDialog.openError(null, ATTENTION_WORD, "Не заполнено обязательное поле: Имя соединения!");
             return;
         } else if (editedDbcData != null && !editedDbcData.getName().equals(name) && dbcDataList.stream().anyMatch(d -> d.getName().equals(name))) {
-            MessageDialog.openError(null, "Внимание!", "Сервер с таким именем существует!");
+            MessageDialog.openError(null, ATTENTION_WORD, "Сервер с таким именем существует!");
             return;
         } else if (host.isEmpty() || port.isEmpty()) {
-            MessageDialog.openError(null, "Внимание!", "Не заполнены обязательные поля: Хост и/или Порт!");
+            MessageDialog.openError(null, ATTENTION_WORD, "Не заполнены обязательные поля: Хост и/или Порт!");
             return;
         } else if (dbname.isEmpty() || user.isEmpty()) {
-            MessageDialog.openError(null, "Внимание!", "Не заполнены обязательные поля: Имя БД и/или Имя пользователя!");
+            MessageDialog.openError(null, ATTENTION_WORD, "Не заполнены обязательные поля: Имя БД и/или Имя пользователя!");
             return;
         }
 

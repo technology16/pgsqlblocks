@@ -6,7 +6,6 @@ import org.w3c.dom.Node;
 
 public class DbcDataParser {
 
-    private static final String ID = "id";
     private static final String NAME = "name";
     private static final String HOST = "host";
     private static final String PORT = "port";
