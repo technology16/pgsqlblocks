@@ -74,7 +74,6 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
     private Action autoUpdate;
     private Action cancelUpdate;
     private Action onlyBlocked;
-    private AddDbcDataDlg addDbcDlg;
     private static SortColumn sortColumn = SortColumn.BLOCKED_COUNT;
     private static SortDirection sortDirection = SortDirection.UP;
     private Settings settings = Settings.getInstance();
@@ -162,8 +161,6 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
     {
         Composite composite = new Composite(parent, SWT.NONE);
         composite.setLayout(new GridLayout());
-        
-        addDbcDlg = new AddDbcDataDlg(getShell());
 
         GridLayout gridLayout = new GridLayout();
         gridLayout.marginHeight = ZERO_MARGIN;
@@ -404,12 +401,12 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
             
             @Override
             public void run() {
-
+                AddDbcDataDlg addDbcDlg = new AddDbcDataDlg(getShell(), null, dbcDataBuilder.getDbcDataList());
                 if (Window.OK == addDbcDlg.open()) {
                     selectedDbcData = addDbcDlg.getNewDbcData();
                     if (selectedDbcData != null) {
                         dbcDataBuilder.add(selectedDbcData);
-                        caServersTable.getTable().setSelection(dbcDataBuilder.getOrderNum(selectedDbcData));
+                        caServersTable.getTable().setSelection(dbcDataBuilder.getDbcDataList().indexOf(selectedDbcData));
                     }
                     serversToolBarState();
                     updateUi();
@@ -434,7 +431,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
                     } else {
                         selectedDbcData = dbcDataBuilder.getDbcDataList()
                                 .get(dbcDataBuilder.getDbcDataList().size() - 1);
-                        caServersTable.getTable().setSelection(dbcDataBuilder.getOrderNum(selectedDbcData));
+                        caServersTable.getTable().setSelection(dbcDataBuilder.getDbcDataList().indexOf(selectedDbcData));
                     }
                     updateUi();
                 }
@@ -449,18 +446,13 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
 
             @Override
             public void run() {
-                AddDbcDataDlg editDbcDlg = new AddDbcDataDlg(getShell(), selectedDbcData);
+                AddDbcDataDlg editDbcDlg = new AddDbcDataDlg(getShell(), selectedDbcData, dbcDataBuilder.getDbcDataList());
                 if (Window.OK == editDbcDlg.open()) {
-                    if (selectedDbcData.compareTo(editDbcDlg.getNewDbcData()) != 0) {
-                        dbcDataBuilder.delete(selectedDbcData);
-                        selectedDbcData = editDbcDlg.getNewDbcData();
-                        if (selectedDbcData != null) {
-                            dbcDataBuilder.add(selectedDbcData);
-                            caServersTable.getTable().setSelection(dbcDataBuilder.getOrderNum(selectedDbcData));
-                        }
-                    } else {
-                        MessageDialog.openInformation(getShell(), "Редактирование БД", "Изменений не обнаружено");
-                    }
+                    DbcData oldOne = editDbcDlg.getEditedDbcData();
+                    DbcData newOne = editDbcDlg.getNewDbcData();
+
+                    dbcDataBuilder.edit(oldOne, newOne);
+                    updateUi();
                 }
             }
         };

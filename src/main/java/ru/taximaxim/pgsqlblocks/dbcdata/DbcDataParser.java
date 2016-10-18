@@ -44,9 +44,7 @@ public class DbcDataParser {
         createElement(server, doc.createElement(PASSWD), wp ? dbcData.getPass() : "******");
         createElement(server, doc.createElement(DBNAME), dbcData.getDbname());
         createElement(server, doc.createElement(ENABLED), String.valueOf(dbcData.isEnabled()));
-        
-        server.setAttribute(ID, String.valueOf(dbcData.hashCode()));
-        server.setIdAttribute(ID, true);
+
         return server;
     }
     

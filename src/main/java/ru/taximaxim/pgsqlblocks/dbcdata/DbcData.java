@@ -134,13 +134,7 @@ public class DbcData extends UpdateProvider implements Comparable<DbcData> {
     
     @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((getDbname() == null) ? 0 : getDbname().hashCode());
-        result = prime * result + ((getHost() == null) ? 0 : getHost().hashCode());
-        result = prime * result + ((getPort() == null) ? 0 : getPort().hashCode());
-        result = prime * result + ((getUser() == null) ? 0 : getUser().hashCode());
-        return result;
+        return name.hashCode();
     }
     
     @Override
@@ -151,7 +145,7 @@ public class DbcData extends UpdateProvider implements Comparable<DbcData> {
         DbcData table = (DbcData) object;
         return this.getName().equals(table.getName());
     }
-    
+
     public DbcStatus getStatus() {
         return status;
     }
@@ -251,5 +245,15 @@ public class DbcData extends UpdateProvider implements Comparable<DbcData> {
 
     public void setContainBlockedProcess(boolean containBlockedProcess) {
         this.containBlockedProcess = containBlockedProcess;
+    }
+
+    public void updateFields(DbcData newData) {
+        this.name = newData.name;
+        this.host = newData.host;
+        this.port = newData.port;
+        this.dbname = newData.dbname;
+        this.user = newData.user;
+        this.password = newData.password;
+        this.enabled = newData.enabled;
     }
 }

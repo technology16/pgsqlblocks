@@ -15,14 +15,16 @@ import org.eclipse.swt.widgets.Text;
 
 import ru.taximaxim.pgsqlblocks.dbcdata.DbcData;
 
+import java.util.List;
+
 public class AddDbcDataDlg extends Dialog {
 
     private static final String DEFAULT_PORT = "5432";
     private static final int TEXT_WIDTH = 200;
 
-    private DbcData editedDbcData;
+    private final DbcData editedDbcData;
+    private final List<DbcData> dbcDataList;
     private DbcData newDbcData;
-    private Action action;
 
     private Text nameText;
     private Text hostText;
@@ -36,20 +38,14 @@ public class AddDbcDataDlg extends Dialog {
         return newDbcData;
     }
 
-    private enum Action {
-        ADD,
-        EDIT
+    public DbcData getEditedDbcData() {
+        return editedDbcData;
     }
     
-    public AddDbcDataDlg(Shell shell) {
-        super(shell);
-        this.action = Action.ADD;
-    }
-    
-    public AddDbcDataDlg(Shell shell, DbcData dbcData) {
+    public AddDbcDataDlg(Shell shell, DbcData dbcData, List<DbcData> dbcDataList) {
         super(shell);
         this.editedDbcData = dbcData;
-        this.action = Action.EDIT;
+        this.dbcDataList = dbcDataList;
     }
     
     @Override
@@ -106,7 +102,7 @@ public class AddDbcDataDlg extends Dialog {
       enabledLabel.setText("Подкл. автоматически");
       enabledButton = new Button(container, SWT.CHECK);
       
-      if (action == Action.EDIT) {
+      if (editedDbcData != null) {
           nameText.setText(editedDbcData.getName());
           hostText.setText(editedDbcData.getHost());
           portText.setText(editedDbcData.getPort());
@@ -122,15 +118,10 @@ public class AddDbcDataDlg extends Dialog {
     @Override
     protected void configureShell(Shell newShell) {
       super.configureShell(newShell);
-      switch (action) {
-      case ADD:
+      if (editedDbcData == null) {
           newShell.setText("Добавить новое соединение");
-          break;
-      case EDIT:
+      } else {
           newShell.setText("Редактировать соединение");
-          break;
-      default:
-          break;
       }
     }
 
@@ -150,6 +141,9 @@ public class AddDbcDataDlg extends Dialog {
         boolean enabled = enabledButton.getSelection();
         if (name.isEmpty()) {
             MessageDialog.openError(null, "Внимание!", "Не заполнено обязательное поле: Имя соединения!");
+            return;
+        } else if (editedDbcData != null && !editedDbcData.getName().equals(name) && dbcDataList.stream().anyMatch(d -> d.getName().equals(name))) {
+            MessageDialog.openError(null, "Внимание!", "Сервер с таким именем существует!");
             return;
         } else if (host.isEmpty() || port.isEmpty()) {
             MessageDialog.openError(null, "Внимание!", "Не заполнены обязательные поля: Хост и/или Порт!");
