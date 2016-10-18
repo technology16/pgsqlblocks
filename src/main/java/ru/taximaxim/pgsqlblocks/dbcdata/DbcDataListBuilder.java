@@ -137,7 +137,7 @@ public final class DbcDataListBuilder {
     public void addScheduledUpdater(DbcData dbcData) {
         dbcData.setUpdateListener(mainForm);
         updaterMap.putIfAbsent(dbcData, 
-                mainService.scheduleWithFixedDelay(new DbcDataRunner(dbcData), 0, settings.getUpdatePeriod(), SECONDS));
+                mainService.scheduleWithFixedDelay(new DbcDataRunner(dbcData, this), 0, settings.getUpdatePeriod(), SECONDS));
     }
 
     /**
@@ -154,7 +154,7 @@ public final class DbcDataListBuilder {
      */
     public void addOnceScheduledUpdater(DbcData dbcData) {
         updateOnceMap.putIfAbsent(dbcData,
-                mainService.schedule(new DbcDataRunner(dbcData), 0, SECONDS));
+                mainService.schedule(new DbcDataRunner(dbcData, this), 0, SECONDS));
     }
 
     /**

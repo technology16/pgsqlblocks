@@ -521,7 +521,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
             @Override
             public void run() {
                 if (autoUpdate.isChecked()) {
-                    dbcDataBuilder.getDbcDataList().stream().filter(x -> x.isConnected() || x.isEnabled())
+                    dbcDataBuilder.getDbcDataList().stream().filter(x -> x.isConnected() || x.isEnabled() && x.getStatus() != DbcStatus.ERROR)
                             .forEach(dbcDataBuilder::addScheduledUpdater);
                 } else {
                     dbcDataBuilder.getDbcDataList().forEach(dbcDataBuilder::removeScheduledUpdater);
@@ -756,6 +756,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
         display.asyncExec(() -> {
             if (!display.isDisposed()) {
                 caServersTable.refresh();
+                serversToolBarState();
                 if (selectedDbcData != null) {
                     try {
                         Object[] expanded = caMainTree.getExpandedElements();
