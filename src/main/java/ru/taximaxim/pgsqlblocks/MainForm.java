@@ -539,6 +539,8 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
             }
         };
 
+        cancelUpdate.setEnabled(false);
+
         toolBarManager.add(new Separator());
 
         Action filterSetting = new Action(Images.FILTER.getDescription(),
@@ -735,6 +737,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
         editDB.setEnabled(false);
         connectDB.setEnabled(false);
         disconnectDB.setEnabled(true);
+        cancelUpdate.setEnabled(true);
     }
     
     private void disconnectState() {
@@ -742,6 +745,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
         editDB.setEnabled(true);
         connectDB.setEnabled(true);
         disconnectDB.setEnabled(false);
+        cancelUpdate.setEnabled(false);
     }
 
     private void updateUi() {
