@@ -66,6 +66,10 @@ public class Process implements Comparable<Process> {
         return children;
     }
     
+    void clearChildren(){
+        children.clear();
+    }
+
     public int getPid() {
         return pid;
     }

@@ -34,8 +34,7 @@ public class DbcData extends UpdateProvider implements Comparable<DbcData> {
     private boolean containBlockedProcess;
     
     private Connection connection;
-    private ProcessTreeBuilder processTree = null;
-    private ProcessTreeBuilder blockedProcessTree = null;
+    private final ProcessTreeBuilder processTree = new ProcessTreeBuilder(this);
 
     public DbcData(String name,String host, String port,String dbname,
             String user, String passwd, boolean enabled) {
@@ -47,14 +46,6 @@ public class DbcData extends UpdateProvider implements Comparable<DbcData> {
         this.user = user;
         this.enabled = enabled;
         this.password = passwd;
-    }
-
-    private void setProcessTree(ProcessTreeBuilder processTree) {
-        this.processTree = processTree;
-    }
-
-    private void setBlockedProcessTree(ProcessTreeBuilder blockedProcessTree) {
-        this.blockedProcessTree = blockedProcessTree;
     }
 
     public void setProcess(Process process){
@@ -221,22 +212,13 @@ public class DbcData extends UpdateProvider implements Comparable<DbcData> {
     }
 
     public Process getProcessTree() {
-        if(processTree == null){
-            processTree = new ProcessTreeBuilder(this);
-            setProcessTree(processTree);
-        }
         Process rootProcess = processTree.getProcessTree();
         processTree.processSort(rootProcess, MainForm.getSortColumn(), MainForm.getSortDirection());
         return rootProcess;
     }
 
     Process getOnlyBlockedProcessTree() {
-        if(blockedProcessTree == null){
-            blockedProcessTree = new ProcessTreeBuilder(this);
-            setBlockedProcessTree(blockedProcessTree);
-        }
-
-        return blockedProcessTree.getOnlyBlockedProcessTree();
+        return processTree.getOnlyBlockedProcessTree();
     }
 
     public boolean hasBlockedProcess() {
@@ -247,7 +229,7 @@ public class DbcData extends UpdateProvider implements Comparable<DbcData> {
         this.containBlockedProcess = containBlockedProcess;
     }
 
-    public void updateFields(DbcData newData) {
+    void updateFields(DbcData newData) {
         this.name = newData.name;
         this.host = newData.host;
         this.port = newData.port;

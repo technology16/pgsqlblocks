@@ -362,6 +362,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
                     caTreeSf.layout(false, false);
                 }
                 serversToolBarState();
+                caMainTree.setInput(selectedDbcData.getProcess());
                 updateUi();
             }
         });
@@ -757,7 +758,6 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
                 if (selectedDbcData != null) {
                     try {
                         Object[] expanded = caMainTree.getExpandedElements();
-                        caMainTree.setInput(selectedDbcData.getProcess());
                         caMainTree.setExpandedElements(expanded);
                         caMainTree.refresh();
                         bhMainTree.refresh();

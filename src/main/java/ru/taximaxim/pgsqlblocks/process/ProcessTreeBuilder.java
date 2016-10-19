@@ -42,29 +42,26 @@ public class ProcessTreeBuilder {
     private String query;
     private DbcData dbcData;
     private Set<Process> tempProcessList = new LinkedHashSet<Process>();
+    private final Process root = new Process();
 
     public ProcessTreeBuilder(DbcData dbcData) {
         this.dbcData = dbcData;
     }
 
     public Process getProcessTree() {
-        Process rootProcess = new Process();
-        
+        root.clearChildren();
         buildProcessTree().stream()
             .filter(process -> !process.hasParent())
-            .forEach(process -> rootProcess.addChildren(process));
-        
-        return rootProcess;
+            .forEach(root::addChildren);
+        return root;
     }
     
     public Process getOnlyBlockedProcessTree() {
-        Process blockedRootProcess = new Process();
-        
+        root.clearChildren();
         buildProcessTree().stream()
-            .filter(process -> process.hasChildren())
-            .forEach(process -> blockedRootProcess.addChildren(process));
-        
-        return blockedRootProcess;
+            .filter(Process::hasChildren)
+            .forEach(root::addChildren);
+        return root;
     }
 
     private Set<Process> buildProcessTree() {
