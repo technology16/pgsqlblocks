@@ -33,11 +33,11 @@ public class SettingsDlg extends Dialog {
       container.setLayout(layout);
 
       GridData textGd = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1);
-      textGd.widthHint = 50;
+      textGd.widthHint = 100;
       
       Label nameLabel = new Label(container, SWT.HORIZONTAL);
       nameLabel.setText("Период обновления");
-      updatePeriod = new Spinner(container, SWT.BORDER | SWT.READ_ONLY);
+      updatePeriod = new Spinner(container, SWT.BORDER);
       updatePeriod.setLayoutData(textGd);
       updatePeriod.setMinimum(1);
       updatePeriod.setMaximum(100);

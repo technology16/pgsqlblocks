@@ -562,6 +562,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
             @Override
             public void run() {
                 settings.setOnlyBlocked(onlyBlocked.isChecked());
+                update.run();
                 updateUi();
             }
         };
