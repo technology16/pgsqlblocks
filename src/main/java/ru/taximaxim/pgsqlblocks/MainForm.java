@@ -494,13 +494,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
             @Override
             public void run() {
                 if (selectedDbcData != null) {
-                    dbcDataBuilder.removeScheduledUpdater(selectedDbcData);
-                    dbcDataBuilder.removeOnceScheduledUpdater(selectedDbcData);
-                    if (settings.isAutoUpdate()) {
-                        dbcDataBuilder.addScheduledUpdater(selectedDbcData);
-                    } else {
-                        dbcDataBuilder.addOnceScheduledUpdater(selectedDbcData);
-                    }
+                    runUpdate(selectedDbcData);
                 }
             }
         };
@@ -550,6 +544,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
             public void run() {
                 FilterDlg filterDlg = new FilterDlg(getShell(), filterProcess);
                 filterDlg.open();
+
                 updateUi();
             }
         };
@@ -562,7 +557,9 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
             @Override
             public void run() {
                 settings.setOnlyBlocked(onlyBlocked.isChecked());
-                update.run();
+                if (selectedDbcData != null) {
+                    runUpdate(selectedDbcData);
+                }
                 updateUi();
             }
         };
@@ -619,13 +616,28 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
             @Override
             public void run() {
                 SettingsDlg settingsDlg = new SettingsDlg(getShell(), settings);
-                settingsDlg.open();
+                if (Window.OK == settingsDlg.open()) {
+                    dbcDataBuilder.getDbcDataList().stream().filter(DbcData::isEnabled)
+                            .forEach((dbcData) -> runUpdate(dbcData));
+                }
             }
         };
 
         toolBarManager.add(settingsAction);
         
         return toolBarManager;
+    }
+
+    private void runUpdate(DbcData dbcData) {
+        dbcDataBuilder.removeScheduledUpdater(dbcData);
+        dbcDataBuilder.removeOnceScheduledUpdater(dbcData);
+        if (settings.isAutoUpdate()) {
+            LOG.debug(MessageFormat.format("Add dbcData \"{0}\" to updaterList",
+                    dbcData.getName()));
+            dbcDataBuilder.addScheduledUpdater(dbcData);
+        } else {
+            dbcDataBuilder.addOnceScheduledUpdater(dbcData);
+        }
     }
 
     private Image getImage(Images type) {
@@ -699,13 +711,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
 
     private void dbcDataConnect() {
         synchronized (selectedDbcData) {
-            if (settings.isAutoUpdate()) {
-                LOG.debug(MessageFormat.format("Add on connect dbcData \"{0}\" to updaterList",
-                        selectedDbcData.getName()));
-                dbcDataBuilder.addScheduledUpdater(selectedDbcData);
-            } else {
-                dbcDataBuilder.addOnceScheduledUpdater(selectedDbcData);
-            }
+            runUpdate(selectedDbcData);
             connectState();
         }
     }
