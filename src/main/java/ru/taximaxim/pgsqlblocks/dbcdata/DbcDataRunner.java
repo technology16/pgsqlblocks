@@ -42,7 +42,7 @@ public class DbcDataRunner implements Runnable {
         } catch (Exception e) {
             LOG.error(MessageFormat.format("  Error on connect or update DbcData: {0}", e.getMessage()));
         }
-        LOG.info(MessageFormat.format("  Finish updating \"{0}\"...", dbcData.getName()));
+        LOG.debug(MessageFormat.format("  Finish updating \"{0}\"...", dbcData.getName()));
         dbcData.notifyUpdated();
     }
 }
