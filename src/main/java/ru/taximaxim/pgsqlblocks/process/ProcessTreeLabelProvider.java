@@ -57,19 +57,19 @@ public class ProcessTreeLabelProvider implements ITableLabelProvider {
         switch (columnIndex) {
             case 0: return String.valueOf(process.getPid());
             case 1: return String.valueOf(process.getChildren().size());
-            case 2: return process.getApplicationName();
-            case 3: return process.getDatname();
-            case 4: return process.getUsename();
-            case 5: return process.getClient();
-            case 6: return process.getBackendStart();
-            case 7: return process.getQueryStart();
-            case 8: return process.getXactStart();
+            case 2: return process.getCaller().getApplicationName();
+            case 3: return process.getCaller().getDatname();
+            case 4: return process.getCaller().getUsername();
+            case 5: return process.getCaller().getClient();
+            case 6: return process.getQuery().getBackendStart();
+            case 7: return process.getQuery().getQueryStart();
+            case 8: return process.getQuery().getExactStart();
             case 9: return process.getState();
             case 10: return process.getStateChange();
             case 11: return String.valueOf(process.getBlockedBy());
             case 12: return String.valueOf(process.getBlockingLocks());
-            case 13: return process.getQuery();
-            case 14: return String.valueOf(process.isSlowQuery());
+            case 13: return process.getQuery().getQuery();
+            case 14: return String.valueOf(process.getQuery().isSlowQuery());
         }
         return null;
     }

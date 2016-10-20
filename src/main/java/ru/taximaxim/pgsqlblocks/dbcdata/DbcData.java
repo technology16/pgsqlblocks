@@ -144,7 +144,7 @@ public class DbcData extends UpdateProvider implements Comparable<DbcData> {
     public void setStatus(DbcStatus status) {
         this.status = status;
     }
-    
+    // FIXME report connection result
     public void connect() {
         if(isConnected()) {
             LOG.info(getName() + " соединение уже создано");

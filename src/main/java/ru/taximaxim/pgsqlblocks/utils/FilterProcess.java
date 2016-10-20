@@ -86,7 +86,7 @@ public final class FilterProcess {
     }
     
     private boolean compareDbName(Process element) {
-        String dbName = element.getDatname();
+        String dbName = element.getCaller().getDatname();
         if (getDbName().getValue().isEmpty()) {
             return true;
         }
@@ -106,7 +106,7 @@ public final class FilterProcess {
     }
 
     private boolean compareUserName(Process element) {
-        String userName = element.getUsename();
+        String userName = element.getCaller().getUsername();
         if (getUserName().getValue().isEmpty()) {
             return true;
         }
@@ -126,7 +126,7 @@ public final class FilterProcess {
     }
     
     private boolean compareBackendStart(Process element) {
-        String backendStart = element.getBackendStart();
+        String backendStart = element.getQuery().getBackendStart();
         if (getBackendStart().getValue().isEmpty()) {
             return true;
         }
@@ -154,7 +154,7 @@ public final class FilterProcess {
     }
     
     private boolean compareQueryStart(Process element) {
-        String queryStart = element.getQueryStart();
+        String queryStart = element.getQuery().getQueryStart();
         if (getQueryStart().getValue().isEmpty()) {
             return true;
         }
@@ -245,7 +245,7 @@ public final class FilterProcess {
     }
 
     /**
-     * @param querystart the querystart to set
+     * @param queryStart the querystart to set
      */
     public void setQueryStart(FilterItem queryStart) {
         this.queryStart = queryStart;

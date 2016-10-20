@@ -37,19 +37,19 @@ public class ProcessParcer {
     public Element createProcessElement(Document doc, Process process) {
         Element procEl = doc.createElement(PROCESS);
         createElement(procEl, doc.createElement(PID), String.valueOf(process.getPid()));
-        createElement(procEl, doc.createElement(APPLICATIONNAME), process.getApplicationName());
-        createElement(procEl, doc.createElement(DATNAME), process.getDatname());
-        createElement(procEl, doc.createElement(USENAME), process.getUsename());
-        createElement(procEl, doc.createElement(CLIENT), process.getClient());
-        createElement(procEl, doc.createElement(BACKENDSTART), process.getBackendStart());
-        createElement(procEl, doc.createElement(QUERYSTART), process.getQueryStart());
-        createElement(procEl, doc.createElement(XACTSTART), process.getXactStart());
+        createElement(procEl, doc.createElement(APPLICATIONNAME), process.getCaller().getApplicationName());
+        createElement(procEl, doc.createElement(DATNAME), process.getCaller().getDatname());
+        createElement(procEl, doc.createElement(USENAME), process.getCaller().getUsername());
+        createElement(procEl, doc.createElement(CLIENT), process.getCaller().getClient());
+        createElement(procEl, doc.createElement(BACKENDSTART), process.getQuery().getBackendStart());
+        createElement(procEl, doc.createElement(QUERYSTART), process.getQuery().getQueryStart());
+        createElement(procEl, doc.createElement(XACTSTART), process.getQuery().getExactStart());
         createElement(procEl, doc.createElement(STATE), process.getState());
         createElement(procEl, doc.createElement(STATECHANGE), process.getStateChange());
         createElement(procEl, doc.createElement(BLOCKED), String.valueOf(process.getBlockedBy()));
         createElement(procEl, doc.createElement(WAITING), String.valueOf(process.getBlockingLocks()));
-        createElement(procEl, doc.createElement(QUERY), process.getQuery());
-        createElement(procEl, doc.createElement(SLOWQUERY), String.valueOf(process.isSlowQuery()));
+        createElement(procEl, doc.createElement(QUERY), process.getQuery().getQuery());
+        createElement(procEl, doc.createElement(SLOWQUERY), String.valueOf(process.getQuery().isSlowQuery()));
         
         Element children = doc.createElement(CHILDREN);
         for(Process childProcess : process.getChildren()) {
@@ -60,22 +60,22 @@ public class ProcessParcer {
     }
     
     public Process parseProcess(Element el) {
-        Process process = new Process(
-                Integer.parseInt(getNodeValue(el, PID)),
-                getNodeValue(el, APPLICATIONNAME),
-                getNodeValue(el, DATNAME),
-                getNodeValue(el, USENAME),
-                getNodeValue(el, CLIENT),
+        Query query = new Query(getNodeValue(el, QUERY),
                 getNodeValue(el, BACKENDSTART),
                 getNodeValue(el, QUERYSTART),
                 getNodeValue(el, XACTSTART),
+                Boolean.parseBoolean(getNodeValue(el, SLOWQUERY)));
+        QueryCaller caller = new QueryCaller(getNodeValue(el, APPLICATIONNAME),
+                getNodeValue(el, DATNAME),
+                getNodeValue(el, USENAME),
+                getNodeValue(el, CLIENT));
+        Process process = new Process(Integer.parseInt(getNodeValue(el, PID)),
+                caller,
+                query,
                 getNodeValue(el, STATE),
                 getNodeValue(el, STATECHANGE),
                 Integer.parseInt(getNodeValue(el, BLOCKED)),
-                Integer.parseInt(getNodeValue(el, WAITING)),
-                getNodeValue(el, QUERY),
-                Boolean.parseBoolean(getNodeValue(el, SLOWQUERY))
-                );
+                Integer.parseInt(getNodeValue(el, WAITING)));
         XPathFactory xpf = XPathFactory.newInstance();
         XPath xp = xpf.newXPath();
         NodeList children = null;

@@ -83,7 +83,7 @@ public final class BlocksHistory {
     
     public List<DbcData> open(String path) {
         List<DbcData> dbcDataList = new ArrayList<DbcData>();
-        Process rootProcess = new Process();
+        Process rootProcess = new Process(0, null,null,null,null,0,0);
         if(path == null) {
             return dbcDataList;
         }
