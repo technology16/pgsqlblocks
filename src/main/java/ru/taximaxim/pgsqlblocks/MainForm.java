@@ -507,7 +507,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
             @Override
             public void run() {
                 if (autoUpdate.isChecked()) {
-                    dbcDataBuilder.getDbcDataList().stream().filter(x -> x.isConnected() || x.isEnabled() && x.getStatus() != DbcStatus.ERROR)
+                    dbcDataBuilder.getDbcDataList().stream().filter(x -> (x.isConnected() || x.isEnabled()) && x.getStatus() != DbcStatus.ERROR)
                             .forEach(dbcDataBuilder::addScheduledUpdater);
                 } else {
                     dbcDataBuilder.getDbcDataList().forEach(dbcDataBuilder::removeScheduledUpdater);
@@ -544,7 +544,6 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
             public void run() {
                 FilterDlg filterDlg = new FilterDlg(getShell(), filterProcess);
                 filterDlg.open();
-
                 updateUi();
             }
         };
@@ -557,9 +556,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
             @Override
             public void run() {
                 settings.setOnlyBlocked(onlyBlocked.isChecked());
-                if (selectedDbcData != null) {
-                    runUpdate(selectedDbcData);
-                }
+                runUpdateForAllEnabled();
                 updateUi();
             }
         };
@@ -617,8 +614,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
             public void run() {
                 SettingsDlg settingsDlg = new SettingsDlg(getShell(), settings);
                 if (Window.OK == settingsDlg.open()) {
-                    dbcDataBuilder.getDbcDataList().stream().filter(DbcData::isEnabled)
-                            .forEach((dbcData) -> runUpdate(dbcData));
+                    runUpdateForAllEnabled();
                 }
             }
         };
@@ -626,6 +622,19 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
         toolBarManager.add(settingsAction);
         
         return toolBarManager;
+    }
+
+    private void runUpdateForAllEnabled() {
+        dbcDataBuilder.getDbcDataList().stream().forEach(dbcDataBuilder::removeScheduledUpdater);
+        dbcDataBuilder.getDbcDataList().stream().forEach(dbcDataBuilder::removeOnceScheduledUpdater);
+        if (autoUpdate.isChecked()) {
+            dbcDataBuilder.getDbcDataList().stream().filter(x -> (x.isConnected() || x.isEnabled()) && x.getStatus() != DbcStatus.ERROR)
+                    .forEach(dbcDataBuilder::addScheduledUpdater);
+        } else {
+            dbcDataBuilder.getDbcDataList().stream()
+                    .filter(x -> x.isConnected() || x.isEnabled())
+                    .forEach(dbcDataBuilder::addOnceScheduledUpdater);
+        }
     }
 
     private void runUpdate(DbcData dbcData) {
@@ -685,6 +694,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
         } else {
             LOG.info(selectedDbcData.getName() + PID + pid + " is terminated failed.");
         }
+        updateUi();
     }
 
     public void cancel(Process process) {
@@ -707,6 +717,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
         } else {
             LOG.info(selectedDbcData.getName() + PID + pid + " is canceled failed.");
         }
+        updateUi();
     }
 
     private void dbcDataConnect() {
