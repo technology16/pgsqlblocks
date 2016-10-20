@@ -45,8 +45,9 @@ public final class FilterProcess {
     
     public boolean isFiltered(Process element) {
         try {
-            return comparePid(element) && compareDbName(element) && compareUserName(element) &&
-                    compareBackendStart(element) && compareQueryStart(element);
+            boolean isCallerChanged = compareDbName(element) && compareUserName(element);
+            boolean isQueryChanged = compareBackendStart(element) && compareQueryStart(element);
+            return comparePid(element) && isCallerChanged && isQueryChanged;
         } catch (Exception e) {
             LOG.error("Некорректное выражение для фильтра!", e);
             return true;
