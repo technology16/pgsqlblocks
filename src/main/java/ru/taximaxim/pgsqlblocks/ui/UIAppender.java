@@ -32,7 +32,9 @@ public class UIAppender extends WriterAppender{
     }
 
     public void append(LoggingEvent event) {
-        if(display == null || display.isDisposed() || parent ==null || parent.isDisposed() || text == null) {
+        boolean displayIsFine = display == null || display.isDisposed();
+        boolean parentIsFine = parent == null || parent.isDisposed();
+        if(displayIsFine || parentIsFine || text == null) {
             return;
         }
         SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");

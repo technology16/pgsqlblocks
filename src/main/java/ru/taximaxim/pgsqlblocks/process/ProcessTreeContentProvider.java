@@ -5,8 +5,6 @@ import org.eclipse.jface.viewers.Viewer;
 
 public class ProcessTreeContentProvider implements ITreeContentProvider {
     
-    private final Object[] emptyArray = new Object[0];
-    
     /**
      * Gets the children of the specified object
      * 
@@ -16,11 +14,7 @@ public class ProcessTreeContentProvider implements ITreeContentProvider {
      */
     public Object[] getChildren(Object arg0) {
         Process process = (Process) arg0;
-        if (process.getChildren().size() == 0) {
-            return emptyArray;
-        } else {
-            return process.getChildren().toArray();
-        }
+        return process.getChildren().toArray();
     }
 
     /**

@@ -23,8 +23,6 @@ public class XmlDocumentWorker {
     
     private static final Logger LOG = Logger.getLogger(XmlDocumentWorker.class);
     private static final String SERVERS = "servers";
-    
-    public XmlDocumentWorker() {}
 
     public void save(Document doc, File xmlFile) {
         TransformerFactory transformerFactory = TransformerFactory.newInstance();
