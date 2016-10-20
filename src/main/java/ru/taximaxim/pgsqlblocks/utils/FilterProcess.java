@@ -45,12 +45,9 @@ public final class FilterProcess {
     
     public boolean isFiltered(Process element) {
         try {
-            if (comparePid(element) && compareDbName(element) && compareUserName(element) &&
-                    compareBackendStart(element) && compareQueryStart(element)) {
-                return true;
-            } else {
-                return false;
-            }
+            boolean isCallerChanged = compareDbName(element) && compareUserName(element);
+            boolean isQueryChanged = compareBackendStart(element) && compareQueryStart(element);
+            return comparePid(element) && isCallerChanged && isQueryChanged;
         } catch (Exception e) {
             LOG.error("Некорректное выражение для фильтра!", e);
             return true;
@@ -86,7 +83,7 @@ public final class FilterProcess {
     }
     
     private boolean compareDbName(Process element) {
-        String dbName = element.getDatname();
+        String dbName = element.getCaller().getDatname();
         if (getDbName().getValue().isEmpty()) {
             return true;
         }
@@ -106,7 +103,7 @@ public final class FilterProcess {
     }
 
     private boolean compareUserName(Process element) {
-        String userName = element.getUsename();
+        String userName = element.getCaller().getUsername();
         if (getUserName().getValue().isEmpty()) {
             return true;
         }
@@ -126,7 +123,7 @@ public final class FilterProcess {
     }
     
     private boolean compareBackendStart(Process element) {
-        String backendStart = element.getBackendStart();
+        String backendStart = element.getQuery().getBackendStart();
         if (getBackendStart().getValue().isEmpty()) {
             return true;
         }
@@ -154,7 +151,7 @@ public final class FilterProcess {
     }
     
     private boolean compareQueryStart(Process element) {
-        String queryStart = element.getQueryStart();
+        String queryStart = element.getQuery().getQueryStart();
         if (getQueryStart().getValue().isEmpty()) {
             return true;
         }
@@ -205,7 +202,7 @@ public final class FilterProcess {
     /**
      * @param dbName the dbName to set
      */
-    public void FilterItem(FilterItem dbName) {
+    public void filterItem(FilterItem dbName) {
         this.dbName = dbName;
     }
 
@@ -245,7 +242,7 @@ public final class FilterProcess {
     }
 
     /**
-     * @param querystart the querystart to set
+     * @param queryStart the querystart to set
      */
     public void setQueryStart(FilterItem queryStart) {
         this.queryStart = queryStart;

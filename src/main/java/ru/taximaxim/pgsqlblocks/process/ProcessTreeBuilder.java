@@ -40,31 +40,28 @@ public class ProcessTreeBuilder {
     private static final String QUERYSQL = "query";
     
     private String query;
-    private DbcData dbcData;
+    private final DbcData dbcData;
     private Set<Process> tempProcessList = new LinkedHashSet<Process>();
+    private final Process root = new Process(0,null,null,null,null,0,0);
 
     public ProcessTreeBuilder(DbcData dbcData) {
         this.dbcData = dbcData;
     }
 
     public Process getProcessTree() {
-        Process rootProcess = new Process();
-        
+        root.clearChildren();
         buildProcessTree().stream()
             .filter(process -> !process.hasParent())
-            .forEach(process -> rootProcess.addChildren(process));
-        
-        return rootProcess;
+            .forEach(root::addChildren);
+        return root;
     }
     
     public Process getOnlyBlockedProcessTree() {
-        Process blockedRootProcess = new Process();
-        
+        root.clearChildren();
         buildProcessTree().stream()
-            .filter(process -> process.hasChildren())
-            .forEach(process -> blockedRootProcess.addChildren(process));
-        
-        return blockedRootProcess;
+            .filter(Process::hasChildren)
+            .forEach(root::addChildren);
+        return root;
     }
 
     private Set<Process> buildProcessTree() {
@@ -80,27 +77,28 @@ public class ProcessTreeBuilder {
             LOG.error(String.format("Ошибка при переподключении к %s", dbcData.getName()), e);
         }
         try (
+                // TODO do not prepare each time
                 PreparedStatement statement = dbcData.getConnection().prepareStatement(getQuery());
                 ResultSet processSet = statement.executeQuery();
-                ) {
-            
+        ) {
             while (processSet.next()) {
-                Process process = new Process(
-                        processSet.getInt(PID),
-                        processSet.getString(APPLICATIONNAME),
-                        processSet.getString(DATNAME),
-                        processSet.getString(USENAME),
-                        processSet.getString(CLIENT),
+                Query query = new Query(processSet.getString(QUERYSQL),
                         dateParse(processSet.getString(BACKENDSTART)),
                         dateParse(processSet.getString(QUERYSTART)),
                         dateParse(processSet.getString(XACTSTART)),
+                        processSet.getBoolean(SLOWQUERY));
+                QueryCaller caller = new QueryCaller(processSet.getString(APPLICATIONNAME),
+                        processSet.getString(DATNAME),
+                        processSet.getString(USENAME),
+                        processSet.getString(CLIENT));
+                Process process = new Process(
+                        processSet.getInt(PID),
+                        caller,
+                        query,
                         processSet.getString(STATE),
                         dateParse(processSet.getString(STATECHANGE)),
                         processSet.getInt(BLOCKEDBY),
-                        processSet.getInt(BLOCKING_LOCKS),
-                        processSet.getString(QUERYSQL),
-                        processSet.getBoolean(SLOWQUERY));
-
+                        processSet.getInt(BLOCKING_LOCKS));
                 tempProcessList.add(process);
             }
         } catch (SQLException e) {
@@ -156,33 +154,33 @@ public class ProcessTreeBuilder {
                     return 0;
                 }
             case BLOCKED_COUNT:
-                if(process1.getChildrensCount() > process2.getChildrensCount()) {
+                if(process1.getChildrenCount() > process2.getChildrenCount()) {
                     return sortDirection == SortDirection.UP ? -1 : 1;
-                } else if(process1.getChildrensCount() < process2.getChildrensCount()) {
+                } else if(process1.getChildrenCount() < process2.getChildrenCount()) {
                     return sortDirection == SortDirection.UP ? 1 : -1;
                 } else {
                     return 0;
                 }
             case APPLICATION_NAME:
-                return stringCompare(process1.getApplicationName(), process2.getApplicationName(), sortDirection);
+                return stringCompare(process1.getCaller().getApplicationName(), process2.getCaller().getApplicationName(), sortDirection);
             case DATNAME:
-                return stringCompare(process1.getDatname(), process2.getDatname(), sortDirection);
+                return stringCompare(process1.getCaller().getDatname(), process2.getCaller().getDatname(), sortDirection);
             case USENAME:
-                return stringCompare(process1.getUsename(), process2.getUsename(), sortDirection);
+                return stringCompare(process1.getCaller().getUsername(), process2.getCaller().getUsername(), sortDirection);
             case CLIENT:
-                return stringCompare(process1.getClient(), process2.getClient(), sortDirection);
+                return stringCompare(process1.getCaller().getClient(), process2.getCaller().getClient(), sortDirection);
             case BACKEND_START:
-                return stringCompare(process1.getBackendStart(), process2.getBackendStart(), sortDirection);
+                return stringCompare(process1.getQuery().getBackendStart(), process2.getQuery().getBackendStart(), sortDirection);
             case QUERY_START:
-                return stringCompare(process1.getQueryStart(), process2.getQueryStart(), sortDirection);
+                return stringCompare(process1.getQuery().getQueryStart(), process2.getQuery().getQueryStart(), sortDirection);
             case XACT_STAT:
-                return stringCompare(process1.getXactStart(), process2.getXactStart(), sortDirection);
+                return stringCompare(process1.getQuery().getExactStart(), process2.getQuery().getExactStart(), sortDirection);
             case STATE:
                 return stringCompare(process1.getState(), process2.getState(), sortDirection);
             case STATE_CHANGE:
                 return stringCompare(process1.getStateChange(), process2.getStateChange(), sortDirection);
             case QUERY:
-                return stringCompare(process1.getQuery(), process2.getQuery(), sortDirection);
+                return stringCompare(process1.getQuery().getQueryString(), process2.getQuery().getQueryString(), sortDirection);
             case SLOWQUERY:
                 return getSortDirectionBySlowQueryColumn(sortDirection, process1, process2);
             case DEFAULT:
@@ -192,24 +190,24 @@ public class ProcessTreeBuilder {
                 return 0;
         }
     }
-
+    // TODO refactor!
     private int getSortDirectionBySlowQueryColumn(SortDirection sortDirection, Process process1, Process process2) {
         if(sortDirection == SortDirection.UP) {
-            if(process1.isSlowQuery() && process2.isSlowQuery()) {
+            if(process1.getQuery().isSlowQuery() && process2.getQuery().isSlowQuery()) {
                 return 0;
-            } else if(process1.isSlowQuery() && !process2.isSlowQuery()) {
+            } else if(process1.getQuery().isSlowQuery() && !process2.getQuery().isSlowQuery()) {
                 return 1;
-            } else if(!process1.isSlowQuery() && process2.isSlowQuery()) {
+            } else if(!process1.getQuery().isSlowQuery() && process2.getQuery().isSlowQuery()) {
                 return -1;
             } else {
                 return 0;
             }
         } else {
-            if(process1.isSlowQuery() && process2.isSlowQuery()) {
+            if(process1.getQuery().isSlowQuery() && process2.getQuery().isSlowQuery()) {
                 return 0;
-            } else if(!process1.isSlowQuery() && process2.isSlowQuery()) {
+            } else if(!process1.getQuery().isSlowQuery() && process2.getQuery().isSlowQuery()) {
                 return 1;
-            } else if(process1.isSlowQuery() && !process2.isSlowQuery()) {
+            } else if(process1.getQuery().isSlowQuery() && !process2.getQuery().isSlowQuery()) {
                 return -1;
             } else {
                 return 0;
