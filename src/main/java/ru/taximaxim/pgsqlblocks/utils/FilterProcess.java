@@ -45,12 +45,8 @@ public final class FilterProcess {
     
     public boolean isFiltered(Process element) {
         try {
-            if (comparePid(element) && compareDbName(element) && compareUserName(element) &&
-                    compareBackendStart(element) && compareQueryStart(element)) {
-                return true;
-            } else {
-                return false;
-            }
+            return comparePid(element) && compareDbName(element) && compareUserName(element) &&
+                    compareBackendStart(element) && compareQueryStart(element);
         } catch (Exception e) {
             LOG.error("Некорректное выражение для фильтра!", e);
             return true;
@@ -205,7 +201,7 @@ public final class FilterProcess {
     /**
      * @param dbName the dbName to set
      */
-    public void FilterItem(FilterItem dbName) {
+    public void filterItem(FilterItem dbName) {
         this.dbName = dbName;
     }
 
