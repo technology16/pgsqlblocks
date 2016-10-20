@@ -46,9 +46,9 @@ public class ProcessTreeLabelProvider implements ITableLabelProvider {
     public Image getColumnImage(Object element, int columnIndex) {
         Process process = (Process) element;
         switch (columnIndex) {
-        case 0: return getImage(process.getStatus().getImageAddr());
+            case 0: return getImage(process.getStatus().getImageAddr());
+            default: return null;
         }
-        return null;
     }
 
     @Override
@@ -68,10 +68,10 @@ public class ProcessTreeLabelProvider implements ITableLabelProvider {
             case 10: return process.getStateChange();
             case 11: return String.valueOf(process.getBlockedBy());
             case 12: return String.valueOf(process.getBlockingLocks());
-            case 13: return process.getQuery().getQuery();
+            case 13: return process.getQuery().getQueryString();
             case 14: return String.valueOf(process.getQuery().isSlowQuery());
+            default: return null;
         }
-        return null;
     }
     
     private Image getImage(String path) {

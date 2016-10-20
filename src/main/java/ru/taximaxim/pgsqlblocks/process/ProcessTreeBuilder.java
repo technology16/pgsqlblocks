@@ -180,7 +180,7 @@ public class ProcessTreeBuilder {
             case STATE_CHANGE:
                 return stringCompare(process1.getStateChange(), process2.getStateChange(), sortDirection);
             case QUERY:
-                return stringCompare(process1.getQuery().getQuery(), process2.getQuery().getQuery(), sortDirection);
+                return stringCompare(process1.getQuery().getQueryString(), process2.getQuery().getQueryString(), sortDirection);
             case SLOWQUERY:
                 return getSortDirectionBySlowQueryColumn(sortDirection, process1, process2);
             case DEFAULT:

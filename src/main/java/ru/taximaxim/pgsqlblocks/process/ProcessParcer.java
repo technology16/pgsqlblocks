@@ -31,8 +31,6 @@ public class ProcessParcer {
     private static final String SLOWQUERY = "slowQuery";
     private static final String PROCESS = "process";
     private static final String CHILDREN = "children";
-    
-    public ProcessParcer() {}
 
     public Element createProcessElement(Document doc, Process process) {
         Element procEl = doc.createElement(PROCESS);
@@ -48,7 +46,7 @@ public class ProcessParcer {
         createElement(procEl, doc.createElement(STATECHANGE), process.getStateChange());
         createElement(procEl, doc.createElement(BLOCKED), String.valueOf(process.getBlockedBy()));
         createElement(procEl, doc.createElement(WAITING), String.valueOf(process.getBlockingLocks()));
-        createElement(procEl, doc.createElement(QUERY), process.getQuery().getQuery());
+        createElement(procEl, doc.createElement(QUERY), process.getQuery().getQueryString());
         createElement(procEl, doc.createElement(SLOWQUERY), String.valueOf(process.getQuery().isSlowQuery()));
         
         Element children = doc.createElement(CHILDREN);

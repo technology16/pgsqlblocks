@@ -1,22 +1,22 @@
 package ru.taximaxim.pgsqlblocks.process;
 
 public class Query {
-    private final String query;
+    private final String queryString;
     private final boolean slowQuery;
     private final String backendStart;
     private final String queryStart;
     private final String exactStart;
 
-    Query(String query, String backendStart, String queryStart, String exactStart, boolean slowQuery) {
-        this.query = query;
+    Query(String queryString, String backendStart, String queryStart, String exactStart, boolean slowQuery) {
+        this.queryString = queryString;
         this.backendStart = backendStart;
         this.queryStart = queryStart;
         this.exactStart = exactStart;
         this.slowQuery = slowQuery;
     }
 
-    public String getQuery() {
-        return query;
+    public String getQueryString() {
+        return queryString;
     }
 
     public boolean isSlowQuery() {
@@ -38,7 +38,7 @@ public class Query {
     @Override
     public String toString() {
         return "Query{" +
-                "query='" + query + '\'' +
+                "queryString='" + queryString + '\'' +
                 ", slowQuery=" + slowQuery +
                 ", backendStart='" + backendStart + '\'' +
                 ", queryStart='" + queryStart + '\'' +
