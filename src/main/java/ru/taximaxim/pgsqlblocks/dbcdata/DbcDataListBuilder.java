@@ -23,7 +23,7 @@ public final class DbcDataListBuilder {
     
     private static final Logger LOG = Logger.getLogger(DbcDataListBuilder.class);
     
-    private static final String ID = "id";
+    private static final String NAME = "name";
     private static final String SERVERS = "servers";
     private static final String SERVER = "server";
     
@@ -61,7 +61,6 @@ public final class DbcDataListBuilder {
         if (dbcDataList == null) {
             dbcDataList = new ArrayList<>();
         }
-        Collections.sort(dbcDataList);
         return dbcDataList;
     }
     
@@ -87,48 +86,81 @@ public final class DbcDataListBuilder {
         }
     }
     
+    private void editOrDeleteNode(DbcData dbcData, String oldName, boolean delMode) {
+        Document doc = docWorker.open(serversFile);
+        NodeList nodeList = doc.getElementsByTagName(SERVER);
+        for (int i = 0; i < nodeList.getLength(); i++) {
+            Node n = nodeList.item(i);
+            Element el = (Element) n;
+            if (el.getElementsByTagName(NAME).item(0).getTextContent().equals(oldName)) {
+                if (delMode) {
+                    n.getParentNode().removeChild(n);
+                } else {
+                    n.getParentNode().replaceChild(dbcDataParcer.createServerElement(doc, dbcData, true), n);
+                }
+                break;
+            }
+        }
+        docWorker.save(doc, serversFile);
+    }
+
+    private void appendToXml(DbcData dbcData){
+        Document doc = docWorker.open(serversFile);
+        NodeList rootElement = doc.getElementsByTagName(SERVERS);
+        rootElement.item(0).appendChild(dbcDataParcer.createServerElement(doc, dbcData, true));
+        docWorker.save(doc, serversFile);
+    }
+
+    private void editInXml(DbcData dbcData, String oldName){
+        editOrDeleteNode(dbcData, oldName, false);
+    }
+
+    private void deleteFromXml(DbcData dbcData){
+        editOrDeleteNode(dbcData, dbcData.getName(), true);
+    }
+
     public void add(DbcData dbcData) {
         if(getDbcDataList().contains(dbcData)) {
             LOG.error("Данный сервер уже есть в конфигурационном файле");
             return;
         }
         getDbcDataList().add(dbcData);
-        Collections.sort(getDbcDataList());
-        if (settings.isAutoUpdate()) {
-            addScheduledUpdater(dbcData);
-        } else if (dbcData.isEnabled()) {
-            addOnceScheduledUpdater(dbcData);
-        }
-        Document doc = docWorker.open(serversFile);
-        NodeList rootElement = doc.getElementsByTagName(SERVERS);
-        rootElement.item(0).appendChild(dbcDataParcer.createServerElement(doc, dbcData, true));
-        docWorker.save(doc, serversFile);
-    }
-    
-    public void delete(DbcData oldDbc) {
-        Document doc = docWorker.open(serversFile);
-        NodeList nodeList = doc.getElementsByTagName(SERVER);
-        for(int i=0; i<nodeList.getLength();i++) {
-            Node n = nodeList.item(i);
-            NamedNodeMap attrs = n.getAttributes();
-            if(attrs.getNamedItem(ID).getNodeValue().equals(String.valueOf(oldDbc.hashCode()))) {
-                n.getParentNode().removeChild(n);
-                break;
+        if (dbcData.isEnabled()) {
+            if (settings.isAutoUpdate()) {
+                addScheduledUpdater(dbcData);
+            } else {
+                addOnceScheduledUpdater(dbcData);
             }
         }
+
+        appendToXml(dbcData);
+    }
+
+    public void delete(DbcData oldDbc) {
+        deleteFromXml(oldDbc);
+
         getDbcDataList().remove(oldDbc);
         removeScheduledUpdater(oldDbc);
         removeOnceScheduledUpdater(oldDbc);
-        docWorker.save(doc, serversFile);
     }
-    
-    public int getOrderNum(DbcData dbcData) {
-        for (int i = 0; i < getDbcDataList().size(); i++) {
-            if (getDbcDataList().get(i).equals(dbcData)) {
-                return i;
+
+    public void edit(DbcData oldData, DbcData newData) {
+        String oldName = oldData.getName();
+        oldData.updateFields(newData);
+        editInXml(newData, oldName);
+
+        // remove old updaters
+        removeScheduledUpdater(oldData);
+        removeOnceScheduledUpdater(oldData);
+
+        // add new updaters
+        if (oldData.isEnabled()) {
+            if (settings.isAutoUpdate()) {
+                addScheduledUpdater(oldData);
+            } else {
+                addOnceScheduledUpdater(oldData);
             }
         }
-        return 0;
     }
 
     /**
@@ -137,7 +169,7 @@ public final class DbcDataListBuilder {
     public void addScheduledUpdater(DbcData dbcData) {
         dbcData.setUpdateListener(mainForm);
         updaterMap.putIfAbsent(dbcData, 
-                mainService.scheduleWithFixedDelay(new DbcDataRunner(dbcData), 0, settings.getUpdatePeriod(), SECONDS));
+                mainService.scheduleWithFixedDelay(new DbcDataRunner(dbcData, this), 0, settings.getUpdatePeriod(), SECONDS));
     }
 
     /**
@@ -154,7 +186,7 @@ public final class DbcDataListBuilder {
      */
     public void addOnceScheduledUpdater(DbcData dbcData) {
         updateOnceMap.putIfAbsent(dbcData,
-                mainService.schedule(new DbcDataRunner(dbcData), 0, SECONDS));
+                mainService.schedule(new DbcDataRunner(dbcData, this), 0, SECONDS));
     }
 
     /**

@@ -34,8 +34,7 @@ public class DbcData extends UpdateProvider implements Comparable<DbcData> {
     private boolean containBlockedProcess;
     
     private Connection connection;
-    private ProcessTreeBuilder processTree = null;
-    private ProcessTreeBuilder blockedProcessTree = null;
+    private final ProcessTreeBuilder processTree = new ProcessTreeBuilder(this);
 
     public DbcData(String name,String host, String port,String dbname,
             String user, String passwd, boolean enabled) {
@@ -47,14 +46,6 @@ public class DbcData extends UpdateProvider implements Comparable<DbcData> {
         this.user = user;
         this.enabled = enabled;
         this.password = passwd;
-    }
-
-    private void setProcessTree(ProcessTreeBuilder processTree) {
-        this.processTree = processTree;
-    }
-
-    private void setBlockedProcessTree(ProcessTreeBuilder blockedProcessTree) {
-        this.blockedProcessTree = blockedProcessTree;
     }
 
     public void setProcess(Process process){
@@ -134,13 +125,7 @@ public class DbcData extends UpdateProvider implements Comparable<DbcData> {
     
     @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((getDbname() == null) ? 0 : getDbname().hashCode());
-        result = prime * result + ((getHost() == null) ? 0 : getHost().hashCode());
-        result = prime * result + ((getPort() == null) ? 0 : getPort().hashCode());
-        result = prime * result + ((getUser() == null) ? 0 : getUser().hashCode());
-        return result;
+        return name.hashCode();
     }
     
     @Override
@@ -151,7 +136,7 @@ public class DbcData extends UpdateProvider implements Comparable<DbcData> {
         DbcData table = (DbcData) object;
         return this.getName().equals(table.getName());
     }
-    
+
     public DbcStatus getStatus() {
         return status;
     }
@@ -159,7 +144,7 @@ public class DbcData extends UpdateProvider implements Comparable<DbcData> {
     public void setStatus(DbcStatus status) {
         this.status = status;
     }
-    
+    // FIXME report connection result
     public void connect() {
         if(isConnected()) {
             LOG.info(getName() + " соединение уже создано");
@@ -227,22 +212,13 @@ public class DbcData extends UpdateProvider implements Comparable<DbcData> {
     }
 
     public Process getProcessTree() {
-        if(processTree == null){
-            processTree = new ProcessTreeBuilder(this);
-            setProcessTree(processTree);
-        }
         Process rootProcess = processTree.getProcessTree();
         processTree.processSort(rootProcess, MainForm.getSortColumn(), MainForm.getSortDirection());
         return rootProcess;
     }
 
     Process getOnlyBlockedProcessTree() {
-        if(blockedProcessTree == null){
-            blockedProcessTree = new ProcessTreeBuilder(this);
-            setBlockedProcessTree(blockedProcessTree);
-        }
-
-        return blockedProcessTree.getOnlyBlockedProcessTree();
+        return processTree.getOnlyBlockedProcessTree();
     }
 
     public boolean hasBlockedProcess() {
@@ -251,5 +227,15 @@ public class DbcData extends UpdateProvider implements Comparable<DbcData> {
 
     public void setContainBlockedProcess(boolean containBlockedProcess) {
         this.containBlockedProcess = containBlockedProcess;
+    }
+
+    void updateFields(DbcData newData) {
+        this.name = newData.name;
+        this.host = newData.host;
+        this.port = newData.port;
+        this.dbname = newData.dbname;
+        this.user = newData.user;
+        this.password = newData.password;
+        this.enabled = newData.enabled;
     }
 }

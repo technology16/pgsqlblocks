@@ -70,7 +70,7 @@ public final class Settings {
                 !properties.getProperty(UPDATE_UI_PERIOD).isEmpty()) {
             this.updateUIPeriod = Integer.parseInt(properties.getProperty(UPDATE_UI_PERIOD));
         } else {
-            this.updateUIPeriod = 1;
+            this.updateUIPeriod = 5;
         }
         if (properties.getProperty(LOGIN_TIMEOUT) != null &&
                 !properties.getProperty(LOGIN_TIMEOUT).isEmpty()) {

@@ -74,7 +74,6 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
     private Action autoUpdate;
     private Action cancelUpdate;
     private Action onlyBlocked;
-    private AddDbcDataDlg addDbcDlg;
     private static SortColumn sortColumn = SortColumn.BLOCKED_COUNT;
     private static SortDirection sortDirection = SortDirection.UP;
     private Settings settings = Settings.getInstance();
@@ -162,8 +161,6 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
     {
         Composite composite = new Composite(parent, SWT.NONE);
         composite.setLayout(new GridLayout());
-        
-        addDbcDlg = new AddDbcDataDlg(getShell());
 
         GridLayout gridLayout = new GridLayout();
         gridLayout.marginHeight = ZERO_MARGIN;
@@ -365,6 +362,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
                     caTreeSf.layout(false, false);
                 }
                 serversToolBarState();
+                caMainTree.setInput(selectedDbcData.getProcess());
                 updateUi();
             }
         });
@@ -404,12 +402,12 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
             
             @Override
             public void run() {
-
+                AddDbcDataDlg addDbcDlg = new AddDbcDataDlg(getShell(), null, dbcDataBuilder.getDbcDataList());
                 if (Window.OK == addDbcDlg.open()) {
                     selectedDbcData = addDbcDlg.getNewDbcData();
                     if (selectedDbcData != null) {
                         dbcDataBuilder.add(selectedDbcData);
-                        caServersTable.getTable().setSelection(dbcDataBuilder.getOrderNum(selectedDbcData));
+                        caServersTable.getTable().setSelection(dbcDataBuilder.getDbcDataList().indexOf(selectedDbcData));
                     }
                     serversToolBarState();
                     updateUi();
@@ -434,7 +432,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
                     } else {
                         selectedDbcData = dbcDataBuilder.getDbcDataList()
                                 .get(dbcDataBuilder.getDbcDataList().size() - 1);
-                        caServersTable.getTable().setSelection(dbcDataBuilder.getOrderNum(selectedDbcData));
+                        caServersTable.getTable().setSelection(dbcDataBuilder.getDbcDataList().indexOf(selectedDbcData));
                     }
                     updateUi();
                 }
@@ -449,18 +447,13 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
 
             @Override
             public void run() {
-                AddDbcDataDlg editDbcDlg = new AddDbcDataDlg(getShell(), selectedDbcData);
+                AddDbcDataDlg editDbcDlg = new AddDbcDataDlg(getShell(), selectedDbcData, dbcDataBuilder.getDbcDataList());
                 if (Window.OK == editDbcDlg.open()) {
-                    if (selectedDbcData.compareTo(editDbcDlg.getNewDbcData()) != 0) {
-                        dbcDataBuilder.delete(selectedDbcData);
-                        selectedDbcData = editDbcDlg.getNewDbcData();
-                        if (selectedDbcData != null) {
-                            dbcDataBuilder.add(selectedDbcData);
-                            caServersTable.getTable().setSelection(dbcDataBuilder.getOrderNum(selectedDbcData));
-                        }
-                    } else {
-                        MessageDialog.openInformation(getShell(), "Редактирование БД", "Изменений не обнаружено");
-                    }
+                    DbcData oldOne = editDbcDlg.getEditedDbcData();
+                    DbcData newOne = editDbcDlg.getNewDbcData();
+
+                    dbcDataBuilder.edit(oldOne, newOne);
+                    updateUi();
                 }
             }
         };
@@ -502,13 +495,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
             @Override
             public void run() {
                 if (selectedDbcData != null) {
-                    dbcDataBuilder.removeScheduledUpdater(selectedDbcData);
-                    dbcDataBuilder.removeOnceScheduledUpdater(selectedDbcData);
-                    if (settings.isAutoUpdate()) {
-                        dbcDataBuilder.addScheduledUpdater(selectedDbcData);
-                    } else {
-                        dbcDataBuilder.addOnceScheduledUpdater(selectedDbcData);
-                    }
+                    runUpdate(selectedDbcData);
                 }
             }
         };
@@ -521,7 +508,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
             @Override
             public void run() {
                 if (autoUpdate.isChecked()) {
-                    dbcDataBuilder.getDbcDataList().stream().filter(x -> x.isConnected() || x.isEnabled())
+                    dbcDataBuilder.getDbcDataList().stream().filter(x -> (x.isConnected() || x.isEnabled()) && x.getStatus() != DbcStatus.ERROR)
                             .forEach(dbcDataBuilder::addScheduledUpdater);
                 } else {
                     dbcDataBuilder.getDbcDataList().forEach(dbcDataBuilder::removeScheduledUpdater);
@@ -547,6 +534,8 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
             }
         };
 
+        cancelUpdate.setEnabled(false);
+
         toolBarManager.add(new Separator());
 
         Action filterSetting = new Action(Images.FILTER.getDescription(),
@@ -568,6 +557,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
             @Override
             public void run() {
                 settings.setOnlyBlocked(onlyBlocked.isChecked());
+                runUpdateForAllEnabled();
                 updateUi();
             }
         };
@@ -624,13 +614,40 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
             @Override
             public void run() {
                 SettingsDlg settingsDlg = new SettingsDlg(getShell(), settings);
-                settingsDlg.open();
+                if (Window.OK == settingsDlg.open()) {
+                    runUpdateForAllEnabled();
+                }
             }
         };
 
         toolBarManager.add(settingsAction);
         
         return toolBarManager;
+    }
+
+    private void runUpdateForAllEnabled() {
+        dbcDataBuilder.getDbcDataList().stream().forEach(dbcDataBuilder::removeScheduledUpdater);
+        dbcDataBuilder.getDbcDataList().stream().forEach(dbcDataBuilder::removeOnceScheduledUpdater);
+        if (autoUpdate.isChecked()) {
+            dbcDataBuilder.getDbcDataList().stream().filter(x -> (x.isConnected() || x.isEnabled()) && x.getStatus() != DbcStatus.ERROR)
+                    .forEach(dbcDataBuilder::addScheduledUpdater);
+        } else {
+            dbcDataBuilder.getDbcDataList().stream()
+                    .filter(x -> x.isConnected() || x.isEnabled())
+                    .forEach(dbcDataBuilder::addOnceScheduledUpdater);
+        }
+    }
+
+    private void runUpdate(DbcData dbcData) {
+        dbcDataBuilder.removeScheduledUpdater(dbcData);
+        dbcDataBuilder.removeOnceScheduledUpdater(dbcData);
+        if (settings.isAutoUpdate()) {
+            LOG.debug(MessageFormat.format("Add dbcData \"{0}\" to updaterList",
+                    dbcData.getName()));
+            dbcDataBuilder.addScheduledUpdater(dbcData);
+        } else {
+            dbcDataBuilder.addOnceScheduledUpdater(dbcData);
+        }
     }
 
     private Image getImage(Images type) {
@@ -678,6 +695,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
         } else {
             LOG.info(selectedDbcData.getName() + PID + pid + " is terminated failed.");
         }
+        updateUi();
     }
 
     public void cancel(Process process) {
@@ -700,17 +718,12 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
         } else {
             LOG.info(selectedDbcData.getName() + PID + pid + " is canceled failed.");
         }
+        updateUi();
     }
 
     private void dbcDataConnect() {
         synchronized (selectedDbcData) {
-            if (settings.isAutoUpdate()) {
-                LOG.debug(MessageFormat.format("Add on connect dbcData \"{0}\" to updaterList",
-                        selectedDbcData.getName()));
-                dbcDataBuilder.addScheduledUpdater(selectedDbcData);
-            } else {
-                dbcDataBuilder.addOnceScheduledUpdater(selectedDbcData);
-            }
+            runUpdate(selectedDbcData);
             connectState();
         }
     }
@@ -743,6 +756,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
         editDB.setEnabled(false);
         connectDB.setEnabled(false);
         disconnectDB.setEnabled(true);
+        cancelUpdate.setEnabled(true);
     }
     
     private void disconnectState() {
@@ -750,16 +764,17 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
         editDB.setEnabled(true);
         connectDB.setEnabled(true);
         disconnectDB.setEnabled(false);
+        cancelUpdate.setEnabled(false);
     }
 
     private void updateUi() {
         display.asyncExec(() -> {
             if (!display.isDisposed()) {
                 caServersTable.refresh();
+                serversToolBarState();
                 if (selectedDbcData != null) {
                     try {
                         Object[] expanded = caMainTree.getExpandedElements();
-                        caMainTree.setInput(selectedDbcData.getProcess());
                         caMainTree.setExpandedElements(expanded);
                         caMainTree.refresh();
                         bhMainTree.refresh();
