@@ -373,7 +373,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
                 if (selectedDbcData != null) {
                     caMainTree.getTree().setSortColumn(column);
                     column.setData(SORT_DIRECTION, ((SortDirection)column.getData(SORT_DIRECTION)).getOpposite());
-                    sortDirection = ((SortDirection)column.getData(SORT_DIRECTION));
+                    sortDirection = (SortDirection)column.getData(SORT_DIRECTION);
                     caMainTree.getTree().setSortDirection(sortDirection.getSwtData());
                     sortColumn = SortColumn.valueOf((String)column.getData("colName"));
                     ProcessTreeBuilder processTree = new ProcessTreeBuilder(selectedDbcData);
