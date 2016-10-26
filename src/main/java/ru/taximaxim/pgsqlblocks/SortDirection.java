@@ -7,18 +7,10 @@ public enum SortDirection {
     DOWN;
     
     public SortDirection getOpposite() {
-        if(this == UP) {
-            return DOWN;
-        } else {
-            return UP;
-        }
+        return this == UP ? DOWN : UP;
     }
     
     public int getSwtData(){
-        if(this == UP) {
-            return SWT.UP;
-        } else {
-            return SWT.DOWN;
-        }
+        return this == UP ? SWT.UP : SWT.DOWN;
     }
 }
