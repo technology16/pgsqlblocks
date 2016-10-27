@@ -95,23 +95,18 @@ public class DbcData extends UpdateProvider implements Comparable<DbcData> {
             String settingsLine = null;
             while ((settingsLine = reader.readLine()) != null) {
                 String[] settings = settingsLine.split(":");
-                if (settings.length == 5) {
-                    if (settings[0].equals(host) && settings[1].equals(port) && settings[2].equals(dbname)
-                            && settings[3].equals(user)) {
-                        // return exact match
-                        return settings[4];
-                        // it's not an exact match, maybe we can find exact match in next line
-                    } else {
-                        boolean equalsSettingOrAny = (settings[0].equals(host) || "*".equals(settings[0]))
-                                && (settings[1].equals(port) || "*".equals(settings[1]))
-                                && (settings[2].equals(dbname) || "*".equals(settings[2]))
-                                && (settings[3].equals(user) || "*".equals(settings[3]));
-                        if (equalsSettingOrAny) {
-                            pgPass = settings[4];
-                        }
+                if (settings.length != 5) {
+                    continue;
+                }
+                if (settings[0].equals(host) && settings[1].equals(port) && settings[2].equals(dbname)
+                        && settings[3].equals(user)) {
+                    // return exact match
+                    return settings[4];
+                    // it's not an exact match, maybe we can find exact match in next line
+                } else if (equalsSettingOrAny(settings)) {
+                        pgPass = settings[4];
                     }
                 }
-            }
         } catch (FileNotFoundException e1) {
             LOG.error("Файл ./pgpass не найден");
         } catch (IOException e1) {
@@ -119,6 +114,13 @@ public class DbcData extends UpdateProvider implements Comparable<DbcData> {
         }
         
         return pgPass;
+    }
+
+    private boolean equalsSettingOrAny(String[] settings) {
+        boolean result = settings[0].equals(host) || "*".equals(settings[0]);
+        result = result && (settings[1].equals(port) || "*".equals(settings[1]));
+        result = result && (settings[2].equals(dbname) || "*".equals(settings[2]));
+        return result && (settings[3].equals(user) || "*".equals(settings[3]));
     }
 
     /**
