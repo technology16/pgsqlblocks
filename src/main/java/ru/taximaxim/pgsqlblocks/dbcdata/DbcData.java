@@ -86,7 +86,7 @@ public class DbcData extends UpdateProvider implements Comparable<DbcData> {
      * @return pgpass
      */
     private String getPgPass() {
-        Path pgPassPath =Paths.get(getPgPassPath());
+        Path pgPassPath = Paths.get(getPgPassPath());
         String pgPass = "";
         try (
                 BufferedReader reader = Files.newBufferedReader(
@@ -132,8 +132,6 @@ public class DbcData extends UpdateProvider implements Comparable<DbcData> {
          if (os.contains("NUX")) {
             return System.getProperty("user.home") + "/.pgpass";
         } else if (os.contains("WIN")) {
-             // TODO: On Microsoft Windows the file is named %APPDATA%\postgresql\pgpass.conf
-//            return System.getProperty("user.home") + "\\Local Settings\\ApplicationData" + "postgresql\pgpass.conf";
             return System.getenv("APPDATA") + "\\postgresql\\pgpass.conf";
         } else if (os.contains("MAC")) {
             return System.getProperty("user.home") + "/Library/Application " + "Support";
