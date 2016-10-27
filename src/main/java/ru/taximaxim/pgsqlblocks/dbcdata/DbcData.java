@@ -101,11 +101,14 @@ public class DbcData extends UpdateProvider implements Comparable<DbcData> {
                         // return exact match
                         return settings[4];
                         // it's not an exact match, maybe we can find exact match in next line
-                    } else if ((settings[0].equals(host) || "*".equals(settings[0]))
-                                && (settings[1].equals(port)  || "*".equals(settings[1]))
+                    } else {
+                        boolean equalsSettingOrAny = (settings[0].equals(host) || "*".equals(settings[0]))
+                                && (settings[1].equals(port) || "*".equals(settings[1]))
                                 && (settings[2].equals(dbname) || "*".equals(settings[2]))
-                                && (settings[3].equals(user)  || "*".equals(settings[3]))) {
-                        pgPass = settings[4];
+                                && (settings[3].equals(user) || "*".equals(settings[3]));
+                        if (equalsSettingOrAny) {
+                            pgPass = settings[4];
+                        }
                     }
                 }
             }
@@ -130,8 +133,7 @@ public class DbcData extends UpdateProvider implements Comparable<DbcData> {
              // TODO: On Microsoft Windows the file is named %APPDATA%\postgresql\pgpass.conf
 //            return System.getProperty("user.home") + "\\Local Settings\\ApplicationData" + "postgresql\pgpass.conf";
             return System.getenv("APPDATA") + "\\postgresql\\pgpass.conf";
-        }
-        else if (os.contains("MAC")) {
+        } else if (os.contains("MAC")) {
             return System.getProperty("user.home") + "/Library/Application " + "Support";
         }
         return System.getProperty("user.dir") + "/.pgpass";
