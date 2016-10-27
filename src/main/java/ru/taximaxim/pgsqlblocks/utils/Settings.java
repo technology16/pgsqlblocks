@@ -85,7 +85,7 @@ public final class Settings {
                 !properties.getProperty(SHOW_IDLE).isEmpty()) {
             this.showIdle = Boolean.parseBoolean(properties.getProperty(SHOW_IDLE));
         } else {
-            this.showIdle = false;
+            this.showIdle = true;
         }
     }
 
