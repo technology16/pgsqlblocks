@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -79,21 +80,33 @@ public class DbcData extends UpdateProvider implements Comparable<DbcData> {
     public String getPass() {
         return password;
     }
-    
+
+    /**
+     * Считывание пароля из pgpass
+     * @return pgpass
+     */
     private String getPgPass() {
-        // Считывание пароля из ./pgpass
+        Path pgPassPath =Paths.get(getPgPassPath());
         String pgPass = "";
         try (
                 BufferedReader reader = Files.newBufferedReader(
-                        Paths.get(System.getProperty("user.home") + "/.pgpass"), StandardCharsets.UTF_8);
+                        pgPassPath, StandardCharsets.UTF_8)
                 ) {
-
             String settingsLine = null;
             while ((settingsLine = reader.readLine()) != null) {
                 String[] settings = settingsLine.split(":");
-                if (settings[0].equals(host) && (settings[1].equals(port)
-                        && settings[3].equals(user))) {
-                    pgPass = settings[4];
+                if (settings.length == 5) {
+                    if (settings[0].equals(host) && settings[1].equals(port) && settings[2].equals(dbname)
+                            && settings[3].equals(user)) {
+                        // return exact match
+                        return settings[4];
+                        // it's not an exact match, maybe we can find exact match in next line
+                    } else if ((settings[0].equals(host) || "*".equals(settings[0]))
+                                && (settings[1].equals(port)  || "*".equals(settings[1]))
+                                && (settings[2].equals(dbname) || "*".equals(settings[2]))
+                                && (settings[3].equals(user)  || "*".equals(settings[3]))) {
+                        pgPass = settings[4];
+                    }
                 }
             }
         } catch (FileNotFoundException e1) {
@@ -104,7 +117,26 @@ public class DbcData extends UpdateProvider implements Comparable<DbcData> {
         
         return pgPass;
     }
-    
+
+    /**
+     * Поиск директории файла pgpass
+     * @return pgpass file path
+     */
+    private String getPgPassPath() {
+        String os = System.getProperty("os.name").toUpperCase();
+         if (os.contains("NUX")) {
+            return System.getProperty("user.home") + "/.pgpass";
+        } else if (os.contains("WIN")) {
+             // TODO: On Microsoft Windows the file is named %APPDATA%\postgresql\pgpass.conf
+//            return System.getProperty("user.home") + "\\Local Settings\\ApplicationData" + "postgresql\pgpass.conf";
+            return System.getenv("APPDATA") + "\\postgresql\\pgpass.conf";
+        }
+        else if (os.contains("MAC")) {
+            return System.getProperty("user.home") + "/Library/Application " + "Support";
+        }
+        return System.getProperty("user.dir") + "/.pgpass";
+    }
+
     public String getDbname() {
         return dbname;
     }
