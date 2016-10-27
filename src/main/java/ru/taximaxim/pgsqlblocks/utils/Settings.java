@@ -56,18 +56,10 @@ public final class Settings {
         } else {
             this.updatePeriod = 10;
         }
-        if (properties.getProperty(AUTO_UPDATE) != null &&
-                !properties.getProperty(AUTO_UPDATE).isEmpty()) {
-            this.autoUpdate = Boolean.parseBoolean(properties.getProperty(AUTO_UPDATE));
-        } else {
-            this.autoUpdate = true;
-        }
-        if (properties.getProperty(ONLY_BLOCKED) != null &&
-                !properties.getProperty(ONLY_BLOCKED).isEmpty()) {
-            this.onlyBlocked = Boolean.parseBoolean(properties.getProperty(ONLY_BLOCKED));
-        } else {
-            this.onlyBlocked = false;
-        }
+        this.autoUpdate = !(properties.getProperty(AUTO_UPDATE) != null &&
+                !properties.getProperty(AUTO_UPDATE).isEmpty()) || Boolean.parseBoolean(properties.getProperty(AUTO_UPDATE));
+        this.onlyBlocked = properties.getProperty(ONLY_BLOCKED) != null
+                && !properties.getProperty(ONLY_BLOCKED).isEmpty() && Boolean.parseBoolean(properties.getProperty(ONLY_BLOCKED));
         if (properties.getProperty(UPDATE_UI_PERIOD) != null &&
                 !properties.getProperty(UPDATE_UI_PERIOD).isEmpty()) {
             this.updateUIPeriod = Integer.parseInt(properties.getProperty(UPDATE_UI_PERIOD));
@@ -81,12 +73,8 @@ public final class Settings {
             this.loginTimeout = 10;
         }
 
-        if (properties.getProperty(SHOW_IDLE) != null &&
-                !properties.getProperty(SHOW_IDLE).isEmpty()) {
-            this.showIdle = Boolean.parseBoolean(properties.getProperty(SHOW_IDLE));
-        } else {
-            this.showIdle = true;
-        }
+        this.showIdle = !(properties.getProperty(SHOW_IDLE) != null &&
+                !properties.getProperty(SHOW_IDLE).isEmpty()) || Boolean.parseBoolean(properties.getProperty(SHOW_IDLE));
     }
 
     public static Settings getInstance() {
