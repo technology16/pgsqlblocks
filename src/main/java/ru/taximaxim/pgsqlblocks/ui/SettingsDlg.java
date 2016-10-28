@@ -2,7 +2,6 @@ package ru.taximaxim.pgsqlblocks.ui;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.*;
@@ -45,7 +44,8 @@ public class SettingsDlg extends Dialog {
         showIdleButton = new Button(container, SWT.CHECK);
         showIdleButton.setSelection(settings.getShowIdle());
 
-      return container;
+        container.pack();
+        return container;
     }
 
     @Override
@@ -54,11 +54,6 @@ public class SettingsDlg extends Dialog {
       newShell.setText("Настройки");
     }
 
-    @Override
-    protected Point getInitialSize() {
-        return new Point(325, 175);
-    }
-    
     @Override
     protected void okPressed() {
         settings.setUpdatePeriod(updatePeriod.getSelection());
