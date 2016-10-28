@@ -45,10 +45,10 @@ public class ProcessTreeBuilder {
 
     private Settings settings = Settings.getInstance();
     
-    private String query;
-    private Boolean showIdle = settings.getShowIdle();
+    private static String queryWithoutIdle;
+    private static String queryWithIdle;
     private final DbcData dbcData;
-    private Set<Process> tempProcessList = new LinkedHashSet<Process>();
+    private Set<Process> tempProcessList = new LinkedHashSet<>();
     private final Process root = new Process(0,null,null,null,null,0,0);
 
     public ProcessTreeBuilder(DbcData dbcData) {
@@ -84,7 +84,8 @@ public class ProcessTreeBuilder {
             LOG.error(String.format("Ошибка при переподключении к %s", dbcData.getName()), e);
         }
         try (
-                PreparedStatement statement = dbcData.getConnection().prepareStatement(getQuery());
+                // TODO do not prepare each time
+                PreparedStatement statement = dbcData.getConnection().prepareStatement(getQuery(settings.getShowIdle()));
                 ResultSet processSet = statement.executeQuery()
         ) {
             while (processSet.next()) {
@@ -239,30 +240,29 @@ public class ProcessTreeBuilder {
     private Process getProcessByPid(Set<Process> processList, int pid) {
         return processList.stream().filter(process -> process.getPid() == pid).findFirst().get();
     }
-    
-    private String getQuery() {
-        if (query != null & showIdle == settings.getShowIdle()) {
-            return query;
+
+    private String getQuery(boolean showIdle) {
+        if (showIdle) {
+            queryWithIdle = (queryWithIdle == null) ? loadQuery(QUERYWITHIDLEFILENAME) : queryWithIdle;
+            return queryWithIdle;
+        } else {
+            queryWithoutIdle = (queryWithoutIdle == null) ? loadQuery(QUERYFILENAME) : queryWithoutIdle;
+            return queryWithoutIdle;
         }
+    }
 
-        showIdle = settings.getShowIdle();
-
-        String queryFile = showIdle ? QUERYWITHIDLEFILENAME : QUERYFILENAME;
-        try (
-                InputStream input = ClassLoader.getSystemResourceAsStream(queryFile);
-                BufferedReader reader = new BufferedReader(new InputStreamReader(input, "UTF-8"));
-                ) {
-
+    private String loadQuery(String queryFile){
+        try (InputStream input = ClassLoader.getSystemResourceAsStream(queryFile);
+             BufferedReader reader = new BufferedReader(new InputStreamReader(input, "UTF-8"))) {
             StringBuilder out = new StringBuilder();
             String line;
             while ((line = reader.readLine()) != null) {
                 out.append(line);
             }
-            query = out.toString();
+            return out.toString();
         } catch (IOException e) {
             LOG.error("Ошибка чтения файла " + queryFile, e);
+            return null;
         }
-
-        return query;
     }
 }
