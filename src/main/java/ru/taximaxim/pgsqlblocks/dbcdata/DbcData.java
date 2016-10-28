@@ -158,7 +158,7 @@ public class DbcData extends UpdateProvider implements Comparable<DbcData> {
             setStatus(DbcStatus.CONNECTED);
             LOG.info(getName() + " Соединение создано.");
         } catch (SQLException e) {
-            setStatus(DbcStatus.ERROR);
+            setStatus(DbcStatus.CONNECTION_ERROR);
             LOG.error(getName() + " " + e.getMessage(), e);
         }
     }
@@ -172,7 +172,7 @@ public class DbcData extends UpdateProvider implements Comparable<DbcData> {
                 LOG.info(getName() + " Соединение закрыто.");
             } catch (SQLException e) {
                 connection = null;
-                setStatus(DbcStatus.ERROR);
+                setStatus(DbcStatus.CONNECTION_ERROR);
                 LOG.error(getName() + " " + e.getMessage(), e);
             } 
         }
@@ -180,13 +180,11 @@ public class DbcData extends UpdateProvider implements Comparable<DbcData> {
     
     public boolean isConnected() {
         try {
-            if(connection == null || connection.isClosed()) {
-                return false;
-            }
+            return !(connection == null || connection.isClosed());
         } catch (SQLException e) {
             LOG.error("Ошибка isConnected: " + e.getMessage());
         }
-        return true;
+        return false;
     }
 
     @Override

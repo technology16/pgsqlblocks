@@ -23,11 +23,10 @@ public class DbcDataRunner implements Runnable {
                 LOG.debug(MessageFormat.format("  Connecting \"{0}\"...", dbcData.getName()));
                 dbcData.connect();
             }
-            if (dbcData.getStatus() == DbcStatus.ERROR) {
+            if (dbcData.getStatus() == DbcStatus.CONNECTION_ERROR) {
                 LOG.warn(MessageFormat.format("  Error on DbcData: {0}", dbcData.getName()));
                 dbcDataBuilder.removeScheduledUpdater(dbcData);
-            }
-            if (dbcData.isConnected()) {
+            } else {
                 dbcData.setStatus(DbcStatus.UPDATE);
                 LOG.info(MessageFormat.format("  Updating \"{0}\"...", dbcData.getName()));
                 if (settings.isOnlyBlocked()) {
@@ -35,8 +34,6 @@ public class DbcDataRunner implements Runnable {
                 } else {
                     dbcData.setProcess(dbcData.getProcessTree());
                 }
-            } else {
-                LOG.warn(MessageFormat.format(" DbcData not connected: \"{0}\"", dbcData.getName()));
             }
         } catch (Exception e) {
             LOG.error(MessageFormat.format("  Error on connect or update DbcData: {0}", e.getMessage()));

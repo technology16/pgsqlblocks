@@ -3,7 +3,7 @@ package ru.taximaxim.pgsqlblocks.dbcdata;
 public enum DbcStatus {
     DISABLED,
     CONNECTED,
-    ERROR,
+    CONNECTION_ERROR,
     UPDATE;
 
     /**
@@ -16,7 +16,7 @@ public enum DbcStatus {
             return "images/db_f_16.png";
         case CONNECTED:
             return "images/db_t_16.png";
-        case ERROR:
+        case CONNECTION_ERROR:
             return "images/db_e_16.png";
         case UPDATE:
             return "images/on_update_16.png";

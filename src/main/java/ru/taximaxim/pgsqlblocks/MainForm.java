@@ -508,7 +508,9 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
             @Override
             public void run() {
                 if (autoUpdate.isChecked()) {
-                    dbcDataBuilder.getDbcDataList().stream().filter(x -> (x.isConnected() || x.isEnabled()) && x.getStatus() != DbcStatus.ERROR)
+                    dbcDataBuilder.getDbcDataList().stream()
+                            .filter(x -> x.isConnected() || x.isEnabled())
+                            .filter(x -> x.getStatus() != DbcStatus.CONNECTION_ERROR)
                             .forEach(dbcDataBuilder::addScheduledUpdater);
                 } else {
                     dbcDataBuilder.getDbcDataList().forEach(dbcDataBuilder::removeScheduledUpdater);
@@ -626,10 +628,12 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
     }
 
     private void runUpdateForAllEnabled() {
-        dbcDataBuilder.getDbcDataList().stream().forEach(dbcDataBuilder::removeScheduledUpdater);
-        dbcDataBuilder.getDbcDataList().stream().forEach(dbcDataBuilder::removeOnceScheduledUpdater);
+        dbcDataBuilder.getDbcDataList().forEach(dbcDataBuilder::removeScheduledUpdater);
+        dbcDataBuilder.getDbcDataList().forEach(dbcDataBuilder::removeOnceScheduledUpdater);
         if (autoUpdate.isChecked()) {
-            dbcDataBuilder.getDbcDataList().stream().filter(x -> (x.isConnected() || x.isEnabled()) && x.getStatus() != DbcStatus.ERROR)
+            dbcDataBuilder.getDbcDataList().stream()
+                    .filter(x -> x.isConnected() || x.isEnabled())
+                    .filter(x -> x.getStatus() != DbcStatus.CONNECTION_ERROR)
                     .forEach(dbcDataBuilder::addScheduledUpdater);
         } else {
             dbcDataBuilder.getDbcDataList().stream()
@@ -687,7 +691,6 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
                 }
             }
         } catch (SQLException e) {
-            selectedDbcData.setStatus(DbcStatus.ERROR);
             LOG.error(selectedDbcData.getName() + " " + e.getMessage(), e);
         }
         if(kill) {
@@ -710,7 +713,6 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
                 }
             }
         } catch (SQLException e) {
-            selectedDbcData.setStatus(DbcStatus.ERROR);
             LOG.error(selectedDbcData.getName() + " " + e.getMessage(), e);
         }
         if(kill) {
@@ -742,7 +744,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
     
     private void serversToolBarState() {
         if (selectedDbcData != null &&
-                (selectedDbcData.getStatus() == DbcStatus.ERROR ||
+                (selectedDbcData.getStatus() == DbcStatus.CONNECTION_ERROR ||
                 selectedDbcData.getStatus() == DbcStatus.DISABLED)) {
             
             disconnectState();
