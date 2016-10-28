@@ -60,7 +60,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
     private Process selectedProcess;
     private Text procText;
     private SashForm caTreeSf;
-    protected TableViewer caServersTable;
+    private TableViewer caServersTable;
     private TreeViewer caMainTree;
     private Composite procComposite;
     private TableViewer bhServersTable;
@@ -74,6 +74,8 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
     private Action autoUpdate;
     private Action cancelUpdate;
     private Action onlyBlocked;
+    private ToolItem cancelProc;
+    private ToolItem terminateProc;
     private static SortColumn sortColumn = SortColumn.BLOCKED_COUNT;
     private static SortDirection sortDirection = SortDirection.UP;
     private Settings settings = Settings.getInstance();
@@ -251,21 +253,19 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
                                 procComposite.setVisible(false);
                                 ToolBar pcToolBar = new ToolBar(procComposite, SWT.FLAT | SWT.RIGHT);
                                 pcToolBar.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
-                                ToolItem terminateProc = new ToolItem(pcToolBar, SWT.PUSH);
+                                terminateProc = new ToolItem(pcToolBar, SWT.PUSH);
                                 terminateProc.setText("Уничтожить процесс");
                                 terminateProc.addListener(SWT.Selection, event -> {
                                     if (selectedProcess != null) {
                                         terminate(selectedProcess);
-                                        updateUi();
                                     }
                                 });
                                 
-                                ToolItem cancelProc = new ToolItem(pcToolBar, SWT.PUSH);
+                                cancelProc = new ToolItem(pcToolBar, SWT.PUSH);
                                 cancelProc.setText("Послать сигнал отмены процесса");
                                 cancelProc.addListener(SWT.Selection, event -> {
                                     if (selectedProcess != null) {
                                         cancel(selectedProcess);
-                                        updateUi();
                                     }
                                 });
 
@@ -695,10 +695,10 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
         }
         if(kill) {
             LOG.info(selectedDbcData.getName() + PID + pid + " is terminated.");
+            runUpdate(selectedDbcData);
         } else {
-            LOG.info(selectedDbcData.getName() + PID + pid + " is terminated failed.");
+            LOG.info(selectedDbcData.getName() + " failed to terminate " + PID + pid);
         }
-        updateUi();
     }
 
     private void cancel(Process process) {
@@ -717,10 +717,10 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
         }
         if(kill) {
             LOG.info(selectedDbcData.getName() + PID + pid + " is canceled.");
+            runUpdate(selectedDbcData);
         } else {
-            LOG.info(selectedDbcData.getName() + PID + pid + " is canceled failed.");
+            LOG.info(selectedDbcData.getName() + " failed to cancel " + PID + pid);
         }
-        updateUi();
     }
 
     private void dbcDataConnect() {
@@ -759,6 +759,8 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
         connectDB.setEnabled(false);
         disconnectDB.setEnabled(true);
         cancelUpdate.setEnabled(true);
+        cancelProc.setEnabled(true);
+        terminateProc.setEnabled(true);
     }
     
     private void disconnectState() {
@@ -767,6 +769,8 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
         connectDB.setEnabled(true);
         disconnectDB.setEnabled(false);
         cancelUpdate.setEnabled(false);
+        cancelProc.setEnabled(false);
+        terminateProc.setEnabled(false);
     }
 
     private void updateUi() {
