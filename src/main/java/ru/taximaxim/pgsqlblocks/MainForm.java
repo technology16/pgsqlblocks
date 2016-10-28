@@ -17,6 +17,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.*;
 import ru.taximaxim.pgsqlblocks.dbcdata.*;
 import ru.taximaxim.pgsqlblocks.process.Process;
+import ru.taximaxim.pgsqlblocks.process.ProcessTreeBuilder;
 import ru.taximaxim.pgsqlblocks.process.ProcessTreeContentProvider;
 import ru.taximaxim.pgsqlblocks.process.ProcessTreeLabelProvider;
 import ru.taximaxim.pgsqlblocks.ui.AddDbcDataDlg;
@@ -368,15 +369,18 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
         
         for (TreeColumn column : caMainTree.getTree().getColumns()) {
             column.addListener(SWT.Selection, event -> {
-                caMainTree.getTree().setSortColumn(column);
-                column.setData(SORT_DIRECTION, ((SortDirection)column.getData(SORT_DIRECTION)).getOpposite());
-                sortDirection = (SortDirection)column.getData(SORT_DIRECTION);
-                caMainTree.getTree().setSortDirection(sortDirection.getSwtData());
-                sortColumn = SortColumn.valueOf((String)column.getData("colName"));
-                updateUi();
+                if (selectedDbcData != null) {
+                    caMainTree.getTree().setSortColumn(column);
+                    column.setData(SORT_DIRECTION, ((SortDirection)column.getData(SORT_DIRECTION)).getOpposite());
+                    sortDirection = (SortDirection)column.getData(SORT_DIRECTION);
+                    caMainTree.getTree().setSortDirection(sortDirection.getSwtData());
+                    sortColumn = SortColumn.valueOf((String)column.getData("colName"));
+                    selectedDbcData.getProcessTree();
+                    updateUi();
+                }
             });
         }
-        
+
         caServersTable.addDoubleClickListener(event -> {
             if (!caServersTable.getSelection().isEmpty()) {
                 IStructuredSelection selected = (IStructuredSelection) event.getSelection();
