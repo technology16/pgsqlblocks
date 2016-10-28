@@ -271,7 +271,6 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
 
                                 procText = new Text(procComposite, SWT.MULTI | SWT.BORDER | SWT.READ_ONLY | SWT.V_SCROLL | SWT.H_SCROLL);
                                 procText.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-                                procText.setBackground(composite.getDisplay().getSystemColor(SWT.COLOR_WHITE));
                             }
                         }
                         caTreeSf.setWeights(VERTICAL_WEIGHTS);
