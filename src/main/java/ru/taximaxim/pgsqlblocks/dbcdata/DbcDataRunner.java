@@ -23,20 +23,16 @@ public class DbcDataRunner implements Runnable {
                 LOG.debug(MessageFormat.format("  Connecting \"{0}\"...", dbcData.getName()));
                 dbcData.connect();
             }
-            if (dbcData.getStatus() == DbcStatus.ERROR) {
+            if (dbcData.getStatus() == DbcStatus.CONNECTION_ERROR) {
                 LOG.warn(MessageFormat.format("  Error on DbcData: {0}", dbcData.getName()));
                 dbcDataBuilder.removeScheduledUpdater(dbcData);
             } else {
-                if (dbcData.isConnected()) {
-                    dbcData.setStatus(DbcStatus.UPDATE);
-                    LOG.info(MessageFormat.format("  Updating \"{0}\"...", dbcData.getName()));
-                    if (settings.isOnlyBlocked()) {
-                        dbcData.setProcess(dbcData.getOnlyBlockedProcessTree());
-                    } else {
-                        dbcData.setProcess(dbcData.getProcessTree());
-                    }
+                dbcData.setStatus(DbcStatus.UPDATE);
+                LOG.info(MessageFormat.format("  Updating \"{0}\"...", dbcData.getName()));
+                if (settings.isOnlyBlocked()) {
+                    dbcData.setProcess(dbcData.getOnlyBlockedProcessTree());
                 } else {
-                    LOG.warn(MessageFormat.format(" DbcData not connected: \"{0}\"", dbcData.getName()));
+                    dbcData.setProcess(dbcData.getProcessTree());
                 }
             }
         } catch (Exception e) {

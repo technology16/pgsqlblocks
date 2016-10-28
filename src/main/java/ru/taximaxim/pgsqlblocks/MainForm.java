@@ -60,7 +60,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
     private Process selectedProcess;
     private Text procText;
     private SashForm caTreeSf;
-    protected TableViewer caServersTable;
+    private TableViewer caServersTable;
     private TreeViewer caMainTree;
     private Composite procComposite;
     private TableViewer bhServersTable;
@@ -74,6 +74,8 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
     private Action autoUpdate;
     private Action cancelUpdate;
     private Action onlyBlocked;
+    private ToolItem cancelProc;
+    private ToolItem terminateProc;
     private static SortColumn sortColumn = SortColumn.BLOCKED_COUNT;
     private static SortDirection sortDirection = SortDirection.UP;
     private Settings settings = Settings.getInstance();
@@ -251,21 +253,19 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
                                 procComposite.setVisible(false);
                                 ToolBar pcToolBar = new ToolBar(procComposite, SWT.FLAT | SWT.RIGHT);
                                 pcToolBar.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
-                                ToolItem terminateProc = new ToolItem(pcToolBar, SWT.PUSH);
+                                terminateProc = new ToolItem(pcToolBar, SWT.PUSH);
                                 terminateProc.setText("Уничтожить процесс");
                                 terminateProc.addListener(SWT.Selection, event -> {
                                     if (selectedProcess != null) {
                                         terminate(selectedProcess);
-                                        updateUi();
                                     }
                                 });
                                 
-                                ToolItem cancelProc = new ToolItem(pcToolBar, SWT.PUSH);
+                                cancelProc = new ToolItem(pcToolBar, SWT.PUSH);
                                 cancelProc.setText("Послать сигнал отмены процесса");
                                 cancelProc.addListener(SWT.Selection, event -> {
                                     if (selectedProcess != null) {
                                         cancel(selectedProcess);
-                                        updateUi();
                                     }
                                 });
 
@@ -507,7 +507,9 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
             @Override
             public void run() {
                 if (autoUpdate.isChecked()) {
-                    dbcDataBuilder.getDbcDataList().stream().filter(x -> (x.isConnected() || x.isEnabled()) && x.getStatus() != DbcStatus.ERROR)
+                    dbcDataBuilder.getDbcDataList().stream()
+                            .filter(x -> x.isConnected() || x.isEnabled())
+                            .filter(x -> x.getStatus() != DbcStatus.CONNECTION_ERROR)
                             .forEach(dbcDataBuilder::addScheduledUpdater);
                 } else {
                     dbcDataBuilder.getDbcDataList().forEach(dbcDataBuilder::removeScheduledUpdater);
@@ -626,10 +628,12 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
     }
 
     private void runUpdateForAllEnabled() {
-        dbcDataBuilder.getDbcDataList().stream().forEach(dbcDataBuilder::removeScheduledUpdater);
-        dbcDataBuilder.getDbcDataList().stream().forEach(dbcDataBuilder::removeOnceScheduledUpdater);
+        dbcDataBuilder.getDbcDataList().forEach(dbcDataBuilder::removeScheduledUpdater);
+        dbcDataBuilder.getDbcDataList().forEach(dbcDataBuilder::removeOnceScheduledUpdater);
         if (autoUpdate.isChecked()) {
-            dbcDataBuilder.getDbcDataList().stream().filter(x -> (x.isConnected() || x.isEnabled()) && x.getStatus() != DbcStatus.ERROR)
+            dbcDataBuilder.getDbcDataList().stream()
+                    .filter(x -> x.isConnected() || x.isEnabled())
+                    .filter(x -> x.getStatus() != DbcStatus.CONNECTION_ERROR)
                     .forEach(dbcDataBuilder::addScheduledUpdater);
         } else {
             dbcDataBuilder.getDbcDataList().stream()
@@ -675,7 +679,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
         return appVersion;
     }
     
-    public void terminate(Process process) {
+    private void terminate(Process process) {
         String term = "select pg_terminate_backend(?);";
         boolean kill = false;
         int pid = process.getPid();
@@ -687,18 +691,17 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
                 }
             }
         } catch (SQLException e) {
-            selectedDbcData.setStatus(DbcStatus.ERROR);
             LOG.error(selectedDbcData.getName() + " " + e.getMessage(), e);
         }
         if(kill) {
             LOG.info(selectedDbcData.getName() + PID + pid + " is terminated.");
+            runUpdate(selectedDbcData);
         } else {
-            LOG.info(selectedDbcData.getName() + PID + pid + " is terminated failed.");
+            LOG.info(selectedDbcData.getName() + " failed to terminate " + PID + pid);
         }
-        updateUi();
     }
 
-    public void cancel(Process process) {
+    private void cancel(Process process) {
         String cancel = "select pg_cancel_backend(?);";
         int pid = process.getPid();
         boolean kill = false;
@@ -710,15 +713,14 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
                 }
             }
         } catch (SQLException e) {
-            selectedDbcData.setStatus(DbcStatus.ERROR);
             LOG.error(selectedDbcData.getName() + " " + e.getMessage(), e);
         }
         if(kill) {
             LOG.info(selectedDbcData.getName() + PID + pid + " is canceled.");
+            runUpdate(selectedDbcData);
         } else {
-            LOG.info(selectedDbcData.getName() + PID + pid + " is canceled failed.");
+            LOG.info(selectedDbcData.getName() + " failed to cancel " + PID + pid);
         }
-        updateUi();
     }
 
     private void dbcDataConnect() {
@@ -742,7 +744,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
     
     private void serversToolBarState() {
         if (selectedDbcData != null &&
-                (selectedDbcData.getStatus() == DbcStatus.ERROR ||
+                (selectedDbcData.getStatus() == DbcStatus.CONNECTION_ERROR ||
                 selectedDbcData.getStatus() == DbcStatus.DISABLED)) {
             
             disconnectState();
@@ -757,6 +759,8 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
         connectDB.setEnabled(false);
         disconnectDB.setEnabled(true);
         cancelUpdate.setEnabled(true);
+        cancelProc.setEnabled(true);
+        terminateProc.setEnabled(true);
     }
     
     private void disconnectState() {
@@ -765,6 +769,8 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
         connectDB.setEnabled(true);
         disconnectDB.setEnabled(false);
         cancelUpdate.setEnabled(false);
+        cancelProc.setEnabled(false);
+        terminateProc.setEnabled(false);
     }
 
     private void updateUi() {
