@@ -19,6 +19,7 @@ import ru.taximaxim.pgsqlblocks.SortColumn;
 import ru.taximaxim.pgsqlblocks.SortDirection;
 import ru.taximaxim.pgsqlblocks.dbcdata.DbcData;
 import ru.taximaxim.pgsqlblocks.dbcdata.DbcStatus;
+import ru.taximaxim.pgsqlblocks.utils.Settings;
 
 public class ProcessTreeBuilder {
 
@@ -38,10 +39,16 @@ public class ProcessTreeBuilder {
     private static final String XACTSTART = "xact_start";
     private static final String STATECHANGE = "state_change";
     private static final String QUERYSQL = "query";
+
+    private static final String QUERYFILENAME = "query.sql";
+    private static final String QUERYWITHIDLEFILENAME = "query_with_idle.sql";
+
+    private Settings settings = Settings.getInstance();
     
-    private String query;
+    private static String queryWithoutIdle;
+    private static String queryWithIdle;
     private final DbcData dbcData;
-    private Set<Process> tempProcessList = new LinkedHashSet<Process>();
+    private Set<Process> tempProcessList = new LinkedHashSet<>();
     private final Process root = new Process(0,null,null,null,null,0,0);
 
     public ProcessTreeBuilder(DbcData dbcData) {
@@ -78,8 +85,8 @@ public class ProcessTreeBuilder {
         }
         try (
                 // TODO do not prepare each time
-                PreparedStatement statement = dbcData.getConnection().prepareStatement(getQuery());
-                ResultSet processSet = statement.executeQuery();
+                PreparedStatement statement = dbcData.getConnection().prepareStatement(getQuery(settings.getShowIdle()));
+                ResultSet processSet = statement.executeQuery()
         ) {
             while (processSet.next()) {
                 Query query = new Query(processSet.getString(QUERYSQL),
@@ -233,24 +240,29 @@ public class ProcessTreeBuilder {
     private Process getProcessByPid(Set<Process> processList, int pid) {
         return processList.stream().filter(process -> process.getPid() == pid).findFirst().get();
     }
-    
-    private String getQuery() {
-        if(query == null) {
-            try (
-                    InputStream input = ClassLoader.getSystemResourceAsStream("query.sql");
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(input, "UTF-8"));
-                    ) {
-                
-                StringBuilder out = new StringBuilder();
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    out.append(line);
-                }
-                query = out.toString();
-            } catch (IOException e) {
-                LOG.error("Ошибка чтения файла query.sql", e);
-            }
+
+    private String getQuery(boolean showIdle) {
+        if (showIdle) {
+            queryWithIdle = (queryWithIdle == null) ? loadQuery(QUERYWITHIDLEFILENAME) : queryWithIdle;
+            return queryWithIdle;
+        } else {
+            queryWithoutIdle = (queryWithoutIdle == null) ? loadQuery(QUERYFILENAME) : queryWithoutIdle;
+            return queryWithoutIdle;
         }
-        return query;
+    }
+
+    private String loadQuery(String queryFile){
+        try (InputStream input = ClassLoader.getSystemResourceAsStream(queryFile);
+             BufferedReader reader = new BufferedReader(new InputStreamReader(input, "UTF-8"))) {
+            StringBuilder out = new StringBuilder();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                out.append(line);
+            }
+            return out.toString();
+        } catch (IOException e) {
+            LOG.error("Ошибка чтения файла " + queryFile, e);
+            return null;
+        }
     }
 }

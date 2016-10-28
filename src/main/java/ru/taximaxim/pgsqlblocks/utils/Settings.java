@@ -23,6 +23,7 @@ public final class Settings {
     private static final String LOGIN_TIMEOUT = "login_timeout";
     private static final String AUTO_UPDATE = "auto_update";
     private static final String ONLY_BLOCKED = "only_blocked";
+    private static final String SHOW_IDLE = "show_idle";
 
     private int updatePeriod;
     private int updateUIPeriod;
@@ -31,6 +32,7 @@ public final class Settings {
     private boolean autoUpdate;
 
     private boolean onlyBlocked;
+    private boolean showIdle;
 
     private Properties properties;
     private File propFile;
@@ -54,18 +56,10 @@ public final class Settings {
         } else {
             this.updatePeriod = 10;
         }
-        if (properties.getProperty(AUTO_UPDATE) != null &&
-                !properties.getProperty(AUTO_UPDATE).isEmpty()) {
-            this.autoUpdate = Boolean.parseBoolean(properties.getProperty(AUTO_UPDATE));
-        } else {
-            this.autoUpdate = true;
-        }
-        if (properties.getProperty(ONLY_BLOCKED) != null &&
-                !properties.getProperty(ONLY_BLOCKED).isEmpty()) {
-            this.onlyBlocked = Boolean.parseBoolean(properties.getProperty(ONLY_BLOCKED));
-        } else {
-            this.onlyBlocked = false;
-        }
+        this.autoUpdate = !(properties.getProperty(AUTO_UPDATE) != null &&
+                !properties.getProperty(AUTO_UPDATE).isEmpty()) || Boolean.parseBoolean(properties.getProperty(AUTO_UPDATE));
+        this.onlyBlocked = properties.getProperty(ONLY_BLOCKED) != null
+                && !properties.getProperty(ONLY_BLOCKED).isEmpty() && Boolean.parseBoolean(properties.getProperty(ONLY_BLOCKED));
         if (properties.getProperty(UPDATE_UI_PERIOD) != null &&
                 !properties.getProperty(UPDATE_UI_PERIOD).isEmpty()) {
             this.updateUIPeriod = Integer.parseInt(properties.getProperty(UPDATE_UI_PERIOD));
@@ -78,6 +72,9 @@ public final class Settings {
         } else {
             this.loginTimeout = 10;
         }
+
+        this.showIdle = !(properties.getProperty(SHOW_IDLE) != null &&
+                !properties.getProperty(SHOW_IDLE).isEmpty()) || Boolean.parseBoolean(properties.getProperty(SHOW_IDLE));
     }
 
     public static Settings getInstance() {
@@ -174,6 +171,23 @@ public final class Settings {
     public void setOnlyBlocked(boolean onlyBlocked) {
         this.onlyBlocked = onlyBlocked;
         saveProperties(ONLY_BLOCKED, Boolean.toString(onlyBlocked));
+    }
+
+    /**
+     * Устанавливаем флаг отображения бездействующих процессов
+     * @param showIdle the showIdle to set
+     */
+    public void setShowIdle(boolean showIdle) {
+        this.showIdle = showIdle;
+        saveProperties(SHOW_IDLE, Boolean.toString(showIdle));
+    }
+
+    /**
+     * Получаем флаг отображения бездействующих процессов
+     * @return the showIdle
+     */
+    public boolean getShowIdle() {
+        return showIdle;
     }
 
     private void saveProperties(String key, String value) {
