@@ -679,7 +679,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
         return appVersion;
     }
     
-    public void terminate(Process process) {
+    private void terminate(Process process) {
         String term = "select pg_terminate_backend(?);";
         boolean kill = false;
         int pid = process.getPid();
@@ -701,7 +701,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
         updateUi();
     }
 
-    public void cancel(Process process) {
+    private void cancel(Process process) {
         String cancel = "select pg_cancel_backend(?);";
         int pid = process.getPid();
         boolean kill = false;
