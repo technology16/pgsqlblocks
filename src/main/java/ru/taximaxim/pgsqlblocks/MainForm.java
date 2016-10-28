@@ -782,16 +782,18 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
             if (!display.isDisposed()) {
                 caServersTable.refresh();
                 serversToolBarState();
-                if (selectedDbcData != null) {
+                if (selectedDbcData != null && selectedDbcData.getStatus() == DbcStatus.CONNECTED) {
                     try {
                         Object[] expanded = caMainTree.getExpandedElements();
                         caMainTree.setExpandedElements(expanded);
-                        caMainTree.refresh();
-                        bhMainTree.refresh();
                     } catch (SWTException e) {
                         LOG.error("Ошибка при отрисовке таблицы!", e);
                     }
+                } else {
+                    caMainTree.setInput(null);
                 }
+                caMainTree.refresh();
+                bhMainTree.refresh();
                 LOG.debug("  Finish updating tree.");
             }
         });
