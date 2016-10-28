@@ -376,11 +376,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
                     sortDirection = (SortDirection)column.getData(SORT_DIRECTION);
                     caMainTree.getTree().setSortDirection(sortDirection.getSwtData());
                     sortColumn = SortColumn.valueOf((String)column.getData("colName"));
-                    ProcessTreeBuilder processTree = new ProcessTreeBuilder(selectedDbcData);
-                    processTree.processSort(selectedDbcData.getProcessTree(),
-                            sortColumn,
-                            sortDirection
-                    );
+                    selectedDbcData.getProcessTree();
                     updateUi();
                 }
             });
