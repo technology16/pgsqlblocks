@@ -422,7 +422,6 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
 
         deleteDB = new Action(Images.DELETE_DATABASE.getDescription(),
                 ImageDescriptor.createFromImage(getImage(Images.DELETE_DATABASE))) {
-            
             @Override
             public void run() {
                 if (MessageDialog.openQuestion(getShell(),
