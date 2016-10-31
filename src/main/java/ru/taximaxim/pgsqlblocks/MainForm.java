@@ -432,9 +432,11 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
                     dbcDataBuilder.delete(selectedDbcData);
                     if (dbcDataBuilder.getDbcDataList().isEmpty()) {
                         selectedDbcData = null;
+                        caMainTree.setInput(null);
                     } else {
                         selectedDbcData = dbcDataBuilder.getDbcDataList()
                                 .get(dbcDataBuilder.getDbcDataList().size() - 1);
+                        caMainTree.setInput(selectedDbcData.getProcess());
                         caServersTable.getTable().setSelection(dbcDataBuilder.getDbcDataList().indexOf(selectedDbcData));
                     }
                     updateUi();
@@ -789,8 +791,6 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
                     } catch (SWTException e) {
                         LOG.error("Ошибка при отрисовке таблицы!", e);
                     }
-                } else {
-                    caMainTree.setInput(null);
                 }
                 caMainTree.refresh();
                 bhMainTree.refresh();
