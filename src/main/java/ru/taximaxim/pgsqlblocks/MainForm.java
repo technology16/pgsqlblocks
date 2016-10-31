@@ -425,10 +425,9 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
             
             @Override
             public void run() {
-                boolean okPress = MessageDialog.openQuestion(getShell(),
+                if (MessageDialog.openQuestion(getShell(),
                         "Подтверждение действия",
-                        String.format("Вы действительно хотите удалить %s?", selectedDbcData.getName()));
-                if (okPress) {
+                        String.format("Вы действительно хотите удалить %s?", selectedDbcData.getName()))) {
                     dbcDataBuilder.delete(selectedDbcData);
                     if (dbcDataBuilder.getDbcDataList().isEmpty()) {
                         selectedDbcData = null;
