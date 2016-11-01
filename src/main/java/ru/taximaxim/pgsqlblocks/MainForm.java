@@ -15,6 +15,18 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.*;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.FileDialog;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Tray;
+import org.eclipse.swt.widgets.TrayItem;
 import ru.taximaxim.pgsqlblocks.dbcdata.*;
 import ru.taximaxim.pgsqlblocks.process.Process;
 import ru.taximaxim.pgsqlblocks.process.ProcessTreeContentProvider;
@@ -274,6 +286,14 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
                             }
                         }
                         caTreeSf.setWeights(VERTICAL_WEIGHTS);
+
+                        final Tray tray = display.getSystemTray();
+                        if (tray == null) {
+                            LOG.warn("The system tray is not available");
+                        } else {
+                            final TrayItem item = new TrayItem(tray, SWT.NONE);
+                            item.setImage(getImage(Images.BLOCKED));
+                        }
                     }
                     currentActivitySf.setWeights(HORIZONTAL_WEIGHTS);
                     currentActivityTi.setControl(currentActivitySf);
