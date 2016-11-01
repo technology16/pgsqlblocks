@@ -1,21 +1,15 @@
 package ru.taximaxim.pgsqlblocks.dbcdata;
 
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-
 import org.apache.log4j.Logger;
 import ru.taximaxim.pgsqlblocks.MainForm;
 import ru.taximaxim.pgsqlblocks.process.Process;
 import ru.taximaxim.pgsqlblocks.process.ProcessTreeBuilder;
+import ru.taximaxim.pgsqlblocks.utils.PgPassLoader;
 import ru.taximaxim.pgsqlblocks.utils.Settings;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 
 public class DbcData extends UpdateProvider implements Comparable<DbcData> {
 
@@ -81,64 +75,6 @@ public class DbcData extends UpdateProvider implements Comparable<DbcData> {
         return password;
     }
 
-    /**
-     * Считывание пароля из pgpass
-     * @return pgpass
-     */
-    private String getPgPass() {
-        Path pgPassPath = Paths.get(getPgPassPath());
-        String pgPass = "";
-        try (
-                BufferedReader reader = Files.newBufferedReader(
-                        pgPassPath, StandardCharsets.UTF_8)
-                ) {
-            String settingsLine = null;
-            while ((settingsLine = reader.readLine()) != null) {
-                String[] settings = settingsLine.split(":");
-                if (settings.length != 5) {
-                    continue;
-                }
-                if (settings[0].equals(host) && settings[1].equals(port) && settings[2].equals(dbname)
-                        && settings[3].equals(user)) {
-                    // return exact match
-                    return settings[4];
-                    // it's not an exact match, maybe we can find exact match in next line
-                } else if (equalsSettingOrAny(settings)) {
-                        pgPass = settings[4];
-                    }
-                }
-        } catch (FileNotFoundException e1) {
-            LOG.error("Файл ./pgpass не найден");
-        } catch (IOException e1) {
-            LOG.error("Ошибка чтения файла ./pgpass");
-        }
-        
-        return pgPass;
-    }
-
-    private boolean equalsSettingOrAny(String[] settings) {
-        boolean result = settings[0].equals(host) || "*".equals(settings[0]);
-        result = result && (settings[1].equals(port) || "*".equals(settings[1]));
-        result = result && (settings[2].equals(dbname) || "*".equals(settings[2]));
-        return result && (settings[3].equals(user) || "*".equals(settings[3]));
-    }
-
-    /**
-     * Поиск директории файла pgpass
-     * @return pgpass file path
-     */
-    private String getPgPassPath() {
-        String os = System.getProperty("os.name").toUpperCase();
-         if (os.contains("NUX")) {
-            return System.getProperty("user.home") + "/.pgpass";
-        } else if (os.contains("WIN")) {
-            return System.getenv("APPDATA") + "\\postgresql\\pgpass.conf";
-        } else if (os.contains("MAC")) {
-            return System.getProperty("user.home") + "/Library/Application " + "Support";
-        }
-        return System.getProperty("user.dir") + "/.pgpass";
-    }
-
     public String getDbname() {
         return dbname;
     }
@@ -185,7 +121,7 @@ public class DbcData extends UpdateProvider implements Comparable<DbcData> {
             return;
         }
         try {
-            String pass = (getPass() == null || getPass().isEmpty()) ? getPgPass() : getPass();
+            String pass = (getPass() == null || getPass().isEmpty()) ? new PgPassLoader(this).getPgPass() : getPass();
             LOG.info(getName() + " Соединение...");
             DriverManager.setLoginTimeout(settings.getLoginTimeout());
             connection = DriverManager.getConnection(getUrl(), getUser(), pass);
