@@ -1,20 +1,15 @@
 package ru.taximaxim.pgsqlblocks.dbcdata;
 
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-
 import org.apache.log4j.Logger;
 import ru.taximaxim.pgsqlblocks.MainForm;
 import ru.taximaxim.pgsqlblocks.process.Process;
 import ru.taximaxim.pgsqlblocks.process.ProcessTreeBuilder;
+import ru.taximaxim.pgsqlblocks.utils.PgPassLoader;
 import ru.taximaxim.pgsqlblocks.utils.Settings;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 
 public class DbcData extends UpdateProvider implements Comparable<DbcData> {
 
@@ -79,32 +74,7 @@ public class DbcData extends UpdateProvider implements Comparable<DbcData> {
     public String getPass() {
         return password;
     }
-    
-    private String getPgPass() {
-        // Считывание пароля из ./pgpass
-        String pgPass = "";
-        try (
-                BufferedReader reader = Files.newBufferedReader(
-                        Paths.get(System.getProperty("user.home") + "/.pgpass"), StandardCharsets.UTF_8);
-                ) {
 
-            String settingsLine = null;
-            while ((settingsLine = reader.readLine()) != null) {
-                String[] settings = settingsLine.split(":");
-                if (settings[0].equals(host) && (settings[1].equals(port)
-                        && settings[3].equals(user))) {
-                    pgPass = settings[4];
-                }
-            }
-        } catch (FileNotFoundException e1) {
-            LOG.error("Файл ./pgpass не найден");
-        } catch (IOException e1) {
-            LOG.error("Ошибка чтения файла ./pgpass");
-        }
-        
-        return pgPass;
-    }
-    
     public String getDbname() {
         return dbname;
     }
@@ -151,7 +121,7 @@ public class DbcData extends UpdateProvider implements Comparable<DbcData> {
             return;
         }
         try {
-            String pass = (getPass() == null || getPass().isEmpty()) ? getPgPass() : getPass();
+            String pass = (getPass() == null || getPass().isEmpty()) ? new PgPassLoader(this).getPgPass() : getPass();
             LOG.info(getName() + " Соединение...");
             DriverManager.setLoginTimeout(settings.getLoginTimeout());
             connection = DriverManager.getConnection(getUrl(), getUser(), pass);
