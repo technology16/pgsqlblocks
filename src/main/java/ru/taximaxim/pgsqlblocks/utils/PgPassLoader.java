@@ -4,91 +4,102 @@ import org.apache.log4j.Logger;
 import ru.taximaxim.pgsqlblocks.dbcdata.DbcData;
 
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.regex.Pattern;
 
 /**
- * Created by shaidullin_iz on 01.11.16.
+ * Reads user password from pgpass file to be used to access certain DB passed to constructor
+ * 
+ * @author shaidullin_iz
  */
 public class PgPassLoader {
+
     private static final Logger LOG = Logger.getLogger(PgPassLoader.class);
-    public static final String REGEX = "(?<=(?<!\\\\)):|(?<=(?<!\\\\)(\\\\){2}):|(?<=(?<!\\\\)(\\\\){4}):";
-    private String host;
-    private String port;
-    private String dbname;
-    private String user;
+
+    private static final String REGEX = "(?<=(?<!\\\\)):|(?<=(?<!\\\\)(\\\\){2}):|(?<=(?<!\\\\)(\\\\){4}):";
+    private static final Pattern PATTERN = Pattern.compile(REGEX);
+    private static final String ANY = "*";
+
+    private static final int HOST_IDX = 0;
+    private static final int PORT_IDX = 1;
+    private static final int NAME_IDX = 2;
+    private static final int USER_IDX = 3;
+    private static final int PASS_IDX = 4;
+
+    private final String host;
+    private final String port;
+    private final String dbName;
+    private final String user;
 
     public PgPassLoader(DbcData dbcData) {
         this(dbcData.getHost(), dbcData.getPort(), dbcData.getDbname(),  dbcData.getUser());
     }
 
-    public PgPassLoader(String host, String port,String dbname, String user) {
+    public PgPassLoader(String host, String port, String dbName, String user) {
         this.host = host;
         this.port = port;
-        this.dbname = dbname;
+        this.dbName = dbName;
         this.user = user;
     }
 
     /**
-     * Считывание пароля из pgpass
-     * @return pgpass
+     * Read password from default pgpass location
      */
     public String getPgPass() {
-        Path pgPassPath = Paths.get(getPgPassPath());
-        String pgPass = "";
-        try (
-                BufferedReader reader = Files.newBufferedReader(
-                        pgPassPath, StandardCharsets.UTF_8)
-        ) {
+        return getPgPass(getPgPassPath());
+    }
+
+    /**
+     * Read password from pgpass located at {@code pgPassPath}
+     * 
+     * @param pgPassPath path to pgpass file 
+     */
+    public String getPgPass(Path pgPassPath) {
+        String pgPass = null;
+        try (BufferedReader reader = Files.newBufferedReader(pgPassPath, StandardCharsets.UTF_8)) {
             String settingsLine = null;
             while ((settingsLine = reader.readLine()) != null) {
-                String[] settings = settingsLine.split(REGEX);
-                if (settings.length != 5 || settingsLine.startsWith("#")) {
+                if (settingsLine.startsWith("#")){
                     continue;
                 }
-
-                if (settings[0].equals(host) && settings[1].equals(port)
-                        && settings[2].equals(dbname) && settings[3].equals(user)) {
-                    // return exact match
-                    return settings[4];
-                    // it's not an exact match, maybe we can find exact match in next line
-                } else if (equalsSettingOrAny(settings)) {
-                    pgPass = settings[4];
+                String[] settings = PATTERN.split(settingsLine);
+                if (settingsMatch(settings)) {
+                    pgPass = settings[PASS_IDX];
+                    break;
                 }
             }
-        } catch (FileNotFoundException e1) {
-            LOG.error("Файл ./pgpass не найден");
-        } catch (IOException e1) {
-            LOG.error("Ошибка чтения файла ./pgpass");
+        } catch (NoSuchFileException e) {
+            LOG.error(String.format("Файл pgpass не найден: %s", pgPassPath));
+        } catch (IOException e) {
+            LOG.error(String.format("Ошибка чтения файла pgpass: %s", pgPassPath), e);
         }
 
         return pgPass;
     }
 
-    private boolean equalsSettingOrAny(String[] settings) {
-        boolean result = settings[0].equals(host) || "*".equals(settings[0]);
-        result = result && (settings[1].equals(port) || "*".equals(settings[1]));
-        result = result && (settings[2].equals(dbname) || "*".equals(settings[2]));
-        return result && (settings[3].equals(user) || "*".equals(settings[3]));
+    private boolean settingsMatch(String[] settings) {
+        if (settings.length != 5) {
+            return false;
+        } else {
+            boolean hostMatch = settings[HOST_IDX].equals(ANY) || settings[HOST_IDX].equals(host);
+            boolean portMatch = settings[PORT_IDX].equals(ANY) || settings[PORT_IDX].equals(port);
+            boolean nameMatch = settings[NAME_IDX].equals(ANY) || settings[NAME_IDX].equals(dbName);
+            boolean userMatch = settings[USER_IDX].equals(ANY) || settings[USER_IDX].equals(user);
+            return hostMatch && portMatch && nameMatch && userMatch;
+        }
     }
 
-    /**
-     * Поиск директории файла pgpass
-     * @return pgpass file path
-     */
-    private String getPgPassPath() {
+    private Path getPgPassPath() {
+        Path path = Paths.get(System.getProperty("user.home")).resolve(Paths.get(".pgpass"));;
         String os = System.getProperty("os.name").toUpperCase();
-        if (os.contains("NUX") || os.contains("NIX") || os.contains("AIX") ) {
-            return System.getProperty("user.home") + "/.pgpass";
-        } else if (os.contains("WIN")) {
-            return System.getenv("APPDATA") + "\\postgresql\\pgpass.conf";
-        } else if (os.contains("MAC")) {
-            return System.getProperty("user.home") + "/Library/Application " + "Support";
+        if (os.contains("WIN")) {
+            path = Paths.get(System.getenv("APPDATA")).resolve(Paths.get("postgresql", "pgpass.conf"));
         }
-        return System.getProperty("user.dir") + "/.pgpass";
+        return path;
     }
 }
