@@ -15,7 +15,8 @@ public enum Images {
     SETTINGS,
     FILTER,
     CANCEL_UPDATE,
-    BLOCKED;
+    BLOCKED,
+    UNBLOCKED;
     
     /**
      * Получение иконки
@@ -51,6 +52,8 @@ public enum Images {
             return "images/cancel_update_16.png";
         case BLOCKED:
             return "images/block-32x32.png";
+        case UNBLOCKED:
+            return "images/unblock-32x32.png";
         default:
             return "images/void_16.png";
         }

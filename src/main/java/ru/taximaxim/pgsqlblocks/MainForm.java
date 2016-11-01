@@ -77,6 +77,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
     private Action autoUpdate;
     private Action cancelUpdate;
     private Action onlyBlocked;
+    private TrayItem trayItem;
     private static SortColumn sortColumn = SortColumn.BLOCKED_COUNT;
     private static SortDirection sortDirection = SortDirection.UP;
     private Settings settings = Settings.getInstance();
@@ -85,13 +86,13 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
     private final ScheduledExecutorService otherService = Executors.newScheduledThreadPool(1);
     private final DbcDataListBuilder dbcDataBuilder = DbcDataListBuilder.getInstance(this);
     private ConcurrentMap<String, Image> imagesMap = new ConcurrentHashMap<>();
-    private MenuManager serversTableMenuMgr = new MenuManager();
 
+    private MenuManager serversTableMenuMgr = new MenuManager();
     private int[] caMainTreeColsSize = new int[]{80, 110, 150, 110, 110, 110, 145, 145, 145, 55, 145, 70, 65, 150, 80};
+
     private String[] caMainTreeColsName = new String[]{
             "pid", "blocked_count", "application_name", "datname", "usename", "client", "backend_start", "query_start",
             "xact_stat", "state", "state_change", "blocked", "waiting", "query" , "slowquery"};
-    
     private String[] caColName = {"PID", "BLOCKED_COUNT", "APPLICATION_NAME", "DATNAME", "USENAME", "CLIENT", "BACKEND_START", "QUERY_START",
             "XACT_STAT", "STATE", "STATE_CHANGE", "BLOCKED", "WAITING", "QUERY", "SLOWQUERY"};
 
@@ -282,8 +283,8 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
                         if (tray == null) {
                             LOG.warn("The system tray is not available");
                         } else {
-                            final TrayItem trayItem = new TrayItem(tray, SWT.NONE);
-                            trayItem.setImage(getImage(Images.BLOCKED));
+                            trayItem = new TrayItem(tray, SWT.NONE);
+                            trayItem.setImage(getIconImage());
                             trayItem.setToolTipText("PgSqlBlocks v." + getAppVersion());
                             final Menu trayMenu = new Menu(getShell(), SWT.POP_UP);
                             MenuItem trayMenuItem = new MenuItem(trayMenu, SWT.PUSH);
@@ -409,7 +410,16 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
         otherService.scheduleAtFixedRate(this::updateUi, 0, settings.getUpdateUIPeriod(), TimeUnit.SECONDS);
         return parent;
     }
-    
+
+    private Image getIconImage() {
+        if (!dbcDataBuilder.getDbcDataList().isEmpty()) {
+            if (dbcDataBuilder.getDbcDataList().stream().anyMatch(DbcData::hasBlockedProcess)) {
+                return getImage(Images.BLOCKED);
+            }
+        }
+        return getImage(Images.UNBLOCKED);
+    }
+
     protected ToolBarManager createToolBarManager(int style) {
         ToolBarManager toolBarManager = new ToolBarManager(style);
 
@@ -800,6 +810,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
                 }
                 LOG.debug("  Finish updating tree.");
             }
+            trayItem.setImage(getIconImage());
         });
     }
 
