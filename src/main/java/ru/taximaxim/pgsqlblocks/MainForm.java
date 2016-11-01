@@ -2,7 +2,10 @@ package ru.taximaxim.pgsqlblocks;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
-import org.eclipse.jface.action.*;
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.action.Separator;
+import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.*;
@@ -15,18 +18,6 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.*;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.FileDialog;
-import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Menu;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Event;
-import org.eclipse.swt.widgets.Listener;
-import org.eclipse.swt.widgets.Menu;
-import org.eclipse.swt.widgets.MenuItem;
-import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swt.widgets.Tray;
-import org.eclipse.swt.widgets.TrayItem;
 import ru.taximaxim.pgsqlblocks.dbcdata.*;
 import ru.taximaxim.pgsqlblocks.process.Process;
 import ru.taximaxim.pgsqlblocks.process.ProcessTreeContentProvider;
@@ -216,7 +207,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
                             caServersTable.setInput(dbcDataBuilder.getDbcDataList());
                         }
 
-                        Menu menu = serversTableMenuMgr.createContextMenu(caServersTable.getControl());
+                        Menu mainMenu = serversTableMenuMgr.createContextMenu(caServersTable.getControl());
                         serversTableMenuMgr.addMenuListener(manager -> {
                             if (caServersTable.getSelection() instanceof IStructuredSelection) {
                                 manager.add(cancelUpdate);
@@ -229,7 +220,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
                             }
                         });
                         serversTableMenuMgr.setRemoveAllWhenShown(true);
-                        caServersTable.getControl().setMenu(menu);
+                        caServersTable.getControl().setMenu(mainMenu);
 
                         caTreeSf = new SashForm(currentActivitySf, SWT.VERTICAL);
                         {
@@ -291,8 +282,14 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
                         if (tray == null) {
                             LOG.warn("The system tray is not available");
                         } else {
-                            final TrayItem item = new TrayItem(tray, SWT.NONE);
-                            item.setImage(getImage(Images.BLOCKED));
+                            final TrayItem trayItem = new TrayItem(tray, SWT.NONE);
+                            trayItem.setImage(getImage(Images.BLOCKED));
+                            trayItem.setToolTipText("PgSqlBlocks v." + getAppVersion());
+                            final Menu trayMenu = new Menu(getShell(), SWT.POP_UP);
+                            MenuItem trayMenuItem = new MenuItem(trayMenu, SWT.PUSH);
+                            trayMenuItem.setText("Выход");
+                            trayMenuItem.addListener(SWT.Selection, event -> getShell().close());
+                            trayItem.addListener(SWT.MenuDetect, event -> trayMenu.setVisible(true));
                         }
                     }
                     currentActivitySf.setWeights(HORIZONTAL_WEIGHTS);
