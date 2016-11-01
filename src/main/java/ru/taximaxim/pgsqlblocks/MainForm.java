@@ -9,7 +9,6 @@ import org.eclipse.jface.viewers.*;
 import org.eclipse.jface.window.ApplicationWindow;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.SWTException;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
@@ -17,7 +16,6 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.*;
 import ru.taximaxim.pgsqlblocks.dbcdata.*;
 import ru.taximaxim.pgsqlblocks.process.Process;
-import ru.taximaxim.pgsqlblocks.process.ProcessTreeBuilder;
 import ru.taximaxim.pgsqlblocks.process.ProcessTreeContentProvider;
 import ru.taximaxim.pgsqlblocks.process.ProcessTreeLabelProvider;
 import ru.taximaxim.pgsqlblocks.ui.AddDbcDataDlg;
@@ -82,7 +80,6 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
     private Settings settings = Settings.getInstance();
     private FilterProcess filterProcess = FilterProcess.getInstance();
     private final ScheduledExecutorService mainService = Executors.newScheduledThreadPool(1);
-    private final ScheduledExecutorService otherService = Executors.newScheduledThreadPool(1);
     private final DbcDataListBuilder dbcDataBuilder = DbcDataListBuilder.getInstance(this);
     private ConcurrentMap<String, Image> imagesMap = new ConcurrentHashMap<>();
     private MenuManager serversTableMenuMgr = new MenuManager();
@@ -155,7 +152,6 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
             return false;
         }
         mainService.shutdown();
-        otherService.shutdown();
         return super.canHandleShellCloseEvent();
     }
 
@@ -197,7 +193,6 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
                         caServersTable = new TableViewer(currentActivitySf, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL | SWT.FULL_SELECTION);
                         {
                             caServersTable.getTable().setHeaderVisible(true);
-                            caServersTable.getTable().setLinesVisible(true);
                             caServersTable.getTable().setLayoutData(gridData);
                             TableViewerColumn tvColumn = new TableViewerColumn(caServersTable, SWT.NONE);
                             tvColumn.getColumn().setText("Сервер");
@@ -356,14 +351,17 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
         caServersTable.addSelectionChangedListener(event -> {
             if (!caServersTable.getSelection().isEmpty()) {
                 IStructuredSelection selected = (IStructuredSelection) event.getSelection();
-                selectedDbcData = (DbcData) selected.getFirstElement();
-                if(procComposite.isVisible()) {
-                    procComposite.setVisible(false);
-                    caTreeSf.layout(false, false);
+                DbcData newSelection = (DbcData) selected.getFirstElement();
+                if (selectedDbcData != newSelection){
+                    selectedDbcData = newSelection;
+                    if(procComposite.isVisible()) {
+                        procComposite.setVisible(false);
+                        caTreeSf.layout(false, false);
+                    }
+                    serversToolBarState();
+                    caMainTree.setInput(selectedDbcData.getProcess());
+                    updateUi();
                 }
-                serversToolBarState();
-                caMainTree.setInput(selectedDbcData.getProcess());
-                updateUi();
             }
         });
         
@@ -393,7 +391,6 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
             }
         });
 
-        otherService.scheduleAtFixedRate(this::updateUi, 0, settings.getUpdateUIPeriod(), TimeUnit.SECONDS);
         return parent;
     }
     
@@ -422,21 +419,14 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
 
         deleteDB = new Action(Images.DELETE_DATABASE.getDescription(),
                 ImageDescriptor.createFromImage(getImage(Images.DELETE_DATABASE))) {
-            
             @Override
             public void run() {
-                boolean okPress = MessageDialog.openQuestion(getShell(),
+                if (MessageDialog.openQuestion(getShell(),
                         "Подтверждение действия",
-                        String.format("Вы действительно хотите удалить %s?", selectedDbcData.getName()));
-                if (okPress) {
+                        String.format("Вы действительно хотите удалить %s?", selectedDbcData.getName()))) {
                     dbcDataBuilder.delete(selectedDbcData);
-                    if (dbcDataBuilder.getDbcDataList().isEmpty()) {
-                        selectedDbcData = null;
-                    } else {
-                        selectedDbcData = dbcDataBuilder.getDbcDataList()
-                                .get(dbcDataBuilder.getDbcDataList().size() - 1);
-                        caServersTable.getTable().setSelection(dbcDataBuilder.getDbcDataList().indexOf(selectedDbcData));
-                    }
+                    selectedDbcData = null;
+                    caMainTree.setInput(null);
                     updateUi();
                 }
             }
@@ -729,6 +719,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
 
     private void dbcDataConnect() {
         synchronized (selectedDbcData) {
+            caMainTree.setInput(selectedDbcData.getProcess());
             runUpdate(selectedDbcData);
             connectState();
         }
@@ -782,17 +773,8 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
             if (!display.isDisposed()) {
                 caServersTable.refresh();
                 serversToolBarState();
-                if (selectedDbcData != null) {
-                    try {
-                        Object[] expanded = caMainTree.getExpandedElements();
-                        caMainTree.setExpandedElements(expanded);
-                        caMainTree.refresh();
-                        bhMainTree.refresh();
-                    } catch (SWTException e) {
-                        LOG.error("Ошибка при отрисовке таблицы!", e);
-                    }
-                }
-                LOG.debug("  Finish updating tree.");
+                caMainTree.refresh();
+                bhMainTree.refresh();
             }
         });
     }

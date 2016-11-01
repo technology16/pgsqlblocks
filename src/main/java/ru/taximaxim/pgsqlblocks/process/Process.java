@@ -131,7 +131,7 @@ public class Process implements Comparable<Process> {
                 ", blockedBy=" + blockedBy +
                 ", blockingLocks=" + blockingLocks +
                 ", query=" + query +
-                ", children=" + children +
+                ", children=" + children.size() +
                 ", status=" + status +
                 '}';
     }

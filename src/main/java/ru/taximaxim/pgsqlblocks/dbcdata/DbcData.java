@@ -31,9 +31,7 @@ public class DbcData extends UpdateProvider implements Comparable<DbcData> {
     private Connection connection;
     private final ProcessTreeBuilder processTree = new ProcessTreeBuilder(this);
 
-    public DbcData(String name,String host, String port,String dbname,
-            String user, String passwd, boolean enabled) {
-        
+    public DbcData(String name,String host, String port,String dbname, String user, String passwd, boolean enabled) {
         this.name = name;
         this.host = host;
         this.port = port;
@@ -41,6 +39,8 @@ public class DbcData extends UpdateProvider implements Comparable<DbcData> {
         this.user = user;
         this.enabled = enabled;
         this.password = passwd;
+
+        process = processTree.getProcessTree();
     }
 
     public void setProcess(Process process){

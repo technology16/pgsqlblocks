@@ -19,14 +19,12 @@ public final class Settings {
     private static final Logger LOG = Logger.getLogger(Settings.class);
 
     private static final String UPDATE_PERIOD = "update_period";
-    private static final String UPDATE_UI_PERIOD = "update_UI_period";
     private static final String LOGIN_TIMEOUT = "login_timeout";
     private static final String AUTO_UPDATE = "auto_update";
     private static final String ONLY_BLOCKED = "only_blocked";
     private static final String SHOW_IDLE = "show_idle";
 
     private int updatePeriod;
-    private int updateUIPeriod;
     private int loginTimeout;
 
     private boolean autoUpdate;
@@ -60,12 +58,6 @@ public final class Settings {
                 !properties.getProperty(AUTO_UPDATE).isEmpty()) || Boolean.parseBoolean(properties.getProperty(AUTO_UPDATE));
         this.onlyBlocked = properties.getProperty(ONLY_BLOCKED) != null
                 && !properties.getProperty(ONLY_BLOCKED).isEmpty() && Boolean.parseBoolean(properties.getProperty(ONLY_BLOCKED));
-        if (properties.getProperty(UPDATE_UI_PERIOD) != null &&
-                !properties.getProperty(UPDATE_UI_PERIOD).isEmpty()) {
-            this.updateUIPeriod = Integer.parseInt(properties.getProperty(UPDATE_UI_PERIOD));
-        } else {
-            this.updateUIPeriod = 5;
-        }
         if (properties.getProperty(LOGIN_TIMEOUT) != null &&
                 !properties.getProperty(LOGIN_TIMEOUT).isEmpty()) {
             this.loginTimeout = Integer.parseInt(properties.getProperty(LOGIN_TIMEOUT));
@@ -101,22 +93,6 @@ public final class Settings {
         return updatePeriod;
     }
 
-    /**
-     * Устанавливаем период обновления UI
-     * @param updateUIPeriod
-     */
-    public void setUpdateUIPeriod(int updateUIPeriod) {
-        this.updateUIPeriod = updateUIPeriod;
-        saveProperties(UPDATE_UI_PERIOD, Integer.toString(updateUIPeriod));
-    }
-
-    /**
-     * Получаем период обновления UI
-     * @return the updateUIPeriod
-     */
-    public int getUpdateUIPeriod() {
-        return updateUIPeriod;
-    }
     /**
      * Sets the maximum time in seconds that a driver will wait
      * while attempting to connect to a database once the driver has
