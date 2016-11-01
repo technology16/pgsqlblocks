@@ -17,19 +17,16 @@ import java.nio.file.Paths;
 public class PgPassLoader {
     private static final Logger LOG = Logger.getLogger(PgPassLoader.class);
     public static final String REGEX = "(?<=(?<!\\\\)):|(?<=(?<!\\\\)(\\\\){2}):|(?<=(?<!\\\\)(\\\\){4}):";
-    private String name;
     private String host;
     private String port;
-    private String user;
-    private String password;
     private String dbname;
+    private String user;
 
     public PgPassLoader(DbcData dbcData) {
-        this(dbcData.getName(), dbcData.getHost(), dbcData.getPort(), dbcData.getDbname(),  dbcData.getUser());
+        this(dbcData.getHost(), dbcData.getPort(), dbcData.getDbname(),  dbcData.getUser());
     }
 
-    public PgPassLoader(String name,String host, String port,String dbname, String user) {
-        this.name = name;
+    public PgPassLoader(String host, String port,String dbname, String user) {
         this.host = host;
         this.port = port;
         this.dbname = dbname;
