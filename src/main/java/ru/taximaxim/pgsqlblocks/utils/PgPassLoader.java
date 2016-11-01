@@ -64,13 +64,12 @@ public class PgPassLoader {
         try (BufferedReader reader = Files.newBufferedReader(pgPassPath, StandardCharsets.UTF_8)) {
             String settingsLine = null;
             while ((settingsLine = reader.readLine()) != null) {
-                if (settingsLine.startsWith("#")){
-                    continue;
-                }
-                String[] settings = PATTERN.split(settingsLine);
-                if (settingsMatch(settings)) {
-                    pgPass = settings[PASS_IDX];
-                    break;
+                if (!settingsLine.startsWith("#")){
+                    String[] settings = PATTERN.split(settingsLine);
+                    if (settingsMatch(settings)) {
+                        pgPass = settings[PASS_IDX];
+                        break;
+                    }
                 }
             }
         } catch (NoSuchFileException e) {
@@ -95,7 +94,7 @@ public class PgPassLoader {
     }
 
     private Path getPgPassPath() {
-        Path path = Paths.get(System.getProperty("user.home")).resolve(Paths.get(".pgpass"));;
+        Path path = Paths.get(System.getProperty("user.home")).resolve(Paths.get(".pgpass"));
         String os = System.getProperty("os.name").toUpperCase();
         if (os.contains("WIN")) {
             path = Paths.get(System.getenv("APPDATA")).resolve(Paths.get("postgresql", "pgpass.conf"));
