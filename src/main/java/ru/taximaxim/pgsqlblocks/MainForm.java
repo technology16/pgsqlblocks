@@ -412,10 +412,9 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
     }
 
     private Image getIconImage() {
-        if (!dbcDataBuilder.getDbcDataList().isEmpty()) {
-            if (dbcDataBuilder.getDbcDataList().stream().anyMatch(DbcData::hasBlockedProcess)) {
-                return getImage(Images.BLOCKED);
-            }
+        if (!dbcDataBuilder.getDbcDataList().isEmpty()
+                && dbcDataBuilder.getDbcDataList().stream().anyMatch(DbcData::hasBlockedProcess)) {
+            return getImage(Images.BLOCKED);
         }
         return getImage(Images.UNBLOCKED);
     }
