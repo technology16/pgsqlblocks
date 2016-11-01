@@ -93,6 +93,7 @@ public class PgPassLoader {
         }
     }
 
+    // TODO support PGPASSFILE
     private Path getPgPassPath() {
         Path path = Paths.get(System.getProperty("user.home")).resolve(Paths.get(".pgpass"));
         String os = System.getProperty("os.name").toUpperCase();
