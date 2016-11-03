@@ -51,9 +51,9 @@ public enum Images {
         case CANCEL_UPDATE:
             return "images/cancel_update_16.png";
         case BLOCKED:
-            return "images/block-32x32.png";
+            return "images/block-16x16.gif";
         case UNBLOCKED:
-            return "images/unblock-32x32.png";
+            return "images/unblock-16x16.gif";
         default:
             return "images/void_16.png";
         }
