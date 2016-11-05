@@ -14,7 +14,9 @@ public enum Images {
     IMPORT_BLOCKS,
     SETTINGS,
     FILTER,
-    CANCEL_UPDATE;
+    CANCEL_UPDATE,
+    BLOCKED,
+    UNBLOCKED;
     
     /**
      * Получение иконки
@@ -48,6 +50,10 @@ public enum Images {
             return "images/filter.png";
         case CANCEL_UPDATE:
             return "images/cancel_update_16.png";
+        case BLOCKED:
+            return "images/block-16x16.gif";
+        case UNBLOCKED:
+            return "images/unblock-16x16.gif";
         default:
             return "images/void_16.png";
         }

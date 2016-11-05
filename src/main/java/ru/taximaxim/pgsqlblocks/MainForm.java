@@ -2,7 +2,10 @@ package ru.taximaxim.pgsqlblocks;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
-import org.eclipse.jface.action.*;
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.action.Separator;
+import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.*;
@@ -75,6 +78,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
     private Action onlyBlocked;
     private ToolItem cancelProc;
     private ToolItem terminateProc;
+    private TrayItem trayItem;
     private static SortColumn sortColumn = SortColumn.BLOCKED_COUNT;
     private static SortDirection sortDirection = SortDirection.UP;
     private Settings settings = Settings.getInstance();
@@ -202,7 +206,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
                             caServersTable.setInput(dbcDataBuilder.getDbcDataList());
                         }
 
-                        Menu menu = serversTableMenuMgr.createContextMenu(caServersTable.getControl());
+                        Menu mainMenu = serversTableMenuMgr.createContextMenu(caServersTable.getControl());
                         serversTableMenuMgr.addMenuListener(manager -> {
                             if (caServersTable.getSelection() instanceof IStructuredSelection) {
                                 manager.add(cancelUpdate);
@@ -215,7 +219,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
                             }
                         });
                         serversTableMenuMgr.setRemoveAllWhenShown(true);
-                        caServersTable.getControl().setMenu(menu);
+                        caServersTable.getControl().setMenu(mainMenu);
 
                         caTreeSf = new SashForm(currentActivitySf, SWT.VERTICAL);
                         {
@@ -391,9 +395,31 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
             }
         });
 
+        final Tray tray = display.getSystemTray();
+        if (tray == null) {
+            LOG.warn("The system tray is not available");
+        } else {
+            trayItem = new TrayItem(tray, SWT.NONE);
+            trayItem.setImage(getIconImage());
+            trayItem.setToolTipText("PgSqlBlocks v." + getAppVersion());
+            final Menu trayMenu = new Menu(getShell(), SWT.POP_UP);
+            MenuItem trayMenuItem = new MenuItem(trayMenu, SWT.PUSH);
+            trayMenuItem.setText("Выход");
+            trayMenuItem.addListener(SWT.Selection, event -> getShell().close());
+            trayItem.addListener(SWT.MenuDetect, event -> trayMenu.setVisible(true));
+        }
+
         return parent;
     }
-    
+
+    private Image getIconImage() {
+        if (!dbcDataBuilder.getDbcDataList().isEmpty()
+                && dbcDataBuilder.getDbcDataList().stream().anyMatch(DbcData::hasBlockedProcess)) {
+            return getImage(Images.BLOCKED);
+        }
+        return getImage(Images.UNBLOCKED);
+    }
+
     protected ToolBarManager createToolBarManager(int style) {
         ToolBarManager toolBarManager = new ToolBarManager(style);
 
@@ -611,7 +637,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
                 SettingsDlg settingsDlg = new SettingsDlg(getShell(), settings);
                 if (Window.OK == settingsDlg.open()) {
                     runUpdateForAllEnabled();
-                    updateUi();
+                    updateUi(); // TODO make sure this is needed after merge
                 }
             }
         };
@@ -775,6 +801,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
                 serversToolBarState();
                 caMainTree.refresh();
                 bhMainTree.refresh();
+                trayItem.setImage(getIconImage());
             }
         });
     }
