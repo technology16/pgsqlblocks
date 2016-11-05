@@ -278,20 +278,6 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
                             }
                         }
                         caTreeSf.setWeights(VERTICAL_WEIGHTS);
-
-                        final Tray tray = display.getSystemTray();
-                        if (tray == null) {
-                            LOG.warn("The system tray is not available");
-                        } else {
-                            trayItem = new TrayItem(tray, SWT.NONE);
-                            trayItem.setImage(getIconImage());
-                            trayItem.setToolTipText("PgSqlBlocks v." + getAppVersion());
-                            final Menu trayMenu = new Menu(getShell(), SWT.POP_UP);
-                            MenuItem trayMenuItem = new MenuItem(trayMenu, SWT.PUSH);
-                            trayMenuItem.setText("Выход");
-                            trayMenuItem.addListener(SWT.Selection, event -> getShell().close());
-                            trayItem.addListener(SWT.MenuDetect, event -> trayMenu.setVisible(true));
-                        }
                     }
                     currentActivitySf.setWeights(HORIZONTAL_WEIGHTS);
                     currentActivityTi.setControl(currentActivitySf);
@@ -406,6 +392,20 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
                 }
             }
         });
+
+        final Tray tray = display.getSystemTray();
+        if (tray == null) {
+            LOG.warn("The system tray is not available");
+        } else {
+            trayItem = new TrayItem(tray, SWT.NONE);
+            trayItem.setImage(getIconImage());
+            trayItem.setToolTipText("PgSqlBlocks v." + getAppVersion());
+            final Menu trayMenu = new Menu(getShell(), SWT.POP_UP);
+            MenuItem trayMenuItem = new MenuItem(trayMenu, SWT.PUSH);
+            trayMenuItem.setText("Выход");
+            trayMenuItem.addListener(SWT.Selection, event -> getShell().close());
+            trayItem.addListener(SWT.MenuDetect, event -> trayMenu.setVisible(true));
+        }
 
         otherService.scheduleAtFixedRate(this::updateUi, 0, settings.getUpdateUIPeriod(), TimeUnit.SECONDS);
         return parent;
