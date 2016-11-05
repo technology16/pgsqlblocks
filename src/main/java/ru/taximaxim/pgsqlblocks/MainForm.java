@@ -413,8 +413,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
     }
 
     private Image getIconImage() {
-        if (!dbcDataBuilder.getDbcDataList().isEmpty()
-                && dbcDataBuilder.getDbcDataList().stream().anyMatch(DbcData::hasBlockedProcess)) {
+        if (dbcDataBuilder.getDbcDataList().stream().anyMatch(DbcData::hasBlockedProcess)) {
             return getImage(Images.BLOCKED);
         }
         return getImage(Images.UNBLOCKED);
@@ -675,12 +674,8 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
     }
 
     private Image getImage(Images type) {
-        Image image = imagesMap.get(type.toString());
-        if (image == null) {
-            image = new Image(null, getClass().getClassLoader().getResourceAsStream(type.getImageAddr()));
-            imagesMap.put(type.toString(), image);
-        }
-        return image;
+        return imagesMap.putIfAbsent(type.toString(),
+                new Image(null, getClass().getClassLoader().getResourceAsStream(type.getImageAddr())));
     }
     
     private String getAppVersion() {
