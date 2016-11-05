@@ -674,8 +674,8 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
     }
 
     private Image getImage(Images type) {
-        return imagesMap.putIfAbsent(type.toString(),
-                new Image(null, getClass().getClassLoader().getResourceAsStream(type.getImageAddr())));
+        return imagesMap.computeIfAbsent(type.toString(),
+                k -> new Image(null, getClass().getClassLoader().getResourceAsStream(type.getImageAddr())));
     }
     
     private String getAppVersion() {
