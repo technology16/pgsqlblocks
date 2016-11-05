@@ -636,8 +636,8 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
             public void run() {
                 SettingsDlg settingsDlg = new SettingsDlg(getShell(), settings);
                 if (Window.OK == settingsDlg.open()) {
+                    updateUi();
                     runUpdateForAllEnabled();
-                    updateUi(); // TODO make sure this is needed after merge
                 }
             }
         };
