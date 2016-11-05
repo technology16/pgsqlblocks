@@ -333,7 +333,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
                 statusBar.setLayout(gridLayout);
                 statusBar.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, true, false));
                 Label appVersionLabel = new Label(statusBar, SWT.HORIZONTAL);
-                appVersionLabel.setText("PgSqlBlocks v." + getAppVersion());
+                appVersionLabel.setText("pgSqlBlocks v." + getAppVersion());
             }
 
             dbcDataBuilder.getDbcDataList().stream().filter(DbcData::isEnabled)
@@ -401,7 +401,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
         } else {
             trayItem = new TrayItem(tray, SWT.NONE);
             trayItem.setImage(getIconImage());
-            trayItem.setToolTipText("PgSqlBlocks v." + getAppVersion());
+            trayItem.setToolTipText("pgSqlBlocks v." + getAppVersion());
             final Menu trayMenu = new Menu(getShell(), SWT.POP_UP);
             MenuItem trayMenuItem = new MenuItem(trayMenu, SWT.PUSH);
             trayMenuItem.setText("Выход");
