@@ -185,8 +185,10 @@ public class DbcData extends UpdateProvider implements Comparable<DbcData> {
         return rootProcess;
     }
 
-    Process getOnlyBlockedProcessTree() {
-        return processTree.getOnlyBlockedProcessTree();
+    public Process getOnlyBlockedProcessTree() {
+        Process rootProcess = processTree.getOnlyBlockedProcessTree();
+        processTree.processSort(rootProcess, MainForm.getSortColumn(), MainForm.getSortDirection());
+        return rootProcess;
     }
 
     public boolean hasBlockedProcess() {
