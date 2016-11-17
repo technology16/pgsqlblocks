@@ -38,7 +38,8 @@ SELECT
     state, 
     date_trunc('second', state_change) AS state_change, 
     blocks.pid AS blockedby, 
-    null::text AS blocking_locks, 
+    /* deprecated
+    null::text AS blocking_locks,*/ 
     blocks.locktype AS locktype, 
     blocks.relation AS relation, 
     query AS query, 
@@ -49,7 +50,5 @@ FROM
     pg_stat_activity procs 
     LEFT JOIN blocks 
         ON blocks.blocked_pid = procs.pid 
-WHERE 
-    usename = 'pgtest' 
 ORDER BY 
     pid
