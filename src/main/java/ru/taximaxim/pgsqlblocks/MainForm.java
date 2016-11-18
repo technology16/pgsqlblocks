@@ -88,13 +88,13 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
     private ConcurrentMap<String, Image> imagesMap = new ConcurrentHashMap<>();
     private MenuManager serversTableMenuMgr = new MenuManager();
 
-    private int[] caMainTreeColsSize = new int[]{80, 110, 150, 110, 110, 110, 145, 145, 145, 55, 145, 70, 150, 80};
+    private int[] caMainTreeColsSize = new int[]{80, 110, 150, 110, 110, 110, 145, 145, 145, 55, 145, 70, 70, 70, 150, 80};
     private String[] caMainTreeColsName = new String[]{
             "pid", "blocked_count", "application_name", "datname", "usename", "client", "backend_start", "query_start",
-            "xact_stat", "state", "state_change", "blocked", "query" , "slowquery"};
+            "xact_stat", "state", "state_change", "blocked", "locktype", "relation", "query" , "slowquery"};
     
     private String[] caColName = {"PID", "BLOCKED_COUNT", "APPLICATION_NAME", "DATNAME", "USENAME", "CLIENT", "BACKEND_START", "QUERY_START",
-            "XACT_STAT", "STATE", "STATE_CHANGE", "BLOCKED", "QUERY", "SLOWQUERY"};
+            "XACT_STAT", "STATE", "STATE_CHANGE", "BLOCKED", "LOCKTYPE", "RELATION", "QUERY", "SLOWQUERY"};
 
     public static void main(String[] args) {
         try {

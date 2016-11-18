@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.stream.Collectors;
 
 import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.viewers.ITableLabelProvider;
@@ -66,9 +67,20 @@ public class ProcessTreeLabelProvider implements ITableLabelProvider {
             case 8: return process.getQuery().getExactStart();
             case 9: return process.getState();
             case 10: return process.getStateChange();
-            case 11: return String.valueOf(process.getBlocks());
-            case 13: return process.getQuery().getQueryString();
-            case 14: return String.valueOf(process.getQuery().isSlowQuery());
+            case 11: return process.getBlocks().stream()
+                                .map(b -> String.valueOf(b.getBlockingPid()))
+                                .collect(Collectors.joining(","));
+            case 12: return process.getBlocks().stream()
+                                .map(Block::getLocktype)
+                                .distinct()
+                                .collect(Collectors.joining(","));
+            case 13: return process.getBlocks().stream()
+                                .map(Block::getRelation)
+                                .filter(r -> r != null && !r.isEmpty())
+                                .distinct()
+                                .collect(Collectors.joining(","));
+            case 14: return process.getQuery().getQueryString();
+            case 15: return String.valueOf(process.getQuery().isSlowQuery());
             default: return null;
         }
     }
