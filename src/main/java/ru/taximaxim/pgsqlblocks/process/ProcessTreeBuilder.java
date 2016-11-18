@@ -29,6 +29,8 @@ public class ProcessTreeBuilder {
     private static final String CLIENT = "client";
     private static final String STATE = "state";
     private static final String BLOCKEDBY = "blockedBy";
+    private static final String RELATION = "relation";
+    private static final String LOCKTYPE = "locktype";
     private static final String SLOWQUERY = "slowQuery";
     private static final String APPLICATIONNAME = "application_name";
     private static final String BACKENDSTART = "backend_start";
@@ -108,7 +110,7 @@ public class ProcessTreeBuilder {
                 
                 int blockedBy = processSet.getInt(BLOCKEDBY);
                 if (blockedBy != 0) {
-                    currentProcess.setBlockingPids(blockedBy);
+                    currentProcess.addBlock(new Block(blockedBy, processSet.getString(LOCKTYPE), processSet.getString(RELATION)));
                 }
             }
         } catch (SQLException e) {
@@ -119,9 +121,9 @@ public class ProcessTreeBuilder {
         dbcData.setStatus(DbcStatus.CONNECTED);
         dbcData.setContainBlockedProcess(false);
         for (Process process : tempProcessList.values()) {
-            process.getBlockingPids().forEach(blockedBy -> {
-                //Добавляем для данного процесса родителя с pid = process.getBlockingPids()
-                Process parentProcess = getProcessByPid(tempProcessList.values(), blockedBy);
+            process.getBlocks().forEach(blockedBy -> {
+                //Добавляем для данного процесса родителя с pid = process.getBlocks()
+                Process parentProcess = getProcessByPid(tempProcessList.values(), blockedBy.getBlockingPid());
                 if (parentProcess != null) {
                     process.setParents(parentProcess);
                     parentProcess.addChildren(process);

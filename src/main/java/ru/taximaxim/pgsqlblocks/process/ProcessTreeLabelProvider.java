@@ -66,7 +66,7 @@ public class ProcessTreeLabelProvider implements ITableLabelProvider {
             case 8: return process.getQuery().getExactStart();
             case 9: return process.getState();
             case 10: return process.getStateChange();
-            case 11: return String.valueOf(process.getBlockingPids());
+            case 11: return String.valueOf(process.getBlocks());
             case 13: return process.getQuery().getQueryString();
             case 14: return String.valueOf(process.getQuery().isSlowQuery());
             default: return null;

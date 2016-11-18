@@ -118,7 +118,7 @@ public final class BlocksHistory {
                 proc = processParcer.parseProcess(procEl);
                 
                 for (Process process : proc.getChildren()) {
-                    if (!process.getBlockingPids().isEmpty()) {
+                    if (!process.getBlocks().isEmpty()) {
                         process.getParents().forEach(p -> p.setStatus(ProcessStatus.BLOCKING));
                         process.setStatus(ProcessStatus.BLOCKED);
                         dbc.setContainBlockedProcess(true);

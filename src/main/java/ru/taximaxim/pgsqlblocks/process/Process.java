@@ -12,7 +12,7 @@ public class Process implements Comparable<Process> {
     private final QueryCaller caller;
     private final String state;
     private final String stateChange;
-    private final Set<Integer> blockingPids = new HashSet<>();
+    private final Set<Block> blocks = new HashSet<>();
     private final Query query;
     private final List<Process> children = new ArrayList<>();
     private ProcessStatus status = ProcessStatus.WORKING;
@@ -69,12 +69,12 @@ public class Process implements Comparable<Process> {
         return stateChange;
     }
 
-    public Set<Integer> getBlockingPids() {
-        return blockingPids;
+    public Set<Block> getBlocks() {
+        return blocks;
     }
 
-    public void setBlockingPids(int pid) {
-        blockingPids.add(pid);
+    public void addBlock(Block block) {
+        blocks.add(block);
     }
 
     public QueryCaller getCaller() {
@@ -124,7 +124,7 @@ public class Process implements Comparable<Process> {
                 ", caller=" + caller +
                 ", state='" + state + '\'' +
                 ", stateChange='" + stateChange + '\'' +
-                ", blockingPids=" + blockingPids +
+                ", blocks=" + blocks +
                 ", query=" + query +
                 ", children=" + children.size() +
                 ", status=" + status +
@@ -141,6 +141,4 @@ public class Process implements Comparable<Process> {
             return -1;
         }
     }
-
-
 }
