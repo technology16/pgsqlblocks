@@ -9,9 +9,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.*;
 
 import org.apache.log4j.Logger;
 
@@ -31,7 +29,6 @@ public class ProcessTreeBuilder {
     private static final String CLIENT = "client";
     private static final String STATE = "state";
     private static final String BLOCKEDBY = "blockedBy";
-    private static final String BLOCKING_LOCKS = "blocking_locks";
     private static final String SLOWQUERY = "slowQuery";
     private static final String APPLICATIONNAME = "application_name";
     private static final String BACKENDSTART = "backend_start";
@@ -48,8 +45,7 @@ public class ProcessTreeBuilder {
     private static String queryWithoutIdle;
     private static String queryWithIdle;
     private final DbcData dbcData;
-    private Set<Process> tempProcessList = new LinkedHashSet<>();
-    private final Process root = new Process(0,null,null,null,null,0,0);
+    private final Process root = new Process(0, null, null, null, null);
 
     public ProcessTreeBuilder(DbcData dbcData) {
         this.dbcData = dbcData;
@@ -71,10 +67,10 @@ public class ProcessTreeBuilder {
         return root;
     }
 
-    private Set<Process> buildProcessTree() {
-        tempProcessList.clear();
+    private Collection<Process> buildProcessTree() {
+        Map<Integer, Process> tempProcessList = new HashMap<>();
         if (dbcData.getConnection() == null) {
-            return tempProcessList;
+            return tempProcessList.values();
         }
         try {
             if (dbcData.getConnection().isClosed()) {
@@ -89,24 +85,31 @@ public class ProcessTreeBuilder {
                 ResultSet processSet = statement.executeQuery()
         ) {
             while (processSet.next()) {
-                Query query = new Query(processSet.getString(QUERYSQL),
-                        dateParse(processSet.getString(BACKENDSTART)),
-                        dateParse(processSet.getString(QUERYSTART)),
-                        dateParse(processSet.getString(XACTSTART)),
-                        processSet.getBoolean(SLOWQUERY));
-                QueryCaller caller = new QueryCaller(processSet.getString(APPLICATIONNAME),
-                        processSet.getString(DATNAME),
-                        processSet.getString(USENAME),
-                        processSet.getString(CLIENT));
-                Process process = new Process(
-                        processSet.getInt(PID),
-                        caller,
-                        query,
-                        processSet.getString(STATE),
-                        dateParse(processSet.getString(STATECHANGE)),
-                        processSet.getInt(BLOCKEDBY),
-                        processSet.getInt(BLOCKING_LOCKS));
-                tempProcessList.add(process);
+                int pid = processSet.getInt(PID);
+                Process currentProcess = tempProcessList.get(pid);
+                if (currentProcess == null) {
+                    Query query = new Query(processSet.getString(QUERYSQL),
+                            dateParse(processSet.getString(BACKENDSTART)),
+                            dateParse(processSet.getString(QUERYSTART)),
+                            dateParse(processSet.getString(XACTSTART)),
+                            processSet.getBoolean(SLOWQUERY));
+                    QueryCaller caller = new QueryCaller(processSet.getString(APPLICATIONNAME),
+                            processSet.getString(DATNAME),
+                            processSet.getString(USENAME),
+                            processSet.getString(CLIENT));
+                    currentProcess = new Process(
+                            pid,
+                            caller,
+                            query,
+                            processSet.getString(STATE),
+                            dateParse(processSet.getString(STATECHANGE)));
+                    tempProcessList.put(pid, currentProcess);
+                }
+                
+                int blockedBy = processSet.getInt(BLOCKEDBY);
+                if (blockedBy != 0) {
+                    currentProcess.setBlockingPids(blockedBy);
+                }
             }
         } catch (SQLException e) {
             LOG.error(String.format("Ошибка при получении процессов для %s", dbcData.getDbname()), e);
@@ -115,29 +118,21 @@ public class ProcessTreeBuilder {
         // Пробегаем по списку процессов, ищем ожидающие и блокированные процессы
         dbcData.setStatus(DbcStatus.CONNECTED);
         dbcData.setContainBlockedProcess(false);
-        for (Process process : tempProcessList) {
-            if ((process.getBlockingLocks() != 0) && (process.getBlockedBy() == 0)) {
-                //Добавляем для данного процесса родителя с pid = process.getBlockingLocks()
-                Process parentProcess = getProcessByPid(tempProcessList, process.getBlockingLocks());
+        for (Process process : tempProcessList.values()) {
+            process.getBlockingPids().forEach(blockedBy -> {
+                //Добавляем для данного процесса родителя с pid = process.getBlockingPids()
+                Process parentProcess = getProcessByPid(tempProcessList.values(), blockedBy);
                 if (parentProcess != null) {
-                    process.setParent(parentProcess);
-                    parentProcess.addChildren(process);
-                    process.setStatus(ProcessStatus.WAITING);
-                }
-            } else if (process.getBlockedBy() != 0) {
-                //Добавляем для данного процесса родителя с pid = process.getBlockedBy()
-                Process parentProcess = getProcessByPid(tempProcessList, process.getBlockedBy());
-                if (parentProcess != null) {
-                    process.setParent(parentProcess);
+                    process.setParents(parentProcess);
                     parentProcess.addChildren(process);
                     parentProcess.setStatus(ProcessStatus.BLOCKING);
                     process.setStatus(ProcessStatus.BLOCKED);
                     dbcData.setContainBlockedProcess(true);
                 }
-            }
+            });
         }
 
-        return tempProcessList;
+        return tempProcessList.values();
     }
     
     private int stringCompare(String s1, String s2, SortDirection sortDirection) {
@@ -237,7 +232,7 @@ public class ProcessTreeBuilder {
         return sdfp.format(date);
     }
 
-    private Process getProcessByPid(Set<Process> processList, int pid) {
+    private Process getProcessByPid(Collection<Process> processList, int pid) {
         return processList.stream().filter(process -> process.getPid() == pid).findFirst().get();
     }
 

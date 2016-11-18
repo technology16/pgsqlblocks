@@ -25,7 +25,7 @@ public class ProcessTreeContentProvider implements ITreeContentProvider {
      * @return Object
      */
     public Object getParent(Object arg0) {
-        return ((Process) arg0).getParent();
+        return ((Process) arg0).getParents();
     }
 
     /**

@@ -44,8 +44,7 @@ public class ProcessParcer {
         createElement(procEl, doc.createElement(XACTSTART), process.getQuery().getExactStart());
         createElement(procEl, doc.createElement(STATE), process.getState());
         createElement(procEl, doc.createElement(STATECHANGE), process.getStateChange());
-        createElement(procEl, doc.createElement(BLOCKED), String.valueOf(process.getBlockedBy()));
-        createElement(procEl, doc.createElement(WAITING), String.valueOf(process.getBlockingLocks()));
+        createElement(procEl, doc.createElement(BLOCKED), String.valueOf(process.getBlockingPids()));
         createElement(procEl, doc.createElement(QUERY), process.getQuery().getQueryString());
         createElement(procEl, doc.createElement(SLOWQUERY), String.valueOf(process.getQuery().isSlowQuery()));
         
@@ -71,9 +70,8 @@ public class ProcessParcer {
                 caller,
                 query,
                 getNodeValue(el, STATE),
-                getNodeValue(el, STATECHANGE),
-                Integer.parseInt(getNodeValue(el, BLOCKED)),
-                Integer.parseInt(getNodeValue(el, WAITING)));
+                getNodeValue(el, STATECHANGE));
+        process.setBlockingPids(Integer.parseInt(getNodeValue(el, BLOCKED)));
         XPathFactory xpf = XPathFactory.newInstance();
         XPath xp = xpf.newXPath();
         NodeList children = null;
@@ -89,7 +87,7 @@ public class ProcessParcer {
             }
             Element procEl = (Element)processNode;
             Process proc = parseProcess(procEl);
-            proc.setParent(process);
+            proc.setParents(process);
             process.addChildren(proc);
         }
         return process;

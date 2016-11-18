@@ -82,8 +82,8 @@ public final class BlocksHistory {
     }
     
     public List<DbcData> open(String path) {
-        List<DbcData> dbcDataList = new ArrayList<DbcData>();
-        Process rootProcess = new Process(0, null,null,null,null,0,0);
+        List<DbcData> dbcDataList = new ArrayList<>();
+        Process rootProcess = new Process(0, null,null,null,null);
         if(path == null) {
             return dbcDataList;
         }
@@ -118,10 +118,8 @@ public final class BlocksHistory {
                 proc = processParcer.parseProcess(procEl);
                 
                 for (Process process : proc.getChildren()) {
-                    if ((process.getBlockingLocks() != 0) && (process.getBlockedBy() == 0)) {
-                        process.setStatus(ProcessStatus.WAITING);
-                    } else if (process.getBlockedBy() != 0) {
-                        process.getParent().setStatus(ProcessStatus.BLOCKING);
+                    if (!process.getBlockingPids().isEmpty()) {
+                        process.getParents().forEach(p -> p.setStatus(ProcessStatus.BLOCKING));
                         process.setStatus(ProcessStatus.BLOCKED);
                         dbc.setContainBlockedProcess(true);
                     }
