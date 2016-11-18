@@ -26,7 +26,6 @@ public class ProcessParcer {
     private static final String STATE = "state";
     private static final String STATECHANGE = "stateChange";
     private static final String BLOCKED = "blocked";
-    private static final String WAITING = "waiting";
     private static final String QUERY = "query";
     private static final String SLOWQUERY = "slowQuery";
     private static final String PROCESS = "process";
