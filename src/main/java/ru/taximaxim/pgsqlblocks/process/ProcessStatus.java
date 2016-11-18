@@ -3,8 +3,7 @@ package ru.taximaxim.pgsqlblocks.process;
 public enum ProcessStatus {
     WORKING,
     BLOCKING,
-    BLOCKED,
-    WAITING;
+    BLOCKED;
     
     /**
      * Получение иконки в зависимости от состояния
@@ -18,8 +17,6 @@ public enum ProcessStatus {
             return "images/locker_16.png";
         case BLOCKED:
             return "images/locked_16.png";
-        case WAITING:
-            return "images/waiting_16.png";
         default:
             return "images/void_16.png";
         }

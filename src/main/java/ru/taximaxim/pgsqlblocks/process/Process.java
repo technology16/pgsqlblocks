@@ -1,41 +1,40 @@
 package ru.taximaxim.pgsqlblocks.process;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class Process implements Comparable<Process> {
 
-    private Process parent;
+    private List<Process> parents = new ArrayList<>();
     private final int pid;
     private final QueryCaller caller;
     private final String state;
     private final String stateChange;
-    private final int blockedBy;
-    private final int blockingLocks;
+    private final Set<Block> blocks = new HashSet<>();
     private final Query query;
     private final List<Process> children = new ArrayList<>();
     private ProcessStatus status = ProcessStatus.WORKING;
 
-    public Process(int pid, QueryCaller caller, Query query, String state, String stateChange, int blockedBy, int blockingLocks) {
+    public Process(int pid, QueryCaller caller, Query query, String state, String stateChange) {
         this.pid = pid;
         this.caller = caller;
         this.query = query;
         this.state = state;
         this.stateChange = stateChange;
-        this.blockedBy = blockedBy;
-        this.blockingLocks = blockingLocks;
     }
 
-    void setParent(Process parent) {
-        this.parent = parent;
+    void setParents(Process parents) {
+        this.parents.add(parents);
     }
 
     public void setStatus(ProcessStatus status) {
         this.status = status;
     }
 
-    public Process getParent() {
-        return parent;
+    public List<Process> getParents() {
+        return parents;
     }
 
     public void addChildren(Process child) {
@@ -59,7 +58,7 @@ public class Process implements Comparable<Process> {
     }
 
     boolean hasParent() {
-        return parent != null;
+        return !parents.isEmpty();
     }
 
     public String getState() {
@@ -70,12 +69,12 @@ public class Process implements Comparable<Process> {
         return stateChange;
     }
 
-    public int getBlockedBy() {
-        return blockedBy;
+    public Set<Block> getBlocks() {
+        return blocks;
     }
 
-    public int getBlockingLocks() {
-        return blockingLocks;
+    public void addBlock(Block block) {
+        blocks.add(block);
     }
 
     public QueryCaller getCaller() {
@@ -114,22 +113,18 @@ public class Process implements Comparable<Process> {
             return false;
         }
         Process other = (Process) obj;
-        if (getPid() != other.getPid()){
-            return false;
-        }
-        return true;
+        return getPid() == other.getPid();
     }
 
     @Override
     public String toString() {
         return "Process{" +
-                "parent=" + parent +
+                "parents=" + parents +
                 ", pid=" + pid +
                 ", caller=" + caller +
                 ", state='" + state + '\'' +
                 ", stateChange='" + stateChange + '\'' +
-                ", blockedBy=" + blockedBy +
-                ", blockingLocks=" + blockingLocks +
+                ", blocks=" + blocks +
                 ", query=" + query +
                 ", children=" + children.size() +
                 ", status=" + status +
@@ -146,6 +141,4 @@ public class Process implements Comparable<Process> {
             return -1;
         }
     }
-
-
 }

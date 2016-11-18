@@ -26,7 +26,8 @@ public class ProcessParcer {
     private static final String STATE = "state";
     private static final String STATECHANGE = "stateChange";
     private static final String BLOCKED = "blocked";
-    private static final String WAITING = "waiting";
+    private static final String RELATION = "relation";
+    private static final String LOCKTYPE = "locktype";
     private static final String QUERY = "query";
     private static final String SLOWQUERY = "slowQuery";
     private static final String PROCESS = "process";
@@ -44,8 +45,7 @@ public class ProcessParcer {
         createElement(procEl, doc.createElement(XACTSTART), process.getQuery().getExactStart());
         createElement(procEl, doc.createElement(STATE), process.getState());
         createElement(procEl, doc.createElement(STATECHANGE), process.getStateChange());
-        createElement(procEl, doc.createElement(BLOCKED), String.valueOf(process.getBlockedBy()));
-        createElement(procEl, doc.createElement(WAITING), String.valueOf(process.getBlockingLocks()));
+        createElement(procEl, doc.createElement(BLOCKED), String.valueOf(process.getBlocks()));
         createElement(procEl, doc.createElement(QUERY), process.getQuery().getQueryString());
         createElement(procEl, doc.createElement(SLOWQUERY), String.valueOf(process.getQuery().isSlowQuery()));
         
@@ -71,9 +71,12 @@ public class ProcessParcer {
                 caller,
                 query,
                 getNodeValue(el, STATE),
-                getNodeValue(el, STATECHANGE),
-                Integer.parseInt(getNodeValue(el, BLOCKED)),
-                Integer.parseInt(getNodeValue(el, WAITING)));
+                getNodeValue(el, STATECHANGE));
+        int blockingPid = Integer.parseInt(getNodeValue(el, BLOCKED));
+        if (blockingPid != 0) {
+            Block block = new Block(blockingPid, getNodeValue(el, LOCKTYPE), getNodeValue(el, RELATION));
+            process.addBlock(block);
+        }
         XPathFactory xpf = XPathFactory.newInstance();
         XPath xp = xpf.newXPath();
         NodeList children = null;
@@ -89,7 +92,7 @@ public class ProcessParcer {
             }
             Element procEl = (Element)processNode;
             Process proc = parseProcess(procEl);
-            proc.setParent(process);
+            proc.setParents(process);
             process.addChildren(proc);
         }
         return process;
