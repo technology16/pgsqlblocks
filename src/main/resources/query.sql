@@ -52,6 +52,6 @@ FROM
         ON blocks.blocked_pid = procs.pid 
 WHERE 
     procs.state != 'idle' 
-    OR procs.state IS NULL
+    OR procs.state IS NULL 
 ORDER BY 
     pid
