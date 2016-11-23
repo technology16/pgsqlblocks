@@ -29,7 +29,7 @@ public class DbcData extends UpdateProvider implements Comparable<DbcData> {
     private boolean containBlockedProcess;
     
     private Connection connection;
-    private final ProcessTreeBuilder processTree = new ProcessTreeBuilder(this);
+    private final ProcessTreeBuilder treeBuilder = new ProcessTreeBuilder(this);
 
     public DbcData(String name,String host, String port,String dbname, String user, String passwd, boolean enabled) {
         this.name = name;
@@ -40,7 +40,7 @@ public class DbcData extends UpdateProvider implements Comparable<DbcData> {
         this.enabled = enabled;
         this.password = passwd;
 
-        process = processTree.getProcessTree();
+        process = treeBuilder.buildProcessTree();
     }
 
     public void setProcess(Process process){
@@ -179,14 +179,16 @@ public class DbcData extends UpdateProvider implements Comparable<DbcData> {
         return result;
     }
 
-    public Process getProcessTree() {
-        Process rootProcess = processTree.getProcessTree();
-        processTree.processSort(rootProcess, MainForm.getSortColumn(), MainForm.getSortDirection());
+    public Process getProcessTree(boolean needUpdate) {
+        Process rootProcess = needUpdate ? treeBuilder.buildProcessTree() : process;
+        treeBuilder.processSort(rootProcess, MainForm.getSortColumn(), MainForm.getSortDirection());
         return rootProcess;
     }
 
-    Process getOnlyBlockedProcessTree() {
-        return processTree.getOnlyBlockedProcessTree();
+    public Process getOnlyBlockedProcessTree(boolean needUpdate) {
+        Process rootProcess = needUpdate ? treeBuilder.buildOnlyBlockedProcessTree() : process;
+        treeBuilder.processSort(rootProcess, MainForm.getSortColumn(), MainForm.getSortDirection());
+        return rootProcess;
     }
 
     public boolean hasBlockedProcess() {

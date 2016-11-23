@@ -53,23 +53,23 @@ public class ProcessTreeBuilder {
         this.dbcData = dbcData;
     }
 
-    public Process getProcessTree() {
+    public Process buildProcessTree() {
         root.clearChildren();
-        buildProcessTree().stream()
+        queryProcessTree().stream()
             .filter(process -> !process.hasParent())
             .forEach(root::addChildren);
         return root;
     }
     
-    public Process getOnlyBlockedProcessTree() {
+    public Process buildOnlyBlockedProcessTree() {
         root.clearChildren();
-        buildProcessTree().stream()
+        queryProcessTree().stream()
             .filter(Process::hasChildren)
             .forEach(root::addChildren);
         return root;
     }
 
-    private Collection<Process> buildProcessTree() {
+    private Collection<Process> queryProcessTree() {
         Map<Integer, Process> tempProcessList = new HashMap<>();
         if (dbcData.getConnection() == null) {
             return tempProcessList.values();
