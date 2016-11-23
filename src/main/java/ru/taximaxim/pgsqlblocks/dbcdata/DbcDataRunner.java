@@ -30,9 +30,9 @@ public class DbcDataRunner implements Runnable {
                 dbcData.setStatus(DbcStatus.UPDATE);
                 LOG.info(MessageFormat.format("  Updating \"{0}\"...", dbcData.getName()));
                 if (settings.isOnlyBlocked()) {
-                    dbcData.setProcess(dbcData.getOnlyBlockedProcessTree());
+                    dbcData.setProcess(dbcData.getOnlyBlockedProcessTree(true));
                 } else {
-                    dbcData.setProcess(dbcData.getProcessTree());
+                    dbcData.setProcess(dbcData.getProcessTree(true));
                 }
             }
         } catch (Exception e) {

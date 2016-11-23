@@ -378,9 +378,9 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
                     caMainTree.getTree().setSortDirection(sortDirection.getSwtData());
                     sortColumn = SortColumn.valueOf((String)column.getData("colName"));
                     if (settings.isOnlyBlocked()){
-                        selectedDbcData.getOnlyBlockedProcessTree();
+                        selectedDbcData.getOnlyBlockedProcessTree(false);
                     } else {
-                        selectedDbcData.getProcessTree();
+                        selectedDbcData.getProcessTree(false);
                     }
                     updateUi();
                 }
