@@ -1,19 +1,12 @@
 package ru.taximaxim.pgsqlblocks.dbcdata;
 
 import org.apache.log4j.Logger;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.junit.Ignore;
+import org.junit.*;
 import ru.taximaxim.pgsqlblocks.process.Process;
 import ru.taximaxim.pgsqlblocks.process.ProcessStatus;
 import ru.taximaxim.pgsqlblocks.process.ProcessTreeBuilder;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -85,9 +78,9 @@ public class DbcDataTest {
         Optional <Process> proc3 = rootProcess.getChildren().stream().filter(x -> (x.getPid() == conn3Pid)).findFirst();
 
 
-        if (!(proc1.isPresent() && proc2.isPresent() && proc3.isPresent())) throw new AssertionError();
-        {
+        assertTrue(proc1.isPresent() && proc2.isPresent() && proc3.isPresent());
 
+        if (proc1.isPresent() && proc2.isPresent() && proc3.isPresent()) {
             assertEquals(ProcessStatus.BLOCKED, proc1.get().getStatus());
             assertEquals(ProcessStatus.BLOCKING, proc2.get().getStatus());
             assertEquals(ProcessStatus.BLOCKING, proc3.get().getStatus());
@@ -140,7 +133,6 @@ public class DbcDataTest {
         assertTrue(proc1.isPresent() && proc2.isPresent());
 
         if (proc1.isPresent() && proc2.isPresent()) {
-
             assertEquals(ProcessStatus.BLOCKING, proc1.get().getStatus());
             assertEquals(ProcessStatus.BLOCKED, proc2.get().getStatus());
 
@@ -190,8 +182,9 @@ public class DbcDataTest {
         Optional <Process> proc2 = rootProcess.getChildren().stream().filter(x -> (x.getPid() == conn2Pid)).findFirst();
 
 
-        if (!(proc1.isPresent() && proc2.isPresent())) throw new AssertionError();
-        {
+        assertTrue(proc1.isPresent() && proc2.isPresent());
+
+        if (proc1.isPresent() && proc2.isPresent()) {
 
             assertEquals(ProcessStatus.BLOCKING, proc2.get().getStatus());
             assertEquals(ProcessStatus.BLOCKED, proc1.get().getStatus());
@@ -250,9 +243,9 @@ public class DbcDataTest {
         Optional <Process> proc3 = allGrandChild.stream().filter(x -> (x.getPid() == conn3Pid)).findFirst();
 
 
-        if (!(proc1.isPresent() && proc2.isPresent() && proc3.isPresent())) throw new AssertionError();
-        {
+        assertTrue(proc1.isPresent() && proc2.isPresent() && proc3.isPresent());
 
+        if (proc1.isPresent() && proc2.isPresent() && proc3.isPresent()) {
             assertEquals(ProcessStatus.BLOCKING, proc1.get().getStatus());
             assertEquals(ProcessStatus.BLOCKED, proc2.get().getStatus());
             assertEquals(ProcessStatus.BLOCKING, proc3.get().getStatus());
