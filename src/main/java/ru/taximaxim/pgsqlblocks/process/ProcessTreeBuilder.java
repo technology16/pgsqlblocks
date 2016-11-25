@@ -248,13 +248,14 @@ public class ProcessTreeBuilder {
         }
     }
 
-    private String loadQuery(String queryFile){
+    public static String loadQuery(String queryFile){
         try (InputStream input = ClassLoader.getSystemResourceAsStream(queryFile);
              BufferedReader reader = new BufferedReader(new InputStreamReader(input, "UTF-8"))) {
             StringBuilder out = new StringBuilder();
             String line;
             while ((line = reader.readLine()) != null) {
                 out.append(line);
+                out.append(System.lineSeparator());
             }
             return out.toString();
         } catch (IOException e) {

@@ -11,13 +11,14 @@ public interface TEST {
 //    String REMOTE_DB_PATTERN = "pgsqlblocks_testing_{0}";
 
     String SELECT_PG_BACKEND_PID = "select pg_backend_pid();";
+    String[] PG_TERMINATE_BACKEND = {"select pg_terminate_backend(",");"};
+    String TERMINATED_SUCCESED = "pg_terminate_backend";
     String PID = "pg_backend_pid";
 
     String TESTING_DUMP_SQL = "test/testing_dump.sql";
     String CREATE_RULE_SQL = "test/create_rule.sql";
-
-    String TEST_COMMON_LOCKS_1_SQL = "test/common_locks_1.sql";
-    String TEST_COMMON_LOCKS_2_SQL = "test/common_locks_2.sql";
-    String[] PG_TERMINATE_BACKEND = {"select pg_terminate_backend(",");"};
-    String TERMINATED_SUCCESED = "pg_terminate_backend";
+    String TEST_DROP_RULE_SQL = "test/drop_rule.sql";
+    String TEST_SELECT_1000_SQL = "test/select_1000.sql";
+    String TEST_SELECT_SLEEP_SQL = "test/select_sleep.sql";
+    String TEST_CREATE_INDEX_SQL = "test/create_index.sql";
 }

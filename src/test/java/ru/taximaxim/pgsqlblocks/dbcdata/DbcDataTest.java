@@ -5,8 +5,10 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.Ignore;
 import ru.taximaxim.pgsqlblocks.process.Process;
 import ru.taximaxim.pgsqlblocks.process.ProcessStatus;
+import ru.taximaxim.pgsqlblocks.process.ProcessTreeBuilder;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -40,40 +42,39 @@ public class DbcDataTest {
             testDbc.connect();
         }
         /* prepare db */
-        testDbc.getConnection().prepareStatement(loadQuery(TESTING_DUMP_SQL)).execute();
+        testDbc.getConnection().prepareStatement(ProcessTreeBuilder.loadQuery(TESTING_DUMP_SQL)).execute();
         /* create rule */
-        testDbc.getConnection().prepareStatement(loadQuery(CREATE_RULE_SQL)).execute();
+        testDbc.getConnection().prepareStatement(ProcessTreeBuilder.loadQuery(CREATE_RULE_SQL)).execute();
     }
 
     @Test
-    public void test_multiple_locks() throws IOException, SQLException {
+    public void test_multiple_locks() throws IOException, SQLException, InterruptedException {
         Connection conn1 = getNewConnector();
         int conn1Pid = getPid(conn1);
-//        bomberList.add(conn1Pid);
-        LOG.info("conn1Pid:" + conn1Pid + "/" + bomberList.add(conn1Pid));
+        bomberList.add(conn1Pid);
         Connection conn2 = getNewConnector();
         int conn2Pid = getPid(conn2);
-//        bomberList.add(conn2Pid);
-        LOG.info("conn2Pid:" + conn2Pid+ "/" + bomberList.add(conn2Pid));
+        bomberList.add(conn2Pid);
         Connection conn3 = getNewConnector();
         int conn3Pid = getPid(conn3);
-//        bomberList.add(conn3Pid);
-        LOG.info("conn3Pid:" + conn3Pid+ "/" + bomberList.add(conn3Pid));
+        bomberList.add(conn3Pid);
 
-        PreparedStatement statement1 = conn1.prepareStatement(loadQuery(TEST_COMMON_LOCKS_1_SQL));
-        PreparedStatement statement2 = conn2.prepareStatement(loadQuery(TEST_COMMON_LOCKS_2_SQL));
-        PreparedStatement statement3 = conn3.prepareStatement(loadQuery(TEST_COMMON_LOCKS_2_SQL));
+        PreparedStatement statement1 = conn1.prepareStatement(ProcessTreeBuilder.loadQuery(TEST_DROP_RULE_SQL));
+        PreparedStatement statement2 = conn2.prepareStatement(ProcessTreeBuilder.loadQuery(TEST_SELECT_1000_SQL));
+        PreparedStatement statement3 = conn3.prepareStatement(ProcessTreeBuilder.loadQuery(TEST_SELECT_1000_SQL));
 
         /* Execute in the following order 2, 3, 1 */
         Thread thread2 = getNewThread(statement2);
         thread2.start();
+        Thread.sleep(1000);
         Thread thread3 = getNewThread(statement3);
         thread3.start();
+        Thread.sleep(1000);
         Thread thread1 = getNewThread(statement1);
         thread1.start();
+        Thread.sleep(1000);
 
-        Process rootProcess = testDbc.getProcessTree(true);
-        LOG.info("rootProcess:" + rootProcess);
+        Process rootProcess = testDbc.getOnlyBlockedProcessTree(true);
 
         List<Process> allGrandChild = rootProcess.getChildren().stream().
                 flatMap(l -> l.getChildren().stream()).
@@ -94,7 +95,7 @@ public class DbcDataTest {
             assertTrue(proc2.get().hasChildren()
                     && (proc1.get().getParents().stream().anyMatch(x -> x.getPid() == proc2.get().getPid())));
             assertTrue(proc3.get().hasChildren()
-                    && (proc1.get().getParents().stream().anyMatch(x -> x.getPid() ==  proc3.get().getPid())));
+                    && (proc1.get().getParents().stream().anyMatch(x -> x.getPid() == proc3.get().getPid())));
         }
 
         thread1.interrupt();
@@ -106,26 +107,177 @@ public class DbcDataTest {
         conn2.close();
     }
 
+    @Test
+    public void test_repro_waiting_locks() throws IOException, SQLException, InterruptedException {
+        Connection conn1 = getNewConnector();
+        int conn1Pid = getPid(conn1);
+        bomberList.add(conn1Pid);
+        Connection conn2 = getNewConnector();
+        int conn2Pid = getPid(conn2);
+        bomberList.add(conn2Pid);
+
+
+        PreparedStatement statement1 = conn1.prepareStatement(ProcessTreeBuilder.loadQuery(TEST_SELECT_SLEEP_SQL));
+        PreparedStatement statement2 = conn2.prepareStatement(ProcessTreeBuilder.loadQuery(TEST_CREATE_INDEX_SQL));
+
+        /* Execute in the following order 1, 2 */
+        Thread thread1 = getNewThread(statement1);
+        thread1.start();
+        Thread.sleep(1000);
+        Thread thread2 = getNewThread(statement2);
+        thread2.start();
+        Thread.sleep(1000);
+
+        Process rootProcess = testDbc.getOnlyBlockedProcessTree(true);
+        List<Process> allGrandChild = rootProcess.getChildren().stream().
+                flatMap(l -> l.getChildren().stream()).
+                collect(Collectors.toList());
+
+        Optional <Process> proc1 = rootProcess.getChildren().stream().filter(x -> (x.getPid() == conn1Pid)).findFirst();
+
+        Optional <Process> proc2 = allGrandChild.stream().filter(x -> (x.getPid() == conn2Pid)).findFirst();
+
+        assertTrue(proc1.isPresent() && proc2.isPresent());
+
+        if (proc1.isPresent() && proc2.isPresent()) {
+
+            assertEquals(ProcessStatus.BLOCKING, proc1.get().getStatus());
+            assertEquals(ProcessStatus.BLOCKED, proc2.get().getStatus());
+
+            assertTrue(proc1.get().hasChildren()
+                    && (proc2.get().getParents().stream().anyMatch(x -> x.getPid() == proc1.get().getPid())));
+        }
+
+        thread2.interrupt();
+        thread1.interrupt();
+        executionPids();
+        conn2.close();
+        conn1.close();
+    }
+
+    @Test
+    public void test_ordered_locks() throws IOException, SQLException, InterruptedException {
+        /* create rule */
+        testDbc.getConnection().prepareStatement(ProcessTreeBuilder.loadQuery(CREATE_RULE_SQL)).execute();
+
+        Connection conn1 = getNewConnector();
+        int conn1Pid = getPid(conn1);
+        bomberList.add(conn1Pid);
+        Connection conn2 = getNewConnector();
+        int conn2Pid = getPid(conn2);
+        bomberList.add(conn2Pid);
+
+        assertTrue(conn1Pid < conn2Pid);
+
+        PreparedStatement statement1 = conn1.prepareStatement(ProcessTreeBuilder.loadQuery(TEST_DROP_RULE_SQL));
+        PreparedStatement statement2 = conn2.prepareStatement(ProcessTreeBuilder.loadQuery(TEST_SELECT_1000_SQL));
+
+        /* Execute in the following order 2, 1 */
+        Thread thread2 = getNewThread(statement2);
+        thread2.start();
+        Thread.sleep(1000);
+        Thread thread1 = getNewThread(statement1);
+        thread1.start();
+        Thread.sleep(1000);
+
+        Process rootProcess = testDbc.getOnlyBlockedProcessTree(true);
+
+        List<Process> allGrandChild = rootProcess.getChildren().stream().
+                flatMap(l -> l.getChildren().stream()).
+                collect(Collectors.toList());
+
+        Optional <Process> proc1 = allGrandChild.stream().filter(x -> (x.getPid() == conn1Pid)).findFirst();
+        Optional <Process> proc2 = rootProcess.getChildren().stream().filter(x -> (x.getPid() == conn2Pid)).findFirst();
+
+
+        if (!(proc1.isPresent() && proc2.isPresent())) throw new AssertionError();
+        {
+
+            assertEquals(ProcessStatus.BLOCKING, proc2.get().getStatus());
+            assertEquals(ProcessStatus.BLOCKED, proc1.get().getStatus());
+
+            assertTrue(proc2.get().hasChildren()
+                    && (proc1.get().getParents().stream().anyMatch(x -> x.getPid() == proc2.get().getPid())));
+        }
+
+        thread1.interrupt();
+        thread2.interrupt();
+        executionPids();
+        conn1.close();
+        conn2.close();
+    }
+
+    //TODO: remove ignore annotation and fix test after solving the issue #12290
+    @Test
+    @Ignore
+    public void test_triple_locks() throws IOException, SQLException, InterruptedException {
+        /* create rule */
+        testDbc.getConnection().prepareStatement(ProcessTreeBuilder.loadQuery(CREATE_RULE_SQL)).execute();
+
+        Connection conn1 = getNewConnector();
+        int conn1Pid = getPid(conn1);
+        bomberList.add(conn1Pid);
+        Connection conn2 = getNewConnector();
+        int conn2Pid = getPid(conn2);
+        bomberList.add(conn2Pid);
+        Connection conn3 = getNewConnector();
+        int conn3Pid = getPid(conn3);
+        bomberList.add(conn3Pid);
+
+        PreparedStatement statement1 = conn1.prepareStatement(ProcessTreeBuilder.loadQuery(TEST_SELECT_1000_SQL));
+        PreparedStatement statement2 = conn2.prepareStatement(ProcessTreeBuilder.loadQuery(TEST_DROP_RULE_SQL));
+        PreparedStatement statement3 = conn3.prepareStatement(ProcessTreeBuilder.loadQuery(TEST_SELECT_1000_SQL));
+
+        /* Execute in the following order 1, 2, 3 */
+        Thread thread1 = getNewThread(statement1);
+        thread1.start();
+        Thread.sleep(1000);
+        Thread thread2 = getNewThread(statement2);
+        thread2.start();
+        Thread.sleep(1000);
+        Thread thread3 = getNewThread(statement3);
+        thread3.start();
+        Thread.sleep(1000);
+
+        Process rootProcess = testDbc.getOnlyBlockedProcessTree(true);
+
+        List<Process> allGrandChild = rootProcess.getChildren().stream().
+                flatMap(l -> l.getChildren().stream()).
+                collect(Collectors.toList());
+
+        Optional <Process> proc1 = rootProcess.getChildren().stream().filter(x -> (x.getPid() == conn1Pid)).findFirst();
+        Optional <Process> proc2 = allGrandChild.stream().filter(x -> (x.getPid() == conn2Pid)).findFirst();
+        Optional <Process> proc3 = allGrandChild.stream().filter(x -> (x.getPid() == conn3Pid)).findFirst();
+
+
+        if (!(proc1.isPresent() && proc2.isPresent() && proc3.isPresent())) throw new AssertionError();
+        {
+
+            assertEquals(ProcessStatus.BLOCKING, proc1.get().getStatus());
+            assertEquals(ProcessStatus.BLOCKED, proc2.get().getStatus());
+            assertEquals(ProcessStatus.BLOCKING, proc3.get().getStatus());
+
+            assertTrue(proc1.get().hasChildren()
+                    && (proc2.get().getParents().stream().anyMatch(x -> x.getPid() == proc1.get().getPid()))
+                    && (proc3.get().getParents().stream().anyMatch(x -> x.getPid() == proc1.get().getPid())));
+
+            assertTrue(proc2.get().hasChildren()
+                    && (proc3.get().getParents().stream().anyMatch(x -> x.getPid() == proc2.get().getPid())));
+        }
+
+        thread3.interrupt();
+        thread2.interrupt();
+        thread1.interrupt();
+        executionPids();
+        conn3.close();
+        conn2.close();
+        conn1.close();
+    }
+
     @AfterClass
     public static void terminate() throws SQLException {
         executionPids();
         testDbc.disconnect();
-    }
-
-    private String loadQuery(String queryFile){
-        try (InputStream input = ClassLoader.getSystemResourceAsStream(queryFile);
-             BufferedReader reader = new BufferedReader(new InputStreamReader(input, "UTF-8"))) {
-            StringBuilder out = new StringBuilder();
-            String line;
-            while ((line = reader.readLine()) != null) {
-                out.append(line);
-                out.append(System.lineSeparator());
-            }
-            return out.toString();
-        } catch (IOException e) {
-            LOG.error("Ошибка чтения файла " + queryFile, e);
-            return null;
-        }
     }
 
     private Connection getNewConnector() throws SQLException {
@@ -143,7 +295,7 @@ public class DbcDataTest {
                 try {
                     statement.execute();
                 } catch (SQLException e) {
-                    LOG.warn("Statement stopped:" + statement);
+                    LOG.warn("Statement stopped: " + statement);
                 }
             }}
         );
@@ -173,6 +325,7 @@ public class DbcDataTest {
                 if (terminatedSuccesed) {
                     LOG.info("Process terminated:" + processID);
                 } else {
+                    LOG.info("Process cannot be terminated:" + processID);
                     newList.add(processID);
                 }
             }
