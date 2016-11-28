@@ -41,7 +41,7 @@ public class DbcDataTest {
     }
 
     @Test
-    public void test_multiple_locks() throws IOException, SQLException, InterruptedException {
+    public void testMultipleLocks() throws IOException, SQLException, InterruptedException {
         Connection conn1 = getNewConnector();
         int conn1Pid = getPid(conn1);
         bomberList.add(conn1Pid);
@@ -101,7 +101,7 @@ public class DbcDataTest {
     }
 
     @Test
-    public void test_repro_waiting_locks() throws IOException, SQLException, InterruptedException {
+    public void testReproWaitingLocks() throws IOException, SQLException, InterruptedException {
         Connection conn1 = getNewConnector();
         int conn1Pid = getPid(conn1);
         bomberList.add(conn1Pid);
@@ -127,11 +127,9 @@ public class DbcDataTest {
                 collect(Collectors.toList());
 
         Optional <Process> proc1 = rootProcess.getChildren().stream().filter(x -> (x.getPid() == conn1Pid)).findFirst();
-
         Optional <Process> proc2 = allGrandChild.stream().filter(x -> (x.getPid() == conn2Pid)).findFirst();
 
         assertTrue(proc1.isPresent() && proc2.isPresent());
-
         if (proc1.isPresent() && proc2.isPresent()) {
             assertEquals(ProcessStatus.BLOCKING, proc1.get().getStatus());
             assertEquals(ProcessStatus.BLOCKED, proc2.get().getStatus());
@@ -148,7 +146,7 @@ public class DbcDataTest {
     }
 
     @Test
-    public void test_ordered_locks() throws IOException, SQLException, InterruptedException {
+    public void testOrderedLocks() throws IOException, SQLException, InterruptedException {
         /* create rule */
         testDbc.getConnection().prepareStatement(ProcessTreeBuilder.loadQuery(CREATE_RULE_SQL)).execute();
 
@@ -181,11 +179,9 @@ public class DbcDataTest {
         Optional <Process> proc1 = allGrandChild.stream().filter(x -> (x.getPid() == conn1Pid)).findFirst();
         Optional <Process> proc2 = rootProcess.getChildren().stream().filter(x -> (x.getPid() == conn2Pid)).findFirst();
 
-
         assertTrue(proc1.isPresent() && proc2.isPresent());
 
         if (proc1.isPresent() && proc2.isPresent()) {
-
             assertEquals(ProcessStatus.BLOCKING, proc2.get().getStatus());
             assertEquals(ProcessStatus.BLOCKED, proc1.get().getStatus());
 
@@ -203,7 +199,7 @@ public class DbcDataTest {
     //TODO: remove ignore annotation and fix test after solving the issue #12290
     @Test
     @Ignore
-    public void test_triple_locks() throws IOException, SQLException, InterruptedException {
+    public void testTripleLocks() throws IOException, SQLException, InterruptedException {
         /* create rule */
         testDbc.getConnection().prepareStatement(ProcessTreeBuilder.loadQuery(CREATE_RULE_SQL)).execute();
 
@@ -275,24 +271,21 @@ public class DbcDataTest {
 
     private Connection getNewConnector() throws SQLException {
         DriverManager.setLoginTimeout(10);
-        Connection connection = DriverManager.getConnection(
+        return DriverManager.getConnection(
                 String.format("jdbc:postgresql://%1$s:%2$s/%3$s", REMOTE_HOST, REMOTE_PORT, REMOTE_DB),
                 REMOTE_USERNAME,
                 REMOTE_PASSWORD);
-        return connection;
     }
 
     private Thread getNewThread(PreparedStatement statement) throws SQLException {
-        Thread t = new Thread(new Runnable() {
-            public void run() {
-                try {
-                    statement.execute();
-                } catch (SQLException e) {
-                    LOG.warn("Statement stopped: " + statement);
-                }
-            }}
+        return new Thread(() -> {
+            try {
+                statement.execute();
+            } catch (SQLException e) {
+                LOG.warn("Statement stopped: " + statement);
+            }
+        }
         );
-        return t;
     }
 
     private int getPid(Connection connection) throws SQLException {
