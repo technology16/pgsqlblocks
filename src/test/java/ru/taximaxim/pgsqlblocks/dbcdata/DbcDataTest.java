@@ -73,10 +73,9 @@ public class DbcDataTest {
                 flatMap(l -> l.getChildren().stream()).
                 collect(Collectors.toList());
 
-        Optional <Process> proc1 = allGrandChild.stream().filter(x -> (x.getPid() == conn1Pid)).findFirst();
-        Optional <Process> proc2 = rootProcess.getChildren().stream().filter(x -> (x.getPid() == conn2Pid)).findFirst();
-        Optional <Process> proc3 = rootProcess.getChildren().stream().filter(x -> (x.getPid() == conn3Pid)).findFirst();
-
+        Optional <Process> proc1 = allGrandChild.stream().filter(x -> x.getPid() == conn1Pid).findFirst();
+        Optional <Process> proc2 = rootProcess.getChildren().stream().filter(x -> x.getPid() == conn2Pid).findFirst();
+        Optional <Process> proc3 = rootProcess.getChildren().stream().filter(x -> x.getPid() == conn3Pid).findFirst();
 
         assertTrue(proc1.isPresent() && proc2.isPresent() && proc3.isPresent());
 
@@ -109,7 +108,6 @@ public class DbcDataTest {
         int conn2Pid = getPid(conn2);
         bomberList.add(conn2Pid);
 
-
         PreparedStatement statement1 = conn1.prepareStatement(ProcessTreeBuilder.loadQuery(TEST_SELECT_SLEEP_SQL));
         PreparedStatement statement2 = conn2.prepareStatement(ProcessTreeBuilder.loadQuery(TEST_CREATE_INDEX_SQL));
 
@@ -126,10 +124,11 @@ public class DbcDataTest {
                 flatMap(l -> l.getChildren().stream()).
                 collect(Collectors.toList());
 
-        Optional <Process> proc1 = rootProcess.getChildren().stream().filter(x -> (x.getPid() == conn1Pid)).findFirst();
-        Optional <Process> proc2 = allGrandChild.stream().filter(x -> (x.getPid() == conn2Pid)).findFirst();
+        Optional <Process> proc1 = rootProcess.getChildren().stream().filter(x -> x.getPid() == conn1Pid).findFirst();
+        Optional <Process> proc2 = allGrandChild.stream().filter(x -> x.getPid() == conn2Pid).findFirst();
 
         assertTrue(proc1.isPresent() && proc2.isPresent());
+
         if (proc1.isPresent() && proc2.isPresent()) {
             assertEquals(ProcessStatus.BLOCKING, proc1.get().getStatus());
             assertEquals(ProcessStatus.BLOCKED, proc2.get().getStatus());
@@ -176,8 +175,8 @@ public class DbcDataTest {
                 flatMap(l -> l.getChildren().stream()).
                 collect(Collectors.toList());
 
-        Optional <Process> proc1 = allGrandChild.stream().filter(x -> (x.getPid() == conn1Pid)).findFirst();
-        Optional <Process> proc2 = rootProcess.getChildren().stream().filter(x -> (x.getPid() == conn2Pid)).findFirst();
+        Optional <Process> proc1 = allGrandChild.stream().filter(x -> x.getPid() == conn1Pid).findFirst();
+        Optional <Process> proc2 = rootProcess.getChildren().stream().filter(x -> x.getPid() == conn2Pid).findFirst();
 
         assertTrue(proc1.isPresent() && proc2.isPresent());
 
@@ -234,9 +233,9 @@ public class DbcDataTest {
                 flatMap(l -> l.getChildren().stream()).
                 collect(Collectors.toList());
 
-        Optional <Process> proc1 = rootProcess.getChildren().stream().filter(x -> (x.getPid() == conn1Pid)).findFirst();
-        Optional <Process> proc2 = allGrandChild.stream().filter(x -> (x.getPid() == conn2Pid)).findFirst();
-        Optional <Process> proc3 = allGrandChild.stream().filter(x -> (x.getPid() == conn3Pid)).findFirst();
+        Optional <Process> proc1 = rootProcess.getChildren().stream().filter(x -> x.getPid() == conn1Pid).findFirst();
+        Optional <Process> proc2 = allGrandChild.stream().filter(x -> x.getPid() == conn2Pid).findFirst();
+        Optional <Process> proc3 = allGrandChild.stream().filter(x -> x.getPid() == conn3Pid).findFirst();
 
 
         assertTrue(proc1.isPresent() && proc2.isPresent() && proc3.isPresent());
