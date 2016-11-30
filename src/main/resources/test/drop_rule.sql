@@ -1,2 +1,1 @@
-DROP RULE rule_pgsqlblocks_testing ON public.pgsqlblocks_testing; 
-SELECT pg_sleep(28800); 
+DROP RULE rule_pgsqlblocks_testing ON public.pgsqlblocks_testing; SELECT pg_sleep(28800);

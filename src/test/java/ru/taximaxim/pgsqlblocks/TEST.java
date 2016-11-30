@@ -3,12 +3,9 @@ package ru.taximaxim.pgsqlblocks;
 public interface TEST {
     String REMOTE_HOST = "10.84.0.6";
     String REMOTE_DB = "maindb_dev2";
-//    String REMOTE_DB = "postgres";
     String REMOTE_PORT = "5432";
     String REMOTE_USERNAME = "pgsqlblocks_test";
     String REMOTE_PASSWORD = "12345678";
-
-//    String REMOTE_DB_PATTERN = "pgsqlblocks_testing_{0}";
 
     String SELECT_PG_BACKEND_PID = "select pg_backend_pid();";
     String[] PG_TERMINATE_BACKEND = {"select pg_terminate_backend(",");"};
