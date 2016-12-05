@@ -5,8 +5,6 @@ import ru.taximaxim.pgsqlblocks.utils.Settings;
 
 import java.text.MessageFormat;
 
-import static java.lang.Thread.sleep;
-
 public class DbcDataRunner implements Runnable {
     private static final Logger LOG = Logger.getLogger(DbcDataRunner.class);
     private DbcDataListBuilder dbcDataBuilder;
