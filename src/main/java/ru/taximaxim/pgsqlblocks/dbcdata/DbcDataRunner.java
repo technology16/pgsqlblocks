@@ -5,6 +5,8 @@ import ru.taximaxim.pgsqlblocks.utils.Settings;
 
 import java.text.MessageFormat;
 
+import static java.lang.Thread.sleep;
+
 public class DbcDataRunner implements Runnable {
     private static final Logger LOG = Logger.getLogger(DbcDataRunner.class);
     private DbcDataListBuilder dbcDataBuilder;
@@ -27,7 +29,7 @@ public class DbcDataRunner implements Runnable {
                 LOG.warn(MessageFormat.format("  Error on DbcData: {0}", dbcData.getName()));
                 dbcDataBuilder.removeScheduledUpdater(dbcData);
             } else {
-                dbcData.setStatus(DbcStatus.UPDATE);
+                dbcData.setUpdateState(true);
                 LOG.info(MessageFormat.format("  Updating \"{0}\"...", dbcData.getName()));
                 if (settings.isOnlyBlocked()) {
                     dbcData.setProcess(dbcData.getOnlyBlockedProcessTree(true));
@@ -39,6 +41,7 @@ public class DbcDataRunner implements Runnable {
             LOG.error(MessageFormat.format("  Error on connect or update DbcData: {0}", e.getMessage()));
         }
         LOG.debug(MessageFormat.format("  Finish updating \"{0}\"...", dbcData.getName()));
+        dbcData.setUpdateState(false);
         dbcData.notifyUpdated();
     }
 }

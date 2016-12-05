@@ -5,11 +5,8 @@ import org.eclipse.jface.viewers.DecorationOverlayIcon;
 import org.eclipse.jface.viewers.IDecoration;
 import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.viewers.ITableLabelProvider;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.widgets.Display;
-import ru.taximaxim.pgsqlblocks.process.ProcessStatus;
+import ru.taximaxim.pgsqlblocks.utils.Images;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,9 +15,8 @@ import java.util.concurrent.ConcurrentMap;
 
 public class DbcDataListLabelProvider implements ITableLabelProvider {
 
-    private static final int QUADRANT = IDecoration.TOP_RIGHT;
-    private static final double RESIZE_SCALE = 0.5;
-
+    private static final int BLOCKED_ICON_QUADRANT = IDecoration.TOP_RIGHT;
+    private static final int UPDATE_ICON_QUADRANT = IDecoration.BOTTOM_RIGHT;
     private List<ILabelProviderListener> listeners;
 
     private ConcurrentMap<String, Image> imagesMap = new ConcurrentHashMap<String, Image>();
@@ -83,39 +79,25 @@ public class DbcDataListLabelProvider implements ITableLabelProvider {
         }
 
         if (dbcData.hasBlockedProcess()) {
-            String overlayImagePath = ProcessStatus.BLOCKING.getImageAddr();
             Image overlayImage = new Image(null,
-                    getClass().getClassLoader().getResourceAsStream(
-                            overlayImagePath));
-            ImageDescriptor imageDescriptor = ImageDescriptor.createFromImage
-                    (resize(overlayImage));
-            return decorateImage(image, imageDescriptor);
-        } else {
-            return image;
+                    getClass().getClassLoader().getResourceAsStream(Images.LITTLE_BLOCKED.getImageAddr()));
+            ImageDescriptor imageDescriptor = ImageDescriptor.createFromImage(overlayImage);
+            image = decorateImage(image, imageDescriptor, BLOCKED_ICON_QUADRANT);
         }
+        if (dbcData.inUpdateState()){
+            Image overlayImage = new Image(null,
+                    getClass().getClassLoader().getResourceAsStream(Images.LITTLE_UPDATE.getImageAddr()));
+            ImageDescriptor imageDescriptor = ImageDescriptor.createFromImage(overlayImage);
+            image = decorateImage(image, imageDescriptor, UPDATE_ICON_QUADRANT);
+        }
+        return image;
     }
 
-    private Image decorateImage(Image image, ImageDescriptor imageDescriptor) {
+    private Image decorateImage(Image image, ImageDescriptor imageDescriptor, int iconQuadrant) {
         DecorationOverlayIcon overlayIcon = new DecorationOverlayIcon(
                 image,
                 imageDescriptor,
-                QUADRANT);
+                iconQuadrant);
         return overlayIcon.createImage();
-    }
-
-    private Image resize(Image image) {
-        int width = (int) (image.getImageData().width * RESIZE_SCALE);
-        int height = (int) (image.getImageData().height * RESIZE_SCALE);
-        Image scaled = new Image(Display.getDefault(), width, height);
-        GC gc = new GC(scaled);
-        gc.setAntialias(SWT.ON);
-        gc.setInterpolation(SWT.HIGH);
-        gc.drawImage(image, 0, 0,
-                image.getBounds().width, image.getBounds().height,
-                0, 0,
-                width, height);
-        gc.dispose();
-        image.dispose();
-        return scaled;
     }
 }

@@ -16,7 +16,9 @@ public enum Images {
     FILTER,
     CANCEL_UPDATE,
     BLOCKED,
-    UNBLOCKED;
+    UNBLOCKED,
+    LITTLE_BLOCKED,
+    LITTLE_UPDATE;
     
     /**
      * Получение иконки
@@ -54,6 +56,10 @@ public enum Images {
             return "images/block-16x16.gif";
         case UNBLOCKED:
             return "images/unblock-16x16.gif";
+        case LITTLE_BLOCKED:
+            return "images/locker_8.png";
+        case LITTLE_UPDATE:
+            return "images/update_8.png";
         default:
             return "images/void_16.png";
         }
