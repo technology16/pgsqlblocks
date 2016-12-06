@@ -168,7 +168,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
 
         MenuItem helpGetHelpItem = new MenuItem(helpMenu, SWT.PUSH);
         helpGetHelpItem.setText("&About");
-        helpGetHelpItem.addListener(SWT.Selection, e -> new AboutDlg(getShell()));
+        helpGetHelpItem.addListener(SWT.Selection, e -> new AboutDlg(getShell()).open());
         getShell().setMenuBar(menuBar);
 
         Composite composite = new Composite(parent, SWT.NONE);
