@@ -45,6 +45,7 @@ public class UIAppender extends WriterAppender{
                         text.append("\n");
                         text.setTopIndex(text.getLineCount() - 1);
                     }
+                    break;
                 default:
                     break;
             }
