@@ -187,9 +187,9 @@ public class ProcessTreeBuilder {
                 return stringCompare(process1.getQuery().getQueryString(), process2.getQuery().getQueryString(), sortDirection);
             case SLOWQUERY:
                 return getSortDirectionBySlowQueryColumn(sortDirection, process1, process2);
-            case DEFAULT:
             case BLOCKED:
-            case WAITING:
+            case LOCKTYPE:
+            case RELATION:
             default:
                 return 0;
         }

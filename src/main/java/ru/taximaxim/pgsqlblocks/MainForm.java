@@ -36,6 +36,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.MessageFormat;
+import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.*;
 import java.util.jar.Attributes;
@@ -87,14 +89,6 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
     private final DbcDataListBuilder dbcDataBuilder = DbcDataListBuilder.getInstance(this);
     private ConcurrentMap<String, Image> imagesMap = new ConcurrentHashMap<>();
     private MenuManager serversTableMenuMgr = new MenuManager();
-
-    private int[] caMainTreeColsSize = new int[]{80, 110, 150, 110, 110, 110, 145, 145, 145, 55, 145, 70, 70, 70, 150, 80};
-    private String[] caMainTreeColsName = new String[]{
-            "pid", "blocked_count", "application_name", "datname", "usename", "client", "backend_start", "query_start",
-            "xact_stat", "state", "state_change", "blocked", "locktype", "relation", "query" , "slowquery"};
-    
-    private String[] caColName = {"PID", "BLOCKED_COUNT", "APPLICATION_NAME", "DATNAME", "USENAME", "CLIENT", "BACKEND_START", "QUERY_START",
-            "XACT_STAT", "STATE", "STATE_CHANGE", "BLOCKED", "LOCKTYPE", "RELATION", "QUERY", "SLOWQUERY"};
 
     public static void main(String[] args) {
         try {
@@ -227,12 +221,14 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
                             caMainTree.getTree().setHeaderVisible(true);
                             caMainTree.getTree().setLinesVisible(true);
                             caMainTree.getTree().setLayoutData(gridData);
-                            for(int i=0;i<caMainTreeColsName.length;i++) {
+                            for (Iterator<SortColumn> it = Arrays.stream(SortColumn.values()).iterator(); it.hasNext(); ) {
+                                SortColumn column = it.next();
                                 TreeViewerColumn treeColumn = new TreeViewerColumn(caMainTree, SWT.NONE);
-                                treeColumn.getColumn().setText(caMainTreeColsName[i]);
-                                treeColumn.getColumn().setWidth(caMainTreeColsSize[i]);
-                                treeColumn.getColumn().setData("colName",caColName[i]);
+                                treeColumn.getColumn().setText(column.getLowCaseName());
+                                treeColumn.getColumn().setWidth(column.getColSize());
+                                treeColumn.getColumn().setData("colName", column);
                                 treeColumn.getColumn().setData(SORT_DIRECTION, SortDirection.UP);
+                                treeColumn.getColumn().setMoveable(true);
                             }
                             caMainTree.setContentProvider(new ProcessTreeContentProvider());
                             caMainTree.setLabelProvider(new ProcessTreeLabelProvider());
@@ -306,10 +302,11 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
                             bhMainTree.getTree().setHeaderVisible(true);
                             bhMainTree.getTree().setLinesVisible(true);
                             bhMainTree.getTree().setLayoutData(gridData);
-                            for(int i = 0; i < caMainTreeColsName.length; i++) {
+                            for (Iterator<SortColumn> it = Arrays.stream(SortColumn.values()).iterator(); it.hasNext(); ) {
+                                SortColumn column = it.next();
                                 TreeViewerColumn treeColumn = new TreeViewerColumn(bhMainTree, SWT.NONE);
-                                treeColumn.getColumn().setText(caMainTreeColsName[i]);
-                                treeColumn.getColumn().setWidth(caMainTreeColsSize[i]);
+                                treeColumn.getColumn().setText(column.getLowCaseName());
+                                treeColumn.getColumn().setWidth(column.getColSize());
                             }
                             bhMainTree.setContentProvider(new ProcessTreeContentProvider());
                             bhMainTree.setLabelProvider(new ProcessTreeLabelProvider());
@@ -376,7 +373,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
                     column.setData(SORT_DIRECTION, ((SortDirection)column.getData(SORT_DIRECTION)).getOpposite());
                     sortDirection = (SortDirection)column.getData(SORT_DIRECTION);
                     caMainTree.getTree().setSortDirection(sortDirection.getSwtData());
-                    sortColumn = SortColumn.valueOf((String)column.getData("colName"));
+                    sortColumn = (SortColumn)column.getData("colName");
                     if (settings.isOnlyBlocked()){
                         selectedDbcData.getOnlyBlockedProcessTree(false);
                     } else {
