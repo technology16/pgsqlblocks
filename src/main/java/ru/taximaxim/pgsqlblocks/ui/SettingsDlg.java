@@ -13,7 +13,8 @@ public class SettingsDlg extends Dialog {
     private Settings settings;
     private Spinner updatePeriod;
     private Button showIdleButton;
-    
+    private Button showToolTip;
+
     public SettingsDlg(Shell shell, Settings settings) {
         super(shell);
         this.settings = settings;
@@ -43,6 +44,11 @@ public class SettingsDlg extends Dialog {
         idleShowLabel.setText("Показывать idle процессы");
         showIdleButton = new Button(container, SWT.CHECK);
         showIdleButton.setSelection(settings.getShowIdle());
+
+        Label idleShowToolTip = new Label(container, SWT.HORIZONTAL);
+        idleShowToolTip.setText("Показывать оповещения о блокировках в трее");
+        showToolTip = new Button(container, SWT.CHECK);
+        showToolTip.setSelection(settings.getShowToolTip());
 
         container.pack();
         return container;

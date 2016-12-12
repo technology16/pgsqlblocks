@@ -23,6 +23,7 @@ public final class Settings {
     private static final String AUTO_UPDATE = "auto_update";
     private static final String ONLY_BLOCKED = "only_blocked";
     private static final String SHOW_IDLE = "show_idle";
+    private static final String SHOW_TOOL_TIP = "show_tool_tip";
 
     private int updatePeriod;
     private int loginTimeout;
@@ -31,6 +32,7 @@ public final class Settings {
 
     private boolean onlyBlocked;
     private boolean showIdle;
+    private boolean showToolTip;
 
     private Properties properties;
     private File propFile;
@@ -67,6 +69,11 @@ public final class Settings {
 
         this.showIdle = !(properties.getProperty(SHOW_IDLE) != null &&
                 !properties.getProperty(SHOW_IDLE).isEmpty()) || Boolean.parseBoolean(properties.getProperty(SHOW_IDLE));
+
+
+        this.showToolTip = properties.getProperty(SHOW_TOOL_TIP) != null
+                && !properties.getProperty(SHOW_TOOL_TIP).isEmpty()
+                && Boolean.parseBoolean(properties.getProperty(SHOW_TOOL_TIP));
     }
 
     public static Settings getInstance() {
@@ -164,6 +171,23 @@ public final class Settings {
      */
     public boolean getShowIdle() {
         return showIdle;
+    }
+
+    /**
+     * Устанавливаем флаг отображения уведомлений в трее
+     * @param showToolTip the showIdle to set
+     */
+    public void setShowToolTip(boolean showToolTip) {
+        this.showToolTip = showToolTip;
+        saveProperties(SHOW_TOOL_TIP, Boolean.toString(showToolTip));
+    }
+
+    /**
+     * Получаем флаг отображения уведомлений в трее
+     * @return the showIdle
+     */
+    public boolean getShowToolTip() {
+        return showToolTip;
     }
 
     private void saveProperties(String key, String value) {

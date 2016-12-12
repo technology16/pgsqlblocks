@@ -414,17 +414,16 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
             trayMenuItem.addListener(SWT.Selection, event -> getShell().close());
             trayItem.addListener(SWT.MenuDetect, event -> trayMenu.setVisible(true));
 
-            // do not show ToolTip, if linux system
+            // do not show ToolTip if option disabled
+            // or if OS - linux like system
             String os = System.getProperty("os.name").toLowerCase();
-            if (!os.contains("nux") && !os.contains("nix")) {
+            if (settings.getShowToolTip() && (!os.contains("nux") && !os.contains("nix"))) {
                 tip = new ToolTip(getShell(), SWT.BALLOON | SWT.ICON_WARNING);
                 tip.setText("pgSqlBlocks");
                 tip.setMessage("В одной из БД имеется блокировка!");
                 tip.setAutoHide(true);
                 tip.setVisible(false);
                 trayItem.setToolTip(tip);
-            } else {
-                return parent;
             }
         }
 
