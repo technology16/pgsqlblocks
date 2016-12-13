@@ -419,11 +419,11 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
     }
     private void updateTreeViewer(TreeViewer treeViewer) {
         visibleColumns = settings.getColumnsList().split(",");
-        TreeColumn[] columns = treeViewer.getTree().getColumns();
-        for (TreeColumn treeColumn : columns) {
-            SortColumn sortColumn = (SortColumn)treeColumn.getData("colName");
-            if (Arrays.stream(visibleColumns).anyMatch(x -> x.equals(sortColumn.toString()))) {
-                treeColumn.setWidth(sortColumn.getColSize());
+        TreeColumn[] treeColumns = treeViewer.getTree().getColumns();
+        for (TreeColumn treeColumn : treeColumns) {
+            SortColumn thisSortColumn = (SortColumn)treeColumn.getData("colName");
+            if (Arrays.stream(visibleColumns).anyMatch(x -> x.equals(thisSortColumn.toString()))) {
+                treeColumn.setWidth(thisSortColumn.getColSize());
             } else {
                 treeColumn.setWidth(0);
                 treeColumn.setResizable(false);
