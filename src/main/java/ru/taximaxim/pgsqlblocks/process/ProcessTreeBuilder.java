@@ -177,7 +177,7 @@ public class ProcessTreeBuilder {
                 return stringCompare(process1.getQuery().getBackendStart(), process2.getQuery().getBackendStart(), sortDirection);
             case QUERY_START:
                 return stringCompare(process1.getQuery().getQueryStart(), process2.getQuery().getQueryStart(), sortDirection);
-            case XACT_STAT:
+            case XACT_START:
                 return stringCompare(process1.getQuery().getExactStart(), process2.getQuery().getExactStart(), sortDirection);
             case STATE:
                 return stringCompare(process1.getState(), process2.getState(), sortDirection);

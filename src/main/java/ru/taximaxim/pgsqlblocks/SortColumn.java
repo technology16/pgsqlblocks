@@ -9,7 +9,7 @@ public enum SortColumn {
     CLIENT,
     BACKEND_START,
     QUERY_START,
-    XACT_STAT,
+    XACT_START,
     STATE,
     STATE_CHANGE,
     BLOCKED,
@@ -25,37 +25,37 @@ public enum SortColumn {
     public String getName() {
         switch (this) {
             case PID:
-                return "Идентификатор процесса";
+                return "PID";
             case BLOCKED_COUNT:
-                return "Кол-во заблокированных процессов";
+                return "Блокирует";
             case APPLICATION_NAME:
-                return "Имя при подключении/установке сессии";
+                return "Приложение";
             case DATNAME:
-                return "Имя базы данных при подключении";
+                return "Имя БД";
             case USENAME:
-                return "Имя роли при подключении";
+                return "Роль";
             case CLIENT:
                 return "Данные клиента";
             case BACKEND_START:
-                return "Время подключения к серверу";
+                return "Подключение к серверу";
             case QUERY_START:
-                return "Время старта запроса";
-            case XACT_STAT:
-                return "Время старта транзакции";
+                return "Старт запроса";
+            case XACT_START:
+                return "Старт транзакции";
             case STATE:
-                return "Состояние процесса";
+                return "Состояние";
             case STATE_CHANGE:
-                return "Время последнего изменения состояния процесса";
+                return "Изменено";
             case BLOCKED:
                 return "Кем блокируется";
             case LOCKTYPE:
-                return "Тип блокируемого объекта";
+                return "Тип объекта блокировки";
             case RELATION:
-                return "OID отношения, являющегося целью блокировки";
+                return "Объект блокировки";
             case QUERY:
-                return "Текст запроса";
+                return "Запрос";
             case SLOWQUERY:
-                return "\"Долгий\" процесс";
+                return "Долгий процесс";
             default:
                 return "Без имени";
         }
@@ -82,7 +82,7 @@ public enum SortColumn {
                 return 145;
             case QUERY_START:
                 return 145;
-            case XACT_STAT:
+            case XACT_START:
                 return 145;
             case STATE:
                 return 55;
