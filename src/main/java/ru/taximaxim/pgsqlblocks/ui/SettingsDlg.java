@@ -54,22 +54,19 @@ public class SettingsDlg extends Dialog {
         showIdleButton.setSelection(settings.getShowIdle());
 
         Label columnsLabel = new Label(container, SWT.HORIZONTAL);
-        columnsLabel.setText("Отображаемые колонки: *");
+        columnsLabel.setText("Отображаемые колонки: ");
         final Sash sash = new Sash(container, SWT.HORIZONTAL);
         sash.setVisible(true);
 
         for (int i = 0; i < columnsList.length; i++) {
             SortColumn column = columnsList[i];
             checkBoxes[i] = new Button(container, SWT.CHECK);
-            checkBoxes[i].setText(column.getLowCaseName());
+            checkBoxes[i].setText(column.getName());
             checkBoxes[i].setData(column);
             checkBoxes[i].setSelection(Arrays.stream(oldList)
                     .anyMatch(x -> x.equals(column.toString())));
             checkBoxes[i].pack();
         }
-        Label infoLabel = new Label(container, SWT.HORIZONTAL);
-        infoLabel.setText("* для того, чтобы изменения вступили в силу, \n"
-                + "необходимо перезапустить приложение");
 
         container.pack();
         return container;
@@ -83,19 +80,16 @@ public class SettingsDlg extends Dialog {
 
     @Override
     protected void okPressed() {
-
-        System.out.println(settings.getColumnsList());
         settings.setUpdatePeriod(updatePeriod.getSelection());
         settings.setShowIdle(showIdleButton.getSelection());
 
         List<String> resultList = new ArrayList<String>() {};
-        for (int i = 0; i < checkBoxes.length; i++) {
-            if (checkBoxes[i].getSelection()) {
-                resultList.add(checkBoxes[i].getData().toString());
+        for (Button checkBox : checkBoxes) {
+            if (checkBox.getSelection()) {
+                resultList.add(checkBox.getData().toString());
             }
         }
         settings.setColumnsList(StringUtils.join(resultList.toArray(), ","));
-        System.out.println(settings.getColumnsList());
 
         super.okPressed();
     }

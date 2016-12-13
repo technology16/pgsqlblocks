@@ -22,9 +22,43 @@ public enum SortColumn {
      * Получение имени колонки
      * @return String
      */
-    public String getLowCaseName() {
-        // TODO: переделать в switch с русскими названиями
-        return this.toString().toLowerCase();
+    public String getName() {
+        switch (this) {
+            case PID:
+                return "Идентификатор процесса";
+            case BLOCKED_COUNT:
+                return "Кол-во заблокированных процессов";
+            case APPLICATION_NAME:
+                return "Имя при подключении/установке сессии";
+            case DATNAME:
+                return "Имя базы данных при подключении";
+            case USENAME:
+                return "Имя роли при подключении";
+            case CLIENT:
+                return "Данные клиента";
+            case BACKEND_START:
+                return "Время подключения к серверу";
+            case QUERY_START:
+                return "Время старта запроса";
+            case XACT_STAT:
+                return "Время старта транзакции";
+            case STATE:
+                return "Состояние процесса";
+            case STATE_CHANGE:
+                return "Время последнего изменения состояния процесса";
+            case BLOCKED:
+                return "Кем блокируется";
+            case LOCKTYPE:
+                return "Тип блокируемого объекта";
+            case RELATION:
+                return "OID отношения, являющегося целью блокировки";
+            case QUERY:
+                return "Текст запроса";
+            case SLOWQUERY:
+                return "\"Долгий\" процесс";
+            default:
+                return "Без имени";
+        }
     }
     /**
      * Получение размера колонки

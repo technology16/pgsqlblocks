@@ -36,6 +36,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.MessageFormat;
+import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.*;
 import java.util.jar.Attributes;
@@ -220,15 +222,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
                             caMainTree.getTree().setHeaderVisible(true);
                             caMainTree.getTree().setLinesVisible(true);
                             caMainTree.getTree().setLayoutData(gridData);
-                            for (String visibleColumn : visibleColumns) {
-                                SortColumn column = SortColumn.valueOf(visibleColumn);
-                                TreeViewerColumn treeColumn = new TreeViewerColumn(caMainTree, SWT.NONE);
-                                treeColumn.getColumn().setText(column.getLowCaseName());
-                                treeColumn.getColumn().setWidth(column.getColSize());
-                                treeColumn.getColumn().setData("colName", column);
-                                treeColumn.getColumn().setData(SORT_DIRECTION, SortDirection.UP);
-                                treeColumn.getColumn().setMoveable(true);
-                            }
+                            fillTreeViewer(caMainTree);
                             caMainTree.setContentProvider(new ProcessTreeContentProvider());
                             caMainTree.setLabelProvider(new ProcessTreeLabelProvider());
                             ViewerFilter[] filters = new ViewerFilter[1];
@@ -301,12 +295,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
                             bhMainTree.getTree().setHeaderVisible(true);
                             bhMainTree.getTree().setLinesVisible(true);
                             bhMainTree.getTree().setLayoutData(gridData);
-                            for (String visibleColumn : visibleColumns) {
-                                SortColumn column = SortColumn.valueOf(visibleColumn);
-                                TreeViewerColumn treeColumn = new TreeViewerColumn(bhMainTree, SWT.NONE);
-                                treeColumn.getColumn().setText(column.getLowCaseName());
-                                treeColumn.getColumn().setWidth(column.getColSize());
-                            }
+                            fillTreeViewer(bhMainTree);
                             bhMainTree.setContentProvider(new ProcessTreeContentProvider());
                             bhMainTree.setLabelProvider(new ProcessTreeLabelProvider());
                         }
@@ -410,6 +399,36 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
         }
 
         return parent;
+    }
+
+    private void fillTreeViewer(TreeViewer treeViewer) {
+        for (Iterator<SortColumn> it = Arrays.stream(SortColumn.values()).iterator(); it.hasNext(); ) {
+            SortColumn column = it.next();
+            TreeViewerColumn treeColumn = new TreeViewerColumn(treeViewer, SWT.NONE);
+            treeColumn.getColumn().setText(column.getName());
+            treeColumn.getColumn().setData("colName", column);
+            treeColumn.getColumn().setData(SORT_DIRECTION, SortDirection.UP);
+            treeColumn.getColumn().setMoveable(true);
+            if (Arrays.stream(visibleColumns).anyMatch(x -> x.equals(column.toString()))) {
+                treeColumn.getColumn().setWidth(column.getColSize());
+            } else {
+                treeColumn.getColumn().setWidth(0);
+                treeColumn.getColumn().setResizable(false);
+            }
+        }
+    }
+    private void updateTreeViewer(TreeViewer treeViewer) {
+        visibleColumns = settings.getColumnsList().split(",");
+        TreeColumn[] columns = treeViewer.getTree().getColumns();
+        for (TreeColumn treeColumn : columns) {
+            SortColumn sortColumn = (SortColumn)treeColumn.getData("colName");
+            if (Arrays.stream(visibleColumns).anyMatch(x -> x.equals(sortColumn.toString()))) {
+                treeColumn.setWidth(sortColumn.getColSize());
+            } else {
+                treeColumn.setWidth(0);
+                treeColumn.setResizable(false);
+            }
+        }
     }
 
     private Image getIconImage() {
@@ -636,6 +655,8 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
                 SettingsDlg settingsDlg = new SettingsDlg(getShell(), settings);
                 if (Window.OK == settingsDlg.open()) {
                     updateUi();
+                    updateTreeViewer(caMainTree);
+                    updateTreeViewer(bhMainTree);
                     runUpdateForAllEnabled();
                 }
             }
