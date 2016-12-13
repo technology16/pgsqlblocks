@@ -56,6 +56,7 @@ public class SettingsDlg extends Dialog {
         Label columnsLabel = new Label(container, SWT.HORIZONTAL);
         columnsLabel.setText("Отображаемые колонки: *");
         final Sash sash = new Sash(container, SWT.HORIZONTAL);
+        sash.setVisible(true);
 
         for (int i = 0; i < columnsList.length; i++) {
             SortColumn column = columnsList[i];
