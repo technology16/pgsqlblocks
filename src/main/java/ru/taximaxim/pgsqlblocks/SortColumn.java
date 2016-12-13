@@ -20,14 +20,15 @@ public enum SortColumn {
 
     /**
      * Получение имени колонки
-     * @return
+     * @return String
      */
     public String getLowCaseName() {
+        // TODO: переделать в switch с русскими названиями
         return this.toString().toLowerCase();
     }
     /**
      * Получение размера колонки
-     * @return
+     * @return int
      */
     public int getColSize() {
         switch (this) {

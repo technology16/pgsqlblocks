@@ -36,8 +36,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.MessageFormat;
-import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.*;
 import java.util.jar.Attributes;
@@ -89,6 +87,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
     private final DbcDataListBuilder dbcDataBuilder = DbcDataListBuilder.getInstance(this);
     private ConcurrentMap<String, Image> imagesMap = new ConcurrentHashMap<>();
     private MenuManager serversTableMenuMgr = new MenuManager();
+    private String[] visibleColumns = settings.getColumnsList().split(",");
 
     public static void main(String[] args) {
         try {
@@ -221,8 +220,8 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
                             caMainTree.getTree().setHeaderVisible(true);
                             caMainTree.getTree().setLinesVisible(true);
                             caMainTree.getTree().setLayoutData(gridData);
-                            for (Iterator<SortColumn> it = Arrays.stream(SortColumn.values()).iterator(); it.hasNext(); ) {
-                                SortColumn column = it.next();
+                            for (String visibleColumn : visibleColumns) {
+                                SortColumn column = SortColumn.valueOf(visibleColumn);
                                 TreeViewerColumn treeColumn = new TreeViewerColumn(caMainTree, SWT.NONE);
                                 treeColumn.getColumn().setText(column.getLowCaseName());
                                 treeColumn.getColumn().setWidth(column.getColSize());
@@ -302,8 +301,8 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
                             bhMainTree.getTree().setHeaderVisible(true);
                             bhMainTree.getTree().setLinesVisible(true);
                             bhMainTree.getTree().setLayoutData(gridData);
-                            for (Iterator<SortColumn> it = Arrays.stream(SortColumn.values()).iterator(); it.hasNext(); ) {
-                                SortColumn column = it.next();
+                            for (String visibleColumn : visibleColumns) {
+                                SortColumn column = SortColumn.valueOf(visibleColumn);
                                 TreeViewerColumn treeColumn = new TreeViewerColumn(bhMainTree, SWT.NONE);
                                 treeColumn.getColumn().setText(column.getLowCaseName());
                                 treeColumn.getColumn().setWidth(column.getColSize());

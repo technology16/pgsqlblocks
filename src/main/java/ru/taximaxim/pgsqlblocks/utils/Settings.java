@@ -5,9 +5,13 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Properties;
+import java.util.stream.Collectors;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
+import ru.taximaxim.pgsqlblocks.SortColumn;
 
 /**
  * Класс для работы с настройка пользователя
@@ -23,6 +27,7 @@ public final class Settings {
     private static final String AUTO_UPDATE = "auto_update";
     private static final String ONLY_BLOCKED = "only_blocked";
     private static final String SHOW_IDLE = "show_idle";
+    private static final String COLUMNS_LIST = "columns_list";
 
     private int updatePeriod;
     private int loginTimeout;
@@ -31,6 +36,8 @@ public final class Settings {
 
     private boolean onlyBlocked;
     private boolean showIdle;
+
+    private String columnsList;
 
     private Properties properties;
     private File propFile;
@@ -67,6 +74,12 @@ public final class Settings {
 
         this.showIdle = !(properties.getProperty(SHOW_IDLE) != null &&
                 !properties.getProperty(SHOW_IDLE).isEmpty()) || Boolean.parseBoolean(properties.getProperty(SHOW_IDLE));
+
+        if (properties.getProperty(COLUMNS_LIST) != null && !properties.getProperty(COLUMNS_LIST).isEmpty()) {
+            this.columnsList = properties.getProperty(COLUMNS_LIST);
+        } else {
+            this.columnsList = StringUtils.join(SortColumn.values(), ",");
+        }
     }
 
     public static Settings getInstance() {
@@ -164,6 +177,15 @@ public final class Settings {
      */
     public boolean getShowIdle() {
         return showIdle;
+    }
+
+    public String getColumnsList() {
+        return columnsList;
+    }
+
+    public void setColumnsList(String columnsList) {
+        this.columnsList = columnsList;
+        saveProperties(COLUMNS_LIST, columnsList);
     }
 
     private void saveProperties(String key, String value) {
