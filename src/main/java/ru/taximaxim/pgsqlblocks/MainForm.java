@@ -690,6 +690,16 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
     }
 
     private void checkBlocks() {
+        if (settings.getShowToolTip() && tip == null) {
+            tip = new ToolTip(getShell(), SWT.BALLOON | SWT.ICON_WARNING);
+            tip.setText("pgSqlBlocks");
+            tip.setMessage("В одной из БД имеется блокировка!");
+            tip.setAutoHide(true);
+            tip.setVisible(false);
+            trayItem.setToolTip(tip);
+        } else if (!settings.getShowToolTip()){
+            tip = null;
+        }
         boolean current = dbcDataBuilder.getDbcDataList().stream().anyMatch(DbcData::hasBlockedProcess);
         if (tip != null && current != haveBlocks) {
             haveBlocks = current;
