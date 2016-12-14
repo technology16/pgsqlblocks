@@ -64,6 +64,7 @@ public class SettingsDlg extends Dialog {
     protected void okPressed() {
         settings.setUpdatePeriod(updatePeriod.getSelection());
         settings.setShowIdle(showIdleButton.getSelection());
+        settings.setShowToolTip(showToolTip.getSelection());
 
         super.okPressed();
     }
