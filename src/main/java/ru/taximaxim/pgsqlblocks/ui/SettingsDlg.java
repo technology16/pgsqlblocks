@@ -65,6 +65,7 @@ public class SettingsDlg extends Dialog {
             checkBoxes[i].setData(column);
             checkBoxes[i].setSelection(Arrays.stream(oldList)
                     .anyMatch(x -> x.equals(column.toString())));
+            checkBoxes[i].setToolTipText(column.toString());
             checkBoxes[i].pack();
         }
 
