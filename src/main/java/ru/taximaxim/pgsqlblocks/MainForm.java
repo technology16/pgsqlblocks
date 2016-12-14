@@ -409,6 +409,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
             treeColumn.getColumn().setData("colName", column);
             treeColumn.getColumn().setData(SORT_DIRECTION, SortDirection.UP);
             treeColumn.getColumn().setMoveable(true);
+            treeColumn.getColumn().setToolTipText(column.toString());
             if (Arrays.stream(visibleColumns).anyMatch(x -> x.equals(column.toString()))) {
                 treeColumn.getColumn().setWidth(column.getColSize());
             } else {
