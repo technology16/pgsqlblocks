@@ -36,6 +36,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.MessageFormat;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.*;
 import java.util.jar.Attributes;
@@ -706,9 +707,14 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
         if (tip != null && current != haveBlocks) {
             haveBlocks = current;
             if (blockedDB.length > 0) {
-                tip.setMessage(String.format("В %s БД имеется блокировка: %s",
-                        blockedDB.length == 1 ? "одной" : "нескольких",
-                        String.join(", \n", blockedDB)));
+                if (blockedDB.length > 4) {
+                    tip.setMessage(String.format("В нескольких БД имеется блокировка: %s ...",
+                            String.join(", \n", Arrays.stream(blockedDB).limit(4).toArray(String[]::new))));
+                } else {
+                    tip.setMessage(String.format("В %s БД имеется блокировка: %s",
+                            blockedDB.length == 1 ? "одной" : "нескольких",
+                            String.join(", \n", blockedDB)));
+                }
             } else {
                 tip.setMessage("В одной из БД имеется блокировка!");
             }
