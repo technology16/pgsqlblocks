@@ -85,12 +85,13 @@ public class ProcessTreeBuilder {
         // get backend pid
         try (
                 PreparedStatement statementForBackendPid = dbcData.getConnection().prepareStatement(QUERY_BACKEND_PID);
-                ResultSet processSet = statementForBackendPid.executeQuery()
+                ResultSet resultSet = statementForBackendPid.executeQuery()
         ) {
-            processSet.next();
-            int backendPid = processSet.getInt(PG_BACKEND_PID);
-            dbcData.setBackendPid(backendPid);
-            LOG.info(String.format("backend pid для %s:%s", dbcData.getDbname(), backendPid));
+            if (resultSet.next()) {
+                int backendPid = resultSet.getInt(PG_BACKEND_PID);
+                dbcData.setBackendPid(backendPid);
+                LOG.info(String.format("backend pid для %s:%s", dbcData.getDbname(), backendPid));
+            }
         } catch (SQLException e) {
             LOG.error(String.format("Ошибка при получении backend pid для %s", dbcData.getDbname()), e);
         }
