@@ -41,9 +41,10 @@ public class ProcessTreeBuilder {
 
     private static final String QUERYFILENAME = "query.sql";
     private static final String QUERYWITHIDLEFILENAME = "query_with_idle.sql";
+    private static final String PG_BACKEND_PID = "pg_backend_pid";
+    private static final String QUERY_BACKEND_PID = "select pg_backend_pid();";
 
     private Settings settings = Settings.getInstance();
-    
     private static String queryWithoutIdle;
     private static String queryWithIdle;
     private final DbcData dbcData;
@@ -81,6 +82,19 @@ public class ProcessTreeBuilder {
         } catch (SQLException e) {
             LOG.error(String.format("Ошибка при переподключении к %s", dbcData.getName()), e);
         }
+        // get backend pid
+        try (
+                PreparedStatement statementForBackendPid = dbcData.getConnection().prepareStatement(QUERY_BACKEND_PID);
+                ResultSet processSet = statementForBackendPid.executeQuery()
+        ) {
+            processSet.next();
+            int backendPid = processSet.getInt(PG_BACKEND_PID);
+            dbcData.setBackendPid(backendPid);
+            LOG.info(String.format("backend pid для %s:%s", dbcData.getDbname(), backendPid));
+        } catch (SQLException e) {
+            LOG.error(String.format("Ошибка при получении backend pid для %s", dbcData.getDbname()), e);
+        }
+
         try (
                 // TODO do not prepare each time
                 PreparedStatement statement = dbcData.getConnection().prepareStatement(getQuery(settings.getShowIdle()));
@@ -88,6 +102,10 @@ public class ProcessTreeBuilder {
         ) {
             while (processSet.next()) {
                 int pid = processSet.getInt(PID);
+                if (!settings.getShowBackendPid() && dbcData.getBackendPid() != 0
+                        && dbcData.getBackendPid() == pid) {
+                    continue;
+                }
                 Process currentProcess = tempProcessList.get(pid);
                 if (currentProcess == null) {
                     Query query = new Query(processSet.getString(QUERYSQL),

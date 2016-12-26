@@ -27,7 +27,8 @@ public class DbcData extends UpdateProvider implements Comparable<DbcData> {
     private boolean enabled;
     private DbcStatus status = DbcStatus.DISABLED;
     private boolean containBlockedProcess;
-    
+    private int backendPid;
+
     private Connection connection;
     private final ProcessTreeBuilder treeBuilder = new ProcessTreeBuilder(this);
 
@@ -78,7 +79,11 @@ public class DbcData extends UpdateProvider implements Comparable<DbcData> {
     public String getDbname() {
         return dbname;
     }
-    
+
+    public int getBackendPid() {
+        return backendPid;
+    }
+
     public boolean isEnabled() {
         return enabled;
     }
@@ -89,8 +94,9 @@ public class DbcData extends UpdateProvider implements Comparable<DbcData> {
     
     @Override
     public String toString() {
-        return String.format("DbcData [name=%1$s, host=%2$s, port=%3$s, user=%4$s, passwd=%5$s, dbname=%6$s, enabled=%7$s]", 
-            getName(), getHost(), getPort(), getUser(), getPass(), getDbname(), isEnabled());
+        return String.format("DbcData [name=%1$s, host=%2$s, port=%3$s, user=%4$s, " +
+                        "passwd=%5$s, dbname=%6$s, enabled=%7$s, enabled=%8$s]",
+            getName(), getHost(), getPort(), getUser(), getPass(), getDbname(), isEnabled(), getBackendPid());
     }
     
     @Override
@@ -197,6 +203,10 @@ public class DbcData extends UpdateProvider implements Comparable<DbcData> {
 
     public void setContainBlockedProcess(boolean containBlockedProcess) {
         this.containBlockedProcess = containBlockedProcess;
+    }
+
+    public void setBackendPid(int backendPid) {
+        this.backendPid = backendPid;
     }
 
     void updateFields(DbcData newData) {

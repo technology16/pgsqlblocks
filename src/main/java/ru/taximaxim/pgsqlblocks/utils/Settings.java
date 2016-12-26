@@ -23,6 +23,7 @@ public final class Settings {
     private static final String AUTO_UPDATE = "auto_update";
     private static final String ONLY_BLOCKED = "only_blocked";
     private static final String SHOW_IDLE = "show_idle";
+    private static final String SHOW_BACKEND_PID = "show_backend_pid";
 
     private int updatePeriod;
     private int loginTimeout;
@@ -31,6 +32,7 @@ public final class Settings {
 
     private boolean onlyBlocked;
     private boolean showIdle;
+    private boolean showBackendPid;
 
     private Properties properties;
     private File propFile;
@@ -67,6 +69,9 @@ public final class Settings {
 
         this.showIdle = !(properties.getProperty(SHOW_IDLE) != null &&
                 !properties.getProperty(SHOW_IDLE).isEmpty()) || Boolean.parseBoolean(properties.getProperty(SHOW_IDLE));
+
+        this.showBackendPid = !(properties.getProperty(SHOW_BACKEND_PID) != null &&
+                !properties.getProperty(SHOW_BACKEND_PID).isEmpty()) || Boolean.parseBoolean(properties.getProperty(SHOW_BACKEND_PID));
     }
 
     public static Settings getInstance() {
@@ -159,11 +164,28 @@ public final class Settings {
     }
 
     /**
+     * Устанавливаем флаг отображения запросов приложения среди процессов
+     * @param showBackendPid the showIdle to set
+     */
+    public void setShowBackendPid(boolean showBackendPid) {
+        this.showBackendPid = showBackendPid;
+        saveProperties(SHOW_BACKEND_PID, Boolean.toString(showBackendPid));
+    }
+
+    /**
      * Получаем флаг отображения бездействующих процессов
      * @return the showIdle
      */
     public boolean getShowIdle() {
         return showIdle;
+    }
+
+    /**
+     * Получаем флаг отображения запросов приложения среди процессов
+     * @return the showIdle
+     */
+    public boolean getShowBackendPid() {
+        return showBackendPid;
     }
 
     private void saveProperties(String key, String value) {

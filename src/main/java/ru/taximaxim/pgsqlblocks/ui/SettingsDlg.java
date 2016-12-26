@@ -13,7 +13,8 @@ public class SettingsDlg extends Dialog {
     private Settings settings;
     private Spinner updatePeriod;
     private Button showIdleButton;
-    
+    private Button showBackendPidButton;
+
     public SettingsDlg(Shell shell, Settings settings) {
         super(shell);
         this.settings = settings;
@@ -44,6 +45,11 @@ public class SettingsDlg extends Dialog {
         showIdleButton = new Button(container, SWT.CHECK);
         showIdleButton.setSelection(settings.getShowIdle());
 
+        Label showBackendPidLabel = new Label(container, SWT.HORIZONTAL);
+        showBackendPidLabel.setText("Показывать собственные запросы приложения среди процессов");
+        showBackendPidButton = new Button(container, SWT.CHECK);
+        showBackendPidButton.setSelection(settings.getShowBackendPid());
+
         container.pack();
         return container;
     }
@@ -58,6 +64,7 @@ public class SettingsDlg extends Dialog {
     protected void okPressed() {
         settings.setUpdatePeriod(updatePeriod.getSelection());
         settings.setShowIdle(showIdleButton.getSelection());
+        settings.setShowBackendPid(showBackendPidButton.getSelection());
 
         super.okPressed();
     }
