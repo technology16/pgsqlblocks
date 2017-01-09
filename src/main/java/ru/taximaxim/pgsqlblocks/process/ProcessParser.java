@@ -11,9 +11,9 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-public class ProcessParcer {
+public class ProcessParser {
     
-    private static final Logger LOG = Logger.getLogger(ProcessParcer.class);
+    private static final Logger LOG = Logger.getLogger(ProcessParser.class);
 
     private static final String PID = "pid";
     private static final String APPLICATIONNAME = "applicationName";
@@ -34,7 +34,9 @@ public class ProcessParcer {
     private static final String CHILDREN = "children";
     private static final String BLOCK = "block";
     private static final String BLOCKING_PID = "blockingPid";
-    private enum NestedElementType { CHILDS, BLOCKS }
+
+    private static final String XPATH_EXPR_BLOCKED = "blocked/block";
+    private static final String XPATH_EXPR_CHILDREN = "children/process";
 
     public Element createProcessElement(Document doc, Process process) {
         Element procEl = doc.createElement(PROCESS);
@@ -48,13 +50,7 @@ public class ProcessParcer {
         createElement(procEl, doc.createElement(XACTSTART), process.getQuery().getExactStart());
         createElement(procEl, doc.createElement(STATE), process.getState());
         createElement(procEl, doc.createElement(STATECHANGE), process.getStateChange());
-
-        Element blocks = doc.createElement(BLOCKED);
-        for(Block block : process.getBlocks()) {
-            blocks.appendChild(createBlockElement(doc, block));
-        }
-        procEl.appendChild(blocks);
-
+        procEl.appendChild(createBlockedElement(doc, process));
         createElement(procEl, doc.createElement(QUERY), process.getQuery().getQueryString());
         createElement(procEl, doc.createElement(SLOWQUERY), String.valueOf(process.getQuery().isSlowQuery()));
         
@@ -81,15 +77,25 @@ public class ProcessParcer {
                 query,
                 getNodeValue(el, STATE),
                 getNodeValue(el, STATECHANGE));
-
         XPathFactory xpf = XPathFactory.newInstance();
         XPath xp = xpf.newXPath();
+        try {
+            NodeList children = (NodeList) xp.evaluate(XPATH_EXPR_CHILDREN, el, XPathConstants.NODESET);
 
-        // parse blocks
-        parseChildrenAndBlocks(el, process, xp, NestedElementType.BLOCKS);
-
-        // parse children
-        parseChildrenAndBlocks(el, process, xp, NestedElementType.CHILDS);
+            for (int i = 0; i < children.getLength(); i++) {
+                Node processNode = children.item(i);
+                if (processNode.getNodeType() != Node.ELEMENT_NODE) {
+                    continue;
+                }
+                Element procEl = (Element) processNode;
+                Process proc = parseProcess(procEl);
+                proc.setParents(process);
+                process.addChildren(proc);
+            }
+        } catch (XPathExpressionException e) {
+            LOG.error("Ошибка чтения списка процессов: " + e.toString());
+        }
+        parseBlocked(el, process, xp);
 
         return process;
     }
@@ -107,59 +113,37 @@ public class ProcessParcer {
         return node.getNodeValue();
     }
 
-    private Element createBlockElement(Document doc, Block block) {
-        Element procEl = doc.createElement(BLOCK);
-        createElement(procEl, doc.createElement(BLOCKING_PID), String.valueOf(block.getBlockingPid()));
-        createElement(procEl, doc.createElement(RELATION), block.getRelation());
-        createElement(procEl, doc.createElement(LOCKTYPE), block.getLocktype());
-
-        return procEl;
+    private Element createBlockedElement(Document doc, Process process) {
+        Element blocks = doc.createElement(BLOCKED);
+        for (Block block : process.getBlocks()) {
+            Element procEl = doc.createElement(BLOCK);
+            createElement(procEl, doc.createElement(BLOCKING_PID), String.valueOf(block.getBlockingPid()));
+            createElement(procEl, doc.createElement(RELATION), block.getRelation());
+            createElement(procEl, doc.createElement(LOCKTYPE), block.getLocktype());
+            blocks.appendChild(procEl);
+        }
+        return blocks;
     }
 
-    private void parseChildrenAndBlocks(Element el, Process process, XPath xp, NestedElementType type) {
-        NodeList nodeList = null;
-        String expression;
-        switch (type) {
-            case BLOCKS:
-                expression = "blocked/block";
-                break;
-            case CHILDS:
-                expression = "children/process";
-                break;
-            default:
-                LOG.error("Unexpected NestedElementType: " + type);
-                return;
-        }
-
+    private void parseBlocked(Element el, Process process, XPath xp) {
         try {
-            nodeList = (NodeList)xp.evaluate(expression, el, XPathConstants.NODESET);
-        } catch (XPathExpressionException e) {
-            LOG.error("Ошибка XPathExpressionException: " + e.getMessage());
-        }
-        if (nodeList != null) {
-            for(int i = 0; i<nodeList.getLength(); i++) {
-                Node processNode = nodeList.item(i);
-                if (processNode.getNodeType() != Node.ELEMENT_NODE) {
-                    continue;
-                }
-                Element procEl = (Element)processNode;
-                switch (type) {
-                    case BLOCKS:
-                        process.addBlock(
-                                new Block(Integer.parseInt(getNodeValue(procEl, BLOCKING_PID)),
-                                        getNodeValue(procEl, LOCKTYPE),
-                                        getNodeValue(procEl, RELATION)));
-                        break;
-                    case CHILDS:
-                        Process proc = parseProcess(procEl);
-                        proc.setParents(process);
-                        process.addChildren(proc);
-                        break;
-                    default:
-                        LOG.error("Unexpected NestedElementType: " + type);
-                        return;
+            NodeList nodeList = (NodeList) xp.evaluate(XPATH_EXPR_BLOCKED, el, XPathConstants.NODESET);
+
+            if (nodeList != null) {
+                for (int i = 0; i < nodeList.getLength(); i++) {
+                    Node processNode = nodeList.item(i);
+                    if (processNode.getNodeType() != Node.ELEMENT_NODE) {
+                        continue;
+                    }
+                    Element procEl = (Element) processNode;
+                    process.addBlock(
+                            new Block(Integer.parseInt(getNodeValue(procEl, BLOCKING_PID)),
+                                    getNodeValue(procEl, LOCKTYPE),
+                                    getNodeValue(procEl, RELATION)));
                 }
             }
+        } catch (XPathExpressionException e) {
+            LOG.error("Ошибка чтения списка блокировок: " + e.toString());
         }
     }
 }
