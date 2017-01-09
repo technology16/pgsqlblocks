@@ -1,9 +1,9 @@
 package ru.taximaxim.pgsqlblocks.ui;
 
-import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.program.Program;
@@ -16,12 +16,26 @@ public class AboutDlg extends Dialog {
     public static final String TELEGRAM_LINK = "https://telegram.me/joinchat/Bxn1Zwh02WM96O-55GAryA";
 
     public AboutDlg(Shell parentShell) {
-        super(parentShell);
+        super(parentShell, SWT.DIALOG_TRIM | SWT.APPLICATION_MODAL);
+        parentShell.setText("О приложении");
     }
 
-    @Override
-    protected Control createDialogArea(Composite parent) {
-        Composite container = (Composite) super.createDialogArea(parent);
+    public String open() {
+        Shell shell = new Shell(getParent(), getStyle());
+        shell.setText(getText());
+        createContent(shell);
+        shell.pack();
+        shell.open();
+        Display display = getParent().getDisplay();
+        while (!shell.isDisposed()) {
+            if (!display.readAndDispatch()) {
+                display.sleep();
+            }
+        }
+        return null;
+    }
+
+    private void createContent(Shell container){
 
         GridLayout layout = new GridLayout(1, false);
         layout.marginRight = 5;
@@ -59,17 +73,15 @@ public class AboutDlg extends Dialog {
         Label copyrightLabel = new Label(container, SWT.HORIZONTAL);
         copyrightLabel.setText("© \"Technology\" LLC");
 
-        return super.createDialogArea(parent);
-    }
-
-    @Override
-    protected void configureShell(Shell newShell) {
-        super.configureShell(newShell);
-        newShell.setText("О приложении");
-    }
-
-    @Override
-    protected Point getInitialSize() {
-        return new Point(550, 375);
+        Button ok = new Button(container, SWT.PUSH);
+        ok.setText("OK");
+        GridData data = new GridData(GridData.HORIZONTAL_ALIGN_END);
+        ok.setLayoutData(data);
+        ok.addSelectionListener(new SelectionAdapter() {
+            public void widgetSelected(SelectionEvent event) {
+                container.close();
+            }
+        });
+        container.setDefaultButton(ok);
     }
 }

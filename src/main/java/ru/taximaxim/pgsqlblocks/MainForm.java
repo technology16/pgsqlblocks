@@ -161,13 +161,13 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
     {
         Menu menuBar = new Menu(getShell(), SWT.BAR);
         MenuItem helpMenuHeader = new MenuItem(menuBar, SWT.CASCADE);
-        helpMenuHeader.setText("&Help");
+        helpMenuHeader.setText("&Помощь");
 
         Menu helpMenu = new Menu(getShell(), SWT.DROP_DOWN);
         helpMenuHeader.setMenu(helpMenu);
 
         MenuItem helpGetHelpItem = new MenuItem(helpMenu, SWT.PUSH);
-        helpGetHelpItem.setText("&About");
+        helpGetHelpItem.setText("&О приложении");
         helpGetHelpItem.addListener(SWT.Selection, e -> new AboutDlg(getShell()).open());
         getShell().setMenuBar(menuBar);
 
