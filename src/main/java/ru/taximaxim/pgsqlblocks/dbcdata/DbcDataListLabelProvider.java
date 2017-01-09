@@ -80,13 +80,13 @@ public class DbcDataListLabelProvider implements ITableLabelProvider {
 
         if (dbcData.hasBlockedProcess()) {
             Image overlayImage = new Image(null,
-                    getClass().getClassLoader().getResourceAsStream(Images.LITTLE_BLOCKED.getImageAddr()));
+                    getClass().getClassLoader().getResourceAsStream(Images.DECORATOR_BLOCKED.getImageAddr()));
             ImageDescriptor imageDescriptor = ImageDescriptor.createFromImage(overlayImage);
             image = decorateImage(image, imageDescriptor, BLOCKED_ICON_QUADRANT);
         }
-        if (dbcData.inUpdateState()){
+        if (dbcData.isInUpdateState()){
             Image overlayImage = new Image(null,
-                    getClass().getClassLoader().getResourceAsStream(Images.LITTLE_UPDATE.getImageAddr()));
+                    getClass().getClassLoader().getResourceAsStream(Images.DECORATOR_UPDATE.getImageAddr()));
             ImageDescriptor imageDescriptor = ImageDescriptor.createFromImage(overlayImage);
             image = decorateImage(image, imageDescriptor, UPDATE_ICON_QUADRANT);
         }
@@ -94,10 +94,7 @@ public class DbcDataListLabelProvider implements ITableLabelProvider {
     }
 
     private Image decorateImage(Image image, ImageDescriptor imageDescriptor, int iconQuadrant) {
-        DecorationOverlayIcon overlayIcon = new DecorationOverlayIcon(
-                image,
-                imageDescriptor,
-                iconQuadrant);
+        DecorationOverlayIcon overlayIcon = new DecorationOverlayIcon(image, imageDescriptor, iconQuadrant);
         return overlayIcon.createImage();
     }
 }

@@ -17,8 +17,8 @@ public enum Images {
     CANCEL_UPDATE,
     BLOCKED,
     UNBLOCKED,
-    LITTLE_BLOCKED,
-    LITTLE_UPDATE;
+    DECORATOR_BLOCKED,
+    DECORATOR_UPDATE;
     
     /**
      * Получение иконки
@@ -56,9 +56,9 @@ public enum Images {
             return "images/block-16x16.gif";
         case UNBLOCKED:
             return "images/unblock-16x16.gif";
-        case LITTLE_BLOCKED:
+        case DECORATOR_BLOCKED:
             return "images/locker_8.png";
-        case LITTLE_UPDATE:
+        case DECORATOR_UPDATE:
             return "images/update_8.png";
         default:
             return "images/void_16.png";

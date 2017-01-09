@@ -200,11 +200,11 @@ public class DbcData extends UpdateProvider implements Comparable<DbcData> {
         this.containBlockedProcess = containBlockedProcess;
     }
 
-    public boolean inUpdateState() {
+    public boolean isInUpdateState() {
         return inUpdateState;
     }
 
-    public void setUpdateState(boolean inUpdateState) {
+    public void setInUpdateState(boolean inUpdateState) {
         this.inUpdateState = inUpdateState;
     }
 
