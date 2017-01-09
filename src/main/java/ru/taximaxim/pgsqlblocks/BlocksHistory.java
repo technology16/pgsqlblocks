@@ -21,7 +21,7 @@ import org.w3c.dom.NodeList;
 import ru.taximaxim.pgsqlblocks.dbcdata.DbcData;
 import ru.taximaxim.pgsqlblocks.dbcdata.DbcDataParser;
 import ru.taximaxim.pgsqlblocks.process.Process;
-import ru.taximaxim.pgsqlblocks.process.ProcessParcer;
+import ru.taximaxim.pgsqlblocks.process.ProcessParser;
 import ru.taximaxim.pgsqlblocks.process.ProcessStatus;
 import ru.taximaxim.pgsqlblocks.utils.PathBuilder;
 import ru.taximaxim.pgsqlblocks.utils.XmlDocumentWorker;
@@ -42,7 +42,7 @@ public final class BlocksHistory {
     
     private XmlDocumentWorker docWorker;
     private DbcDataParser dbcDataParcer = new DbcDataParser();
-    private ProcessParcer processParcer = new ProcessParcer();
+    private ProcessParser processParser = new ProcessParser();
     
     public static BlocksHistory getInstance() {
         if(instance == null) {
@@ -71,7 +71,7 @@ public final class BlocksHistory {
                 Element server = dbcDataParcer.createServerElement(doc, dbcData, false);
                 dbcData.getProcessTree(false).getChildren().stream()
                         .filter(Process::hasChildren)
-                        .forEach(process -> server.appendChild(processParcer.createProcessElement(doc, process)));
+                        .forEach(process -> server.appendChild(processParser.createProcessElement(doc, process)));
                 rootElement.appendChild(server);
             });
             doc.appendChild(rootElement);
@@ -115,7 +115,7 @@ public final class BlocksHistory {
                     continue;
                 }
                 Element procEl = (Element)processNode;
-                proc = processParcer.parseProcess(procEl);
+                proc = processParser.parseProcess(procEl);
                 
                 for (Process process : proc.getChildren()) {
                     if (!process.getBlocks().isEmpty()) {
