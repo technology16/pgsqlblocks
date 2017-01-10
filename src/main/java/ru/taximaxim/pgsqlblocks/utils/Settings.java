@@ -40,7 +40,15 @@ public final class Settings {
     private static Settings instance;
 
     private Settings() {
-        properties = new Properties();
+        Properties defaults = new Properties();
+        defaults.put(UPDATE_PERIOD, "10");
+        defaults.put(AUTO_UPDATE, "true");
+        defaults.put(ONLY_BLOCKED, "false");
+        defaults.put(LOGIN_TIMEOUT, "10");
+        defaults.put(SHOW_IDLE, "true");
+        defaults.put(SHOW_TOOL_TIP, "false");
+
+        properties = new Properties(defaults);
         propFile = PathBuilder.getInstance().getPropertiesPath().toFile();
         try (FileInputStream loadProp = new FileInputStream(propFile)) {
             properties.load(loadProp);
@@ -50,30 +58,12 @@ public final class Settings {
             LOG.error(String.format("Ошибка чтения файла %s!", propFile.toString()));
         }
 
-        if (properties.getProperty(UPDATE_PERIOD) != null &&
-                !properties.getProperty(UPDATE_PERIOD).isEmpty()) {
-            this.updatePeriod = Integer.parseInt(properties.getProperty(UPDATE_PERIOD));
-        } else {
-            this.updatePeriod = 10;
-        }
-        this.autoUpdate = !(properties.getProperty(AUTO_UPDATE) != null &&
-                !properties.getProperty(AUTO_UPDATE).isEmpty()) || Boolean.parseBoolean(properties.getProperty(AUTO_UPDATE));
-        this.onlyBlocked = properties.getProperty(ONLY_BLOCKED) != null
-                && !properties.getProperty(ONLY_BLOCKED).isEmpty() && Boolean.parseBoolean(properties.getProperty(ONLY_BLOCKED));
-        if (properties.getProperty(LOGIN_TIMEOUT) != null &&
-                !properties.getProperty(LOGIN_TIMEOUT).isEmpty()) {
-            this.loginTimeout = Integer.parseInt(properties.getProperty(LOGIN_TIMEOUT));
-        } else {
-            this.loginTimeout = 10;
-        }
-
-        this.showIdle = !(properties.getProperty(SHOW_IDLE) != null &&
-                !properties.getProperty(SHOW_IDLE).isEmpty()) || Boolean.parseBoolean(properties.getProperty(SHOW_IDLE));
-
-
-        this.showToolTip = properties.getProperty(SHOW_TOOL_TIP) != null
-                && !properties.getProperty(SHOW_TOOL_TIP).isEmpty()
-                && Boolean.parseBoolean(properties.getProperty(SHOW_TOOL_TIP));
+        this.updatePeriod = Integer.parseInt(properties.getProperty(UPDATE_PERIOD));
+        this.autoUpdate = Boolean.parseBoolean(properties.getProperty(AUTO_UPDATE));
+        this.onlyBlocked = Boolean.parseBoolean(properties.getProperty(ONLY_BLOCKED));
+        this.loginTimeout = Integer.parseInt(properties.getProperty(LOGIN_TIMEOUT));
+        this.showIdle = Boolean.parseBoolean(properties.getProperty(SHOW_IDLE));
+        this.showToolTip = Boolean.parseBoolean(properties.getProperty(SHOW_TOOL_TIP));
     }
 
     public static Settings getInstance() {
