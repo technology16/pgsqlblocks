@@ -8,14 +8,14 @@ public interface TEST {
     String REMOTE_PASSWORD = "12345678";
 
     String SELECT_PG_BACKEND_PID = "select pg_backend_pid();";
-    String[] PG_TERMINATE_BACKEND = {"select pg_terminate_backend(",");"};
+    String PG_TERMINATE_BACKEND = "select pg_terminate_backend(?);";
     String TERMINATED_SUCCESED = "pg_terminate_backend";
     String PID = "pg_backend_pid";
 
-    String TESTING_DUMP_SQL = "test/testing_dump.sql";
-    String CREATE_RULE_SQL = "test/create_rule.sql";
-    String TEST_DROP_RULE_SQL = "test/drop_rule.sql";
-    String TEST_SELECT_1000_SQL = "test/select_1000.sql";
-    String TEST_SELECT_SLEEP_SQL = "test/select_sleep.sql";
-    String TEST_CREATE_INDEX_SQL = "test/create_index.sql";
+    String TESTING_DUMP_SQL = "testing_dump.sql";
+    String CREATE_RULE_SQL = "create_rule.sql";
+    String TEST_DROP_RULE_SQL = "drop_rule.sql";
+    String TEST_SELECT_1000_SQL = "select_1000.sql";
+    String TEST_SELECT_SLEEP_SQL = "select_sleep.sql";
+    String TEST_CREATE_INDEX_SQL = "create_index.sql";
 }

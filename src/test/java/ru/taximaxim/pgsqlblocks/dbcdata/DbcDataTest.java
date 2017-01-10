@@ -77,18 +77,18 @@ public class DbcDataTest {
         Optional <Process> proc2 = rootProcess.getChildren().stream().filter(x -> x.getPid() == conn2Pid).findFirst();
         Optional <Process> proc3 = rootProcess.getChildren().stream().filter(x -> x.getPid() == conn3Pid).findFirst();
 
-        assertTrue(proc1.isPresent() && proc2.isPresent() && proc3.isPresent());
+        assertTrue(proc1.isPresent());
+        assertTrue(proc2.isPresent());
+        assertTrue(proc3.isPresent());
 
-        if (proc1.isPresent() && proc2.isPresent() && proc3.isPresent()) {
-            assertEquals(ProcessStatus.BLOCKED, proc1.get().getStatus());
-            assertEquals(ProcessStatus.BLOCKING, proc2.get().getStatus());
-            assertEquals(ProcessStatus.BLOCKING, proc3.get().getStatus());
+        assertEquals(ProcessStatus.BLOCKED, proc1.get().getStatus());
+        assertEquals(ProcessStatus.BLOCKING, proc2.get().getStatus());
+        assertEquals(ProcessStatus.BLOCKING, proc3.get().getStatus());
 
-            assertTrue(proc2.get().hasChildren()
-                    && (proc1.get().getParents().stream().anyMatch(x -> x.getPid() == proc2.get().getPid())));
-            assertTrue(proc3.get().hasChildren()
-                    && (proc1.get().getParents().stream().anyMatch(x -> x.getPid() == proc3.get().getPid())));
-        }
+        assertTrue(proc2.get().hasChildren());
+        assertTrue(proc1.get().getParents().stream().anyMatch(x -> x.getPid() == proc2.get().getPid()));
+        assertTrue(proc3.get().hasChildren());
+        assertTrue(proc1.get().getParents().stream().anyMatch(x -> x.getPid() == proc3.get().getPid()));
 
         thread1.interrupt();
         thread3.interrupt();
@@ -127,15 +127,14 @@ public class DbcDataTest {
         Optional <Process> proc1 = rootProcess.getChildren().stream().filter(x -> x.getPid() == conn1Pid).findFirst();
         Optional <Process> proc2 = allGrandChild.stream().filter(x -> x.getPid() == conn2Pid).findFirst();
 
-        assertTrue(proc1.isPresent() && proc2.isPresent());
+        assertTrue(proc1.isPresent());
+        assertTrue(proc2.isPresent());
 
-        if (proc1.isPresent() && proc2.isPresent()) {
-            assertEquals(ProcessStatus.BLOCKING, proc1.get().getStatus());
-            assertEquals(ProcessStatus.BLOCKED, proc2.get().getStatus());
+        assertEquals(ProcessStatus.BLOCKING, proc1.get().getStatus());
+        assertEquals(ProcessStatus.BLOCKED, proc2.get().getStatus());
 
-            assertTrue(proc1.get().hasChildren()
-                    && (proc2.get().getParents().stream().anyMatch(x -> x.getPid() == proc1.get().getPid())));
-        }
+        assertTrue(proc1.get().hasChildren());
+        assertTrue(proc2.get().getParents().stream().anyMatch(x -> x.getPid() == proc1.get().getPid()));
 
         thread2.interrupt();
         thread1.interrupt();
@@ -178,15 +177,14 @@ public class DbcDataTest {
         Optional <Process> proc1 = allGrandChild.stream().filter(x -> x.getPid() == conn1Pid).findFirst();
         Optional <Process> proc2 = rootProcess.getChildren().stream().filter(x -> x.getPid() == conn2Pid).findFirst();
 
-        assertTrue(proc1.isPresent() && proc2.isPresent());
+        assertTrue(proc1.isPresent());
+        assertTrue(proc2.isPresent());
 
-        if (proc1.isPresent() && proc2.isPresent()) {
-            assertEquals(ProcessStatus.BLOCKING, proc2.get().getStatus());
-            assertEquals(ProcessStatus.BLOCKED, proc1.get().getStatus());
+        assertEquals(ProcessStatus.BLOCKING, proc2.get().getStatus());
+        assertEquals(ProcessStatus.BLOCKED, proc1.get().getStatus());
 
-            assertTrue(proc2.get().hasChildren()
-                    && (proc1.get().getParents().stream().anyMatch(x -> x.getPid() == proc2.get().getPid())));
-        }
+        assertTrue(proc2.get().hasChildren());
+        assertTrue(proc1.get().getParents().stream().anyMatch(x -> x.getPid() == proc2.get().getPid()));
 
         thread1.interrupt();
         thread2.interrupt();
@@ -238,20 +236,20 @@ public class DbcDataTest {
         Optional <Process> proc3 = allGrandChild.stream().filter(x -> x.getPid() == conn3Pid).findFirst();
 
 
-        assertTrue(proc1.isPresent() && proc2.isPresent() && proc3.isPresent());
+        assertTrue(proc1.isPresent());
+        assertTrue(proc2.isPresent());
+        assertTrue(proc3.isPresent());
 
-        if (proc1.isPresent() && proc2.isPresent() && proc3.isPresent()) {
-            assertEquals(ProcessStatus.BLOCKING, proc1.get().getStatus());
-            assertEquals(ProcessStatus.BLOCKED, proc2.get().getStatus());
-            assertEquals(ProcessStatus.BLOCKING, proc3.get().getStatus());
+        assertEquals(ProcessStatus.BLOCKING, proc1.get().getStatus());
+        assertEquals(ProcessStatus.BLOCKED, proc2.get().getStatus());
+        assertEquals(ProcessStatus.BLOCKING, proc3.get().getStatus());
 
-            assertTrue(proc1.get().hasChildren()
-                    && (proc2.get().getParents().stream().anyMatch(x -> x.getPid() == proc1.get().getPid()))
-                    && (proc3.get().getParents().stream().anyMatch(x -> x.getPid() == proc1.get().getPid())));
+        assertTrue(proc1.get().hasChildren());
+        assertTrue(proc2.get().getParents().stream().anyMatch(x -> x.getPid() == proc1.get().getPid()));
+        assertTrue(proc3.get().getParents().stream().anyMatch(x -> x.getPid() == proc1.get().getPid()));
 
-            assertTrue(proc2.get().hasChildren()
-                    && (proc3.get().getParents().stream().anyMatch(x -> x.getPid() == proc2.get().getPid())));
-        }
+        assertTrue(proc2.get().hasChildren());
+        assertTrue(proc3.get().getParents().stream().anyMatch(x -> x.getPid() == proc2.get().getPid()));
 
         thread3.interrupt();
         thread2.interrupt();
@@ -298,21 +296,25 @@ public class DbcDataTest {
     }
 
     private static void executionPids() throws SQLException {
-        List newList = Collections.synchronizedList(new ArrayList());
+        List newList = new ArrayList();
         for(Object processID : bomberList)
         {
-            String prepared = PG_TERMINATE_BACKEND[0] + processID + PG_TERMINATE_BACKEND[1];
-            LOG.info("Prepared query:" + prepared);
-            ResultSet result = testDbc.getConnection().prepareStatement(prepared).executeQuery();
-            if (result.next()) {
-                boolean terminatedSuccesed = result.getBoolean(TERMINATED_SUCCESED);
-                LOG.info("Terminating the process pid:" + processID + " is succeed:" + terminatedSuccesed);
-                if (terminatedSuccesed) {
-                    LOG.info("Process terminated:" + processID);
-                } else {
-                    LOG.info("Process cannot be terminated:" + processID);
-                    newList.add(processID);
+            try (PreparedStatement termPs = testDbc.getConnection().prepareStatement(PG_TERMINATE_BACKEND)) {
+                termPs.setInt(1, Integer.parseInt(processID.toString()));
+                LOG.info("Prepared query:" + termPs);
+                ResultSet result = termPs.executeQuery();
+                if (result.next()) {
+                    boolean terminatedSuccesed = result.getBoolean(TERMINATED_SUCCESED);
+                    LOG.info("Terminating the process pid:" + processID + " is succeed:" + terminatedSuccesed);
+                    if (terminatedSuccesed) {
+                        LOG.info("Process terminated:" + processID);
+                    } else {
+                        LOG.info("Process cannot be terminated:" + processID);
+                        newList.add(processID);
+                    }
                 }
+            } catch (Exception e) {
+                LOG.error("Error on prepared statement" + e.getMessage());
             }
         }
         bomberList = newList;
