@@ -7,15 +7,24 @@ import org.apache.log4j.WriterAppender;
 import org.apache.log4j.spi.LoggingEvent;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
+import org.eclipse.swt.events.*;
 import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.*;
 
 public class UIAppender extends WriterAppender{
 
     private Composite parent;
     private StyledText text;
     private Display display;
+    private boolean autoScrollEnabled = true;
+    private ModifyListener modifyListener = new ModifyListener() {
+        @Override
+        public void modifyText(ModifyEvent e) {
+            if(autoScrollEnabled) {
+                text.setTopIndex(text.getLineCount() - 1);
+            }
+        }
+    };
 
     public UIAppender(Composite parent) {
         this.parent = parent;
@@ -28,7 +37,26 @@ public class UIAppender extends WriterAppender{
         text.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
         text.setMargins(3, 3, 3, 3);
         text.layout(true);
+        text.addModifyListener(modifyListener);
         parent.layout(true, true);
+
+        // add empty string on ENTER pressed
+        text.addTraverseListener(e -> {
+            switch (e.detail) {
+                case SWT.TRAVERSE_RETURN:
+                    if (!text.isDisposed()) {
+                        text.append("\n");
+                        text.setTopIndex(text.getLineCount() - 1);
+                        text.setCaretOffset(text.getCharCount() - 1);
+                    }
+                    break;
+                default:
+                    break;
+            }
+        });
+
+        // wheel up and down
+        text.addMouseWheelListener(e -> autoScrollEnabled = e.count <= 0);
     }
 
     public void append(LoggingEvent event) {
@@ -48,6 +76,10 @@ public class UIAppender extends WriterAppender{
             return;
         }
         final String logMessage = String.format("[%s] %s%n", dateTime,excMessage);
-        parent.getDisplay().asyncExec(() -> text.append(logMessage));
+        parent.getDisplay().asyncExec(() -> {
+            if (!text.isDisposed()) {
+                text.append(logMessage);
+            }
+        });
     }
 }
