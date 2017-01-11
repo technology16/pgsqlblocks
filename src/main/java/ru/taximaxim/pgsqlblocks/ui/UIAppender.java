@@ -16,10 +16,13 @@ public class UIAppender extends WriterAppender{
     private Composite parent;
     private StyledText text;
     private Display display;
+    private boolean autoScrollEnabled = true;
     private ModifyListener modifyListener = new ModifyListener() {
         @Override
         public void modifyText(ModifyEvent e) {
-            text.setTopIndex(text.getLineCount() - 1);
+            if(autoScrollEnabled) {
+                text.setTopIndex(text.getLineCount() - 1);
+            }
         }
     };
 
@@ -44,6 +47,7 @@ public class UIAppender extends WriterAppender{
                     if (!text.isDisposed()) {
                         text.append("\n");
                         text.setTopIndex(text.getLineCount() - 1);
+                        text.setCaretOffset(text.getCharCount() - 1);
                     }
                     break;
                 default:
@@ -52,13 +56,7 @@ public class UIAppender extends WriterAppender{
         });
 
         // wheel up and down
-        text.addMouseWheelListener(e -> {
-            if (e.count > 0) {
-                text.removeModifyListener(modifyListener);
-            } else {
-                text.addModifyListener(modifyListener);
-            }
-        });
+        text.addMouseWheelListener(e -> autoScrollEnabled = e.count <= 0);
     }
 
     public void append(LoggingEvent event) {
