@@ -36,11 +36,11 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.MessageFormat;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.*;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
+import java.util.stream.Collectors;
 
 
 public class MainForm extends ApplicationWindow implements IUpdateListener {
@@ -57,7 +57,9 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
     // some problem with 512px: (SWT:4175): Gdk-WARNING **: gdk_window_set_icon_list: icons too large
     private static final int[] ICON_SIZES = { 32, 48, 256/*, 512*/ };
     
-    private static Display display;
+    private static final int TRAY_NOTIFICATION_MAX_LENGTH = 4;
+    private static final Display display = new Display();
+    private static final Tray tray = display.getSystemTray();
 
     private volatile DbcData selectedDbcData;
     private Process selectedProcess;
@@ -89,7 +91,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
     private final DbcDataListBuilder dbcDataBuilder = DbcDataListBuilder.getInstance(this);
     private ConcurrentMap<String, Image> imagesMap = new ConcurrentHashMap<>();
     private MenuManager serversTableMenuMgr = new MenuManager();
-    private boolean haveBlocks = dbcDataBuilder.getDbcDataList().stream().anyMatch(DbcData::hasBlockedProcess);
+    private boolean hasBlocks = false;
 
     private int[] caMainTreeColsSize = new int[]{80, 110, 150, 110, 110, 110, 145, 145, 145, 55, 145, 70, 70, 70, 150, 80};
     private String[] caMainTreeColsName = new String[]{
@@ -101,7 +103,6 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
 
     public static void main(String[] args) {
         try {
-            display = new Display();
             MainForm wwin = new MainForm();
             wwin.setBlockOnOpen(true);
             wwin.open();
@@ -402,10 +403,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
             }
         });
 
-        final Tray tray = display.getSystemTray();
-        if (tray == null) {
-            LOG.warn("The system tray is not available");
-        } else {
+        if (getSupportsTray()) {
             trayItem = new TrayItem(tray, SWT.NONE);
             trayItem.setImage(getIconImage());
             trayItem.setToolTipText("pgSqlBlocks v." + getAppVersion());
@@ -415,17 +413,20 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
             trayMenuItem.addListener(SWT.Selection, event -> getShell().close());
             trayItem.addListener(SWT.MenuDetect, event -> trayMenu.setVisible(true));
 
-            // do not show ToolTip if option disabled
-            if (settings.getShowToolTip()) {
-                tip = new ToolTip(getShell(), SWT.BALLOON | SWT.ICON_WARNING);
-                tip.setText("pgSqlBlocks v." + getAppVersion());
-                tip.setAutoHide(true);
-                tip.setVisible(false);
-                trayItem.setToolTip(tip);
-            }
+            tip = new ToolTip(getShell(), SWT.BALLOON | SWT.ICON_WARNING);
+            tip.setText("pgSqlBlocks v." + getAppVersion());
+            tip.setAutoHide(true);
+            tip.setVisible(false);
+            trayItem.setToolTip(tip);
+        } else {
+            LOG.warn("The system tray is not available");
         }
 
         return parent;
+    }
+
+    private boolean getSupportsTray() {
+        return tray != null;
     }
 
     private Image getIconImage() {
@@ -690,35 +691,24 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
     }
 
     private void checkBlocks() {
-        if (settings.getShowToolTip() && tip == null) {
-            tip = new ToolTip(getShell(), SWT.BALLOON | SWT.ICON_WARNING);
-            tip.setText("pgSqlBlocks v." + getAppVersion());
-            tip.setAutoHide(true);
-            tip.setVisible(false);
-            trayItem.setToolTip(tip);
-        } else if (!settings.getShowToolTip()) {
-            tip = null;
-        }
-        boolean current = dbcDataBuilder.getDbcDataList().stream().anyMatch(DbcData::hasBlockedProcess);
-        String[] blockedDB = dbcDataBuilder.getDbcDataList().stream()
-                .filter(DbcData::hasBlockedProcess)
-                .map(DbcData::getName)
-                .toArray(String[]::new);
-        if (tip != null && current != haveBlocks) {
-            haveBlocks = current;
-            if (blockedDB.length > 0) {
-                if (blockedDB.length > 4) {
-                    tip.setMessage(String.format("В нескольких БД имеется блокировка: %s ...",
-                            String.join(", \n", Arrays.stream(blockedDB).limit(4).toArray(String[]::new))));
-                } else {
-                    tip.setMessage(String.format("В %s БД имеется блокировка: %s",
-                            blockedDB.length == 1 ? "одной" : "нескольких",
-                            String.join(", \n", blockedDB)));
-                }
-            } else {
-                tip.setMessage("В одной из БД имеется блокировка!");
+        if (getSupportsTray() && settings.getShowToolTip()) {
+            List<String> blockedDB = dbcDataBuilder.getDbcDataList().stream()
+                    .filter(DbcData::isConnected)
+                    .filter(DbcData::hasBlockedProcess)
+                    .limit(TRAY_NOTIFICATION_MAX_LENGTH)
+                    .map(DbcData::getName)
+                    .collect(Collectors.toList());
+
+            boolean newHasBlocks = !blockedDB.isEmpty();
+
+            if (newHasBlocks && !hasBlocks) {
+                String message = String.format("В %s БД имеется блокировка: %s",
+                        blockedDB.size() == 1 ? "одной" : "нескольких",
+                        String.join(", \n", blockedDB));
+                tip.setMessage(message);
+                tip.setVisible(true);
             }
-            tip.setVisible(haveBlocks);
+            hasBlocks = newHasBlocks;
         }
     }
 
