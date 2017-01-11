@@ -7,12 +7,15 @@ import org.apache.log4j.WriterAppender;
 import org.apache.log4j.spi.LoggingEvent;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
+import org.eclipse.swt.custom.StyledTextContent;
 import org.eclipse.swt.events.*;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.*;
+import org.eclipse.swt.widgets.Composite;
 
 public class UIAppender extends WriterAppender{
 
+    private static final int TEXT_LIMIT = 5000;
     private Composite parent;
     private StyledText text;
     private Display display;
@@ -20,6 +23,14 @@ public class UIAppender extends WriterAppender{
     private ModifyListener modifyListener = new ModifyListener() {
         @Override
         public void modifyText(ModifyEvent e) {
+            if(text.getText().length() > TEXT_LIMIT) {
+                StyledTextContent styledTextContent = text.getContent();
+                // cut excess text
+                styledTextContent.replaceTextRange(0,text.getText().length() - TEXT_LIMIT - 1, "");
+                // cut lopped line
+                styledTextContent.replaceTextRange(0, styledTextContent.getLine(0).length(), "");
+                text.setContent(styledTextContent);
+            }
             if(autoScrollEnabled) {
                 text.setTopIndex(text.getLineCount() - 1);
             }
@@ -75,7 +86,7 @@ public class UIAppender extends WriterAppender{
         } else {
             return;
         }
-        final String logMessage = String.format("[%s] %s%n", dateTime,excMessage);
+        final String logMessage = String.format("[%s] %s%n", dateTime, excMessage);
         parent.getDisplay().asyncExec(() -> {
             if (!text.isDisposed()) {
                 text.append(logMessage);
