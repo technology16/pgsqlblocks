@@ -19,13 +19,14 @@ public class DbcDataListLabelProvider implements ITableLabelProvider {
     private static final int UPDATE_ICON_QUADRANT = IDecoration.BOTTOM_RIGHT;
     private List<ILabelProviderListener> listeners;
 
-    private ConcurrentMap<String, Image> imagesMap = new ConcurrentHashMap<String, Image>();
+    private ConcurrentMap<String, Image> imagesMap = new ConcurrentHashMap<>();
+    private ConcurrentMap<String, ImageDescriptor> decoratorsMap = new ConcurrentHashMap<>();
 
     /**
      * Constructs a FileTreeLabelProvider
      */
     public DbcDataListLabelProvider() {
-        listeners = new ArrayList<ILabelProviderListener>();
+        listeners = new ArrayList<>();
     }
 
     @Override
@@ -78,17 +79,31 @@ public class DbcDataListLabelProvider implements ITableLabelProvider {
             imagesMap.put(path, image);
         }
 
+        String decoratorBlockedPath = Images.DECORATOR_BLOCKED.getImageAddr();
+        ImageDescriptor decoratorBlockedImageDesc = decoratorsMap.get(decoratorBlockedPath);
+        if (decoratorBlockedImageDesc == null) {
+            Image blockedImage = new Image(null, getClass().getClassLoader().getResourceAsStream(decoratorBlockedPath));
+            ImageDescriptor imageDescriptor = ImageDescriptor.createFromImage(blockedImage);
+            decoratorsMap.put(decoratorBlockedPath, imageDescriptor);
+        }
+
+        String decoratorUpdatePath = Images.DECORATOR_UPDATE.getImageAddr();
+        ImageDescriptor decoratorUpdateImageDesc = decoratorsMap.get(decoratorUpdatePath);
+        if (decoratorUpdateImageDesc == null) {
+            Image updateImage = new Image(null, getClass().getClassLoader().getResourceAsStream(decoratorUpdatePath));
+            ImageDescriptor imageDescriptor = ImageDescriptor.createFromImage(updateImage);
+            decoratorsMap.put(decoratorUpdatePath, imageDescriptor);
+        }
+
         if (dbcData.hasBlockedProcess()) {
-            Image overlayImage = new Image(null,
-                    getClass().getClassLoader().getResourceAsStream(Images.DECORATOR_BLOCKED.getImageAddr()));
-            ImageDescriptor imageDescriptor = ImageDescriptor.createFromImage(overlayImage);
-            image = decorateImage(image, imageDescriptor, BLOCKED_ICON_QUADRANT);
+            image = decorateImage(image, decoratorBlockedImageDesc, BLOCKED_ICON_QUADRANT);
         }
         if (dbcData.isInUpdateState()){
-            Image overlayImage = new Image(null,
-                    getClass().getClassLoader().getResourceAsStream(Images.DECORATOR_UPDATE.getImageAddr()));
-            ImageDescriptor imageDescriptor = ImageDescriptor.createFromImage(overlayImage);
-            image = decorateImage(image, imageDescriptor, UPDATE_ICON_QUADRANT);
+            if (dbcData.hasBlockedProcess()) {
+                Image old = image;
+                old.dispose();
+            }
+            image = decorateImage(image, decoratorUpdateImageDesc, UPDATE_ICON_QUADRANT);
         }
         return image;
     }
