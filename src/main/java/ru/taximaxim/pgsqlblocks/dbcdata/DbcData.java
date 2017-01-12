@@ -27,7 +27,8 @@ public class DbcData extends UpdateProvider implements Comparable<DbcData> {
     private boolean enabled;
     private DbcStatus status = DbcStatus.DISABLED;
     private boolean containBlockedProcess;
-    
+    private boolean inUpdateState;
+
     private Connection connection;
     private final ProcessTreeBuilder treeBuilder = new ProcessTreeBuilder(this);
 
@@ -197,6 +198,14 @@ public class DbcData extends UpdateProvider implements Comparable<DbcData> {
 
     public void setContainBlockedProcess(boolean containBlockedProcess) {
         this.containBlockedProcess = containBlockedProcess;
+    }
+
+    public boolean isInUpdateState() {
+        return inUpdateState;
+    }
+
+    public void setInUpdateState(boolean inUpdateState) {
+        this.inUpdateState = inUpdateState;
     }
 
     void updateFields(DbcData newData) {

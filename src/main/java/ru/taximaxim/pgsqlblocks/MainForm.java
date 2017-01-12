@@ -203,7 +203,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
                             caServersTable.getTable().setHeaderVisible(true);
                             caServersTable.getTable().setLayoutData(gridData);
                             TableViewerColumn tvColumn = new TableViewerColumn(caServersTable, SWT.NONE);
-                            tvColumn.getColumn().setText("Сервер");
+                            tvColumn.getColumn().setText("База данных");
                             tvColumn.getColumn().setWidth(200);
                             caServersTable.setContentProvider(new DbcDataListContentProvider());
                             caServersTable.setLabelProvider(new DbcDataListLabelProvider());
@@ -299,7 +299,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
                             bhServersTable.getTable().setLinesVisible(true);
                             bhServersTable.getTable().setLayoutData(gridData);
                             TableViewerColumn serversTc = new TableViewerColumn(bhServersTable, SWT.NONE);
-                            serversTc.getColumn().setText("Сервер");
+                            serversTc.getColumn().setText("База данных");
                             serversTc.getColumn().setWidth(200);
                             bhServersTable.setContentProvider(new DbcDataListContentProvider());
                             bhServersTable.setLabelProvider(new DbcDataListLabelProvider());
