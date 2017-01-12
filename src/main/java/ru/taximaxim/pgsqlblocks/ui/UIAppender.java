@@ -15,23 +15,21 @@ import org.eclipse.swt.widgets.Composite;
 
 public class UIAppender extends WriterAppender{
 
-    private static final int TEXT_LIMIT = 5000;
+    private static final int TEXT_LIMIT = 20000;
     private Composite parent;
     private StyledText text;
+    private StyledTextContent styledTextContent;
     private Display display;
     private boolean autoScrollEnabled = true;
+
     private ModifyListener modifyListener = new ModifyListener() {
         @Override
         public void modifyText(ModifyEvent e) {
-            if(text.getText().length() > TEXT_LIMIT) {
-                StyledTextContent styledTextContent = text.getContent();
-                // cut excess text
-                styledTextContent.replaceTextRange(0,text.getText().length() - TEXT_LIMIT - 1, "");
-                // cut lopped line
+            if (text.getText().length() > TEXT_LIMIT) {
+                styledTextContent.replaceTextRange(0, text.getText().length() - TEXT_LIMIT - 1, "");
                 styledTextContent.replaceTextRange(0, styledTextContent.getLine(0).length(), "");
-                text.setContent(styledTextContent);
             }
-            if(autoScrollEnabled) {
+            if (autoScrollEnabled) {
                 text.setTopIndex(text.getLineCount() - 1);
             }
         }
@@ -68,6 +66,8 @@ public class UIAppender extends WriterAppender{
 
         // wheel up and down
         text.addMouseWheelListener(e -> autoScrollEnabled = e.count <= 0);
+
+        styledTextContent = text.getContent();
     }
 
     public void append(LoggingEvent event) {
