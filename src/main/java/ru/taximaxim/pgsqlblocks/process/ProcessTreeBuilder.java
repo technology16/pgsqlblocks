@@ -43,7 +43,6 @@ public class ProcessTreeBuilder {
     private static final String QUERYWITHIDLEFILENAME = "query_with_idle.sql";
 
     private Settings settings = Settings.getInstance();
-    
     private static String queryWithoutIdle;
     private static String queryWithIdle;
     private final DbcData dbcData;
@@ -88,6 +87,9 @@ public class ProcessTreeBuilder {
         ) {
             while (processSet.next()) {
                 int pid = processSet.getInt(PID);
+                if (!settings.getShowBackendPid() && dbcData.getBackendPid() == pid) {
+                    continue;
+                }
                 Process currentProcess = tempProcessList.get(pid);
                 if (currentProcess == null) {
                     Query query = new Query(processSet.getString(QUERYSQL),

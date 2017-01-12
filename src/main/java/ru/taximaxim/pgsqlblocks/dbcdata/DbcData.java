@@ -7,13 +7,14 @@ import ru.taximaxim.pgsqlblocks.process.ProcessTreeBuilder;
 import ru.taximaxim.pgsqlblocks.utils.PgPassLoader;
 import ru.taximaxim.pgsqlblocks.utils.Settings;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
+import java.sql.*;
 
 public class DbcData extends UpdateProvider implements Comparable<DbcData> {
 
     private static final Logger LOG = Logger.getLogger(DbcData.class);
+    private static final String QUERY_BACKEND_PID = "select pg_backend_pid();";
+    private static final String PG_BACKEND_PID = "pg_backend_pid";
+
     private Settings settings = Settings.getInstance();
 
     private Process process;
@@ -27,6 +28,7 @@ public class DbcData extends UpdateProvider implements Comparable<DbcData> {
     private boolean enabled;
     private DbcStatus status = DbcStatus.DISABLED;
     private boolean containBlockedProcess;
+    private int backendPid;
     private boolean inUpdateState;
 
     private Connection connection;
@@ -79,7 +81,11 @@ public class DbcData extends UpdateProvider implements Comparable<DbcData> {
     public String getDbname() {
         return dbname;
     }
-    
+
+    public int getBackendPid() {
+        return backendPid;
+    }
+
     public boolean isEnabled() {
         return enabled;
     }
@@ -90,8 +96,9 @@ public class DbcData extends UpdateProvider implements Comparable<DbcData> {
     
     @Override
     public String toString() {
-        return String.format("DbcData [name=%1$s, host=%2$s, port=%3$s, user=%4$s, passwd=%5$s, dbname=%6$s, enabled=%7$s]", 
-            getName(), getHost(), getPort(), getUser(), getPass(), getDbname(), isEnabled());
+        return String.format("DbcData [name=%1$s, host=%2$s, port=%3$s, user=%4$s, " +
+                        "passwd=%5$s, dbname=%6$s, enabled=%7$s, backend_pid=%8$s]",
+            getName(), getHost(), getPort(), getUser(), getPass(), getDbname(), isEnabled(), getBackendPid());
     }
     
     @Override
@@ -126,6 +133,14 @@ public class DbcData extends UpdateProvider implements Comparable<DbcData> {
             LOG.info(getName() + " Соединение...");
             DriverManager.setLoginTimeout(settings.getLoginTimeout());
             connection = DriverManager.getConnection(getUrl(), getUser(), pass);
+
+            setBackendPid(0);
+            try (ResultSet resultSet = connection.createStatement().executeQuery(QUERY_BACKEND_PID)) {
+                if (resultSet.next()) {
+                    setBackendPid(resultSet.getInt(PG_BACKEND_PID));
+                }
+            }
+
             setStatus(DbcStatus.CONNECTED);
             LOG.info(getName() + " Соединение создано.");
         } catch (SQLException e) {
@@ -146,6 +161,7 @@ public class DbcData extends UpdateProvider implements Comparable<DbcData> {
                 setStatus(DbcStatus.CONNECTION_ERROR);
                 LOG.error(getName() + " " + e.getMessage(), e);
             } 
+            setBackendPid(0);
         }
     }
     
@@ -198,6 +214,10 @@ public class DbcData extends UpdateProvider implements Comparable<DbcData> {
 
     public void setContainBlockedProcess(boolean containBlockedProcess) {
         this.containBlockedProcess = containBlockedProcess;
+    }
+
+    public void setBackendPid(int backendPid) {
+        this.backendPid = backendPid;
     }
 
     public boolean isInUpdateState() {

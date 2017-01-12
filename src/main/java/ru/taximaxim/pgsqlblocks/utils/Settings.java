@@ -24,6 +24,7 @@ public final class Settings {
     private static final String ONLY_BLOCKED = "only_blocked";
     private static final String SHOW_IDLE = "show_idle";
     private static final String SHOW_TOOL_TIP = "show_tool_tip";
+    private static final String SHOW_BACKEND_PID = "show_backend_pid";
 
     private int updatePeriod;
     private int loginTimeout;
@@ -33,6 +34,7 @@ public final class Settings {
     private boolean onlyBlocked;
     private boolean showIdle;
     private boolean showToolTip;
+    private boolean showBackendPid;
 
     private Properties properties;
     private File propFile;
@@ -47,6 +49,7 @@ public final class Settings {
         defaults.put(LOGIN_TIMEOUT, "10");
         defaults.put(SHOW_IDLE, "true");
         defaults.put(SHOW_TOOL_TIP, "false");
+        defaults.put(SHOW_BACKEND_PID, "true");
 
         properties = new Properties(defaults);
         propFile = PathBuilder.getInstance().getPropertiesPath().toFile();
@@ -64,6 +67,7 @@ public final class Settings {
         this.loginTimeout = Integer.parseInt(properties.getProperty(LOGIN_TIMEOUT));
         this.showIdle = Boolean.parseBoolean(properties.getProperty(SHOW_IDLE));
         this.showToolTip = Boolean.parseBoolean(properties.getProperty(SHOW_TOOL_TIP));
+        this.showBackendPid = Boolean.parseBoolean(properties.getProperty(SHOW_BACKEND_PID));
     }
 
     public static Settings getInstance() {
@@ -161,6 +165,23 @@ public final class Settings {
      */
     public boolean getShowIdle() {
         return showIdle;
+    }
+
+    /**
+     * Устанавливаем флаг отображения запросов приложения среди процессов
+     * @param showBackendPid the showIdle to set
+     */
+    public void setShowBackendPid(boolean showBackendPid) {
+        this.showBackendPid = showBackendPid;
+        saveProperties(SHOW_BACKEND_PID, Boolean.toString(showBackendPid));
+    }
+
+    /**
+     * Получаем флаг отображения запросов приложения среди процессов
+     * @return the showIdle
+     */
+    public boolean getShowBackendPid() {
+        return showBackendPid;
     }
 
     /**
