@@ -8,10 +8,7 @@ import ru.taximaxim.pgsqlblocks.process.ProcessTreeBuilder;
 
 import java.io.IOException;
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
@@ -21,7 +18,7 @@ import static ru.taximaxim.pgsqlblocks.TEST.*;
 public class DbcDataTest {
     private static DbcData testDbc;
     private static final Logger LOG = Logger.getLogger(DbcDataTest.class);
-    private static List bomberList = Collections.synchronizedList(new ArrayList());
+    private static Map<Integer,Connection> connectionList = new HashMap<>();
 
     @BeforeClass
     public static void initialize() throws IOException {
@@ -44,13 +41,13 @@ public class DbcDataTest {
     public void testMultipleLocks() throws IOException, SQLException, InterruptedException {
         Connection conn1 = getNewConnector();
         int conn1Pid = getPid(conn1);
-        bomberList.add(conn1Pid);
+        connectionList.put(conn1Pid, conn1);
         Connection conn2 = getNewConnector();
         int conn2Pid = getPid(conn2);
-        bomberList.add(conn2Pid);
+        connectionList.put(conn2Pid, conn2);
         Connection conn3 = getNewConnector();
         int conn3Pid = getPid(conn3);
-        bomberList.add(conn3Pid);
+        connectionList.put(conn3Pid, conn3);
 
         PreparedStatement statement1 = conn1.prepareStatement(ProcessTreeBuilder.loadQuery(TEST_DROP_RULE_SQL));
         PreparedStatement statement2 = conn2.prepareStatement(ProcessTreeBuilder.loadQuery(TEST_SELECT_1000_SQL));
@@ -93,20 +90,18 @@ public class DbcDataTest {
         thread1.interrupt();
         thread3.interrupt();
         thread2.interrupt();
-        executionPids();
-        conn1.close();
-        conn3.close();
-        conn2.close();
+
+        executionConns();
     }
 
     @Test
     public void testReproWaitingLocks() throws IOException, SQLException, InterruptedException {
         Connection conn1 = getNewConnector();
         int conn1Pid = getPid(conn1);
-        bomberList.add(conn1Pid);
+        connectionList.put(conn1Pid, conn1);
         Connection conn2 = getNewConnector();
         int conn2Pid = getPid(conn2);
-        bomberList.add(conn2Pid);
+        connectionList.put(conn2Pid, conn2);
 
         PreparedStatement statement1 = conn1.prepareStatement(ProcessTreeBuilder.loadQuery(TEST_SELECT_SLEEP_SQL));
         PreparedStatement statement2 = conn2.prepareStatement(ProcessTreeBuilder.loadQuery(TEST_CREATE_INDEX_SQL));
@@ -138,9 +133,8 @@ public class DbcDataTest {
 
         thread2.interrupt();
         thread1.interrupt();
-        executionPids();
-        conn2.close();
-        conn1.close();
+
+        executionConns();
     }
 
     @Test
@@ -150,10 +144,10 @@ public class DbcDataTest {
 
         Connection conn1 = getNewConnector();
         int conn1Pid = getPid(conn1);
-        bomberList.add(conn1Pid);
+        connectionList.put(conn1Pid, conn1);
         Connection conn2 = getNewConnector();
         int conn2Pid = getPid(conn2);
-        bomberList.add(conn2Pid);
+        connectionList.put(conn2Pid, conn2);
 
         assertTrue(conn1Pid < conn2Pid);
 
@@ -188,7 +182,7 @@ public class DbcDataTest {
 
         thread1.interrupt();
         thread2.interrupt();
-        executionPids();
+        executionConns();
         conn1.close();
         conn2.close();
     }
@@ -202,13 +196,13 @@ public class DbcDataTest {
 
         Connection conn1 = getNewConnector();
         int conn1Pid = getPid(conn1);
-        bomberList.add(conn1Pid);
+        connectionList.put(conn1Pid, conn1);
         Connection conn2 = getNewConnector();
         int conn2Pid = getPid(conn2);
-        bomberList.add(conn2Pid);
+        connectionList.put(conn2Pid, conn2);
         Connection conn3 = getNewConnector();
         int conn3Pid = getPid(conn3);
-        bomberList.add(conn3Pid);
+        connectionList.put(conn3Pid, conn3);
 
         PreparedStatement statement1 = conn1.prepareStatement(ProcessTreeBuilder.loadQuery(TEST_SELECT_1000_SQL));
         PreparedStatement statement2 = conn2.prepareStatement(ProcessTreeBuilder.loadQuery(TEST_DROP_RULE_SQL));
@@ -254,15 +248,13 @@ public class DbcDataTest {
         thread3.interrupt();
         thread2.interrupt();
         thread1.interrupt();
-        executionPids();
-        conn3.close();
-        conn2.close();
-        conn1.close();
+
+        executionConns();
     }
 
     @AfterClass
     public static void terminate() throws SQLException {
-        executionPids();
+        executionConns();
         testDbc.disconnect();
     }
 
@@ -285,7 +277,7 @@ public class DbcDataTest {
         );
     }
 
-    private int getPid(Connection connection) throws SQLException {
+    private static int getPid(Connection connection) throws SQLException {
         int pid = 0;
         ResultSet result = connection.prepareStatement(SELECT_PG_BACKEND_PID).executeQuery();
         if (result.next()) {
@@ -295,28 +287,28 @@ public class DbcDataTest {
         return pid;
     }
 
-    private static void executionPids() throws SQLException {
-        List newList = new ArrayList();
-        for(Object processID : bomberList)
-        {
+    private static void executionConns() throws SQLException {
+        Map<Integer, Connection> newList = new HashMap<>();
+        for(Map.Entry<Integer, Connection> entrySet : connectionList.entrySet()) {
             try (PreparedStatement termPs = testDbc.getConnection().prepareStatement(PG_TERMINATE_BACKEND)) {
-                termPs.setInt(1, Integer.parseInt(processID.toString()));
+                termPs.setInt(1, entrySet.getKey());
                 LOG.info("Prepared query:" + termPs);
                 ResultSet result = termPs.executeQuery();
                 if (result.next()) {
                     boolean terminatedSuccesed = result.getBoolean(TERMINATED_SUCCESED);
-                    LOG.info("Terminating the process pid:" + processID + " is succeed:" + terminatedSuccesed);
+                    LOG.info("Terminating the process pid:" + entrySet.getKey() + " is succeed:" + terminatedSuccesed);
                     if (terminatedSuccesed) {
-                        LOG.info("Process terminated:" + processID);
+                        LOG.info("Process terminated:" + entrySet.getKey());
+                        entrySet.getValue().close();
                     } else {
-                        LOG.info("Process cannot be terminated:" + processID);
-                        newList.add(processID);
+                        LOG.info("Process cannot be terminated:" + entrySet.getKey());
+                        newList.put(entrySet.getKey(), entrySet.getValue());
                     }
                 }
             } catch (Exception e) {
                 LOG.error("Error on prepared statement" + e.getMessage());
             }
         }
-        bomberList = newList;
+        connectionList = newList;
     }
 }
