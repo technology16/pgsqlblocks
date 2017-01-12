@@ -1,5 +1,7 @@
 package ru.taximaxim.pgsqlblocks.dbcdata;
 
+import ru.taximaxim.pgsqlblocks.utils.Images;
+
 public enum DbcStatus {
     DISABLED,
     CONNECTED,
@@ -10,18 +12,18 @@ public enum DbcStatus {
      * Получение иконки в зависимости от состояния
      * @return
      */
-    public String getImageAddr() {
+    public Images getStatusImage() {
         switch(this) {
         case DISABLED:
-            return "images/db_f_16.png";
+            return Images.CONN_DISABLED;
         case CONNECTED:
-            return "images/db_t_16.png";
+            return Images.CONN_CONNECTED;
         case CONNECTION_ERROR:
-            return "images/db_e_16.png";
+            return Images.CONN_ERROR;
         case UPDATE:
-            return "images/on_update_16.png";
+            return Images.CONN_UPDATE;
         default:
-            return "images/void_16.png";
+            return Images.DEFAULT;
         }
     }
 }

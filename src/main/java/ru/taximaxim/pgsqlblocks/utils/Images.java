@@ -18,7 +18,15 @@ public enum Images {
     BLOCKED,
     UNBLOCKED,
     DECORATOR_BLOCKED,
-    DECORATOR_UPDATE;
+    DECORATOR_UPDATE,
+    CONN_DISABLED,
+    CONN_CONNECTED,
+    CONN_ERROR,
+    CONN_UPDATE,
+    PROC_WORKING,
+    PROC_BLOCKING,
+    PROC_BLOCKED,
+    DEFAULT;
     
     /**
      * Получение иконки
@@ -60,6 +68,20 @@ public enum Images {
             return "images/locker_8.png";
         case DECORATOR_UPDATE:
             return "images/update_8.png";
+        case CONN_DISABLED:
+            return "images/db_f_16.png";
+        case CONN_CONNECTED:
+            return "images/db_t_16.png";
+        case CONN_ERROR:
+            return "images/db_e_16.png";
+        case CONN_UPDATE:
+            return "images/on_update_16.png";
+        case PROC_WORKING:
+            return "images/nb_16.png";
+        case PROC_BLOCKING:
+            return "images/locker_16.png";
+        case PROC_BLOCKED:
+            return "images/locked_16.png";
         default:
             return "images/void_16.png";
         }

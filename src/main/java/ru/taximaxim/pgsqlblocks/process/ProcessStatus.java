@@ -1,5 +1,7 @@
 package ru.taximaxim.pgsqlblocks.process;
 
+import ru.taximaxim.pgsqlblocks.utils.Images;
+
 public enum ProcessStatus {
     WORKING,
     BLOCKING,
@@ -9,16 +11,16 @@ public enum ProcessStatus {
      * Получение иконки в зависимости от состояния
      * @return
      */
-    public String getImageAddr() {
+    public Images getStatusImage() {
         switch(this) {
         case WORKING:
-            return "images/nb_16.png";
+            return Images.PROC_WORKING;
         case BLOCKING:
-            return "images/locker_16.png";
+            return Images.PROC_BLOCKING;
         case BLOCKED:
-            return "images/locked_16.png";
+            return Images.PROC_BLOCKED;
         default:
-            return "images/void_16.png";
+            return Images.DEFAULT;
         }
     }
 }

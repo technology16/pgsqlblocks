@@ -47,7 +47,7 @@ public class ProcessTreeLabelProvider implements ITableLabelProvider {
     public Image getColumnImage(Object element, int columnIndex) {
         Process process = (Process) element;
         switch (columnIndex) {
-            case 0: return getImage(process.getStatus().getImageAddr());
+            case 0: return getImage(process.getStatus().getStatusImage().getImageAddr());
             default: return null;
         }
     }
