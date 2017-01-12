@@ -7,13 +7,14 @@ import ru.taximaxim.pgsqlblocks.process.ProcessTreeBuilder;
 import ru.taximaxim.pgsqlblocks.utils.PgPassLoader;
 import ru.taximaxim.pgsqlblocks.utils.Settings;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
+import java.sql.*;
 
 public class DbcData extends UpdateProvider implements Comparable<DbcData> {
 
     private static final Logger LOG = Logger.getLogger(DbcData.class);
+    private static final String QUERY_BACKEND_PID = "select pg_backend_pid();";
+    private static final String PG_BACKEND_PID = "pg_backend_pid";
+
     private Settings settings = Settings.getInstance();
 
     private Process process;
@@ -131,6 +132,14 @@ public class DbcData extends UpdateProvider implements Comparable<DbcData> {
             LOG.info(getName() + " Соединение...");
             DriverManager.setLoginTimeout(settings.getLoginTimeout());
             connection = DriverManager.getConnection(getUrl(), getUser(), pass);
+
+            setBackendPid(0);
+            try (ResultSet resultSet = connection.createStatement().executeQuery(QUERY_BACKEND_PID)) {
+                if (resultSet.next()) {
+                    setBackendPid(resultSet.getInt(PG_BACKEND_PID));
+                }
+            }
+
             setStatus(DbcStatus.CONNECTED);
             LOG.info(getName() + " Соединение создано.");
         } catch (SQLException e) {
@@ -151,6 +160,7 @@ public class DbcData extends UpdateProvider implements Comparable<DbcData> {
                 setStatus(DbcStatus.CONNECTION_ERROR);
                 LOG.error(getName() + " " + e.getMessage(), e);
             } 
+            setBackendPid(0);
         }
     }
     

@@ -46,7 +46,7 @@ public class SettingsDlg extends Dialog {
         showIdleButton.setSelection(settings.getShowIdle());
 
         Label showBackendPidLabel = new Label(container, SWT.HORIZONTAL);
-        showBackendPidLabel.setText("Показывать собственные запросы приложения среди процессов");
+        showBackendPidLabel.setText("Показывать собственные запросы среди процессов");
         showBackendPidButton = new Button(container, SWT.CHECK);
         showBackendPidButton.setSelection(settings.getShowBackendPid());
 
