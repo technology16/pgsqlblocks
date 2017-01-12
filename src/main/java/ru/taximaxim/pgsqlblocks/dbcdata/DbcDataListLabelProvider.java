@@ -72,38 +72,32 @@ public class DbcDataListLabelProvider implements ITableLabelProvider {
     }
 
     private Image getImage(DbcData dbcData) {
-        String path = dbcData.getStatus().getImageAddr();
-        Image image = imagesMap.get(path);
-        if (image == null) {
-            image = new Image(null, getClass().getClassLoader().getResourceAsStream(path));
-            imagesMap.put(path, image);
-        }
-
-        String decoratorBlockedPath = Images.DECORATOR_BLOCKED.getImageAddr();
-        ImageDescriptor decoratorBlockedImageDesc = decoratorsMap.get(decoratorBlockedPath);
-        if (decoratorBlockedImageDesc == null) {
-            Image blockedImage = new Image(null, getClass().getClassLoader().getResourceAsStream(decoratorBlockedPath));
-            ImageDescriptor imageDescriptor = ImageDescriptor.createFromImage(blockedImage);
-            decoratorsMap.put(decoratorBlockedPath, imageDescriptor);
-        }
-
-        String decoratorUpdatePath = Images.DECORATOR_UPDATE.getImageAddr();
-        ImageDescriptor decoratorUpdateImageDesc = decoratorsMap.get(decoratorUpdatePath);
-        if (decoratorUpdateImageDesc == null) {
-            Image updateImage = new Image(null, getClass().getClassLoader().getResourceAsStream(decoratorUpdatePath));
-            ImageDescriptor imageDescriptor = ImageDescriptor.createFromImage(updateImage);
-            decoratorsMap.put(decoratorUpdatePath, imageDescriptor);
-        }
+        String imagePath = dbcData.getStatus().getStatusImage().getImageAddr();
+        Image image = imagesMap.computeIfAbsent(imagePath, 
+                k -> new Image(null, getClass().getClassLoader().getResourceAsStream(k)));
 
         if (dbcData.hasBlockedProcess()) {
+            String decoratorBlockedPath = Images.DECORATOR_BLOCKED.getImageAddr();
+            ImageDescriptor decoratorBlockedImageDesc = decoratorsMap.computeIfAbsent(decoratorBlockedPath, path -> {
+                Image blockedImage = new Image(null, getClass().getClassLoader().getResourceAsStream(path));
+                return ImageDescriptor.createFromImage(blockedImage);
+            });
+
             image = decorateImage(image, decoratorBlockedImageDesc, BLOCKED_ICON_QUADRANT);
         }
+
         if (dbcData.isInUpdateState()){
+            String decoratorUpdatePath = Images.DECORATOR_UPDATE.getImageAddr();
+            ImageDescriptor decoratorUpdateImageDesc = decoratorsMap.computeIfAbsent(decoratorUpdatePath, path -> {
+                Image updateImage = new Image(null, getClass().getClassLoader().getResourceAsStream(path));
+                return ImageDescriptor.createFromImage(updateImage);
+            });
+
+            Image old = image;
+            image = decorateImage(image, decoratorUpdateImageDesc, UPDATE_ICON_QUADRANT);
             if (dbcData.hasBlockedProcess()) {
-                Image old = image;
                 old.dispose();
             }
-            image = decorateImage(image, decoratorUpdateImageDesc, UPDATE_ICON_QUADRANT);
         }
         return image;
     }
