@@ -1,6 +1,5 @@
 package ru.taximaxim.pgsqlblocks.ui;
 
-import org.apache.commons.lang.StringUtils;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
@@ -12,6 +11,7 @@ import ru.taximaxim.pgsqlblocks.utils.Settings;
 
 import java.util.*;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class SettingsDlg extends Dialog {
 
@@ -90,7 +90,7 @@ public class SettingsDlg extends Dialog {
                 resultList.add(checkBox.getData().toString());
             }
         }
-        settings.setColumnsList(StringUtils.join(resultList.toArray(), ","));
+        settings.setColumnsList(resultList.stream().collect(Collectors.joining(",")));
 
         super.okPressed();
     }

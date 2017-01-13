@@ -9,7 +9,6 @@ import java.util.Arrays;
 import java.util.Properties;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import ru.taximaxim.pgsqlblocks.SortColumn;
 
@@ -78,7 +77,7 @@ public final class Settings {
         if (properties.getProperty(COLUMNS_LIST) != null && !properties.getProperty(COLUMNS_LIST).isEmpty()) {
             this.columnsList = properties.getProperty(COLUMNS_LIST);
         } else {
-            this.columnsList = StringUtils.join(SortColumn.values(), ",");
+            this.columnsList = Arrays.stream(SortColumn.values()).map(Enum::name).collect(Collectors.joining(","));
         }
     }
 
