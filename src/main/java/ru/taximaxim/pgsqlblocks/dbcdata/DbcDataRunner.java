@@ -19,7 +19,6 @@ public class DbcDataRunner implements Runnable {
     @Override
     public void run() {
         try {
-            dbcData.notifyUpdated();
             if (!dbcData.isConnected()) {
                 LOG.debug(MessageFormat.format("  Connecting \"{0}\"...", dbcData.getName()));
                 dbcData.connect();
