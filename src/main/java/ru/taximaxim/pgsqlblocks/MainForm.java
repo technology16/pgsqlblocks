@@ -161,7 +161,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
     {
         Menu menuBar = new Menu(getShell(), SWT.BAR);
         MenuItem helpMenuHeader = new MenuItem(menuBar, SWT.CASCADE);
-        helpMenuHeader.setText("&Помощь");
+        helpMenuHeader.setText("&pgSqlBlocks");
 
         Menu helpMenu = new Menu(getShell(), SWT.DROP_DOWN);
         helpMenuHeader.setMenu(helpMenu);
@@ -169,6 +169,11 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
         MenuItem helpGetHelpItem = new MenuItem(helpMenu, SWT.PUSH);
         helpGetHelpItem.setText("&О приложении");
         helpGetHelpItem.addListener(SWT.Selection, e -> new AboutDlg(getShell()).open());
+        getShell().setMenuBar(menuBar);
+
+        MenuItem exitMenuItem = new MenuItem(helpMenu, SWT.PUSH);
+        exitMenuItem.setText("&Выход");
+        exitMenuItem.addListener(SWT.Selection, e -> getShell().close());
         getShell().setMenuBar(menuBar);
 
         Composite composite = new Composite(parent, SWT.NONE);

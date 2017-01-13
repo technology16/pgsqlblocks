@@ -8,12 +8,15 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.program.Program;
 import org.eclipse.swt.widgets.*;
+import org.eclipse.jface.layout.PixelConverter;
 
 public class AboutDlg extends Dialog {
 
-    public static final String DISTRIB_LINK = "http://pgcodekeeper.ru/pgsqlblocks/";
-    public static final String HOMEPAGE = "http://pgcodekeeper.ru/pgsqlblocks.html";
-    public static final String TELEGRAM_LINK = "https://telegram.me/joinchat/Bxn1Zwh02WM96O-55GAryA";
+    private static final String DISTRIB_LINK = "http://pgcodekeeper.ru/pgsqlblocks/";
+    private static final String HOMEPAGE = "http://pgcodekeeper.ru/pgsqlblocks.html";
+    private static final String TELEGRAM_LINK = "https://telegram.me/joinchat/Bxn1Zwh02WM96O-55GAryA";
+    private static final int OK_BUTTON_HEIGHT_IN_CHARS = 15;
+
 
     public AboutDlg(Shell parentShell) {
         super(parentShell, SWT.DIALOG_TRIM | SWT.APPLICATION_MODAL);
@@ -38,12 +41,7 @@ public class AboutDlg extends Dialog {
     private void createContent(Shell container){
 
         GridLayout layout = new GridLayout(1, false);
-        layout.marginRight = 5;
-        layout.marginLeft = 10;
         container.setLayout(layout);
-
-        GridData textGd = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1);
-        textGd.widthHint = 250;
 
         Image logo = new Image(null,
                 getClass().getClassLoader().getResourceAsStream("images/block-48x48.png"));
@@ -76,6 +74,8 @@ public class AboutDlg extends Dialog {
         Button ok = new Button(container, SWT.PUSH);
         ok.setText("OK");
         GridData data = new GridData(GridData.HORIZONTAL_ALIGN_END);
+        PixelConverter pc = new PixelConverter(getParent());
+        data.widthHint = pc.convertWidthInCharsToPixels(OK_BUTTON_HEIGHT_IN_CHARS);
         ok.setLayoutData(data);
         ok.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent event) {
