@@ -21,10 +21,7 @@ import ru.taximaxim.pgsqlblocks.dbcdata.*;
 import ru.taximaxim.pgsqlblocks.process.Process;
 import ru.taximaxim.pgsqlblocks.process.ProcessTreeContentProvider;
 import ru.taximaxim.pgsqlblocks.process.ProcessTreeLabelProvider;
-import ru.taximaxim.pgsqlblocks.ui.AddDbcDataDlg;
-import ru.taximaxim.pgsqlblocks.ui.FilterDlg;
-import ru.taximaxim.pgsqlblocks.ui.SettingsDlg;
-import ru.taximaxim.pgsqlblocks.ui.UIAppender;
+import ru.taximaxim.pgsqlblocks.ui.*;
 import ru.taximaxim.pgsqlblocks.utils.FilterProcess;
 import ru.taximaxim.pgsqlblocks.utils.Images;
 import ru.taximaxim.pgsqlblocks.utils.PathBuilder;
@@ -166,6 +163,23 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
     @Override
     protected Control createContents(Composite parent)
     {
+        Menu menuBar = new Menu(getShell(), SWT.BAR);
+        MenuItem helpMenuHeader = new MenuItem(menuBar, SWT.CASCADE);
+        helpMenuHeader.setText("&pgSqlBlocks");
+
+        Menu helpMenu = new Menu(getShell(), SWT.DROP_DOWN);
+        helpMenuHeader.setMenu(helpMenu);
+
+        MenuItem helpGetHelpItem = new MenuItem(helpMenu, SWT.PUSH);
+        helpGetHelpItem.setText("&О приложении");
+        helpGetHelpItem.addListener(SWT.Selection, e -> new AboutDlg(getShell()).open());
+        getShell().setMenuBar(menuBar);
+
+        MenuItem exitMenuItem = new MenuItem(helpMenu, SWT.PUSH);
+        exitMenuItem.setText("&Выход");
+        exitMenuItem.addListener(SWT.Selection, e -> getShell().close());
+        getShell().setMenuBar(menuBar);
+
         Composite composite = new Composite(parent, SWT.NONE);
         composite.setLayout(new GridLayout());
 
