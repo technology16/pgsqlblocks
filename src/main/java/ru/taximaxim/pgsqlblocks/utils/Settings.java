@@ -6,6 +6,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Properties;
 import java.util.stream.Collectors;
 
@@ -36,7 +37,7 @@ public final class Settings {
     private boolean onlyBlocked;
     private boolean showIdle;
 
-    private String columnsList;
+    private List<SortColumn> columnsList;
 
     private Properties properties;
     private File propFile;
@@ -75,9 +76,11 @@ public final class Settings {
                 !properties.getProperty(SHOW_IDLE).isEmpty()) || Boolean.parseBoolean(properties.getProperty(SHOW_IDLE));
 
         if (properties.getProperty(COLUMNS_LIST) != null && !properties.getProperty(COLUMNS_LIST).isEmpty()) {
-            this.columnsList = properties.getProperty(COLUMNS_LIST);
+            this.columnsList = Arrays.stream(properties.getProperty(COLUMNS_LIST).split(","))
+                                        .map(SortColumn::valueOf)
+                                        .collect(Collectors.toList());
         } else {
-            this.columnsList = Arrays.stream(SortColumn.values()).map(Enum::name).collect(Collectors.joining(","));
+            this.columnsList = Arrays.asList(SortColumn.values());
         }
     }
 
@@ -178,13 +181,13 @@ public final class Settings {
         return showIdle;
     }
 
-    public String getColumnsList() {
+    public List<SortColumn> getColumnsList() {
         return columnsList;
     }
 
-    public void setColumnsList(String columnsList) {
+    public void setColumnsList(List<SortColumn> columnsList) {
         this.columnsList = columnsList;
-        saveProperties(COLUMNS_LIST, columnsList);
+        saveProperties(COLUMNS_LIST, columnsList.stream().map(Enum::name).collect(Collectors.joining(",")));
     }
 
     private void saveProperties(String key, String value) {
