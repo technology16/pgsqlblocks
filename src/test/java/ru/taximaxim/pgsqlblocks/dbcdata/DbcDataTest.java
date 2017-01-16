@@ -1,12 +1,15 @@
 package ru.taximaxim.pgsqlblocks.dbcdata;
 
-import org.apache.log4j.Logger;
 import org.junit.*;
 import ru.taximaxim.pgsqlblocks.process.Process;
 import ru.taximaxim.pgsqlblocks.process.ProcessStatus;
-import ru.taximaxim.pgsqlblocks.process.ProcessTreeBuilder;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.sql.*;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -45,9 +48,9 @@ public class DbcDataTest {
         connectionList.add(new ConnInfo(getPid(conn3), conn3));
 
         /* prepare db */
-        testDbc.getConnection().prepareStatement(ProcessTreeBuilder.loadQuery(TESTING_DUMP_SQL)).execute();
+        testDbc.getConnection().prepareStatement(loadQuery(TESTING_DUMP_SQL)).execute();
         /* create rule */
-        testDbc.getConnection().prepareStatement(ProcessTreeBuilder.loadQuery(CREATE_RULE_SQL)).execute();
+        testDbc.getConnection().prepareStatement(loadQuery(CREATE_RULE_SQL)).execute();
     }
 
     @After
@@ -73,9 +76,9 @@ public class DbcDataTest {
 
     @Test
     public void testMultipleLocks() throws IOException, SQLException, InterruptedException {
-        PreparedStatement statement1 = connectionList.get(0).getConnection().prepareStatement(ProcessTreeBuilder.loadQuery(TEST_DROP_RULE_SQL));
-        PreparedStatement statement2 = connectionList.get(1).getConnection().prepareStatement(ProcessTreeBuilder.loadQuery(TEST_SELECT_1000_SQL));
-        PreparedStatement statement3 = connectionList.get(2).getConnection().prepareStatement(ProcessTreeBuilder.loadQuery(TEST_SELECT_1000_SQL));
+        PreparedStatement statement1 = connectionList.get(0).getConnection().prepareStatement(loadQuery(TEST_DROP_RULE_SQL));
+        PreparedStatement statement2 = connectionList.get(1).getConnection().prepareStatement(loadQuery(TEST_SELECT_1000_SQL));
+        PreparedStatement statement3 = connectionList.get(2).getConnection().prepareStatement(loadQuery(TEST_SELECT_1000_SQL));
 
         runThreads(statement2, statement3, statement1);
 
@@ -105,8 +108,8 @@ public class DbcDataTest {
 
     @Test
     public void testReproWaitingLocks() throws IOException, SQLException, InterruptedException {
-        PreparedStatement statement1 = connectionList.get(0).getConnection().prepareStatement(ProcessTreeBuilder.loadQuery(TEST_SELECT_SLEEP_SQL));
-        PreparedStatement statement2 = connectionList.get(1).getConnection().prepareStatement(ProcessTreeBuilder.loadQuery(TEST_CREATE_INDEX_SQL));
+        PreparedStatement statement1 = connectionList.get(0).getConnection().prepareStatement(loadQuery(TEST_SELECT_SLEEP_SQL));
+        PreparedStatement statement2 = connectionList.get(1).getConnection().prepareStatement(loadQuery(TEST_CREATE_INDEX_SQL));
 
         runThreads(statement1, statement2);
 
@@ -131,12 +134,12 @@ public class DbcDataTest {
     @Test
     public void testOrderedLocks() throws IOException, SQLException, InterruptedException {
         /* create rule */
-        testDbc.getConnection().prepareStatement(ProcessTreeBuilder.loadQuery(CREATE_RULE_SQL)).execute();
+        testDbc.getConnection().prepareStatement(loadQuery(CREATE_RULE_SQL)).execute();
 
         assertTrue(connectionList.get(0).getPid() < connectionList.get(1).getPid());
 
-        PreparedStatement statement1 = connectionList.get(0).getConnection().prepareStatement(ProcessTreeBuilder.loadQuery(TEST_DROP_RULE_SQL));
-        PreparedStatement statement2 = connectionList.get(1).getConnection().prepareStatement(ProcessTreeBuilder.loadQuery(TEST_SELECT_1000_SQL));
+        PreparedStatement statement1 = connectionList.get(0).getConnection().prepareStatement(loadQuery(TEST_DROP_RULE_SQL));
+        PreparedStatement statement2 = connectionList.get(1).getConnection().prepareStatement(loadQuery(TEST_SELECT_1000_SQL));
 
         runThreads(statement2, statement1);
 
@@ -164,11 +167,11 @@ public class DbcDataTest {
     @Ignore
     public void testTripleLocks() throws IOException, SQLException, InterruptedException {
         /* create rule */
-        testDbc.getConnection().prepareStatement(ProcessTreeBuilder.loadQuery(CREATE_RULE_SQL)).execute();
+        testDbc.getConnection().prepareStatement(loadQuery(CREATE_RULE_SQL)).execute();
 
-        PreparedStatement statement1 = connectionList.get(0).getConnection().prepareStatement(ProcessTreeBuilder.loadQuery(TEST_SELECT_1000_SQL));
-        PreparedStatement statement2 = connectionList.get(1).getConnection().prepareStatement(ProcessTreeBuilder.loadQuery(TEST_DROP_RULE_SQL));
-        PreparedStatement statement3 = connectionList.get(2).getConnection().prepareStatement(ProcessTreeBuilder.loadQuery(TEST_SELECT_1000_SQL));
+        PreparedStatement statement1 = connectionList.get(0).getConnection().prepareStatement(loadQuery(TEST_SELECT_1000_SQL));
+        PreparedStatement statement2 = connectionList.get(1).getConnection().prepareStatement(loadQuery(TEST_DROP_RULE_SQL));
+        PreparedStatement statement3 = connectionList.get(2).getConnection().prepareStatement(loadQuery(TEST_SELECT_1000_SQL));
 
         runThreads(statement1, statement2, statement3);
 
@@ -234,6 +237,16 @@ public class DbcDataTest {
             pid = result.getInt(PID);
         }
         return pid;
+    }
+
+    private String loadQuery(String filename) throws IOException {
+        try {
+            Path path = Paths.get(ClassLoader.getSystemResource(filename).toURI());
+            List<String> lines = Files.readAllLines(path, Charset.forName("UTF-8"));
+            return lines.stream().collect(Collectors.joining(System.lineSeparator()));
+        } catch (URISyntaxException e) {
+            throw new IOException(e);
+        }
     }
 }
 
