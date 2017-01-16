@@ -10,6 +10,7 @@ import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import org.apache.log4j.Logger;
 
@@ -188,8 +189,17 @@ public class ProcessTreeBuilder {
             case SLOWQUERY:
                 return getSortDirectionBySlowQueryColumn(sortDirection, process1, process2);
             case BLOCKED:
+                return stringCompare(process1.getBlocks().toString(), process2.getBlocks().toString(), sortDirection);
             case LOCKTYPE:
+                return stringCompare(
+                        process1.getBlocks().stream().map(Block::getLocktype).collect(Collectors.joining(", ")),
+                        process2.getBlocks().stream().map(Block::getLocktype).collect(Collectors.joining(", ")),
+                        sortDirection);
             case RELATION:
+                return stringCompare(
+                    process1.getBlocks().stream().map(Block::getRelation).collect(Collectors.joining(", ")),
+                    process2.getBlocks().stream().map(Block::getRelation).collect(Collectors.joining(", ")),
+                    sortDirection);
             default:
                 return 0;
         }

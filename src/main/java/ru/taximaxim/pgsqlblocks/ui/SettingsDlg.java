@@ -19,13 +19,13 @@ public class SettingsDlg extends Dialog {
     private Spinner updatePeriod;
     private Button showIdleButton;
     private SortColumn[] columnsList = SortColumn.values();
-    private String[] oldList;
-    private Button[] checkBoxes = new Button[columnsList.length];
+    private List<SortColumn> oldList;
+    private List<Button> checkBoxes = new ArrayList<>();
 
     public SettingsDlg(Shell shell, Settings settings) {
         super(shell);
         this.settings = settings;
-        oldList = settings.getColumnsList().split(",");
+        oldList = settings.getColumnsList();
     }
 
     @Override
@@ -58,15 +58,14 @@ public class SettingsDlg extends Dialog {
         final Sash sash = new Sash(container, SWT.HORIZONTAL);
         sash.setVisible(true);
 
-        for (int i = 0; i < columnsList.length; i++) {
-            SortColumn column = columnsList[i];
-            checkBoxes[i] = new Button(container, SWT.CHECK);
-            checkBoxes[i].setText(column.getName());
-            checkBoxes[i].setData(column);
-            checkBoxes[i].setSelection(Arrays.stream(oldList)
-                    .anyMatch(x -> x.equals(column.toString())));
-            checkBoxes[i].setToolTipText(column.toString());
-            checkBoxes[i].pack();
+        for (SortColumn column : columnsList) {
+            Button newBtn = new Button(container, SWT.CHECK);
+            newBtn.setText(column.getName());
+            newBtn.setData(column);
+            newBtn.setSelection(oldList.contains(column));
+            newBtn.setToolTipText(column.toString());
+            newBtn.pack();
+            checkBoxes.add(newBtn);
         }
 
         container.pack();
@@ -84,13 +83,13 @@ public class SettingsDlg extends Dialog {
         settings.setUpdatePeriod(updatePeriod.getSelection());
         settings.setShowIdle(showIdleButton.getSelection());
 
-        List<String> resultList = new ArrayList<String>() {};
+        List<SortColumn> resultList = new ArrayList<SortColumn>() {};
         for (Button checkBox : checkBoxes) {
             if (checkBox.getSelection()) {
-                resultList.add(checkBox.getData().toString());
+                resultList.add((SortColumn) checkBox.getData());
             }
         }
-        settings.setColumnsList(resultList.stream().collect(Collectors.joining(",")));
+        settings.setColumnsList(resultList);
 
         super.okPressed();
     }

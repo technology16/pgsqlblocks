@@ -89,7 +89,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
     private final DbcDataListBuilder dbcDataBuilder = DbcDataListBuilder.getInstance(this);
     private ConcurrentMap<String, Image> imagesMap = new ConcurrentHashMap<>();
     private MenuManager serversTableMenuMgr = new MenuManager();
-    private String[] visibleColumns = settings.getColumnsList().split(",");
+    private List<SortColumn> visibleColumns = settings.getColumnsList();
 
     public static void main(String[] args) {
         try {
@@ -402,15 +402,14 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
     }
 
     private void fillTreeViewer(TreeViewer treeViewer) {
-        for (Iterator<SortColumn> it = Arrays.stream(SortColumn.values()).iterator(); it.hasNext(); ) {
-            SortColumn column = it.next();
+        for (SortColumn column : SortColumn.values()) {
             TreeViewerColumn treeColumn = new TreeViewerColumn(treeViewer, SWT.NONE);
             treeColumn.getColumn().setText(column.getName());
             treeColumn.getColumn().setData("colName", column);
             treeColumn.getColumn().setData(SORT_DIRECTION, SortDirection.UP);
             treeColumn.getColumn().setMoveable(true);
             treeColumn.getColumn().setToolTipText(column.toString());
-            if (Arrays.stream(visibleColumns).anyMatch(x -> x.equals(column.toString()))) {
+            if (visibleColumns.contains(column)) {
                 treeColumn.getColumn().setWidth(column.getColSize());
             } else {
                 treeColumn.getColumn().setWidth(0);
@@ -419,11 +418,11 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
         }
     }
     private void updateTreeViewer(TreeViewer treeViewer) {
-        visibleColumns = settings.getColumnsList().split(",");
+        visibleColumns = settings.getColumnsList();
         TreeColumn[] treeColumns = treeViewer.getTree().getColumns();
         for (TreeColumn treeColumn : treeColumns) {
             SortColumn thisSortColumn = (SortColumn)treeColumn.getData("colName");
-            if (Arrays.stream(visibleColumns).anyMatch(x -> x.equals(thisSortColumn.toString()))) {
+            if (visibleColumns.contains(thisSortColumn)) {
                 treeColumn.setWidth(thisSortColumn.getColSize());
             } else {
                 treeColumn.setWidth(0);
