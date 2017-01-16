@@ -1,2 +1,0 @@
-anyhost:5432:*:*:qwerty:::sa*
-10.84.0.6:5432:*:pgsqlblocks_test:12345678
