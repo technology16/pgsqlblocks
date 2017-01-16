@@ -55,8 +55,8 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
     private static final int[] ICON_SIZES = { 32, 48, 256/*, 512*/ };
     
     private static final int TRAY_NOTIFICATION_MAX_LENGTH = 4;
-    private static final Display display = new Display();
-    private static final Tray tray = display.getSystemTray();
+    private static Display display;
+    private static Tray tray;
 
     private volatile DbcData selectedDbcData;
     private Process selectedProcess;
@@ -416,6 +416,8 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
                 }
             }
         });
+        display = Display.getCurrent();
+        tray = display.getSystemTray();
 
         if (getSupportsTray()) {
             trayItem = new TrayItem(tray, SWT.NONE);
