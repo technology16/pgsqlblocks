@@ -18,7 +18,6 @@ import static ru.taximaxim.pgsqlblocks.TEST.*;
 public class DbcDataTest {
     private static final long DELAY_MS = 250;
     private static DbcData testDbc;
-    private static final Logger LOG = Logger.getLogger(DbcDataTest.class);
     private static List<ConnInfo> connectionList = new ArrayList<>();
     private static List<Thread> threadList = new ArrayList<>();
 
