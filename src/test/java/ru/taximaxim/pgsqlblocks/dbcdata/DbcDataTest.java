@@ -16,9 +16,11 @@ import static org.junit.Assert.assertTrue;
 import static ru.taximaxim.pgsqlblocks.TEST.*;
 
 public class DbcDataTest {
+    private static final long DELAY_MS = 250;
     private static DbcData testDbc;
     private static final Logger LOG = Logger.getLogger(DbcDataTest.class);
     private static List<ConnInfo> connectionList = new ArrayList<>();
+    private static List<Thread> threadList = new ArrayList<>();
 
     @BeforeClass
     public static void initialize() throws IOException {
@@ -50,31 +52,24 @@ public class DbcDataTest {
     }
 
     @After
-    public void executionConns() throws SQLException {
-        List<ConnInfo> newList = new ArrayList<>();
-        for(ConnInfo connInfo : connectionList) {
-            try (PreparedStatement termPs = testDbc.getConnection().prepareStatement(PG_TERMINATE_BACKEND)) {
+    public void afterTest() throws SQLException {
+        try (PreparedStatement termPs = testDbc.getConnection().prepareStatement(PG_TERMINATE_BACKEND)) {
+            for (ConnInfo connInfo : connectionList) {
                 termPs.setInt(1, connInfo.getPid());
-                LOG.info("Prepared query:" + termPs);
                 ResultSet result = termPs.executeQuery();
                 if (result.next()) {
                     boolean terminatedSuccesed = result.getBoolean(TERMINATED_SUCCESED);
-                    LOG.info("Terminating the process pid:" + connInfo.getPid() + " is succeed:" + terminatedSuccesed);
-                    
-                    if (terminatedSuccesed) {
-                        LOG.info("Process terminated:" + connInfo.getPid());
-                        connInfo.getConnection().close();
-                    } else {
-                        LOG.info("Process cannot be terminated:" + connInfo.getPid());
-                        newList.add(connInfo);
-                    }
+                    connInfo.getConnection().close();
+                    assertTrue("Could not terminate process pid " + connInfo.getPid(), terminatedSuccesed);
                 }
-                assert !result.isAfterLast();
-            } catch (Exception e) {
-                LOG.error("Error on prepared statement" + e.getMessage());
             }
         }
-        connectionList = newList;
+        connectionList.clear();
+
+        for (Thread thread : threadList) {
+            thread.interrupt();
+        }
+        threadList.clear();
     }
 
     @Test
@@ -83,16 +78,7 @@ public class DbcDataTest {
         PreparedStatement statement2 = connectionList.get(1).getConnection().prepareStatement(ProcessTreeBuilder.loadQuery(TEST_SELECT_1000_SQL));
         PreparedStatement statement3 = connectionList.get(2).getConnection().prepareStatement(ProcessTreeBuilder.loadQuery(TEST_SELECT_1000_SQL));
 
-        /* Execute in the following order 2, 3, 1 */
-        Thread thread2 = getNewThread(statement2);
-        thread2.start();
-        Thread.sleep(1000);
-        Thread thread3 = getNewThread(statement3);
-        thread3.start();
-        Thread.sleep(1000);
-        Thread thread1 = getNewThread(statement1);
-        thread1.start();
-        Thread.sleep(1000);
+        runThreads(statement2, statement3, statement1);
 
         Process rootProcess = testDbc.getOnlyBlockedProcessTree(true);
 
@@ -116,10 +102,6 @@ public class DbcDataTest {
         assertTrue(proc1.get().getParents().stream().anyMatch(x -> x.getPid() == proc2.get().getPid()));
         assertTrue(proc3.get().hasChildren());
         assertTrue(proc1.get().getParents().stream().anyMatch(x -> x.getPid() == proc3.get().getPid()));
-
-        thread1.interrupt();
-        thread3.interrupt();
-        thread2.interrupt();
     }
 
     @Test
@@ -127,13 +109,7 @@ public class DbcDataTest {
         PreparedStatement statement1 = connectionList.get(0).getConnection().prepareStatement(ProcessTreeBuilder.loadQuery(TEST_SELECT_SLEEP_SQL));
         PreparedStatement statement2 = connectionList.get(1).getConnection().prepareStatement(ProcessTreeBuilder.loadQuery(TEST_CREATE_INDEX_SQL));
 
-        /* Execute in the following order 1, 2 */
-        Thread thread1 = getNewThread(statement1);
-        thread1.start();
-        Thread.sleep(1000);
-        Thread thread2 = getNewThread(statement2);
-        thread2.start();
-        Thread.sleep(1000);
+        runThreads(statement1, statement2);
 
         Process rootProcess = testDbc.getOnlyBlockedProcessTree(true);
         List<Process> allGrandChild = rootProcess.getChildren().stream().
@@ -151,9 +127,6 @@ public class DbcDataTest {
 
         assertTrue(proc1.get().hasChildren());
         assertTrue(proc2.get().getParents().stream().anyMatch(x -> x.getPid() == proc1.get().getPid()));
-
-        thread2.interrupt();
-        thread1.interrupt();
     }
 
     @Test
@@ -166,13 +139,7 @@ public class DbcDataTest {
         PreparedStatement statement1 = connectionList.get(0).getConnection().prepareStatement(ProcessTreeBuilder.loadQuery(TEST_DROP_RULE_SQL));
         PreparedStatement statement2 = connectionList.get(1).getConnection().prepareStatement(ProcessTreeBuilder.loadQuery(TEST_SELECT_1000_SQL));
 
-        /* Execute in the following order 2, 1 */
-        Thread thread2 = getNewThread(statement2);
-        thread2.start();
-        Thread.sleep(1000);
-        Thread thread1 = getNewThread(statement1);
-        thread1.start();
-        Thread.sleep(1000);
+        runThreads(statement2, statement1);
 
         Process rootProcess = testDbc.getOnlyBlockedProcessTree(true);
 
@@ -191,9 +158,6 @@ public class DbcDataTest {
 
         assertTrue(proc2.get().hasChildren());
         assertTrue(proc1.get().getParents().stream().anyMatch(x -> x.getPid() == proc2.get().getPid()));
-
-        thread1.interrupt();
-        thread2.interrupt();
     }
 
     //TODO: remove ignore annotation and fix test after solving the issue #12290
@@ -207,16 +171,7 @@ public class DbcDataTest {
         PreparedStatement statement2 = connectionList.get(1).getConnection().prepareStatement(ProcessTreeBuilder.loadQuery(TEST_DROP_RULE_SQL));
         PreparedStatement statement3 = connectionList.get(2).getConnection().prepareStatement(ProcessTreeBuilder.loadQuery(TEST_SELECT_1000_SQL));
 
-        /* Execute in the following order 1, 2, 3 */
-        Thread thread1 = getNewThread(statement1);
-        thread1.start();
-        Thread.sleep(1000);
-        Thread thread2 = getNewThread(statement2);
-        thread2.start();
-        Thread.sleep(1000);
-        Thread thread3 = getNewThread(statement3);
-        thread3.start();
-        Thread.sleep(1000);
+        runThreads(statement1, statement2, statement3);
 
         Process rootProcess = testDbc.getOnlyBlockedProcessTree(true);
 
@@ -243,10 +198,6 @@ public class DbcDataTest {
 
         assertTrue(proc2.get().hasChildren());
         assertTrue(proc3.get().getParents().stream().anyMatch(x -> x.getPid() == proc2.get().getPid()));
-
-        thread3.interrupt();
-        thread2.interrupt();
-        thread1.interrupt();
     }
 
     private Connection getNewConnector() throws SQLException {
@@ -257,12 +208,21 @@ public class DbcDataTest {
                 REMOTE_PASSWORD);
     }
 
+    private void runThreads(PreparedStatement... statements) throws SQLException, InterruptedException {
+        for (PreparedStatement statement : statements) {
+            Thread thread = getNewThread(statement);
+            threadList.add(thread);
+            thread.start();
+            Thread.sleep(DELAY_MS);
+        }
+    }
+
     private Thread getNewThread(PreparedStatement statement) throws SQLException {
         return new Thread(() -> {
             try {
                 statement.execute();
             } catch (SQLException e) {
-                LOG.warn("Statement stopped: " + statement);
+                // no-op
             }
         }
         );
@@ -273,7 +233,6 @@ public class DbcDataTest {
         ResultSet result = connection.prepareStatement(SELECT_PG_BACKEND_PID).executeQuery();
         if (result.next()) {
             pid = result.getInt(PID);
-            LOG.info("Connection pid:" + pid);
         }
         return pid;
     }
