@@ -7,13 +7,11 @@ import java.text.MessageFormat;
 
 public class DbcDataRunner implements Runnable {
     private static final Logger LOG = Logger.getLogger(DbcDataRunner.class);
-    private DbcDataListBuilder dbcDataBuilder;
     private DbcData dbcData;
     private Settings settings = Settings.getInstance();
 
-    public DbcDataRunner(DbcData data, DbcDataListBuilder dataBuilder) {
+    public DbcDataRunner(DbcData data) {
         dbcData = data;
-        dbcDataBuilder = dataBuilder;
     }
 
     @Override
@@ -25,7 +23,7 @@ public class DbcDataRunner implements Runnable {
             }
             if (dbcData.getStatus() == DbcStatus.CONNECTION_ERROR) {
                 LOG.warn(MessageFormat.format("  Error on DbcData: {0}", dbcData.getName()));
-                dbcDataBuilder.removeScheduledUpdater(dbcData);
+                dbcData.stopUpdater();
             } else {
                 dbcData.setInUpdateState(true);
                 LOG.info(MessageFormat.format("  Updating \"{0}\"...", dbcData.getName()));

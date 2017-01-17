@@ -8,14 +8,20 @@ import ru.taximaxim.pgsqlblocks.utils.PgPassLoader;
 import ru.taximaxim.pgsqlblocks.utils.Settings;
 
 import java.sql.*;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 
-public class DbcData extends UpdateProvider implements Comparable<DbcData> {
+import static java.util.concurrent.TimeUnit.SECONDS;
+
+public class DbcData extends UpdateProvider implements Comparable<DbcData>, Updatable {
 
     private static final Logger LOG = Logger.getLogger(DbcData.class);
     private static final String QUERY_BACKEND_PID = "select pg_backend_pid();";
     private static final String PG_BACKEND_PID = "pg_backend_pid";
 
     private Settings settings = Settings.getInstance();
+    private final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
 
     private Process process;
 
@@ -86,7 +92,7 @@ public class DbcData extends UpdateProvider implements Comparable<DbcData> {
         return backendPid;
     }
 
-    public boolean isEnabled() {
+    public boolean isEnabledAutoConnect() {
         return enabled;
     }
     
@@ -98,7 +104,7 @@ public class DbcData extends UpdateProvider implements Comparable<DbcData> {
     public String toString() {
         return String.format("DbcData [name=%1$s, host=%2$s, port=%3$s, user=%4$s, " +
                         "passwd=%5$s, dbname=%6$s, enabled=%7$s, backend_pid=%8$s]",
-            getName(), getHost(), getPort(), getUser(), getPass(), getDbname(), isEnabled(), getBackendPid());
+            getName(), getHost(), getPort(), getUser(), getPass(), getDbname(), isEnabledAutoConnect(), getBackendPid());
     }
     
     @Override
@@ -190,7 +196,7 @@ public class DbcData extends UpdateProvider implements Comparable<DbcData> {
             result = getPass().compareTo(other.getPass());
         }
         if (result==0) {
-            result = isEnabled() ^ other.isEnabled() ? 1 : 0;
+            result = isEnabledAutoConnect() ^ other.isEnabledAutoConnect() ? 1 : 0;
         }
 
         return result;
@@ -236,5 +242,43 @@ public class DbcData extends UpdateProvider implements Comparable<DbcData> {
         this.user = newData.user;
         this.password = newData.password;
         this.enabled = newData.enabled;
+    }
+
+    private ScheduledFuture<?> updater;
+    //private ScheduledFuture<?> updaterOnce;
+
+    @Override
+    public synchronized void startUpdater() {
+        if (updater != null){
+         updater.cancel(true);   
+        }
+
+        if (settings.isAutoUpdate()) {
+            updater = executor.scheduleWithFixedDelay(new DbcDataRunner(this), 0, settings.getUpdatePeriod(), SECONDS);
+        } else {
+            updater = executor.schedule(new DbcDataRunner(this), 0, SECONDS);
+        }
+    }
+
+/*    @Override
+    public synchronized void startUpdaterOnce() {
+        if (updaterOnce != null){
+            updaterOnce.cancel(true);
+        }
+        updaterOnce = EXECUTOR.schedule(new DbcDataRunner(this), 0, SECONDS);
+    }*/
+
+    @Override
+    public synchronized void stopUpdater() {
+        if (updater != null){
+            updater.cancel(true);
+        }
+/*        if (updaterOnce != null){
+            updaterOnce.cancel(true);
+        }*/
+    }
+    
+    public void shutdown(){
+        executor.shutdownNow();
     }
 }
