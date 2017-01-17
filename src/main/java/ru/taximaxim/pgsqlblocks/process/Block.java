@@ -6,21 +6,21 @@ public class Block {
     private final String relation;
     private final String locktype;
 
-    public Block(int blockingPid, String locktype, String relation) {
+    Block(int blockingPid, String locktype, String relation) {
         this.blockingPid = blockingPid;
-        this.locktype = locktype;
-        this.relation = relation;
+        this.locktype = locktype == null ? "" : locktype;
+        this.relation = relation == null ? "" : relation;
     }
 
-    public String getLocktype() {
+    String getLocktype() {
         return locktype;
     }
 
-    public String getRelation() {
+    String getRelation() {
         return relation;
     }
 
-    public int getBlockingPid() {
+    int getBlockingPid() {
         return blockingPid;
     }
 

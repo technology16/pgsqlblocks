@@ -21,8 +21,8 @@ public class Process implements Comparable<Process> {
         this.pid = pid;
         this.caller = caller;
         this.query = query;
-        this.state = state;
-        this.stateChange = stateChange;
+        this.state = state  == null ? "" : state;
+        this.stateChange = stateChange  == null ? "" : stateChange;
     }
 
     void setParents(Process parents) {
@@ -61,11 +61,11 @@ public class Process implements Comparable<Process> {
         return !parents.isEmpty();
     }
 
-    public String getState() {
+    String getState() {
         return state;
     }
 
-    public String getStateChange() {
+    String getStateChange() {
         return stateChange;
     }
 
@@ -73,7 +73,7 @@ public class Process implements Comparable<Process> {
         return blocks;
     }
 
-    public void addBlock(Block block) {
+    void addBlock(Block block) {
         blocks.add(block);
     }
 
@@ -85,11 +85,11 @@ public class Process implements Comparable<Process> {
         return query;
     }
 
-    public int getChildrenCount() {
+    int getChildrenCount() {
         return getChildren().stream().mapToInt(Process::getChildrenCount).sum();
     }
 
-    public ProcessStatus getStatus() {
+    ProcessStatus getStatus() {
         return status;
     }
 
