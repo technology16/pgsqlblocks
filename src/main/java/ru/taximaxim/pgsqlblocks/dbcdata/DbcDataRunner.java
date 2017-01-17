@@ -1,14 +1,12 @@
 package ru.taximaxim.pgsqlblocks.dbcdata;
 
 import org.apache.log4j.Logger;
-import ru.taximaxim.pgsqlblocks.utils.Settings;
 
 import java.text.MessageFormat;
 
 public class DbcDataRunner implements Runnable {
     private static final Logger LOG = Logger.getLogger(DbcDataRunner.class);
     private DbcData dbcData;
-    private Settings settings = Settings.getInstance();
 
     public DbcDataRunner(DbcData data) {
         dbcData = data;
