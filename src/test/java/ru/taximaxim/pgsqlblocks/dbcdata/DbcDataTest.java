@@ -82,7 +82,7 @@ public class DbcDataTest {
 
         runThreads(statement2, statement3, statement1);
 
-        Process rootProcess = testDbc.getOnlyBlockedProcessTree(true);
+        Process rootProcess = testDbc.getProcessTree(true);
 
         List<Process> allGrandChild = rootProcess.getChildren().stream().
                 flatMap(l -> l.getChildren().stream()).
@@ -113,7 +113,7 @@ public class DbcDataTest {
 
         runThreads(statement1, statement2);
 
-        Process rootProcess = testDbc.getOnlyBlockedProcessTree(true);
+        Process rootProcess = testDbc.getProcessTree(true);
         List<Process> allGrandChild = rootProcess.getChildren().stream().
                 flatMap(l -> l.getChildren().stream()).
                 collect(Collectors.toList());
@@ -143,7 +143,7 @@ public class DbcDataTest {
 
         runThreads(statement2, statement1);
 
-        Process rootProcess = testDbc.getOnlyBlockedProcessTree(true);
+        Process rootProcess = testDbc.getProcessTree(true);
 
         List<Process> allGrandChild = rootProcess.getChildren().stream().
                 flatMap(l -> l.getChildren().stream()).
@@ -175,7 +175,7 @@ public class DbcDataTest {
 
         runThreads(statement1, statement2, statement3);
 
-        Process rootProcess = testDbc.getOnlyBlockedProcessTree(true);
+        Process rootProcess = testDbc.getProcessTree(true);
 
         List<Process> allGrandChild = rootProcess.getChildren().stream().
                 flatMap(l -> l.getChildren().stream()).

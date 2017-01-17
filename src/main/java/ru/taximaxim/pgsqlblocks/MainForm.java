@@ -247,7 +247,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
                                 treeColumn.getColumn().setData("colName",caColName[i]);
                                 treeColumn.getColumn().setData(SORT_DIRECTION, SortDirection.UP);
                             }
-                            caMainTree.setContentProvider(new ProcessTreeContentProvider());
+                            caMainTree.setContentProvider(new ProcessTreeContentProvider(settings));
                             caMainTree.setLabelProvider(new ProcessTreeLabelProvider());
                             ViewerFilter[] filters = new ViewerFilter[1];
                             filters[0] = new ViewerFilter() {
@@ -324,7 +324,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
                                 treeColumn.getColumn().setText(caMainTreeColsName[i]);
                                 treeColumn.getColumn().setWidth(caMainTreeColsSize[i]);
                             }
-                            bhMainTree.setContentProvider(new ProcessTreeContentProvider());
+                            bhMainTree.setContentProvider(new ProcessTreeContentProvider(settings));
                             bhMainTree.setLabelProvider(new ProcessTreeLabelProvider());
                         }
                     }
@@ -390,11 +390,6 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
                     sortDirection = (SortDirection)column.getData(SORT_DIRECTION);
                     caMainTree.getTree().setSortDirection(sortDirection.getSwtData());
                     sortColumn = SortColumn.valueOf((String)column.getData("colName"));
-                    if (settings.isOnlyBlocked()){
-                        selectedDbcData.getOnlyBlockedProcessTree(false);
-                    } else {
-                        selectedDbcData.getProcessTree(false);
-                    }
                     updateUi();
                 }
             });
@@ -573,14 +568,11 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
 
             @Override
             public void run() {
-                if (selectedDbcData != null) {
+                throw new RuntimeException("Not implemented");
+/*                if (selectedDbcData != null && selectedDbcData.isConnected()) {
                     // TODO dbcDataBuilder.removeOnceScheduledUpdater(selectedDbcData.);
-                    // TODO
-                    // TODO
-                    if (selectedDbcData.isConnected()){
-                        selectedDbcData.setStatus(DbcStatus.CONNECTED);
-                    }
-                }
+                    // TODO selectedDbcData.setStatus(DbcStatus.CONNECTED); - wny?
+                }*/
             }
         };
 
@@ -607,7 +599,6 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
             @Override
             public void run() {
                 settings.setOnlyBlocked(onlyBlocked.isChecked());
-                runUpdateForAllEnabled();
                 updateUi();
             }
         };
