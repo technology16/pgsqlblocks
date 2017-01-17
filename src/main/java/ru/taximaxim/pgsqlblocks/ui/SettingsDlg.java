@@ -11,7 +11,6 @@ import ru.taximaxim.pgsqlblocks.utils.Settings;
 
 import java.util.*;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class SettingsDlg extends Dialog {
 
@@ -83,7 +82,7 @@ public class SettingsDlg extends Dialog {
         settings.setUpdatePeriod(updatePeriod.getSelection());
         settings.setShowIdle(showIdleButton.getSelection());
 
-        List<SortColumn> resultList = new ArrayList<SortColumn>() {};
+        List<SortColumn> resultList = new ArrayList<>();
         for (Button checkBox : checkBoxes) {
             if (checkBox.getSelection()) {
                 resultList.add((SortColumn) checkBox.getData());

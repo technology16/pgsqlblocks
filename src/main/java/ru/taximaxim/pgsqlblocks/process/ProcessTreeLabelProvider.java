@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.swt.graphics.Image;
+import ru.taximaxim.pgsqlblocks.SortColumn;
 
 public class ProcessTreeLabelProvider implements ITableLabelProvider {
     // The listeners
@@ -55,8 +56,8 @@ public class ProcessTreeLabelProvider implements ITableLabelProvider {
     @Override
     public String getColumnText(Object element, int columnIndex) {
         Process process = (Process) element;
-        switch (columnIndex) {
-            case 0: return String.valueOf(process.getPid());
+        switch (SortColumn.values()[columnIndex]) {
+            case 0: return String.valueOf(process.getPid()); // TODO case APPLICATION_NAME
             case 1: return String.valueOf(process.getChildren().size());
             case 2: return process.getCaller().getApplicationName();
             case 3: return process.getCaller().getDatname();

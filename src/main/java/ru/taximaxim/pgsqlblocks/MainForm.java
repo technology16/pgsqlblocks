@@ -353,24 +353,6 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
                 }
             }
         });
-        
-        for (TreeColumn column : caMainTree.getTree().getColumns()) {
-            column.addListener(SWT.Selection, event -> {
-                if (selectedDbcData != null) {
-                    caMainTree.getTree().setSortColumn(column);
-                    column.setData(SORT_DIRECTION, ((SortDirection)column.getData(SORT_DIRECTION)).getOpposite());
-                    sortDirection = (SortDirection)column.getData(SORT_DIRECTION);
-                    caMainTree.getTree().setSortDirection(sortDirection.getSwtData());
-                    sortColumn = (SortColumn)column.getData("colName");
-                    if (settings.isOnlyBlocked()){
-                        selectedDbcData.getOnlyBlockedProcessTree(false);
-                    } else {
-                        selectedDbcData.getProcessTree(false);
-                    }
-                    updateUi();
-                }
-            });
-        }
 
         caServersTable.addDoubleClickListener(event -> {
             if (!caServersTable.getSelection().isEmpty()) {
@@ -409,14 +391,30 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
             treeColumn.getColumn().setData(SORT_DIRECTION, SortDirection.UP);
             treeColumn.getColumn().setMoveable(true);
             treeColumn.getColumn().setToolTipText(column.toString());
-            if (visibleColumns.contains(column)) {
-                treeColumn.getColumn().setWidth(column.getColSize());
-            } else {
-                treeColumn.getColumn().setWidth(0);
-                treeColumn.getColumn().setResizable(false);
-            }
+
+            boolean isVisible = visibleColumns.contains(column);
+            treeColumn.getColumn().setWidth(isVisible ? column.getColSize() : 0);
+            treeColumn.getColumn().setResizable(isVisible);
+
+            TreeColumn swtColumn = treeColumn.getColumn();
+            swtColumn.addListener(SWT.Selection, event -> {
+                if (selectedDbcData != null) {
+                    treeViewer.getTree().setSortColumn(swtColumn);
+                    swtColumn.setData(SORT_DIRECTION, ((SortDirection)swtColumn.getData(SORT_DIRECTION)).getOpposite());
+                    sortDirection = (SortDirection)swtColumn.getData(SORT_DIRECTION);
+                    treeViewer.getTree().setSortDirection(sortDirection.getSwtData());
+                    sortColumn = (SortColumn)swtColumn.getData("colName");
+                    if (settings.isOnlyBlocked()){
+                        selectedDbcData.getOnlyBlockedProcessTree(false);
+                    } else {
+                        selectedDbcData.getProcessTree(false);
+                    }
+                    updateUi();
+                }
+            });
         }
     }
+
     private void updateTreeViewer(TreeViewer treeViewer) {
         visibleColumns = settings.getColumnsList();
         TreeColumn[] treeColumns = treeViewer.getTree().getColumns();
