@@ -13,6 +13,8 @@ import org.eclipse.jface.window.ApplicationWindow;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
+import org.eclipse.swt.events.ShellAdapter;
+import org.eclipse.swt.events.ShellEvent;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -84,7 +86,6 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
     private static SortDirection sortDirection = SortDirection.UP;
     private Settings settings = Settings.getInstance();
     private FilterProcess filterProcess = FilterProcess.getInstance();
-    private final ScheduledExecutorService mainService = Executors.newScheduledThreadPool(1);
     private final DbcDataListBuilder dbcDataBuilder = DbcDataListBuilder.getInstance(this);
     private ConcurrentMap<String, Image> imagesMap = new ConcurrentHashMap<>();
     private MenuManager serversTableMenuMgr = new MenuManager();
@@ -123,10 +124,6 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
         return sortDirection;
     }
 
-    public ScheduledExecutorService getMainService() {
-        return mainService;
-    }
-
     @Override
     protected void constrainShellSize() {
         super.constrainShellSize();
@@ -156,13 +153,21 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
                 "Вы действительно хотите выйти из pgSqlBlocks?")) {
             return false;
         }
-        mainService.shutdown();
+        dbcDataBuilder.getDbcDataList().forEach(DbcData::shutdown);
         return super.canHandleShellCloseEvent();
     }
 
     @Override
     protected Control createContents(Composite parent)
     {
+        this.getShell().addShellListener(new ShellAdapter() {
+            @Override
+            public void shellActivated(ShellEvent e) {
+                super.shellActivated(e);
+                dbcDataBuilder.getDbcDataList().stream().filter(DbcData::isEnabledAutoConnect).forEach(DbcData::startUpdater);
+            }
+        });
+
         Menu menuBar = new Menu(getShell(), SWT.BAR);
         MenuItem helpMenuHeader = new MenuItem(menuBar, SWT.CASCADE);
         helpMenuHeader.setText("&pgSqlBlocks");
@@ -252,7 +257,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
                                 treeColumn.getColumn().setData("colName",caColName[i]);
                                 treeColumn.getColumn().setData(SORT_DIRECTION, SortDirection.UP);
                             }
-                            caMainTree.setContentProvider(new ProcessTreeContentProvider());
+                            caMainTree.setContentProvider(new ProcessTreeContentProvider(settings));
                             caMainTree.setLabelProvider(new ProcessTreeLabelProvider());
                             ViewerFilter[] filters = new ViewerFilter[1];
                             filters[0] = new ViewerFilter() {
@@ -329,7 +334,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
                                 treeColumn.getColumn().setText(caMainTreeColsName[i]);
                                 treeColumn.getColumn().setWidth(caMainTreeColsSize[i]);
                             }
-                            bhMainTree.setContentProvider(new ProcessTreeContentProvider());
+                            bhMainTree.setContentProvider(new ProcessTreeContentProvider(settings));
                             bhMainTree.setLabelProvider(new ProcessTreeLabelProvider());
                         }
                     }
@@ -353,9 +358,6 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
                 Label appVersionLabel = new Label(statusBar, SWT.HORIZONTAL);
                 appVersionLabel.setText("pgSqlBlocks v." + getAppVersion());
             }
-
-            dbcDataBuilder.getDbcDataList().stream().filter(DbcData::isEnabled)
-                    .forEach(dbcDataBuilder::addOnceScheduledUpdater);
         }
 
         caMainTree.addSelectionChangedListener(event -> {
@@ -395,11 +397,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
                     sortDirection = (SortDirection)column.getData(SORT_DIRECTION);
                     caMainTree.getTree().setSortDirection(sortDirection.getSwtData());
                     sortColumn = SortColumn.valueOf((String)column.getData("colName"));
-                    if (settings.isOnlyBlocked()){
-                        selectedDbcData.getOnlyBlockedProcessTree(false);
-                    } else {
-                        selectedDbcData.getProcessTree(false);
-                    }
+                    selectedDbcData.getProcessTree(false);
                     updateUi();
                 }
             });
@@ -546,7 +544,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
             @Override
             public void run() {
                 if (selectedDbcData != null) {
-                    runUpdate(selectedDbcData);
+                    selectedDbcData.startUpdater();
                 }
             }
         };
@@ -558,15 +556,15 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
             
             @Override
             public void run() {
+                settings.setAutoUpdate(autoUpdate.isChecked());
                 if (autoUpdate.isChecked()) {
                     dbcDataBuilder.getDbcDataList().stream()
-                            .filter(x -> x.isConnected() || x.isEnabled())
+                            .filter(x -> x.isConnected() || x.isEnabledAutoConnect())
                             .filter(x -> x.getStatus() != DbcStatus.CONNECTION_ERROR)
-                            .forEach(dbcDataBuilder::addScheduledUpdater);
+                            .forEach(DbcData::startUpdater);
                 } else {
-                    dbcDataBuilder.getDbcDataList().forEach(dbcDataBuilder::removeScheduledUpdater);
+                    dbcDataBuilder.getDbcDataList().forEach(DbcData::stopUpdater);
                 }
-                settings.setAutoUpdate(autoUpdate.isChecked());
             }
         };
 
@@ -578,12 +576,11 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
 
             @Override
             public void run() {
-                if (selectedDbcData != null) {
-                    dbcDataBuilder.removeOnceScheduledUpdater(selectedDbcData);
-                    if (selectedDbcData.isConnected()){
-                        selectedDbcData.setStatus(DbcStatus.CONNECTED);
-                    }
-                }
+                throw new RuntimeException("Not implemented");
+/*                if (selectedDbcData != null && selectedDbcData.isConnected()) {
+                    // TODO dbcDataBuilder.removeOnceScheduledUpdater(selectedDbcData.);
+                    // TODO selectedDbcData.setStatus(DbcStatus.CONNECTED); - wny?
+                }*/
             }
         };
 
@@ -610,7 +607,6 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
             @Override
             public void run() {
                 settings.setOnlyBlocked(onlyBlocked.isChecked());
-                runUpdateForAllEnabled();
                 updateUi();
             }
         };
@@ -669,7 +665,12 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
                 SettingsDlg settingsDlg = new SettingsDlg(getShell(), settings);
                 if (Window.OK == settingsDlg.open()) {
                     updateUi();
-                    runUpdateForAllEnabled();
+                    dbcDataBuilder.getDbcDataList().forEach(DbcData::stopUpdater);
+
+                    dbcDataBuilder.getDbcDataList().stream()
+                            .filter(x -> x.isConnected() || x.isEnabledAutoConnect())
+                            //.filter(x -> x.getStatus() != DbcStatus.CONNECTION_ERROR) // ok, update those too for now
+                            .forEach(DbcData::startUpdater);
                 }
             }
         };
@@ -677,33 +678,6 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
         toolBarManager.add(settingsAction);
         
         return toolBarManager;
-    }
-
-    private void runUpdateForAllEnabled() {
-        dbcDataBuilder.getDbcDataList().forEach(dbcDataBuilder::removeScheduledUpdater);
-        dbcDataBuilder.getDbcDataList().forEach(dbcDataBuilder::removeOnceScheduledUpdater);
-        if (autoUpdate.isChecked()) {
-            dbcDataBuilder.getDbcDataList().stream()
-                    .filter(x -> x.isConnected() || x.isEnabled())
-                    .filter(x -> x.getStatus() != DbcStatus.CONNECTION_ERROR)
-                    .forEach(dbcDataBuilder::addScheduledUpdater);
-        } else {
-            dbcDataBuilder.getDbcDataList().stream()
-                    .filter(x -> x.isConnected() || x.isEnabled())
-                    .forEach(dbcDataBuilder::addOnceScheduledUpdater);
-        }
-    }
-
-    private void runUpdate(DbcData dbcData) {
-        dbcDataBuilder.removeScheduledUpdater(dbcData);
-        dbcDataBuilder.removeOnceScheduledUpdater(dbcData);
-        if (settings.isAutoUpdate()) {
-            LOG.debug(MessageFormat.format("Add dbcData \"{0}\" to updaterList",
-                    dbcData.getName()));
-            dbcDataBuilder.addScheduledUpdater(dbcData);
-        } else {
-            dbcDataBuilder.addOnceScheduledUpdater(dbcData);
-        }
     }
 
     private void checkBlocks() {
@@ -765,7 +739,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
         }
         if(kill) {
             LOG.info(selectedDbcData.getName() + PID + pid + " is terminated.");
-            runUpdate(selectedDbcData);
+            selectedDbcData.startUpdater();
         } else {
             LOG.info(selectedDbcData.getName() + " failed to terminate " + PID + pid);
         }
@@ -787,7 +761,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
         }
         if(kill) {
             LOG.info(selectedDbcData.getName() + PID + pid + " is canceled.");
-            runUpdate(selectedDbcData);
+            selectedDbcData.startUpdater();
         } else {
             LOG.info(selectedDbcData.getName() + " failed to cancel " + PID + pid);
         }
@@ -796,7 +770,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
     private void dbcDataConnect() {
         synchronized (selectedDbcData) {
             caMainTree.setInput(selectedDbcData.getProcess());
-            runUpdate(selectedDbcData);
+            selectedDbcData.startUpdater();
             connectState();
         }
     }
@@ -806,8 +780,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
             LOG.debug(MessageFormat.format("Remove dbcData on disconnect \"{0}\" from updaterList",
                     selectedDbcData.getName()));
             selectedDbcData.disconnect();
-            dbcDataBuilder.removeScheduledUpdater(selectedDbcData);
-            dbcDataBuilder.removeOnceScheduledUpdater(selectedDbcData);
+            selectedDbcData.stopUpdater();
             disconnectState();
         }
         updateUi();

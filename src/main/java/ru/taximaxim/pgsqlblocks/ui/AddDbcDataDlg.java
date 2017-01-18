@@ -110,7 +110,7 @@ public class AddDbcDataDlg extends Dialog {
           dbnameText.setText(editedDbcData.getDbname());
           userText.setText(editedDbcData.getUser());
           passwdText.setText(editedDbcData.getPass());
-          enabledButton.setSelection(editedDbcData.isEnabled());
+          enabledButton.setSelection(editedDbcData.isEnabledAutoConnect());
       }
 
       return container;

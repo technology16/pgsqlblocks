@@ -59,14 +59,6 @@ public class ProcessTreeBuilder {
             .forEach(root::addChildren);
         return root;
     }
-    
-    public Process buildOnlyBlockedProcessTree() {
-        root.clearChildren();
-        queryProcessTree().stream()
-            .filter(Process::hasChildren)
-            .forEach(root::addChildren);
-        return root;
-    }
 
     private Collection<Process> queryProcessTree() {
         Map<Integer, Process> tempProcessList = new HashMap<>();
