@@ -11,7 +11,6 @@ import org.w3c.dom.NodeList;
 
 import ru.taximaxim.pgsqlblocks.MainForm;
 import ru.taximaxim.pgsqlblocks.utils.PathBuilder;
-import ru.taximaxim.pgsqlblocks.utils.Settings;
 import ru.taximaxim.pgsqlblocks.utils.XmlDocumentWorker;
 
 public final class DbcDataListBuilder {
@@ -27,8 +26,7 @@ public final class DbcDataListBuilder {
     private DbcDataParser dbcDataParcer = new DbcDataParser();
     private XmlDocumentWorker docWorker = new XmlDocumentWorker();
     private File serversFile = PathBuilder.getInstance().getServersPath().toFile();
-    private Settings settings = Settings.getInstance();
-    
+
     private static volatile DbcDataListBuilder instance;
 
 
@@ -72,9 +70,6 @@ public final class DbcDataListBuilder {
             data.setUpdateListener(mainForm);
             getDbcDataList().add(data);
         }
-        if (settings.isAutoUpdate()) {
-            getDbcDataList().stream().filter(DbcData::isEnabledAutoConnect).forEach(DbcData::startUpdater);
-        }
     }
     
     private void editOrDeleteNode(DbcData dbcData, String oldName, boolean delMode) {
@@ -116,6 +111,7 @@ public final class DbcDataListBuilder {
             return;
         }
         getDbcDataList().add(dbcData);
+        dbcData.setUpdateListener(mainForm);
         if (dbcData.isEnabledAutoConnect()) {
             dbcData.startUpdater();
         }

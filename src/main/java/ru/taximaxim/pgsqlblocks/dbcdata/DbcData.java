@@ -128,6 +128,7 @@ public class DbcData extends UpdateProvider implements Comparable<DbcData>, Upda
     public void setStatus(DbcStatus status) {
         this.status = status;
     }
+
     // FIXME report connection result
     public void connect() {
         if(isConnected()) {
@@ -239,12 +240,11 @@ public class DbcData extends UpdateProvider implements Comparable<DbcData>, Upda
     }
 
     private ScheduledFuture<?> updater;
-    //private ScheduledFuture<?> updaterOnce;
 
     @Override
     public synchronized void startUpdater() {
         if (updater != null){
-         updater.cancel(true);   
+            updater.cancel(true);   
         }
 
         if (settings.isAutoUpdate()) {
@@ -254,22 +254,11 @@ public class DbcData extends UpdateProvider implements Comparable<DbcData>, Upda
         }
     }
 
-/*    @Override
-    public synchronized void startUpdaterOnce() {
-        if (updaterOnce != null){
-            updaterOnce.cancel(true);
-        }
-        updaterOnce = EXECUTOR.schedule(new DbcDataRunner(this), 0, SECONDS);
-    }*/
-
     @Override
     public synchronized void stopUpdater() {
         if (updater != null){
             updater.cancel(true);
         }
-/*        if (updaterOnce != null){
-            updaterOnce.cancel(true);
-        }*/
     }
     
     public void shutdown(){

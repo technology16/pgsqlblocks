@@ -27,11 +27,12 @@ public class DbcDataRunner implements Runnable {
                 LOG.info(MessageFormat.format("  Updating \"{0}\"...", dbcData.getName()));
                 dbcData.setProcess(dbcData.getProcessTree(true));
             }
+
+            LOG.debug(MessageFormat.format("  Finish updating \"{0}\"...", dbcData.getName()));
+            dbcData.setInUpdateState(false);
+            dbcData.notifyUpdated();
         } catch (Exception e) {
             LOG.error(MessageFormat.format("  Error on connect or update DbcData: {0}", e.getMessage()));
         }
-        LOG.debug(MessageFormat.format("  Finish updating \"{0}\"...", dbcData.getName()));
-        dbcData.setInUpdateState(false);
-        dbcData.notifyUpdated();
     }
 }

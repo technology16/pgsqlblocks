@@ -13,6 +13,8 @@ import org.eclipse.jface.window.ApplicationWindow;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
+import org.eclipse.swt.events.ShellAdapter;
+import org.eclipse.swt.events.ShellEvent;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -158,6 +160,14 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
     @Override
     protected Control createContents(Composite parent)
     {
+        this.getShell().addShellListener(new ShellAdapter() {
+            @Override
+            public void shellActivated(ShellEvent e) {
+                super.shellActivated(e);
+                dbcDataBuilder.getDbcDataList().stream().filter(DbcData::isEnabledAutoConnect).forEach(DbcData::startUpdater);
+            }
+        });
+
         Menu menuBar = new Menu(getShell(), SWT.BAR);
         MenuItem helpMenuHeader = new MenuItem(menuBar, SWT.CASCADE);
         helpMenuHeader.setText("&pgSqlBlocks");
@@ -348,9 +358,6 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
                 Label appVersionLabel = new Label(statusBar, SWT.HORIZONTAL);
                 appVersionLabel.setText("pgSqlBlocks v." + getAppVersion());
             }
-
-            // TODO why
-            //dbcDataBuilder.getDbcDataList().stream().filter(DbcData::isEnabledAutoConnect).forEach(DbcData::startUpdaterOnce);
         }
 
         caMainTree.addSelectionChangedListener(event -> {
@@ -390,6 +397,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
                     sortDirection = (SortDirection)column.getData(SORT_DIRECTION);
                     caMainTree.getTree().setSortDirection(sortDirection.getSwtData());
                     sortColumn = SortColumn.valueOf((String)column.getData("colName"));
+                    selectedDbcData.getProcessTree(false);
                     updateUi();
                 }
             });
@@ -548,6 +556,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
             
             @Override
             public void run() {
+                settings.setAutoUpdate(autoUpdate.isChecked());
                 if (autoUpdate.isChecked()) {
                     dbcDataBuilder.getDbcDataList().stream()
                             .filter(x -> x.isConnected() || x.isEnabledAutoConnect())
@@ -556,7 +565,6 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
                 } else {
                     dbcDataBuilder.getDbcDataList().forEach(DbcData::stopUpdater);
                 }
-                settings.setAutoUpdate(autoUpdate.isChecked());
             }
         };
 
@@ -657,7 +665,12 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
                 SettingsDlg settingsDlg = new SettingsDlg(getShell(), settings);
                 if (Window.OK == settingsDlg.open()) {
                     updateUi();
-                    runUpdateForAllEnabled();
+                    dbcDataBuilder.getDbcDataList().forEach(DbcData::stopUpdater);
+
+                    dbcDataBuilder.getDbcDataList().stream()
+                            .filter(x -> x.isConnected() || x.isEnabledAutoConnect())
+                            //.filter(x -> x.getStatus() != DbcStatus.CONNECTION_ERROR) // ok, update those too for now
+                            .forEach(DbcData::startUpdater);
                 }
             }
         };
@@ -665,15 +678,6 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
         toolBarManager.add(settingsAction);
         
         return toolBarManager;
-    }
-
-    private void runUpdateForAllEnabled() {
-        dbcDataBuilder.getDbcDataList().forEach(DbcData::stopUpdater);
-
-        dbcDataBuilder.getDbcDataList().stream()
-                .filter(x -> x.isConnected() || x.isEnabledAutoConnect())
-                //.filter(x -> x.getStatus() != DbcStatus.CONNECTION_ERROR) // ok, update those too for now
-                .forEach(DbcData::startUpdater);
     }
 
     private void checkBlocks() {
