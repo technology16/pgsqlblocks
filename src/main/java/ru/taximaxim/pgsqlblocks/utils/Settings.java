@@ -25,6 +25,7 @@ public final class Settings {
     private static final String SHOW_IDLE = "show_idle";
     private static final String SHOW_TOOL_TIP = "show_tool_tip";
     private static final String SHOW_BACKEND_PID = "show_backend_pid";
+    private static final String CONFIRM_REQUIRED = "confirm_required";
 
     private int updatePeriod;
     private int loginTimeout;
@@ -34,11 +35,12 @@ public final class Settings {
     private boolean onlyBlocked;
     private boolean showIdle;
     private boolean showToolTip;
+    private boolean confirmRequired;
+
     private boolean showBackendPid;
-
     private Properties properties;
-    private File propFile;
 
+    private File propFile;
     private static Settings instance;
 
     private Settings() {
@@ -50,6 +52,7 @@ public final class Settings {
         defaults.put(SHOW_IDLE, "true");
         defaults.put(SHOW_TOOL_TIP, "false");
         defaults.put(SHOW_BACKEND_PID, "true");
+        defaults.put(CONFIRM_REQUIRED, "true");
 
         properties = new Properties(defaults);
         propFile = PathBuilder.getInstance().getPropertiesPath().toFile();
@@ -68,6 +71,7 @@ public final class Settings {
         this.showIdle = Boolean.parseBoolean(properties.getProperty(SHOW_IDLE));
         this.showToolTip = Boolean.parseBoolean(properties.getProperty(SHOW_TOOL_TIP));
         this.showBackendPid = Boolean.parseBoolean(properties.getProperty(SHOW_BACKEND_PID));
+        this.confirmRequired = Boolean.parseBoolean(properties.getProperty(CONFIRM_REQUIRED));
     }
 
     public static Settings getInstance() {
@@ -199,6 +203,24 @@ public final class Settings {
      */
     public boolean getShowToolTip() {
         return showToolTip;
+    }
+
+    /**
+     * Получаем флаг "подтверждать действие отмены/уничтожения процесса"
+     * @return флаг "подтверждать действие отмены/уничтожения процесса"
+     * @see #setConfirmRequired(boolean)
+     */
+    public boolean isConfirmRequired() {
+        return confirmRequired;
+    }
+
+    /**
+     * Устанавливаем флаг "подтверждать действие отмены/уничтожения процесса"
+     * @param confirmRequired флаг "подтверждать действие отмены/уничтожения процесса"
+     * @see #isConfirmRequired()
+     */
+    public void setConfirmRequired(boolean confirmRequired) {
+        this.confirmRequired = confirmRequired;
     }
 
     private void saveProperties(String key, String value) {

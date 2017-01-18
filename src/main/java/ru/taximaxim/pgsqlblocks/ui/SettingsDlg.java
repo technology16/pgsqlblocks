@@ -15,6 +15,7 @@ public class SettingsDlg extends Dialog {
     private Button showIdleButton;
     private Button showToolTip;
     private Button showBackendPidButton;
+    private Button confirmRequiredButton;
 
     public SettingsDlg(Shell shell, Settings settings) {
         super(shell);
@@ -56,6 +57,11 @@ public class SettingsDlg extends Dialog {
         showBackendPidButton = new Button(container, SWT.CHECK);
         showBackendPidButton.setSelection(settings.getShowBackendPid());
 
+        Label confirmRequiredLabel = new Label(container, SWT.HORIZONTAL);
+        confirmRequiredLabel.setText("Подтверждать действие отмены/уничтожения процесса");
+        confirmRequiredButton = new Button(container, SWT.CHECK);
+        confirmRequiredButton.setSelection(settings.isConfirmRequired());
+
         container.pack();
         return container;
     }
@@ -72,6 +78,7 @@ public class SettingsDlg extends Dialog {
         settings.setShowIdle(showIdleButton.getSelection());
         settings.setShowToolTip(showToolTip.getSelection());
         settings.setShowBackendPid(showBackendPidButton.getSelection());
+        settings.setConfirmRequired(confirmRequiredButton.getSelection());
 
         super.okPressed();
     }

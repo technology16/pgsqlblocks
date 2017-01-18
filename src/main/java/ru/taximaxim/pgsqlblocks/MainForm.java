@@ -750,9 +750,13 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
     }
     
     private void terminate(Process process) {
+        int pid = process.getPid();
+        if (settings.isConfirmRequired() && !MessageDialog.openQuestion(getShell(), "Подтверждение действия",
+                "Вы действительно хотите уничтожить процесс " + pid + "?")) {
+            return;
+        }
         String term = "select pg_terminate_backend(?);";
         boolean kill = false;
-        int pid = process.getPid();
         try (PreparedStatement termPs = selectedDbcData.getConnection().prepareStatement(term)) {
             termPs.setInt(1, pid);
             try (ResultSet resultSet = termPs.executeQuery()) {
@@ -772,8 +776,12 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
     }
 
     private void cancel(Process process) {
-        String cancel = "select pg_cancel_backend(?);";
         int pid = process.getPid();
+        if (settings.isConfirmRequired() && !MessageDialog.openQuestion(getShell(), "Подтверждение действия",
+                "Вы действительно хотите послать сигнал отмены процесса " + pid + "?")) {
+            return;
+        }
+        String cancel = "select pg_cancel_backend(?);";
         boolean kill = false;
         try (PreparedStatement cancelPs = selectedDbcData.getConnection().prepareStatement(cancel)) {
             cancelPs.setInt(1, pid);
