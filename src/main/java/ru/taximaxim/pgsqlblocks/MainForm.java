@@ -422,6 +422,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
             SortColumn thisSortColumn = (SortColumn)treeColumn.getData("colName");
             if (visibleColumns.contains(thisSortColumn)) {
                 treeColumn.setWidth(thisSortColumn.getColSize());
+                treeColumn.setResizable(true);
             } else {
                 treeColumn.setWidth(0);
                 treeColumn.setResizable(false);
