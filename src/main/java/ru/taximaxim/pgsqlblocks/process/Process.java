@@ -61,11 +61,11 @@ public class Process implements Comparable<Process> {
         return !parents.isEmpty();
     }
 
-    String getState() {
+    public String getState() {
         return state;
     }
 
-    String getStateChange() {
+    public String getStateChange() {
         return stateChange;
     }
 
@@ -73,7 +73,7 @@ public class Process implements Comparable<Process> {
         return blocks;
     }
 
-    void addBlock(Block block) {
+    public void addBlock(Block block) {
         blocks.add(block);
     }
 
@@ -85,11 +85,11 @@ public class Process implements Comparable<Process> {
         return query;
     }
 
-    int getChildrenCount() {
+    public int getChildrenCount() {
         return getChildren().stream().mapToInt(Process::getChildrenCount).sum();
     }
 
-    ProcessStatus getStatus() {
+    public ProcessStatus getStatus() {
         return status;
     }
 

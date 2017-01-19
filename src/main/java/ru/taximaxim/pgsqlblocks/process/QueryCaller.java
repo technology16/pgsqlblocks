@@ -13,7 +13,7 @@ public class QueryCaller {
         this.client = client == null ? "" : client;
     }
 
-    String getApplicationName() {
+    public String getApplicationName() {
         return applicationName;
     }
 
@@ -25,7 +25,7 @@ public class QueryCaller {
         return username;
     }
 
-    String getClient() {
+    public String getClient() {
         return client ;
     }
 

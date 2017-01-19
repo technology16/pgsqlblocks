@@ -15,11 +15,11 @@ public class Query {
         this.slowQuery = slowQuery;
     }
 
-    String getQueryString() {
+    public String getQueryString() {
         return queryString;
     }
 
-    boolean isSlowQuery() {
+    public boolean isSlowQuery() {
         return slowQuery;
     }
 
@@ -31,7 +31,7 @@ public class Query {
         return queryStart;
     }
 
-    String getExactStart() {
+    public String getExactStart() {
         return exactStart;
     }
 
