@@ -559,7 +559,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
                 settings.setAutoUpdate(autoUpdate.isChecked());
                 if (autoUpdate.isChecked()) {
                     dbcDataBuilder.getDbcDataList().stream()
-                            .filter(x -> x.isConnected() || x.isEnabledAutoConnect())
+                            .filter(x -> x.isConnected() || x.isInUpdateState())
                             .filter(x -> x.getStatus() != DbcStatus.CONNECTION_ERROR)
                             .forEach(DbcData::startUpdater);
                 } else {
@@ -779,8 +779,8 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
         synchronized (selectedDbcData) {
             LOG.debug(MessageFormat.format("Remove dbcData on disconnect \"{0}\" from updaterList",
                     selectedDbcData.getName()));
-            selectedDbcData.disconnect();
             selectedDbcData.stopUpdater();
+            selectedDbcData.disconnect();
             disconnectState();
         }
         updateUi();
