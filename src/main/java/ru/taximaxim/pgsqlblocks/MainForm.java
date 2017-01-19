@@ -160,14 +160,6 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
     @Override
     protected Control createContents(Composite parent)
     {
-        this.getShell().addShellListener(new ShellAdapter() {
-            @Override
-            public void shellActivated(ShellEvent e) {
-                super.shellActivated(e);
-                dbcDataBuilder.getDbcDataList().stream().filter(DbcData::isEnabledAutoConnect).forEach(DbcData::startUpdater);
-            }
-        });
-
         Menu menuBar = new Menu(getShell(), SWT.BAR);
         MenuItem helpMenuHeader = new MenuItem(menuBar, SWT.CASCADE);
         helpMenuHeader.setText("&pgSqlBlocks");
@@ -435,6 +427,8 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
         } else {
             LOG.warn("The system tray is not available");
         }
+
+        dbcDataBuilder.getDbcDataList().stream().filter(DbcData::isEnabledAutoConnect).forEach(DbcData::startUpdater);
 
         return parent;
     }
