@@ -22,6 +22,7 @@ public class DbcData extends UpdateProvider implements Comparable<DbcData>, Upda
 
     private Settings settings = Settings.getInstance();
     private final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
+    private ScheduledFuture<?> updater;
 
     private Process process;
 
@@ -238,8 +239,6 @@ public class DbcData extends UpdateProvider implements Comparable<DbcData>, Upda
         this.password = newData.password;
         this.enabled = newData.enabled;
     }
-
-    private ScheduledFuture<?> updater;
 
     @Override
     public synchronized void startUpdater() {
