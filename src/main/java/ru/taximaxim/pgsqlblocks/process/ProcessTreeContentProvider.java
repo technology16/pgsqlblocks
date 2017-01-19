@@ -2,9 +2,16 @@ package ru.taximaxim.pgsqlblocks.process;
 
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
+import ru.taximaxim.pgsqlblocks.utils.Settings;
 
 public class ProcessTreeContentProvider implements ITreeContentProvider {
-    
+
+    private final Settings settings;
+
+    public ProcessTreeContentProvider(Settings settings) {
+        this.settings = settings;
+    }
+
     /**
      * Gets the children of the specified object
      * 
@@ -14,7 +21,13 @@ public class ProcessTreeContentProvider implements ITreeContentProvider {
      */
     public Object[] getChildren(Object arg0) {
         Process process = (Process) arg0;
-        return process.getChildren().toArray();
+        if (settings.isOnlyBlocked()) {
+            return process.getChildren().stream()
+                    .filter(proc -> proc.getStatus() == ProcessStatus.BLOCKED || proc.getStatus() == ProcessStatus.BLOCKING)
+                    .toArray();
+        } else {
+            return process.getChildren().toArray();
+        }
     }
 
     /**

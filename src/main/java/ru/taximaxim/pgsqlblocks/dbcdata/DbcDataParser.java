@@ -42,7 +42,7 @@ public class DbcDataParser {
         createElement(server, doc.createElement(USER), dbcData.getUser());
         createElement(server, doc.createElement(PASSWD), wp ? dbcData.getPass() : "******");
         createElement(server, doc.createElement(DBNAME), dbcData.getDbname());
-        createElement(server, doc.createElement(ENABLED), String.valueOf(dbcData.isEnabled()));
+        createElement(server, doc.createElement(ENABLED), String.valueOf(dbcData.isEnabledAutoConnect()));
 
         return server;
     }
