@@ -36,9 +36,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.MessageFormat;
-import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.*;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
@@ -50,6 +49,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
     
     private static final String APP_NAME = "pgSqlBlocks";
     private static final String SORT_DIRECTION = "sortDirection";
+    private static final String SORT_COLUMN = "sortColumn";
     private static final String PID = " pid=";
     private static final int ZERO_MARGIN = 0;
     private static final int[] VERTICAL_WEIGHTS = new int[] {80, 20};
@@ -89,7 +89,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
     private final DbcDataListBuilder dbcDataBuilder = DbcDataListBuilder.getInstance(this);
     private ConcurrentMap<String, Image> imagesMap = new ConcurrentHashMap<>();
     private MenuManager serversTableMenuMgr = new MenuManager();
-    private List<SortColumn> visibleColumns = settings.getColumnsList();
+    private Set<SortColumn> visibleColumns = settings.getColumnsList();
 
     public static void main(String[] args) {
         try {
@@ -387,7 +387,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
         for (SortColumn column : SortColumn.values()) {
             TreeViewerColumn treeColumn = new TreeViewerColumn(treeViewer, SWT.NONE);
             treeColumn.getColumn().setText(column.getName());
-            treeColumn.getColumn().setData("colName", column);
+            treeColumn.getColumn().setData(SORT_COLUMN, column);
             treeColumn.getColumn().setData(SORT_DIRECTION, SortDirection.UP);
             treeColumn.getColumn().setMoveable(true);
             treeColumn.getColumn().setToolTipText(column.toString());
@@ -403,7 +403,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
                     swtColumn.setData(SORT_DIRECTION, ((SortDirection)swtColumn.getData(SORT_DIRECTION)).getOpposite());
                     sortDirection = (SortDirection)swtColumn.getData(SORT_DIRECTION);
                     treeViewer.getTree().setSortDirection(sortDirection.getSwtData());
-                    sortColumn = (SortColumn)swtColumn.getData("colName");
+                    sortColumn = (SortColumn)swtColumn.getData(SORT_COLUMN);
                     if (settings.isOnlyBlocked()){
                         selectedDbcData.getOnlyBlockedProcessTree(false);
                     } else {
@@ -419,7 +419,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
         visibleColumns = settings.getColumnsList();
         TreeColumn[] treeColumns = treeViewer.getTree().getColumns();
         for (TreeColumn treeColumn : treeColumns) {
-            SortColumn thisSortColumn = (SortColumn)treeColumn.getData("colName");
+            SortColumn thisSortColumn = (SortColumn)treeColumn.getData(SORT_COLUMN);
             if (visibleColumns.contains(thisSortColumn)) {
                 treeColumn.setWidth(thisSortColumn.getColSize());
                 treeColumn.setResizable(true);

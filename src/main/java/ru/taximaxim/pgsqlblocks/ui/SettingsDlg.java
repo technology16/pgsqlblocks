@@ -2,6 +2,8 @@ package ru.taximaxim.pgsqlblocks.ui;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.*;
@@ -10,21 +12,18 @@ import ru.taximaxim.pgsqlblocks.SortColumn;
 import ru.taximaxim.pgsqlblocks.utils.Settings;
 
 import java.util.*;
-import java.util.List;
 
 public class SettingsDlg extends Dialog {
 
     private Settings settings;
     private Spinner updatePeriod;
     private Button showIdleButton;
-    private SortColumn[] columnsList = SortColumn.values();
-    private List<SortColumn> oldList;
-    private List<Button> checkBoxes = new ArrayList<>();
+    private Set<SortColumn> enabledColumns = new HashSet<>();
 
     public SettingsDlg(Shell shell, Settings settings) {
         super(shell);
         this.settings = settings;
-        oldList = settings.getColumnsList();
+        enabledColumns.addAll(settings.getColumnsList());
     }
 
     @Override
@@ -57,14 +56,23 @@ public class SettingsDlg extends Dialog {
         final Sash sash = new Sash(container, SWT.HORIZONTAL);
         sash.setVisible(true);
 
-        for (SortColumn column : columnsList) {
+        for (SortColumn column : SortColumn.values()) {
             Button newBtn = new Button(container, SWT.CHECK);
             newBtn.setText(column.getName());
             newBtn.setData(column);
-            newBtn.setSelection(oldList.contains(column));
+            newBtn.setSelection(enabledColumns.contains(column));
             newBtn.setToolTipText(column.toString());
-            newBtn.pack();
-            checkBoxes.add(newBtn);
+            newBtn.addSelectionListener(new SelectionAdapter() {
+                @Override
+                public void widgetSelected(SelectionEvent e) {
+                    Button button = ((Button) e.getSource());
+                    if (button.getSelection()) {
+                        enabledColumns.add((SortColumn)button.getData());
+                    } else {
+                        enabledColumns.remove((SortColumn)button.getData());
+                    }
+                }
+            });
         }
 
         container.pack();
@@ -81,14 +89,7 @@ public class SettingsDlg extends Dialog {
     protected void okPressed() {
         settings.setUpdatePeriod(updatePeriod.getSelection());
         settings.setShowIdle(showIdleButton.getSelection());
-
-        List<SortColumn> resultList = new ArrayList<>();
-        for (Button checkBox : checkBoxes) {
-            if (checkBox.getSelection()) {
-                resultList.add((SortColumn) checkBox.getData());
-            }
-        }
-        settings.setColumnsList(resultList);
+        settings.setColumnsList(enabledColumns);
 
         super.okPressed();
     }
