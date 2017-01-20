@@ -10,7 +10,6 @@ import java.util.stream.Collectors;
 
 import org.apache.log4j.Logger;
 import ru.taximaxim.pgsqlblocks.SortColumn;
-import ru.taximaxim.pgsqlblocks.SortColumn;
 
 /**
  * Класс для работы с настройка пользователя
