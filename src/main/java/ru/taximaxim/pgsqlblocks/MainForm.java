@@ -679,8 +679,9 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
 
         toolBarManager.add(settingsAction);
 
-        logDisplay = new Action(Images.DEFAULT.getDescription(),
-                ImageDescriptor.createFromImage(getImage(Images.DEFAULT))) {
+        // FIXME: change icon for new one
+        logDisplay = new Action(Images.VIEW_ONLY_BLOCKED.getDescription(),
+                ImageDescriptor.createFromImage(getImage(Images.VIEW_ONLY_BLOCKED))) {
 
             @Override
             public void run() {

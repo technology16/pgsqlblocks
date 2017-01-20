@@ -27,6 +27,7 @@ public enum Images {
     PROC_BLOCKING,
     PROC_BLOCKED,
     DEFAULT;
+    // FIXME: add new one
     
     /**
      * Получение иконки
@@ -82,6 +83,7 @@ public enum Images {
             return "images/locker_16.png";
         case PROC_BLOCKED:
             return "images/locked_16.png";
+        // FIXME: add new one
         default:
             return "images/void_16.png";
         }
