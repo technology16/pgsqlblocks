@@ -65,7 +65,7 @@ public class SettingsDlg extends Dialog {
             newBtn.addSelectionListener(new SelectionAdapter() {
                 @Override
                 public void widgetSelected(SelectionEvent e) {
-                    Button button = ((Button) e.getSource());
+                    Button button = (Button) e.getSource();
                     if (button.getSelection()) {
                         enabledColumns.add((SortColumn)button.getData());
                     } else {
