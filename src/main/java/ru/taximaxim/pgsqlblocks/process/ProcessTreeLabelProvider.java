@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.swt.graphics.Image;
+import ru.taximaxim.pgsqlblocks.SortColumn;
 
 public class ProcessTreeLabelProvider implements ITableLabelProvider {
     // The listeners
@@ -55,42 +56,38 @@ public class ProcessTreeLabelProvider implements ITableLabelProvider {
     @Override
     public String getColumnText(Object element, int columnIndex) {
         Process process = (Process) element;
-        switch (columnIndex) {
-            case 0: return String.valueOf(process.getPid());
-            case 1: return String.valueOf(process.getChildren().size());
-            case 2: return process.getCaller().getApplicationName();
-            case 3: return process.getCaller().getDatname();
-            case 4: return process.getCaller().getUsername();
-            case 5: return process.getCaller().getClient();
-            case 6: return process.getQuery().getBackendStart();
-            case 7: return process.getQuery().getQueryStart();
-            case 8: return process.getQuery().getExactStart();
-            case 9: return process.getState();
-            case 10: return process.getStateChange();
-            case 11: return process.getBlocks().stream()
+        switch (SortColumn.values()[columnIndex]) {
+            case PID: return String.valueOf(process.getPid());
+            case BLOCKED_COUNT: return String.valueOf(process.getChildren().size());
+            case APPLICATION_NAME: return process.getCaller().getApplicationName();
+            case DATNAME: return process.getCaller().getDatname();
+            case USENAME: return process.getCaller().getUsername();
+            case CLIENT: return process.getCaller().getClient();
+            case BACKEND_START: return process.getQuery().getBackendStart();
+            case QUERY_START: return process.getQuery().getQueryStart();
+            case XACT_START: return process.getQuery().getExactStart();
+            case STATE: return process.getState();
+            case STATE_CHANGE: return process.getStateChange();
+            case BLOCKED: return process.getBlocks().stream()
                                 .map(b -> String.valueOf(b.getBlockingPid()))
                                 .collect(Collectors.joining(","));
-            case 12: return process.getBlocks().stream()
+            case LOCKTYPE: return process.getBlocks().stream()
                                 .map(Block::getLocktype)
                                 .distinct()
                                 .collect(Collectors.joining(","));
-            case 13: return process.getBlocks().stream()
+            case RELATION: return process.getBlocks().stream()
                                 .map(Block::getRelation)
                                 .filter(r -> r != null && !r.isEmpty())
                                 .distinct()
                                 .collect(Collectors.joining(","));
-            case 14: return process.getQuery().getQueryString();
-            case 15: return String.valueOf(process.getQuery().isSlowQuery());
+            case QUERY: return process.getQuery().getQueryString();
+            case SLOWQUERY: return String.valueOf(process.getQuery().isSlowQuery());
             default: return null;
         }
     }
     
     private Image getImage(String path) {
-        Image image = imagesMap.get(path);
-        if (image == null) {
-            image = new Image(null, getClass().getClassLoader().getResourceAsStream(path));
-            imagesMap.put(path, image);
-        }
-        return image;
+        return imagesMap.computeIfAbsent(path, k ->
+                new Image(null, getClass().getClassLoader().getResourceAsStream(path)));
     }
 }

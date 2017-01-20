@@ -10,6 +10,7 @@ import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import org.apache.log4j.Logger;
 
@@ -171,7 +172,7 @@ public class ProcessTreeBuilder {
                 return stringCompare(process1.getQuery().getBackendStart(), process2.getQuery().getBackendStart(), sortDirection);
             case QUERY_START:
                 return stringCompare(process1.getQuery().getQueryStart(), process2.getQuery().getQueryStart(), sortDirection);
-            case XACT_STAT:
+            case XACT_START:
                 return stringCompare(process1.getQuery().getExactStart(), process2.getQuery().getExactStart(), sortDirection);
             case STATE:
                 return stringCompare(process1.getState(), process2.getState(), sortDirection);
@@ -181,9 +182,18 @@ public class ProcessTreeBuilder {
                 return stringCompare(process1.getQuery().getQueryString(), process2.getQuery().getQueryString(), sortDirection);
             case SLOWQUERY:
                 return getSortDirectionBySlowQueryColumn(sortDirection, process1, process2);
-            case DEFAULT:
             case BLOCKED:
-            case WAITING:
+                return stringCompare(process1.getBlocks().toString(), process2.getBlocks().toString(), sortDirection);
+            case LOCKTYPE:
+                return stringCompare(
+                        process1.getBlocks().stream().map(Block::getLocktype).collect(Collectors.joining(", ")),
+                        process2.getBlocks().stream().map(Block::getLocktype).collect(Collectors.joining(", ")),
+                        sortDirection);
+            case RELATION:
+                return stringCompare(
+                    process1.getBlocks().stream().map(Block::getRelation).collect(Collectors.joining(", ")),
+                    process2.getBlocks().stream().map(Block::getRelation).collect(Collectors.joining(", ")),
+                    sortDirection);
             default:
                 return 0;
         }

@@ -5,9 +5,12 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.Properties;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import org.apache.log4j.Logger;
+import ru.taximaxim.pgsqlblocks.SortColumn;
+import ru.taximaxim.pgsqlblocks.SortColumn;
 
 /**
  * Класс для работы с настройка пользователя
@@ -25,6 +28,7 @@ public final class Settings {
     private static final String SHOW_IDLE = "show_idle";
     private static final String SHOW_TOOL_TIP = "show_tool_tip";
     private static final String SHOW_BACKEND_PID = "show_backend_pid";
+    private static final String COLUMNS_LIST = "columns_list";
 
     private int updatePeriod;
     private int loginTimeout;
@@ -35,6 +39,8 @@ public final class Settings {
     private boolean showIdle;
     private boolean showToolTip;
     private boolean showBackendPid;
+
+    private Set<SortColumn> columnsList;
 
     private Properties properties;
     private File propFile;
@@ -50,6 +56,8 @@ public final class Settings {
         defaults.put(SHOW_IDLE, "true");
         defaults.put(SHOW_TOOL_TIP, "false");
         defaults.put(SHOW_BACKEND_PID, "true");
+        defaults.put(COLUMNS_LIST, 
+                Arrays.stream(SortColumn.values()).map(col -> col.getName()).collect(Collectors.joining(",")));
 
         properties = new Properties(defaults);
         propFile = PathBuilder.getInstance().getPropertiesPath().toFile();
@@ -68,6 +76,8 @@ public final class Settings {
         this.showIdle = Boolean.parseBoolean(properties.getProperty(SHOW_IDLE));
         this.showToolTip = Boolean.parseBoolean(properties.getProperty(SHOW_TOOL_TIP));
         this.showBackendPid = Boolean.parseBoolean(properties.getProperty(SHOW_BACKEND_PID));
+        this.columnsList = Arrays.stream(properties.getProperty(COLUMNS_LIST).split(","))
+                                            .map(SortColumn::valueOf).collect(Collectors.toSet());
     }
 
     public static Settings getInstance() {
@@ -199,6 +209,15 @@ public final class Settings {
      */
     public boolean getShowToolTip() {
         return showToolTip;
+    }
+
+    public Set<SortColumn> getColumnsList() {
+        return columnsList;
+    }
+
+    public void setColumnsList(Set<SortColumn> columnsList) {
+        this.columnsList = columnsList;
+        saveProperties(COLUMNS_LIST, columnsList.stream().map(Enum::name).collect(Collectors.joining(",")));
     }
 
     private void saveProperties(String key, String value) {

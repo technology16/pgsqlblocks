@@ -8,8 +8,8 @@ public class Block {
 
     public Block(int blockingPid, String locktype, String relation) {
         this.blockingPid = blockingPid;
-        this.locktype = locktype;
-        this.relation = relation;
+        this.locktype = locktype == null ? "" : locktype;
+        this.relation = relation == null ? "" : relation;
     }
 
     public String getLocktype() {

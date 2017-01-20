@@ -7,10 +7,10 @@ public class QueryCaller {
     private final String client;
 
     QueryCaller(String applicationName, String datname, String username, String client) {
-        this.applicationName = applicationName;
-        this.datname = datname;
-        this.username = username;
-        this.client = client;
+        this.applicationName = applicationName == null ? "" : applicationName;
+        this.datname = datname == null ? "" : datname;
+        this.username = username == null ? "" : username;
+        this.client = client == null ? "" : client;
     }
 
     public String getApplicationName() {
@@ -26,7 +26,7 @@ public class QueryCaller {
     }
 
     public String getClient() {
-        return client == null ? "" : client;
+        return client ;
     }
 
     @Override

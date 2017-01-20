@@ -8,10 +8,10 @@ public class Query {
     private final String exactStart;
 
     Query(String queryString, String backendStart, String queryStart, String exactStart, boolean slowQuery) {
-        this.queryString = queryString;
-        this.backendStart = backendStart;
-        this.queryStart = queryStart;
-        this.exactStart = exactStart;
+        this.queryString = queryString == null ? "" : queryString;
+        this.backendStart = backendStart == null ? "" : backendStart;
+        this.queryStart = queryStart == null ? "" : queryStart;
+        this.exactStart = exactStart == null ? "" : exactStart;
         this.slowQuery = slowQuery;
     }
 

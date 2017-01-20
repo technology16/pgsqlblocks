@@ -21,8 +21,8 @@ public class Process implements Comparable<Process> {
         this.pid = pid;
         this.caller = caller;
         this.query = query;
-        this.state = state;
-        this.stateChange = stateChange;
+        this.state = state  == null ? "" : state;
+        this.stateChange = stateChange  == null ? "" : stateChange;
     }
 
     void setParents(Process parents) {
