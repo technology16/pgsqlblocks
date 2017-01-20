@@ -75,6 +75,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
     private Action update;
     private Action autoUpdate;
     private Action cancelUpdate;
+    private Action logDisplay;
     private Action onlyBlocked;
     private ToolItem cancelProc;
     private ToolItem terminateProc;
@@ -97,6 +98,8 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
     
     private String[] caColName = {"PID", "BLOCKED_COUNT", "APPLICATION_NAME", "DATNAME", "USENAME", "CLIENT", "BACKEND_START", "QUERY_START",
             "XACT_STAT", "STATE", "STATE_CHANGE", "BLOCKED", "LOCKTYPE", "RELATION", "QUERY", "SLOWQUERY"};
+    private Composite logComposite;
+    private SashForm verticalSf;
 
     public static void main(String[] args) {
         try {
@@ -188,8 +191,8 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
         gridLayout.marginWidth = ZERO_MARGIN;
         
         GridData gridData = new GridData(SWT.FILL, SWT.FILL, true, true);
-        
-        SashForm verticalSf = new SashForm(composite, SWT.VERTICAL);
+
+        verticalSf = new SashForm(composite, SWT.VERTICAL);
         {
             verticalSf.setLayout(gridLayout);
             verticalSf.setLayoutData(gridData);
@@ -337,7 +340,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
                     blocksHistoryTi.setControl(blocksHistorySf);
                 }
             }
-            Composite logComposite = new Composite(verticalSf, SWT.NONE);
+            logComposite = new Composite(verticalSf, SWT.NONE);
             {
                 logComposite.setLayout(gridLayout);
             }
@@ -660,10 +663,10 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
         toolBarManager.add(importBlocks);
 
         toolBarManager.add(new Separator());
-        
+
         Action settingsAction = new Action(Images.SETTINGS.getDescription(),
                 ImageDescriptor.createFromImage(getImage(Images.SETTINGS))) {
-            
+
             @Override
             public void run() {
                 SettingsDlg settingsDlg = new SettingsDlg(getShell(), settings);
@@ -675,6 +678,20 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
         };
 
         toolBarManager.add(settingsAction);
+
+        logDisplay = new Action(Images.DEFAULT.getDescription(),
+                ImageDescriptor.createFromImage(getImage(Images.DEFAULT))) {
+
+            @Override
+            public void run() {
+                settings.setShowLogMessages(logDisplay.isChecked());
+                logComposite.setVisible(logDisplay.isChecked());
+                verticalSf.setWeights(VERTICAL_WEIGHTS);
+            }
+        };
+
+        logDisplay.setChecked(settings.getShowLogMessages());
+        toolBarManager.add(logDisplay);
         
         return toolBarManager;
     }

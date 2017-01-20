@@ -25,6 +25,7 @@ public final class Settings {
     private static final String SHOW_IDLE = "show_idle";
     private static final String SHOW_TOOL_TIP = "show_tool_tip";
     private static final String SHOW_BACKEND_PID = "show_backend_pid";
+    private static final String SHOW_LOG_MESSAGES = "show_log_messages";
 
     private int updatePeriod;
     private int loginTimeout;
@@ -35,6 +36,7 @@ public final class Settings {
     private boolean showIdle;
     private boolean showToolTip;
     private boolean showBackendPid;
+    private boolean showLogMessages;
 
     private Properties properties;
     private File propFile;
@@ -50,6 +52,7 @@ public final class Settings {
         defaults.put(SHOW_IDLE, "true");
         defaults.put(SHOW_TOOL_TIP, "false");
         defaults.put(SHOW_BACKEND_PID, "true");
+        defaults.put(SHOW_LOG_MESSAGES, "true");
 
         properties = new Properties(defaults);
         propFile = PathBuilder.getInstance().getPropertiesPath().toFile();
@@ -68,6 +71,8 @@ public final class Settings {
         this.showIdle = Boolean.parseBoolean(properties.getProperty(SHOW_IDLE));
         this.showToolTip = Boolean.parseBoolean(properties.getProperty(SHOW_TOOL_TIP));
         this.showBackendPid = Boolean.parseBoolean(properties.getProperty(SHOW_BACKEND_PID));
+        this.showBackendPid = Boolean.parseBoolean(properties.getProperty(SHOW_BACKEND_PID));
+        this.showLogMessages = Boolean.parseBoolean(properties.getProperty(SHOW_LOG_MESSAGES));
     }
 
     public static Settings getInstance() {
@@ -199,6 +204,25 @@ public final class Settings {
      */
     public boolean getShowToolTip() {
         return showToolTip;
+    }
+
+    /**
+     * Устанавливаем флаг отображения логов
+     * @param showLogMessages флаг отображения логов
+     * @see #setShowLogMessages(boolean)
+     */
+    public void setShowLogMessages(boolean showLogMessages) {
+        this.showLogMessages = showLogMessages;
+        saveProperties(SHOW_LOG_MESSAGES, Boolean.toString(showLogMessages));
+    }
+
+    /**
+     * Устанавливаем флаг отображения логов
+     * @return the showLogMessages
+     * @see #getShowLogMessages()
+     */
+    public boolean getShowLogMessages() {
+        return showLogMessages;
     }
 
     private void saveProperties(String key, String value) {
