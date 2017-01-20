@@ -363,20 +363,6 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
                 }
             }
         });
-        
-        for (TreeColumn column : caMainTree.getTree().getColumns()) {
-            column.addListener(SWT.Selection, event -> {
-                if (selectedDbcData != null) {
-                    caMainTree.getTree().setSortColumn(column);
-                    column.setData(SORT_DIRECTION, ((SortDirection)column.getData(SORT_DIRECTION)).getOpposite());
-                    sortDirection = (SortDirection)column.getData(SORT_DIRECTION);
-                    caMainTree.getTree().setSortDirection(sortDirection.getSwtData());
-                    sortColumn = SortColumn.valueOf((String)column.getData("colName"));
-                    selectedDbcData.getProcessTree(false);
-                    updateUi();
-                }
-            });
-        }
 
         caServersTable.addDoubleClickListener(event -> {
             if (!caServersTable.getSelection().isEmpty()) {
@@ -441,11 +427,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
                     sortDirection = (SortDirection)swtColumn.getData(SORT_DIRECTION);
                     treeViewer.getTree().setSortDirection(sortDirection.getSwtData());
                     sortColumn = (SortColumn)swtColumn.getData(SORT_COLUMN);
-                    if (settings.isOnlyBlocked()){
-                        selectedDbcData.getOnlyBlockedProcessTree(false);
-                    } else {
-                        selectedDbcData.getProcessTree(false);
-                    }
+                    selectedDbcData.getProcessTree(false);
                     updateUi();
                 }
             });
