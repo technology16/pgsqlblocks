@@ -21,13 +21,13 @@ public final class PathBuilder {
     private PathBuilder() {
         try {
             String os = System.getProperty("os.name").toLowerCase();
-            if (os.contains("nux") || os.contains("nix")) {
-                path = Paths.get(System.getProperty("user.home"), ".pgSqlBlocks");
-                Files.createDirectories(path);
-            } else if (os.contains("win")) {
+            if (os.contains("win")) {
                 path = Paths.get(System.getProperty("user.home"), "pgSqlBlocks");
                 Files.createDirectories(path);
                 Files.setAttribute(path, "dos:hidden", Boolean.TRUE, LinkOption.NOFOLLOW_LINKS);
+            } else {
+                path = Paths.get(System.getProperty("user.home"), ".pgSqlBlocks");
+                Files.createDirectories(path);
             }
         } catch (IOException e) {
             LOG.error(String.format("Ошибка создания директории %s: %s", path, e.getMessage()));

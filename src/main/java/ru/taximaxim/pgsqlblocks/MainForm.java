@@ -13,8 +13,6 @@ import org.eclipse.jface.window.ApplicationWindow;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
-import org.eclipse.swt.events.ShellAdapter;
-import org.eclipse.swt.events.ShellEvent;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -103,6 +101,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
         try {
             MainForm wwin = new MainForm();
             wwin.setBlockOnOpen(true);
+            display = Display.getCurrent();
             wwin.open();
             display.dispose();
         } catch (Exception e) {
@@ -406,7 +405,6 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
                 }
             }
         });
-        display = Display.getCurrent();
         tray = display.getSystemTray();
 
         if (getSupportsTray()) {
