@@ -56,8 +56,7 @@ public final class Settings {
         defaults.put(SHOW_IDLE, "true");
         defaults.put(SHOW_TOOL_TIP, "false");
         defaults.put(SHOW_BACKEND_PID, "true");
-        defaults.put(COLUMNS_LIST, 
-                Arrays.stream(SortColumn.values()).map(col -> col.getName()).collect(Collectors.joining(",")));
+        defaults.put(COLUMNS_LIST, Arrays.stream(SortColumn.values()).map(Enum::name).collect(Collectors.joining(",")));
 
         properties = new Properties(defaults);
         propFile = PathBuilder.getInstance().getPropertiesPath().toFile();
