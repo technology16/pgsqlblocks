@@ -21,6 +21,7 @@ public class SettingsDlg extends Dialog {
     private Button showToolTip;
     private Button showBackendPidButton;
     private Button confirmRequiredButton;
+    private Button confirmExitButton;
 
     private Set<SortColumn> enabledColumns = new HashSet<>();
 
@@ -43,40 +44,73 @@ public class SettingsDlg extends Dialog {
         textGd.widthHint = 100;
 
         Label updatePeriodLabel = new Label(container, SWT.HORIZONTAL);
-        updatePeriodLabel.setText("Период обновления:");
+        updatePeriodLabel.setText("Период обновления");
+        updatePeriodLabel.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
         updatePeriod = new Spinner(container, SWT.BORDER);
         updatePeriod.setLayoutData(textGd);
         updatePeriod.setMinimum(1);
         updatePeriod.setMaximum(100);
         updatePeriod.setSelection(settings.getUpdatePeriod());
 
-        Label idleShowLabel = new Label(container, SWT.HORIZONTAL);
-        idleShowLabel.setText("Показывать idle процессы:");
-        showIdleButton = new Button(container, SWT.CHECK);
+        populateProcessGroup(container);
+        populateNotificationGroup(container);
+        populateColumnGroup(container);
+        return container;
+    }
+
+    private void populateProcessGroup(Composite container) {
+        Group processGroup = new Group(container, SWT.SHADOW_IN);
+        processGroup.setText("Процессы");
+        processGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
+        processGroup.setLayout(new GridLayout(2, false));
+
+        Label idleShowLabel = new Label(processGroup, SWT.HORIZONTAL);
+        idleShowLabel.setText("Показывать idle процессы");
+        idleShowLabel.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+
+        showIdleButton = new Button(processGroup, SWT.CHECK);
         showIdleButton.setSelection(settings.getShowIdle());
 
-        Label idleShowToolTip = new Label(container, SWT.HORIZONTAL);
+        Label showBackendPidLabel = new Label(processGroup, SWT.HORIZONTAL);
+        showBackendPidLabel.setText("Показывать собственные запросы среди процессов");
+        showBackendPidLabel.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+        showBackendPidButton = new Button(processGroup, SWT.CHECK);
+        showBackendPidButton.setSelection(settings.getShowBackendPid());
+    }
+
+    private void populateNotificationGroup(Composite container) {
+        Group notificationGroup = new Group(container, SWT.SHADOW_IN);
+        notificationGroup.setText("Уведомления");
+        notificationGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
+        notificationGroup.setLayout(new GridLayout(2, false));
+
+        Label idleShowToolTip = new Label(notificationGroup, SWT.HORIZONTAL);
         idleShowToolTip.setText("Показывать оповещения о блокировках в трее");
-        showToolTip = new Button(container, SWT.CHECK);
+        idleShowToolTip.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+        showToolTip = new Button(notificationGroup, SWT.CHECK);
         showToolTip.setSelection(settings.getShowToolTip());
 
-        Label showBackendPidLabel = new Label(container, SWT.HORIZONTAL);
-        showBackendPidLabel.setText("Показывать собственные запросы среди процессов");
-        showBackendPidButton = new Button(container, SWT.CHECK);
-        showBackendPidButton.setSelection(settings.getShowBackendPid());
-
-        Label confirmRequiredLabel = new Label(container, SWT.HORIZONTAL);
-        confirmRequiredLabel.setText("Подтверждать действие отмены/уничтожения процесса");
-        confirmRequiredButton = new Button(container, SWT.CHECK);
+        Label confirmRequiredLabel = new Label(notificationGroup, SWT.HORIZONTAL);
+        confirmRequiredLabel.setText("Подтверждать отмену/уничтожение процесса");
+        confirmRequiredLabel.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+        confirmRequiredButton = new Button(notificationGroup, SWT.CHECK);
         confirmRequiredButton.setSelection(settings.isConfirmRequired());
 
-        Label columnsLabel = new Label(container, SWT.HORIZONTAL);
-        columnsLabel.setText("Отображаемые колонки: ");
-        final Sash sash = new Sash(container, SWT.HORIZONTAL);
-        sash.setVisible(true);
+        Label confirmExitLabel = new Label(notificationGroup, SWT.HORIZONTAL);
+        confirmExitLabel.setText("Подтверждать при выходе из pgSqlBlocks");
+        confirmExitLabel.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+        confirmExitButton = new Button(notificationGroup, SWT.CHECK);
+        confirmExitButton.setSelection(settings.isConfirmExit());
+    }
+
+    private void populateColumnGroup(Composite container) {
+        Group columnsGroup = new Group(container, SWT.SHADOW_IN);
+        columnsGroup.setText("Колонки");
+        columnsGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
+        columnsGroup.setLayout(new GridLayout(2, false));
 
         for (SortColumn column : SortColumn.values()) {
-            Button newBtn = new Button(container, SWT.CHECK);
+            Button newBtn = new Button(columnsGroup, SWT.CHECK);
             newBtn.setText(column.getName());
             newBtn.setData(column);
             newBtn.setSelection(enabledColumns.contains(column));
@@ -93,9 +127,6 @@ public class SettingsDlg extends Dialog {
                 }
             });
         }
-
-        container.pack();
-        return container;
     }
 
     @Override
@@ -112,6 +143,7 @@ public class SettingsDlg extends Dialog {
         settings.setShowBackendPid(showBackendPidButton.getSelection());
         settings.setColumnsList(enabledColumns);
         settings.setConfirmRequired(confirmRequiredButton.getSelection());
+        settings.setConfirmExit(confirmExitButton.getSelection());
 
         super.okPressed();
     }

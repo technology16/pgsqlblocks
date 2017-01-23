@@ -29,6 +29,7 @@ public final class Settings {
     private static final String SHOW_BACKEND_PID = "show_backend_pid";
     private static final String COLUMNS_LIST = "columns_list";
     private static final String CONFIRM_REQUIRED = "confirm_required";
+    private static final String CONFIRM_EXIT = "confirm_exit";
 
     private int updatePeriod;
     private int loginTimeout;
@@ -40,6 +41,7 @@ public final class Settings {
     private boolean showToolTip;
     private boolean confirmRequired;
     private boolean showBackendPid;
+    private boolean confirmExit;
 
     private Set<SortColumn> columnsList;
 
@@ -59,6 +61,7 @@ public final class Settings {
         defaults.put(SHOW_BACKEND_PID, "true");
         defaults.put(COLUMNS_LIST, Arrays.stream(SortColumn.values()).map(Enum::name).collect(Collectors.joining(",")));
         defaults.put(CONFIRM_REQUIRED, "true");
+        defaults.put(CONFIRM_EXIT, "true");
 
         properties = new Properties(defaults);
         propFile = PathBuilder.getInstance().getPropertiesPath().toFile();
@@ -80,6 +83,7 @@ public final class Settings {
         this.columnsList = Arrays.stream(properties.getProperty(COLUMNS_LIST).split(","))
                                             .map(SortColumn::valueOf).collect(Collectors.toSet());
         this.confirmRequired = Boolean.parseBoolean(properties.getProperty(CONFIRM_REQUIRED));
+        this.confirmExit = Boolean.parseBoolean(properties.getProperty(CONFIRM_EXIT));
     }
 
     public static Settings getInstance() {
@@ -238,6 +242,16 @@ public final class Settings {
      */
     public void setConfirmRequired(boolean confirmRequired) {
         this.confirmRequired = confirmRequired;
+        saveProperties(CONFIRM_REQUIRED, String.valueOf(confirmRequired));
+    }
+
+    public boolean isConfirmExit() {
+        return confirmExit;
+    }
+
+    public void setConfirmExit(boolean confirmExit) {
+        this.confirmExit = confirmExit;
+        saveProperties(CONFIRM_EXIT, String.valueOf(confirmExit));
     }
 
     private void saveProperties(String key, String value) {
