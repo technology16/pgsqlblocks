@@ -40,18 +40,6 @@ public class SettingsDlg extends Dialog {
         layout.marginLeft = 10;
         container.setLayout(layout);
 
-        GridData textGd = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1);
-        textGd.widthHint = 100;
-
-        Label updatePeriodLabel = new Label(container, SWT.HORIZONTAL);
-        updatePeriodLabel.setText("Период обновления");
-        updatePeriodLabel.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-        updatePeriod = new Spinner(container, SWT.BORDER);
-        updatePeriod.setLayoutData(textGd);
-        updatePeriod.setMinimum(1);
-        updatePeriod.setMaximum(100);
-        updatePeriod.setSelection(settings.getUpdatePeriod());
-
         populateProcessGroup(container);
         populateNotificationGroup(container);
         populateColumnGroup(container);
@@ -62,18 +50,32 @@ public class SettingsDlg extends Dialog {
         Group processGroup = new Group(container, SWT.SHADOW_IN);
         processGroup.setText("Процессы");
         processGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
-        processGroup.setLayout(new GridLayout(2, false));
+        processGroup.setLayout(new GridLayout(3, false));
+
+        Label updatePeriodLabel = new Label(processGroup, SWT.HORIZONTAL);
+        updatePeriodLabel.setText("Период автообновления");
+
+        GridData textGd = new GridData(GridData.FILL_HORIZONTAL);
+        textGd.horizontalSpan = 2;
+        textGd.horizontalIndent = 50;
+        updatePeriod = new Spinner(processGroup, SWT.BORDER);
+        updatePeriod.setLayoutData(textGd);
+        updatePeriod.setMinimum(1);
+        updatePeriod.setMaximum(100);
+        updatePeriod.setSelection(settings.getUpdatePeriod());
 
         Label idleShowLabel = new Label(processGroup, SWT.HORIZONTAL);
         idleShowLabel.setText("Показывать idle процессы");
-        idleShowLabel.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+        GridData labelGd = new GridData(GridData.FILL_HORIZONTAL);
+        labelGd.horizontalSpan = 2;
+        idleShowLabel.setLayoutData(labelGd);
 
         showIdleButton = new Button(processGroup, SWT.CHECK);
         showIdleButton.setSelection(settings.getShowIdle());
 
         Label showBackendPidLabel = new Label(processGroup, SWT.HORIZONTAL);
         showBackendPidLabel.setText("Показывать собственные запросы среди процессов");
-        showBackendPidLabel.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+        showBackendPidLabel.setLayoutData(labelGd);
         showBackendPidButton = new Button(processGroup, SWT.CHECK);
         showBackendPidButton.setSelection(settings.getShowBackendPid());
     }
