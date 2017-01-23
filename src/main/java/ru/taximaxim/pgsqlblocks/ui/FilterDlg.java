@@ -136,6 +136,7 @@ public class FilterDlg extends Dialog {
       backendStartCombo.setText(filterProcess.getBackendStart().getOperation());
       queryStartCombo.setText(filterProcess.getQueryStart().getOperation());
 
+      container.pack();
       return container;
     }
 
@@ -145,11 +146,6 @@ public class FilterDlg extends Dialog {
       newShell.setText("Фильтр процессов");
     }
 
-    @Override
-    protected Point getInitialSize() {
-        return new Point(410, 250);
-    }
-    
     @Override
     protected void okPressed() {
         filterProcess.getPid().setValue(pidText.getText());
