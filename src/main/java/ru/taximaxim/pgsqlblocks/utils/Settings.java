@@ -28,6 +28,7 @@ public final class Settings {
     private static final String SHOW_TOOL_TIP = "show_tool_tip";
     private static final String SHOW_BACKEND_PID = "show_backend_pid";
     private static final String COLUMNS_LIST = "columns_list";
+    private static final String CONFIRM_REQUIRED = "confirm_required";
 
     private int updatePeriod;
     private int loginTimeout;
@@ -37,13 +38,14 @@ public final class Settings {
     private boolean onlyBlocked;
     private boolean showIdle;
     private boolean showToolTip;
+    private boolean confirmRequired;
     private boolean showBackendPid;
 
     private Set<SortColumn> columnsList;
 
     private Properties properties;
-    private File propFile;
 
+    private File propFile;
     private static Settings instance;
 
     private Settings() {
@@ -56,6 +58,7 @@ public final class Settings {
         defaults.put(SHOW_TOOL_TIP, "false");
         defaults.put(SHOW_BACKEND_PID, "true");
         defaults.put(COLUMNS_LIST, Arrays.stream(SortColumn.values()).map(Enum::name).collect(Collectors.joining(",")));
+        defaults.put(CONFIRM_REQUIRED, "true");
 
         properties = new Properties(defaults);
         propFile = PathBuilder.getInstance().getPropertiesPath().toFile();
@@ -76,6 +79,7 @@ public final class Settings {
         this.showBackendPid = Boolean.parseBoolean(properties.getProperty(SHOW_BACKEND_PID));
         this.columnsList = Arrays.stream(properties.getProperty(COLUMNS_LIST).split(","))
                                             .map(SortColumn::valueOf).collect(Collectors.toSet());
+        this.confirmRequired = Boolean.parseBoolean(properties.getProperty(CONFIRM_REQUIRED));
     }
 
     public static Settings getInstance() {
@@ -216,6 +220,24 @@ public final class Settings {
     public void setColumnsList(Set<SortColumn> columnsList) {
         this.columnsList = columnsList;
         saveProperties(COLUMNS_LIST, columnsList.stream().map(Enum::name).collect(Collectors.joining(",")));
+    }
+
+    /**
+     * Получаем флаг "подтверждать действие отмены/уничтожения процесса"
+     * @return флаг "подтверждать действие отмены/уничтожения процесса"
+     * @see #setConfirmRequired(boolean)
+     */
+    public boolean isConfirmRequired() {
+        return confirmRequired;
+    }
+
+    /**
+     * Устанавливаем флаг "подтверждать действие отмены/уничтожения процесса"
+     * @param confirmRequired флаг "подтверждать действие отмены/уничтожения процесса"
+     * @see #isConfirmRequired()
+     */
+    public void setConfirmRequired(boolean confirmRequired) {
+        this.confirmRequired = confirmRequired;
     }
 
     private void saveProperties(String key, String value) {
