@@ -96,6 +96,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
         try {
             MainForm wwin = new MainForm();
             wwin.setBlockOnOpen(true);
+            display = Display.getCurrent();
             wwin.open();
             display.dispose();
         } catch (Exception e) {
@@ -375,7 +376,6 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
                 }
             }
         });
-        display = Display.getCurrent();
         tray = display.getSystemTray();
 
         if (getSupportsTray()) {
