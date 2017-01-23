@@ -21,6 +21,7 @@ public class SettingsDlg extends Dialog {
     private Button showToolTip;
     private Button showBackendPidButton;
     private Button confirmRequiredButton;
+    private Button confirmExitButton;
 
     private Set<SortColumn> enabledColumns = new HashSet<>();
 
@@ -43,7 +44,8 @@ public class SettingsDlg extends Dialog {
         textGd.widthHint = 100;
 
         Label updatePeriodLabel = new Label(container, SWT.HORIZONTAL);
-        updatePeriodLabel.setText("Период обновления:");
+        updatePeriodLabel.setText("Период обновления");
+        updatePeriodLabel.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
         updatePeriod = new Spinner(container, SWT.BORDER);
         updatePeriod.setLayoutData(textGd);
         updatePeriod.setMinimum(1);
@@ -63,7 +65,7 @@ public class SettingsDlg extends Dialog {
         processGroup.setLayout(new GridLayout(2, false));
 
         Label idleShowLabel = new Label(processGroup, SWT.HORIZONTAL);
-        idleShowLabel.setText("Показывать idle процессы:");
+        idleShowLabel.setText("Показывать idle процессы");
         idleShowLabel.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
         showIdleButton = new Button(processGroup, SWT.CHECK);
@@ -89,10 +91,16 @@ public class SettingsDlg extends Dialog {
         showToolTip.setSelection(settings.getShowToolTip());
 
         Label confirmRequiredLabel = new Label(notificationGroup, SWT.HORIZONTAL);
-        confirmRequiredLabel.setText("Подтверждать действие отмены/уничтожения");
+        confirmRequiredLabel.setText("Подтверждать отмену/уничтожение процесса");
         confirmRequiredLabel.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
         confirmRequiredButton = new Button(notificationGroup, SWT.CHECK);
         confirmRequiredButton.setSelection(settings.isConfirmRequired());
+
+        Label confirmExitLabel = new Label(notificationGroup, SWT.HORIZONTAL);
+        confirmExitLabel.setText("Подтверждать при выходе из pgSqlBlocks");
+        confirmExitLabel.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+        confirmExitButton = new Button(notificationGroup, SWT.CHECK);
+        confirmExitButton.setSelection(settings.isConfirmExit());
     }
 
     private void populateColumnGroup(Composite container) {
@@ -135,6 +143,7 @@ public class SettingsDlg extends Dialog {
         settings.setShowBackendPid(showBackendPidButton.getSelection());
         settings.setColumnsList(enabledColumns);
         settings.setConfirmRequired(confirmRequiredButton.getSelection());
+        settings.setConfirmExit(confirmExitButton.getSelection());
 
         super.okPressed();
     }

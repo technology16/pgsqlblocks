@@ -142,7 +142,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
 
     @Override
     protected boolean canHandleShellCloseEvent() {
-        if (!MessageDialog.openQuestion(getShell(), "Подтверждение действия",
+        if (settings.isConfirmExit() && !MessageDialog.openQuestion(getShell(), "Подтверждение действия",
                 "Вы действительно хотите выйти из pgSqlBlocks?")) {
             return false;
         }
