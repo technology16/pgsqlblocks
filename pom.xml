@@ -13,7 +13,6 @@
     <properties>
         <java.version>1.8</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <profile-id>Linux-64</profile-id>
         <swt.artifactId>org.eclipse.swt.gtk.linux.x86_64</swt.artifactId>
         <swt.id>Linux-x86_64</swt.id>
         <swt.version>4.5.1</swt.version>
@@ -24,7 +23,6 @@
         <profile>
             <id>Linux-32</id>
             <properties>
-                <profile-id>Linux-32</profile-id>
                 <swt.artifactId>org.eclipse.swt.gtk.linux.x86</swt.artifactId>
                 <swt.id>Linux-x86</swt.id>
             </properties>
@@ -32,15 +30,16 @@
         <profile>
             <id>Linux-64</id>
             <properties>
-                <profile-id>Linux-64</profile-id>
                 <swt.artifactId>org.eclipse.swt.gtk.linux.x86_64</swt.artifactId>
                 <swt.id>Linux-x86_64</swt.id>
             </properties>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
         </profile>
         <profile>
             <id>Windows-32</id>
             <properties>
-                <profile-id>Windows-32</profile-id>
                 <swt.artifactId>org.eclipse.swt.win32.win32.x86</swt.artifactId>
                 <swt.id>win32-x86</swt.id>
             </properties>
@@ -48,7 +47,6 @@
         <profile>
             <id>Windows-64</id>
             <properties>
-                <profile-id>Windows-64</profile-id>
                 <swt.artifactId>org.eclipse.swt.win32.win32.x86_64</swt.artifactId>
                 <swt.id>win32-x86_64</swt.id>
             </properties>
@@ -56,7 +54,6 @@
         <profile>
             <id>Macosx-64</id>
             <properties>
-                <profile-id>Macosx-64</profile-id>
                 <swt.artifactId>org.eclipse.swt.cocoa.macosx.x86_64</swt.artifactId>
                 <swt.id>Macosx-x86_64</swt.id>
             </properties>
@@ -131,7 +128,7 @@
                     <descriptorRefs>
                         <descriptorRef>jar-with-dependencies</descriptorRef>
                     </descriptorRefs>
-                    <finalName>${project.artifactId}-${project.version}-${profile-id}</finalName>
+                    <finalName>${project.artifactId}-${project.version}-${project.activeProfiles[0].id}</finalName>
                 </configuration>
             </plugin>
         </plugins>
