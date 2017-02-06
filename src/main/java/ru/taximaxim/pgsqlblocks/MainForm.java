@@ -344,6 +344,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
             {
                 logComposite.setLayout(gridLayout);
             }
+            logComposite.setVisible(settings.getShowLogMessages());
             verticalSf.setWeights(VERTICAL_WEIGHTS);
             UIAppender uiAppender = new UIAppender(logComposite);
             uiAppender.setThreshold(Level.INFO);
@@ -679,22 +680,27 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
 
         toolBarManager.add(settingsAction);
 
-        // FIXME: change icon for new one
-        logDisplay = new Action(Images.VIEW_ONLY_BLOCKED.getDescription(),
-                ImageDescriptor.createFromImage(getImage(Images.VIEW_ONLY_BLOCKED))) {
-
+        logDisplay = new Action() {
             @Override
             public void run() {
                 settings.setShowLogMessages(logDisplay.isChecked());
                 logComposite.setVisible(logDisplay.isChecked());
                 verticalSf.setWeights(VERTICAL_WEIGHTS);
+                updateLogDisplayActionBtn(logDisplay.isChecked());
             }
         };
 
         logDisplay.setChecked(settings.getShowLogMessages());
+        updateLogDisplayActionBtn(settings.getShowLogMessages());
         toolBarManager.add(logDisplay);
         
         return toolBarManager;
+    }
+
+    void updateLogDisplayActionBtn(boolean showLogMessages) {
+        Images image = showLogMessages ? Images.SHOW_LOG_PANEL : Images.HIDE_LOG_PANEL;
+        logDisplay.setText(image.getDescription());
+        logDisplay.setImageDescriptor(ImageDescriptor.createFromImage(getImage(image)));
     }
 
     private void runUpdateForAllEnabled() {

@@ -26,9 +26,10 @@ public enum Images {
     PROC_WORKING,
     PROC_BLOCKING,
     PROC_BLOCKED,
+    SHOW_LOG_PANEL,
+    HIDE_LOG_PANEL,
     DEFAULT;
-    // FIXME: add new one
-    
+
     /**
      * Получение иконки
      * @return
@@ -83,7 +84,10 @@ public enum Images {
             return "images/locker_16.png";
         case PROC_BLOCKED:
             return "images/locked_16.png";
-        // FIXME: add new one
+        case SHOW_LOG_PANEL:
+            return "images/log_show_16.png";
+        case HIDE_LOG_PANEL:
+            return "images/log_hide_16.png";
         default:
             return "images/void_16.png";
         }
@@ -117,6 +121,10 @@ public enum Images {
             return "Фильтр";
         case CANCEL_UPDATE:
             return "Отменить обновление";
+        case SHOW_LOG_PANEL:
+            return "Скрыть панель логов";
+        case HIDE_LOG_PANEL:
+            return "Отображать панель логов";
         default:
             return "Действие по-умолчанию";
         }
