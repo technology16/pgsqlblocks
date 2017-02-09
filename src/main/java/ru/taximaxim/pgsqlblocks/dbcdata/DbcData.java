@@ -86,6 +86,10 @@ public class DbcData extends UpdateProvider implements Comparable<DbcData>, Upda
         return password;
     }
 
+    public String getCovertPass() {
+        return String.join("", Collections.nCopies(password.length(), "*").toArray(new String[0]));
+    }
+
     public String getDbname() {
         return dbname;
     }
@@ -104,11 +108,10 @@ public class DbcData extends UpdateProvider implements Comparable<DbcData>, Upda
     
     @Override
     public String toString() {
+        String password = getCovertPass();
         return String.format("DbcData [name=%1$s, host=%2$s, port=%3$s, user=%4$s, " +
                         "passwd=%5$s, dbname=%6$s, enabled=%7$s, backend_pid=%8$s]",
-            getName(), getHost(), getPort(), getUser(),
-                String.join("", Collections.nCopies(getPass().length(), "*").toArray(new String[0])),
-                getDbname(), isEnabledAutoConnect(), getBackendPid());
+            getName(), getHost(), getPort(), getUser(), password, getDbname(), isEnabledAutoConnect(), getBackendPid());
     }
     
     @Override
