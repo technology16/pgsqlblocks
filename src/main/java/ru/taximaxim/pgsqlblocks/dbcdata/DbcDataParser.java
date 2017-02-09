@@ -4,6 +4,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
+@SuppressWarnings("squid:S2068")
 public class DbcDataParser {
 
     private static final String NAME = "name";
