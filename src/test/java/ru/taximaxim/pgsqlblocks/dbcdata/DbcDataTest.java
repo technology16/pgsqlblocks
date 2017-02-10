@@ -12,11 +12,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.*;
 import java.util.*;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.stream.Collectors;
 
-import static java.util.concurrent.TimeUnit.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static ru.taximaxim.pgsqlblocks.TEST.*;
@@ -167,7 +164,6 @@ public class DbcDataTest {
 
     @Test
     @Ignore // remove ignore and fix test after solving the issue #12290 TODO:
-    @SuppressWarnings("squid:S2925")
     public void testTripleLocks() throws IOException, SQLException, InterruptedException {
         /* create rule */
         testDbc.getConnection().prepareStatement(loadQuery(CREATE_RULE_SQL)).execute();
@@ -213,23 +209,25 @@ public class DbcDataTest {
                 REMOTE_PASSWORD);
     }
 
-    private void runThreads(PreparedStatement... statements) {
-        ScheduledThreadPoolExecutor sch = new ScheduledThreadPoolExecutor(1);
+    @SuppressWarnings("squid:S2276")
+    private void runThreads(PreparedStatement... statements) throws SQLException, InterruptedException {
         for (PreparedStatement statement : statements) {
-            sch.schedule(() -> {
-                        Thread thread = new Thread(() -> {
-                            try {
-                                statement.execute();
-                            } catch (SQLException e) {
-                                // no-op
-                            }
-                        });
-                        threadList.add(thread);
-                        thread.start();
-                    },
-                    DELAY_MS,
-                    MILLISECONDS);
+            Thread thread = getNewThread(statement);
+            threadList.add(thread);
+            thread.start();
+            Thread.sleep(DELAY_MS);
         }
+    }
+
+    private Thread getNewThread(PreparedStatement statement) throws SQLException {
+        return new Thread(() -> {
+            try {
+                statement.execute();
+            } catch (SQLException e) {
+                // no-op
+            }
+        }
+        );
     }
 
     private static int getPid(Connection connection) throws SQLException {
