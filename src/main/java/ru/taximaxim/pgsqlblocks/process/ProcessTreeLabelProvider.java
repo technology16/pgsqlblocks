@@ -15,13 +15,13 @@ public class ProcessTreeLabelProvider implements ITableLabelProvider {
     // The listeners
     private List<ILabelProviderListener> listeners;
 
-    private ConcurrentMap<String, Image> imagesMap = new ConcurrentHashMap<String, Image>();
+    private ConcurrentMap<String, Image> imagesMap = new ConcurrentHashMap<>();
 
     /**
      * Constructs a FileTreeLabelProvider
      */
     public ProcessTreeLabelProvider() {
-        listeners = new ArrayList<ILabelProviderListener>();
+        listeners = new ArrayList<>();
     }
 
     @Override

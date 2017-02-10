@@ -141,7 +141,7 @@ public final class FilterProcess {
             case "<":
                 return backendStart.compareTo(fltBackendStart) < 0;
             case "<=":
-                return backendStart.compareTo(fltBackendStart) >= 0;
+                return backendStart.compareTo(fltBackendStart) <= 0;
             default:
                 return true;
             }
@@ -169,7 +169,7 @@ public final class FilterProcess {
             case "<":
                 return queryStart.compareTo(fltQueryStart) < 0;
             case "<=":
-                return queryStart.compareTo(fltQueryStart) >= 0;
+                return queryStart.compareTo(fltQueryStart) <= 0;
             default:
                 return true;
             }

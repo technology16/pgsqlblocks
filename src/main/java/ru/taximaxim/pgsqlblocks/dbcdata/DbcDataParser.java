@@ -31,7 +31,7 @@ public class DbcDataParser {
         String dbname = dbnameNode == null ? "" : dbnameNode.getNodeValue();
         String user = userNode == null ? "" : userNode.getNodeValue();
         String passwd = passwdNode == null ? "" : passwdNode.getNodeValue();
-        boolean enabled = Boolean.valueOf(enabledNode == null ? FALSE : enabledNode.getNodeValue());
+        boolean enabled = Boolean.parseBoolean(enabledNode == null ? FALSE : enabledNode.getNodeValue());
         return new DbcData(name, host, port, dbname, user, passwd, enabled);
     }
     
