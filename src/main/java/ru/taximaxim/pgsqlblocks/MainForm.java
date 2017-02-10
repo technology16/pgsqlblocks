@@ -368,6 +368,8 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
         }
     }
 
+    // if decomposed, then decrease the readability
+    @java.lang.SuppressWarnings("squid:S3776")
     private void addListeners() {
         caMainTree.addSelectionChangedListener(event -> {
             if (!caMainTree.getSelection().isEmpty()) {
