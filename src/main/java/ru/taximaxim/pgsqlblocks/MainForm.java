@@ -466,6 +466,8 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
         return getImage(Images.UNBLOCKED);
     }
 
+    // if decomposed, then decrease the readability
+    @java.lang.SuppressWarnings("squid:S3776")
     protected ToolBarManager createToolBarManager(int style) {
         ToolBarManager toolBarManager = new ToolBarManager(style);
 

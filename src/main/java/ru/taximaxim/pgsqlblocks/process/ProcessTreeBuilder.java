@@ -121,13 +121,11 @@ public class ProcessTreeBuilder {
             process.getBlocks().forEach(blockedBy -> {
                 //Добавляем для данного процесса родителя с pid = process.getBlocks()
                 Process parentProcess = getProcessByPid(tempProcessList.values(), blockedBy.getBlockingPid());
-                if (parentProcess != null) {
-                    process.setParents(parentProcess);
-                    parentProcess.addChildren(process);
-                    parentProcess.setStatus(ProcessStatus.BLOCKING);
-                    process.setStatus(ProcessStatus.BLOCKED);
-                    dbcData.setContainBlockedProcess(true);
-                }
+                process.setParents(parentProcess);
+                parentProcess.addChildren(process);
+                parentProcess.setStatus(ProcessStatus.BLOCKING);
+                process.setStatus(ProcessStatus.BLOCKED);
+                dbcData.setContainBlockedProcess(true);
             });
         }
 
@@ -143,25 +141,17 @@ public class ProcessTreeBuilder {
                 getSortDirectionByColumn(sortColumn, sortDirection, process1, process2));
     }
 
+    /* TODO: need to refactoring cases LOCKTYPE and RELATION.
+    For example, by CollectionUtils.isEqualCollection(java.util.Collection a, java.util.Collection b) mayb*/
     private int getSortDirectionByColumn(SortColumn sortColumn, SortDirection sortDirection,
                                            Process process1, Process process2) {
         switch (sortColumn) {
             case PID:
-                if(process1.getPid() > process2.getPid()) {
-                    return sortDirection == SortDirection.UP ? -1 : 1;
-                } else if(process1.getPid() < process2.getPid()) {
-                    return sortDirection == SortDirection.UP ? 1 : -1;
-                } else {
-                    return 0;
-                }
+                return Integer.compare(process1.getPid(), process2.getPid())
+                        * (sortDirection == SortDirection.UP ? -1 : 1);
             case BLOCKED_COUNT:
-                if(process1.getChildrenCount() > process2.getChildrenCount()) {
-                    return sortDirection == SortDirection.UP ? -1 : 1;
-                } else if(process1.getChildrenCount() < process2.getChildrenCount()) {
-                    return sortDirection == SortDirection.UP ? 1 : -1;
-                } else {
-                    return 0;
-                }
+                return Integer.compare(process1.getChildrenCount(), process2.getChildrenCount())
+                        * (sortDirection == SortDirection.UP ? -1 : 1);
             case APPLICATION_NAME:
                 return stringCompare(process1.getCaller().getApplicationName(), process2.getCaller().getApplicationName(), sortDirection);
             case DATNAME:
@@ -183,45 +173,22 @@ public class ProcessTreeBuilder {
             case QUERY:
                 return stringCompare(process1.getQuery().getQueryString(), process2.getQuery().getQueryString(), sortDirection);
             case SLOWQUERY:
-                return getSortDirectionBySlowQueryColumn(sortDirection, process1, process2);
+                return Boolean.compare(process1.getQuery().isSlowQuery(), process2.getQuery().isSlowQuery())
+                        * (sortDirection == SortDirection.UP ? -1 : 1);
             case BLOCKED:
                 return stringCompare(process1.getBlocks().toString(), process2.getBlocks().toString(), sortDirection);
             case LOCKTYPE:
                 return stringCompare(
-                        process1.getBlocks().stream().map(Block::getLocktype).collect(Collectors.joining(", ")),
-                        process2.getBlocks().stream().map(Block::getLocktype).collect(Collectors.joining(", ")),
+                        process1.getBlocks().stream().map(Block::getLocktype).sorted().collect(Collectors.joining(", ")),
+                        process2.getBlocks().stream().map(Block::getLocktype).sorted().collect(Collectors.joining(", ")),
                         sortDirection);
             case RELATION:
                 return stringCompare(
-                    process1.getBlocks().stream().map(Block::getRelation).collect(Collectors.joining(", ")),
-                    process2.getBlocks().stream().map(Block::getRelation).collect(Collectors.joining(", ")),
+                    process1.getBlocks().stream().map(Block::getRelation).sorted().collect(Collectors.joining(", ")),
+                    process2.getBlocks().stream().map(Block::getRelation).sorted().collect(Collectors.joining(", ")),
                     sortDirection);
             default:
                 return 0;
-        }
-    }
-    // TODO refactor!
-    private int getSortDirectionBySlowQueryColumn(SortDirection sortDirection, Process process1, Process process2) {
-        if(sortDirection == SortDirection.UP) {
-            if(process1.getQuery().isSlowQuery() && process2.getQuery().isSlowQuery()) {
-                return 0;
-            } else if(process1.getQuery().isSlowQuery() && !process2.getQuery().isSlowQuery()) {
-                return 1;
-            } else if(!process1.getQuery().isSlowQuery() && process2.getQuery().isSlowQuery()) {
-                return -1;
-            } else {
-                return 0;
-            }
-        } else {
-            if(process1.getQuery().isSlowQuery() && process2.getQuery().isSlowQuery()) {
-                return 0;
-            } else if(!process1.getQuery().isSlowQuery() && process2.getQuery().isSlowQuery()) {
-                return 1;
-            } else if(process1.getQuery().isSlowQuery() && !process2.getQuery().isSlowQuery()) {
-                return -1;
-            } else {
-                return 0;
-            }
         }
     }
 
