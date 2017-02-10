@@ -98,7 +98,6 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
             wwin.setBlockOnOpen(true);
             display = Display.getCurrent();
             wwin.open();
-            tray = display.getSystemTray();
             display.dispose();
         } catch (Exception e) {
             LOG.error("Произошла ошибка:", e);
@@ -182,6 +181,8 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
         GridData gridData = new GridData(SWT.FILL, SWT.FILL, true, true);
 
         fillVerticalSashForm(composite, gridLayout, gridData);
+
+        tray = display.getSystemTray();
 
         addListeners();
 
