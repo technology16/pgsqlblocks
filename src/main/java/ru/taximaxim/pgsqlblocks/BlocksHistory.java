@@ -109,27 +109,32 @@ public final class BlocksHistory {
             } catch (XPathExpressionException e) {
                 LOG.error("Ошибка XPathExpressionException: " + e.getMessage());
             }
-            for(int j = 0; j < (children != null ? children.getLength() : 0); j++) {
-                Node processNode = children.item(j);
-                if (processNode.getNodeType() != Node.ELEMENT_NODE) {
-                    continue;
-                }
-                Element procEl = (Element)processNode;
-                proc = processParser.parseProcess(procEl);
-                
-                for (Process process : proc.getChildren()) {
-                    if (!process.getBlocks().isEmpty()) {
-                        process.getParents().forEach(p -> p.setStatus(ProcessStatus.BLOCKING));
-                        process.setStatus(ProcessStatus.BLOCKED);
-                        dbc.setContainBlockedProcess(true);
-                    }
-                }
-                rootProcess.addChildren(proc);
-                dbc.setProcess(rootProcess);
-            }
+            parseChildren(rootProcess, dbc, children);
             dbcDataList.add(dbc);
         }
         
         return dbcDataList;
+    }
+
+    void parseChildren(Process rootProcess, DbcData dbc, NodeList children) {
+        Process proc;
+        for(int j = 0; j < (children != null ? children.getLength() : 0); j++) {
+            Node processNode = children.item(j);
+            if (processNode.getNodeType() != Node.ELEMENT_NODE) {
+                continue;
+            }
+            Element procEl = (Element)processNode;
+            proc = processParser.parseProcess(procEl);
+
+            for (Process process : proc.getChildren()) {
+                if (!process.getBlocks().isEmpty()) {
+                    process.getParents().forEach(p -> p.setStatus(ProcessStatus.BLOCKING));
+                    process.setStatus(ProcessStatus.BLOCKED);
+                    dbc.setContainBlockedProcess(true);
+                }
+            }
+            rootProcess.addChildren(proc);
+            dbc.setProcess(rootProcess);
+        }
     }
 }
