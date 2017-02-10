@@ -164,7 +164,8 @@ public class DbcDataTest {
 
     // TODO: remove ignore and fix test after solving the issue #12290
     @Test
-    @Ignore // renable when #12290 is fixed
+    @Ignore
+    @SuppressWarnings("squid:S1607")
     public void testTripleLocks() throws IOException, SQLException, InterruptedException {
         /* create rule */
         testDbc.getConnection().prepareStatement(loadQuery(CREATE_RULE_SQL)).execute();
