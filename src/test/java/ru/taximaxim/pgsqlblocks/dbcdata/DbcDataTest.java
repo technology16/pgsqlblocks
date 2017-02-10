@@ -166,7 +166,7 @@ public class DbcDataTest {
     }
 
     @Test
-    @Ignore //TODO: remove ignore and fix test after solving the issue #12290
+    @Ignore // remove ignore and fix test after solving the issue #12290 TODO:
     @SuppressWarnings("squid:S2925")
     public void testTripleLocks() throws IOException, SQLException, InterruptedException {
         /* create rule */

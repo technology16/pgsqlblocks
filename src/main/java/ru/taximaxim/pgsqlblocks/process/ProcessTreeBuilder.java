@@ -113,8 +113,14 @@ public class ProcessTreeBuilder {
         } catch (SQLException e) {
             LOG.error(String.format("Ошибка при получении процессов для %s", dbcData.getDbname()), e);
         }
-        
+
         // Пробегаем по списку процессов, ищем ожидающие и блокированные процессы
+        proceedProcesses(tempProcessList);
+
+        return tempProcessList.values();
+    }
+
+    private void proceedProcesses(Map<Integer, Process> tempProcessList) {
         dbcData.setStatus(DbcStatus.CONNECTED);
         dbcData.setContainBlockedProcess(false);
         for (Process process : tempProcessList.values()) {
@@ -131,10 +137,8 @@ public class ProcessTreeBuilder {
                 dbcData.setContainBlockedProcess(true);
             });
         }
-
-        return tempProcessList.values();
     }
-    
+
     private int stringCompare(String s1, String s2, SortDirection sortDirection) {
         return sortDirection == SortDirection.DOWN ? s1.compareTo(s2) : s2.compareTo(s1);
     }

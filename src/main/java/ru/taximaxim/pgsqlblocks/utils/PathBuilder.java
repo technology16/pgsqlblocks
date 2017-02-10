@@ -12,13 +12,13 @@ import org.apache.log4j.Logger;
 import static java.nio.file.Files.*;
 
 public final class PathBuilder {
-    
+
     private static final Logger LOG = Logger.getLogger(PathBuilder.class);
-    
+
     private static PathBuilder instance;
-    
+
     private Path path;
-    
+
     private PathBuilder() {
         try {
             String os = System.getProperty("os.name").toLowerCase();
@@ -34,14 +34,15 @@ public final class PathBuilder {
             LOG.error(String.format("Ошибка создания директории %s: %s", path, e.getMessage()));
         }
     }
-    
+
     public static PathBuilder getInstance() {
         if(instance == null) {
             instance = new PathBuilder();
         }
         return instance;
     }
-    
+
+    @SuppressWarnings("squid:S3725") // Cannot resolve method notExists()
     public Path getBlockHistoryDir() {
         Path blocksHistoryDir = Paths.get(path.toString(), "blocksHistory");
         if (notExists(blocksHistoryDir)) {
@@ -53,15 +54,16 @@ public final class PathBuilder {
         }
         return blocksHistoryDir;
     }
-    
+
     public Path getBlockHistoryPath() {
         Path blocksHistoryDir = getBlockHistoryDir();
         SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy HH-mm-ss");
         String dateTime = sdf.format(new Date(System.currentTimeMillis()));
-        
+
         return Paths.get(blocksHistoryDir.toString(), String.format("blocksHistory-%s.xml", dateTime));
     }
-    
+
+    @SuppressWarnings("squid:S3725") // Cannot resolve method notExists()
     public Path getServersPath() {
         Path serversPath = Paths.get(path.toString(), "servers.xml");
         if (notExists(serversPath)) {
@@ -73,7 +75,8 @@ public final class PathBuilder {
         }
         return serversPath;
     }
-    // TODO разные конфиги log4j.propertires для разных ОС 
+    // TODO разные конфиги log4j.propertires для разных ОС
+    @SuppressWarnings("squid:S3725") // Cannot resolve method notExists()
     public Path getPropertiesPath() {
         Path propPath = Paths.get(path.toString(), "pgsqlblocks.properties");
         if (notExists(propPath)) {
