@@ -58,7 +58,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
     
     private static final int TRAY_NOTIFICATION_MAX_LENGTH = 4;
     private static Display display;
-    private static Tray tray;
+    private Tray tray;
 
     private volatile DbcData selectedDbcData;
     private Process selectedProcess;
@@ -415,6 +415,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
         return tray != null;
     }
 
+    @java.lang.SuppressWarnings("squid:S2696")  //TODO: refactoring sortDirection and sortColumn
     private void fillTreeViewer(TreeViewer treeViewer) {
         for (SortColumn column : SortColumn.values()) {
             TreeViewerColumn treeColumn = new TreeViewerColumn(treeViewer, SWT.NONE);

@@ -51,6 +51,8 @@ public class ProcessTreeBuilder {
 
     public ProcessTreeBuilder(DbcData dbcData) {
         this.dbcData = dbcData;
+        queryWithIdle = loadQuery(QUERYWITHIDLEFILENAME);
+        queryWithoutIdle = loadQuery(QUERYFILENAME);
     }
 
     public Process buildProcessTree() {
@@ -244,10 +246,8 @@ public class ProcessTreeBuilder {
 
     private String getQuery(boolean showIdle) {
         if (showIdle) {
-            queryWithIdle = (queryWithIdle == null) ? loadQuery(QUERYWITHIDLEFILENAME) : queryWithIdle;
             return queryWithIdle;
         } else {
-            queryWithoutIdle = (queryWithoutIdle == null) ? loadQuery(QUERYFILENAME) : queryWithoutIdle;
             return queryWithoutIdle;
         }
     }
