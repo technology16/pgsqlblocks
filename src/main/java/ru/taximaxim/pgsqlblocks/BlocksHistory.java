@@ -93,7 +93,7 @@ public final class BlocksHistory {
         }
         NodeList items = doc.getElementsByTagName(SERVER);
         for(int i = 0; i < items.getLength(); i++) {
-            DbcData dbc = null;
+            DbcData dbc;
             Node node = items.item(i);
             if (node.getNodeType() != Node.ELEMENT_NODE) {
                 continue;
@@ -108,7 +108,9 @@ public final class BlocksHistory {
             } catch (XPathExpressionException e) {
                 LOG.error("Ошибка XPathExpressionException: " + e.getMessage());
             }
-            parseChildren(rootProcess, dbc, children);
+            if (children != null) {
+                parseChildren(rootProcess, dbc, children);
+            }
             dbcDataList.add(dbc);
         }
         
@@ -116,7 +118,7 @@ public final class BlocksHistory {
     }
 
     void parseChildren(Process rootProcess, DbcData dbc, NodeList children) {
-        for(int j = 0; j < (children != null ? children.getLength() : 0); j++) {
+        for(int j = 0; j < children.getLength(); j++) {
             Node processNode = children.item(j);
             if (processNode.getNodeType() != Node.ELEMENT_NODE) {
                 continue;

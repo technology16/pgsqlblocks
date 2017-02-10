@@ -12,8 +12,11 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.*;
 import java.util.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.stream.Collectors;
 
+import static java.util.concurrent.TimeUnit.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static ru.taximaxim.pgsqlblocks.TEST.*;
@@ -162,9 +165,9 @@ public class DbcDataTest {
         assertTrue(proc1.get().getParents().stream().anyMatch(x -> x.getPid() == proc2.get().getPid()));
     }
 
-    //TODO: remove ignore annotation and fix test after solving the issue #12290
     @Test
-    @Ignore
+    @Ignore //TODO: remove ignore and fix test after solving the issue #12290
+    @SuppressWarnings("squid:S2925")
     public void testTripleLocks() throws IOException, SQLException, InterruptedException {
         /* create rule */
         testDbc.getConnection().prepareStatement(loadQuery(CREATE_RULE_SQL)).execute();
@@ -210,24 +213,23 @@ public class DbcDataTest {
                 REMOTE_PASSWORD);
     }
 
-    private void runThreads(PreparedStatement... statements) throws SQLException, InterruptedException {
+    private void runThreads(PreparedStatement... statements) {
+        ScheduledThreadPoolExecutor sch = new ScheduledThreadPoolExecutor(1);
         for (PreparedStatement statement : statements) {
-            Thread thread = getNewThread(statement);
-            threadList.add(thread);
-            thread.start();
-            Thread.sleep(DELAY_MS);
+            sch.schedule(() -> {
+                        Thread thread = new Thread(() -> {
+                            try {
+                                statement.execute();
+                            } catch (SQLException e) {
+                                // no-op
+                            }
+                        });
+                        threadList.add(thread);
+                        thread.start();
+                    },
+                    DELAY_MS,
+                    MILLISECONDS);
         }
-    }
-
-    private Thread getNewThread(PreparedStatement statement) throws SQLException {
-        return new Thread(() -> {
-            try {
-                statement.execute();
-            } catch (SQLException e) {
-                // no-op
-            }
-        }
-        );
     }
 
     private static int getPid(Connection connection) throws SQLException {

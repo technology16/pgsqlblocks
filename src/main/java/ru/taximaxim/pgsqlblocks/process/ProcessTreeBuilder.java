@@ -121,6 +121,9 @@ public class ProcessTreeBuilder {
             process.getBlocks().forEach(blockedBy -> {
                 //Добавляем для данного процесса родителя с pid = process.getBlocks()
                 Process parentProcess = getProcessByPid(tempProcessList.values(), blockedBy.getBlockingPid());
+                if (parentProcess == null) {
+                    return; //skip this iteration
+                }
                 process.setParents(parentProcess);
                 parentProcess.addChildren(process);
                 parentProcess.setStatus(ProcessStatus.BLOCKING);
@@ -208,7 +211,7 @@ public class ProcessTreeBuilder {
     }
 
     private Process getProcessByPid(Collection<Process> processList, int pid) {
-        return processList.stream().filter(process -> process.getPid() == pid).findFirst().get();
+        return processList.stream().filter(process -> process.getPid() == pid).findFirst().orElse(null);
     }
 
     private String getQuery(boolean showIdle) {
