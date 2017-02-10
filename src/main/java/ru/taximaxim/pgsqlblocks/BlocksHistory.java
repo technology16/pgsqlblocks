@@ -109,15 +109,14 @@ public final class BlocksHistory {
             } catch (XPathExpressionException e) {
                 LOG.error("Ошибка XPathExpressionException: " + e.getMessage());
             }
-            parseChildren(rootProcess, dbc, children);
+            parseChildren(rootProcess, dbc, proc, children);
             dbcDataList.add(dbc);
         }
         
         return dbcDataList;
     }
 
-    void parseChildren(Process rootProcess, DbcData dbc, NodeList children) {
-        Process proc;
+    void parseChildren(Process rootProcess, DbcData dbc, Process proc, NodeList children) {
         for(int j = 0; j < (children != null ? children.getLength() : 0); j++) {
             Node processNode = children.item(j);
             if (processNode.getNodeType() != Node.ELEMENT_NODE) {
