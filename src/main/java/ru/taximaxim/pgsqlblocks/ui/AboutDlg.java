@@ -78,6 +78,7 @@ public class AboutDlg extends Dialog {
         data.widthHint = pc.convertWidthInCharsToPixels(OK_BUTTON_HEIGHT_IN_CHARS);
         ok.setLayoutData(data);
         ok.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent event) {
                 container.close();
             }
