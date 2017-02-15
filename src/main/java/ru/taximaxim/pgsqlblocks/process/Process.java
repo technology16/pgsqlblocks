@@ -85,8 +85,9 @@ public class Process implements Comparable<Process> {
         return query;
     }
 
+    // TODO: refactor after after solving the issue #12290
     public int getChildrenCount() {
-        return getChildren().stream().mapToInt(Process::getChildrenCount).sum();
+        return getChildren().size();
     }
 
     public ProcessStatus getStatus() {
