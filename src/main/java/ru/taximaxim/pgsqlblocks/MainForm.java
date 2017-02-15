@@ -341,9 +341,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
                 }
             }
             logComposite = new Composite(verticalSf, SWT.NONE);
-            {
-                logComposite.setLayout(gridLayout);
-            }
+            logComposite.setLayout(gridLayout);
             logComposite.setVisible(settings.getShowLogMessages());
             verticalSf.setWeights(VERTICAL_WEIGHTS);
             UIAppender uiAppender = new UIAppender(logComposite);

@@ -71,7 +71,6 @@ public final class Settings {
         this.showIdle = Boolean.parseBoolean(properties.getProperty(SHOW_IDLE));
         this.showToolTip = Boolean.parseBoolean(properties.getProperty(SHOW_TOOL_TIP));
         this.showBackendPid = Boolean.parseBoolean(properties.getProperty(SHOW_BACKEND_PID));
-        this.showBackendPid = Boolean.parseBoolean(properties.getProperty(SHOW_BACKEND_PID));
         this.showLogMessages = Boolean.parseBoolean(properties.getProperty(SHOW_LOG_MESSAGES));
     }
 
