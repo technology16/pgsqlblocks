@@ -30,6 +30,7 @@ public final class Settings {
     private static final String COLUMNS_LIST = "columns_list";
     private static final String CONFIRM_REQUIRED = "confirm_required";
     private static final String CONFIRM_EXIT = "confirm_exit";
+    private static final String SHOW_LOG_MESSAGES = "show_log_messages";
 
     private int updatePeriod;
     private int loginTimeout;
@@ -41,13 +42,14 @@ public final class Settings {
     private boolean showToolTip;
     private boolean confirmRequired;
     private boolean showBackendPid;
+    private boolean showLogMessages;
     private boolean confirmExit;
 
     private Set<SortColumn> columnsList;
 
     private Properties properties;
-
     private File propFile;
+
     private static Settings instance;
 
     private Settings() {
@@ -62,6 +64,7 @@ public final class Settings {
         defaults.put(COLUMNS_LIST, Arrays.stream(SortColumn.values()).map(Enum::name).collect(Collectors.joining(",")));
         defaults.put(CONFIRM_REQUIRED, "true");
         defaults.put(CONFIRM_EXIT, "true");
+        defaults.put(SHOW_LOG_MESSAGES, "true");
 
         properties = new Properties(defaults);
         propFile = PathBuilder.getInstance().getPropertiesPath().toFile();
@@ -84,6 +87,7 @@ public final class Settings {
                                             .map(SortColumn::valueOf).collect(Collectors.toSet());
         this.confirmRequired = Boolean.parseBoolean(properties.getProperty(CONFIRM_REQUIRED));
         this.confirmExit = Boolean.parseBoolean(properties.getProperty(CONFIRM_EXIT));
+        this.showLogMessages = Boolean.parseBoolean(properties.getProperty(SHOW_LOG_MESSAGES));
     }
 
     public static Settings getInstance() {
@@ -252,6 +256,25 @@ public final class Settings {
     public void setConfirmExit(boolean confirmExit) {
         this.confirmExit = confirmExit;
         saveProperties(CONFIRM_EXIT, String.valueOf(confirmExit));
+    }
+
+    /**
+     * Устанавливаем флаг отображения логов
+     * @param showLogMessages флаг отображения логов
+     * @see #setShowLogMessages(boolean)
+     */
+    public void setShowLogMessages(boolean showLogMessages) {
+        this.showLogMessages = showLogMessages;
+        saveProperties(SHOW_LOG_MESSAGES, Boolean.toString(showLogMessages));
+    }
+
+    /**
+     * Устанавливаем флаг отображения логов
+     * @return the showLogMessages
+     * @see #getShowLogMessages()
+     */
+    public boolean getShowLogMessages() {
+        return showLogMessages;
     }
 
     private void saveProperties(String key, String value) {

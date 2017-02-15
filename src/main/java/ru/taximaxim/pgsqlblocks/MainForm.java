@@ -77,6 +77,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
     private Action update;
     private Action autoUpdate;
     private Action cancelUpdate;
+    private Action logDisplay;
     private Action onlyBlocked;
     private ToolItem cancelProc;
     private ToolItem terminateProc;
@@ -91,6 +92,9 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
     private MenuManager serversTableMenuMgr = new MenuManager();
     private Set<SortColumn> visibleColumns = settings.getColumnsList();
     private boolean hasBlocks = false;
+
+    private Composite logComposite;
+    private SashForm verticalSf;
 
     public static void main(String[] args) {
         try {
@@ -179,8 +183,8 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
         gridLayout.marginWidth = ZERO_MARGIN;
         
         GridData gridData = new GridData(SWT.FILL, SWT.FILL, true, true);
-        
-        SashForm verticalSf = new SashForm(composite, SWT.VERTICAL);
+
+        verticalSf = new SashForm(composite, SWT.VERTICAL);
         {
             verticalSf.setLayout(gridLayout);
             verticalSf.setLayoutData(gridData);
@@ -318,10 +322,9 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
                     blocksHistoryTi.setControl(blocksHistorySf);
                 }
             }
-            Composite logComposite = new Composite(verticalSf, SWT.NONE);
-            {
-                logComposite.setLayout(gridLayout);
-            }
+            logComposite = new Composite(verticalSf, SWT.NONE);
+            logComposite.setLayout(gridLayout);
+            logComposite.setVisible(settings.getShowLogMessages());
             verticalSf.setWeights(VERTICAL_WEIGHTS);
             UIAppender uiAppender = new UIAppender(logComposite);
             uiAppender.setThreshold(Level.INFO);
@@ -662,10 +665,10 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
         toolBarManager.add(importBlocks);
 
         toolBarManager.add(new Separator());
-        
+
         Action settingsAction = new Action(Images.SETTINGS.getDescription(),
                 ImageDescriptor.createFromImage(getImage(Images.SETTINGS))) {
-            
+
             @Override
             public void run() {
                 SettingsDlg settingsDlg = new SettingsDlg(getShell(), settings);
@@ -684,8 +687,28 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
         };
 
         toolBarManager.add(settingsAction);
-        
+
+        logDisplay = new Action() {
+            @Override
+            public void run() {
+                settings.setShowLogMessages(logDisplay.isChecked());
+                logComposite.setVisible(logDisplay.isChecked());
+                verticalSf.setWeights(VERTICAL_WEIGHTS);
+                updateLogDisplayActionBtn(logDisplay.isChecked());
+            }
+        };
+
+        logDisplay.setChecked(settings.getShowLogMessages());
+        updateLogDisplayActionBtn(settings.getShowLogMessages());
+        toolBarManager.add(logDisplay);
+
         return toolBarManager;
+    }
+
+    void updateLogDisplayActionBtn(boolean showLogMessages) {
+        Images image = showLogMessages ? Images.SHOW_LOG_PANEL : Images.HIDE_LOG_PANEL;
+        logDisplay.setText(image.getDescription());
+        logDisplay.setImageDescriptor(ImageDescriptor.createFromImage(getImage(image)));
     }
 
     private void checkBlocks() {
