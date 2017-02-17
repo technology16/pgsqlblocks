@@ -162,10 +162,7 @@ public class DbcDataTest {
         assertTrue(proc1.get().getParents().stream().anyMatch(x -> x.getPid() == proc2.get().getPid()));
     }
 
-    // TODO: remove ignore and fix test after solving the issue #12290
     @Test
-    @Ignore
-    @SuppressWarnings("squid:S1607")
     public void testTripleLocks() throws IOException, SQLException, InterruptedException {
         /* create rule */
         testDbc.getConnection().prepareStatement(loadQuery(CREATE_RULE_SQL)).execute();
@@ -192,8 +189,8 @@ public class DbcDataTest {
         assertTrue(proc3.isPresent());
 
         assertEquals(ProcessStatus.BLOCKING, proc1.get().getStatus());
-        assertEquals(ProcessStatus.BLOCKED, proc2.get().getStatus());
-        assertEquals(ProcessStatus.BLOCKING, proc3.get().getStatus());
+        assertEquals(ProcessStatus.BLOCKING, proc2.get().getStatus());
+        assertEquals(ProcessStatus.BLOCKED, proc3.get().getStatus());
 
         assertTrue(proc1.get().hasChildren());
         assertTrue(proc2.get().getParents().stream().anyMatch(x -> x.getPid() == proc1.get().getPid()));
