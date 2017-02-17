@@ -107,7 +107,15 @@ public class ProcessTreeBuilder {
                 
                 int blockedBy = processSet.getInt(BLOCKEDBY);
                 if (blockedBy != 0) {
-                    currentProcess.addBlock(new Block(blockedBy, processSet.getString(LOCKTYPE), processSet.getString(RELATION)));
+                    String locType = processSet.getString(LOCKTYPE);
+                    String relation = processSet.getString(RELATION);
+                    Process process = getProcessByPid(tempProcessList.values(), blockedBy);
+                    if (process != null && process.getBlocks().size() > 0 &&
+                            (process.getQuery().getExactStart()).compareTo(currentProcess.getQuery().getExactStart()) > 0) {
+                        process.addBlock(new Block(currentProcess.getPid(), locType, relation));
+                    } else {
+                        currentProcess.addBlock(new Block(blockedBy, locType, relation));
+                    }
                 }
             }
         } catch (SQLException e) {
