@@ -111,7 +111,7 @@ public class ProcessTreeBuilder {
                     String relation = processSet.getString(RELATION);
                     Process process = getProcessByPid(tempProcessList.values(), blockedBy);
                     if (process != null && process.getBlocks().size() > 0 &&
-                            (process.getQuery().getExactStart()).compareTo(currentProcess.getQuery().getExactStart()) > 0) {
+                            (process.getQuery().getXactStart()).compareTo(currentProcess.getQuery().getXactStart()) > 0) {
                         process.addBlock(new Block(currentProcess.getPid(), locType, relation));
                     } else {
                         currentProcess.addBlock(new Block(blockedBy, locType, relation));
@@ -180,7 +180,7 @@ public class ProcessTreeBuilder {
             case QUERY_START:
                 return stringCompare(process1.getQuery().getQueryStart(), process2.getQuery().getQueryStart(), sortDirection);
             case XACT_START:
-                return stringCompare(process1.getQuery().getExactStart(), process2.getQuery().getExactStart(), sortDirection);
+                return stringCompare(process1.getQuery().getXactStart(), process2.getQuery().getXactStart(), sortDirection);
             case STATE:
                 return stringCompare(process1.getState(), process2.getState(), sortDirection);
             case STATE_CHANGE:

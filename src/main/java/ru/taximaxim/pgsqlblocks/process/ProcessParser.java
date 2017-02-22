@@ -1,15 +1,15 @@
 package ru.taximaxim.pgsqlblocks.process;
 
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpressionException;
-import javax.xml.xpath.XPathFactory;
-
 import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
 
 public class ProcessParser {
     
@@ -47,7 +47,7 @@ public class ProcessParser {
         createElement(procEl, doc.createElement(CLIENT), process.getCaller().getClient());
         createElement(procEl, doc.createElement(BACKENDSTART), process.getQuery().getBackendStart());
         createElement(procEl, doc.createElement(QUERYSTART), process.getQuery().getQueryStart());
-        createElement(procEl, doc.createElement(XACTSTART), process.getQuery().getExactStart());
+        createElement(procEl, doc.createElement(XACTSTART), process.getQuery().getXactStart());
         createElement(procEl, doc.createElement(STATE), process.getState());
         createElement(procEl, doc.createElement(STATECHANGE), process.getStateChange());
         procEl.appendChild(createBlockedElement(doc, process));
