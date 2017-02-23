@@ -206,11 +206,6 @@ public class ProcessTreeBuilder {
                     process1.getBlocks().stream().map(Block::getRelation).sorted().collect(Collectors.joining(", ")),
                     process2.getBlocks().stream().map(Block::getRelation).sorted().collect(Collectors.joining(", ")),
                     sortDirection);
-            case GRANTED:
-                return Boolean.compare(
-                        process1.getBlocks().stream().map(Block::isGranted).anyMatch(x-> !x),
-                        process2.getBlocks().stream().map(Block::isGranted).anyMatch(x-> !x))
-                        * (sortDirection == SortDirection.UP ? -1 : 1);
             default:
                 return 0;
         }

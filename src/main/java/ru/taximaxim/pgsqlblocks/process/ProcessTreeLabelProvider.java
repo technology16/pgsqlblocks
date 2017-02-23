@@ -47,7 +47,6 @@ public class ProcessTreeLabelProvider extends TreeLabelProvider implements ITabl
                                 .collect(Collectors.joining(","));
             case QUERY: return process.getQuery().getQueryString();
             case SLOWQUERY: return String.valueOf(process.getQuery().isSlowQuery());
-            case GRANTED: return String.valueOf(process.getBlocks().stream().map(Block::isGranted).anyMatch(x-> !x));
             default: return null;
         }
     }
