@@ -16,7 +16,8 @@ public enum SortColumn {
     LOCKTYPE,
     RELATION,
     QUERY,
-    SLOWQUERY;
+    SLOWQUERY,
+    GRANTED;
 
     /**
      * Получение имени колонки
@@ -56,6 +57,8 @@ public enum SortColumn {
                 return "Запрос";
             case SLOWQUERY:
                 return "Долгий процесс";
+            case GRANTED:
+                return "Блокировка получена";
             default:
                 return "Без имени";
         }
@@ -74,6 +77,7 @@ public enum SortColumn {
                 return 70;
             case PID:
             case SLOWQUERY:
+            case GRANTED:
                 return 80;
             case BLOCKED_COUNT:
             case DATNAME:

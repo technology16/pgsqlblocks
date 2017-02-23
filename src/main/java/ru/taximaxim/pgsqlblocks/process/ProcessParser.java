@@ -34,6 +34,7 @@ public class ProcessParser {
     private static final String CHILDREN = "children";
     private static final String BLOCK = "block";
     private static final String BLOCKING_PID = "blockingPid";
+    private static final String GRANTED = "granted";
 
     private static final String XPATH_EXPR_BLOCKED = "blocked/block";
     private static final String XPATH_EXPR_CHILDREN = "children/process";
@@ -120,6 +121,7 @@ public class ProcessParser {
             createElement(procEl, doc.createElement(BLOCKING_PID), String.valueOf(block.getBlockingPid()));
             createElement(procEl, doc.createElement(RELATION), block.getRelation());
             createElement(procEl, doc.createElement(LOCKTYPE), block.getLocktype());
+            createElement(procEl, doc.createElement(GRANTED),  String.valueOf(block.isGranted()));
             blocks.appendChild(procEl);
         }
         return blocks;
@@ -139,7 +141,8 @@ public class ProcessParser {
                     process.addBlock(
                             new Block(Integer.parseInt(getNodeValue(procEl, BLOCKING_PID)),
                                     getNodeValue(procEl, LOCKTYPE),
-                                    getNodeValue(procEl, RELATION)));
+                                    getNodeValue(procEl, RELATION),
+                                    Boolean.getBoolean(getNodeValue(procEl, GRANTED))));
                 }
             }
         } catch (XPathExpressionException e) {

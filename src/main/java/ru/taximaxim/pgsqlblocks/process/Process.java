@@ -12,7 +12,7 @@ public class Process implements Comparable<Process> {
     private final QueryCaller caller;
     private final String state;
     private final String stateChange;
-    private final Set<Block> blocks = new HashSet<>();
+    private final HashSet<Block> blocks = new HashSet<>();
     private final Query query;
     private final List<Process> children = new ArrayList<>();
     private ProcessStatus status = ProcessStatus.WORKING;

@@ -3,7 +3,8 @@ WITH blocks AS (
         blocking_locks.pid as pid, 
         blocked_locks.pid as blocked_pid,
         blocking_locks.locktype as locktype,
-        blocking_locks.relation::regclass as relation
+        blocking_locks.relation::regclass as relation,
+        blocking_locks.granted as granted
     FROM 
         pg_catalog.pg_locks blocked_locks
     JOIN 
@@ -41,7 +42,8 @@ SELECT
     /* deprecated
     null::text AS blocking_locks,*/ 
     blocks.locktype AS locktype, 
-    blocks.relation AS relation, 
+    blocks.relation AS relation,
+    blocks.granted AS granted,
     query AS query, 
     CASE WHEN query_start IS NULL OR state<>'active' THEN false 
          ELSE query_start < now() - '10 seconds'::interval 

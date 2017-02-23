@@ -1,11 +1,11 @@
 package ru.taximaxim.pgsqlblocks.process;
 
-import java.util.stream.Collectors;
-
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.swt.graphics.Image;
 import ru.taximaxim.pgsqlblocks.SortColumn;
 import ru.taximaxim.pgsqlblocks.TreeLabelProvider;
+
+import java.util.stream.Collectors;
 
 public class ProcessTreeLabelProvider extends TreeLabelProvider implements ITableLabelProvider {
 
@@ -47,6 +47,7 @@ public class ProcessTreeLabelProvider extends TreeLabelProvider implements ITabl
                                 .collect(Collectors.joining(","));
             case QUERY: return process.getQuery().getQueryString();
             case SLOWQUERY: return String.valueOf(process.getQuery().isSlowQuery());
+            case GRANTED: return String.valueOf(process.getBlocks().stream().map(Block::isGranted).anyMatch(x-> !x));
             default: return null;
         }
     }

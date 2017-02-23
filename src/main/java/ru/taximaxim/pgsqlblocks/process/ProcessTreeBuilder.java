@@ -1,5 +1,12 @@
 package ru.taximaxim.pgsqlblocks.process;
 
+import org.apache.log4j.Logger;
+import ru.taximaxim.pgsqlblocks.SortColumn;
+import ru.taximaxim.pgsqlblocks.SortDirection;
+import ru.taximaxim.pgsqlblocks.dbcdata.DbcData;
+import ru.taximaxim.pgsqlblocks.dbcdata.DbcStatus;
+import ru.taximaxim.pgsqlblocks.utils.Settings;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -9,16 +16,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.stream.Collectors;
-
-import org.apache.log4j.Logger;
-
-import ru.taximaxim.pgsqlblocks.SortColumn;
-import ru.taximaxim.pgsqlblocks.SortDirection;
-import ru.taximaxim.pgsqlblocks.dbcdata.DbcData;
-import ru.taximaxim.pgsqlblocks.dbcdata.DbcStatus;
-import ru.taximaxim.pgsqlblocks.utils.Settings;
 
 public class ProcessTreeBuilder {
 
@@ -39,6 +41,7 @@ public class ProcessTreeBuilder {
     private static final String XACTSTART = "xact_start";
     private static final String STATECHANGE = "state_change";
     private static final String QUERYSQL = "query";
+    private static final String GRANTED = "granted";
 
     private static final String QUERYFILENAME = "query.sql";
     private static final String QUERYWITHIDLEFILENAME = "query_with_idle.sql";
@@ -109,12 +112,13 @@ public class ProcessTreeBuilder {
                 if (blockedBy != 0) {
                     String locType = processSet.getString(LOCKTYPE);
                     String relation = processSet.getString(RELATION);
+                    boolean granted = Boolean.getBoolean(processSet.getString(GRANTED));
                     Process process = getProcessByPid(tempProcessList.values(), blockedBy);
-                    if (process != null && process.getBlocks().size() > 0 &&
-                            (process.getQuery().getXactStart()).compareTo(currentProcess.getQuery().getXactStart()) > 0) {
-                        process.addBlock(new Block(currentProcess.getPid(), locType, relation));
+                    if (!granted && process != null && process.getBlocks().size() > 0 &&
+                            (process.getQuery().getQueryStart()).compareTo(currentProcess.getQuery().getQueryStart()) <= 0) {
+                        process.addBlock(new Block(currentProcess.getPid(), locType, relation, false));
                     } else {
-                        currentProcess.addBlock(new Block(blockedBy, locType, relation));
+                        currentProcess.addBlock(new Block(blockedBy, locType, relation, granted));
                     }
                 }
             }
@@ -202,6 +206,11 @@ public class ProcessTreeBuilder {
                     process1.getBlocks().stream().map(Block::getRelation).sorted().collect(Collectors.joining(", ")),
                     process2.getBlocks().stream().map(Block::getRelation).sorted().collect(Collectors.joining(", ")),
                     sortDirection);
+            case GRANTED:
+                return Boolean.compare(
+                        process1.getBlocks().stream().map(Block::isGranted).anyMatch(x-> !x),
+                        process2.getBlocks().stream().map(Block::isGranted).anyMatch(x-> !x))
+                        * (sortDirection == SortDirection.UP ? -1 : 1);
             default:
                 return 0;
         }
