@@ -110,6 +110,8 @@ public class ProcessTreeBuilder {
 
                 int blockedBy = processSet.getInt(BLOCKEDBY);
                 if (blockedBy != 0) {
+                    // save block info to temporary list
+                    // tempBlocksList: List<Pair<ProcessPid, Map<FieldName, FieldValue>>>
                     Map<String, Object> blockInfo = new HashMap<>();
                     blockInfo.put(BLOCKEDBY, blockedBy);
                     blockInfo.put(LOCKTYPE, processSet.getString(LOCKTYPE));
@@ -121,7 +123,7 @@ public class ProcessTreeBuilder {
             LOG.error(String.format("Ошибка при получении процессов для %s", dbcData.getDbname()), e);
         }
 
-        tempBlocksList = tempBlocksList.stream().distinct().collect(Collectors.toList());
+        tempBlocksList = tempBlocksList.stream().distinct().collect(Collectors.toList()); // remove duplicates
         proceedBlocks(tempProcessList, tempBlocksList);
 
         // Пробегаем по списку процессов, ищем ожидающие и блокированные процессы
@@ -132,23 +134,26 @@ public class ProcessTreeBuilder {
 
     private void proceedBlocks(Map<Integer, Process> tempProcessList, List<Pair<Integer, Map<String, Object>>> tempBlocksList) {
         for(Pair<Integer, Map<String, Object>> blockPair : tempBlocksList) {
-            int pid = blockPair.getKey();
+            int processPid = blockPair.getKey();
             Map<String, Object> blockInfo = blockPair.getValue();
             int blockedBy = Integer.parseInt(String.valueOf(blockInfo.get(BLOCKEDBY)));
             String locType = String.valueOf(blockInfo.get(LOCKTYPE));
             String relation = String.valueOf(blockInfo.get(RELATION));
-            Process currentProcess = getProcessByPid(tempProcessList.values(), pid);
-            Process process = getProcessByPid(tempProcessList.values(), blockedBy);
-            if (currentProcess.isGranted() == process.isGranted()) {
-                if ((process.getQuery().getQueryStart()).compareTo(currentProcess.getQuery().getQueryStart()) <= 0) {
+            Process currentProcess = getProcessByPid(tempProcessList.values(), processPid);
+            Process blockingProcess = getProcessByPid(tempProcessList.values(), blockedBy);
+            // if processes both get lock or both don't get lock in DB
+            if (currentProcess.isGranted() == blockingProcess.isGranted()) {
+                // then first started process get Block
+                if ((blockingProcess.getQuery().getQueryStart()).compareTo(currentProcess.getQuery().getQueryStart()) <= 0) {
                     currentProcess.addBlock(new Block(blockedBy, locType, relation));
                 } else {
-                    process.addBlock(new Block(currentProcess.getPid(), locType, relation));
+                    blockingProcess.addBlock(new Block(currentProcess.getPid(), locType, relation));
                 }
-            } else if (process.isGranted()) {
+            // else don't "granted" process get Block
+            } else if (blockingProcess.isGranted()) {
                 currentProcess.addBlock(new Block(blockedBy, locType, relation));
             } else {
-                process.addBlock(new Block(currentProcess.getPid(), locType, relation));
+                blockingProcess.addBlock(new Block(currentProcess.getPid(), locType, relation));
             }
         }
     }
