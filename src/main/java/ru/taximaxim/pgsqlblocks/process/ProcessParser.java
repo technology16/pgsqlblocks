@@ -51,6 +51,7 @@ public class ProcessParser {
         createElement(procEl, doc.createElement(XACTSTART), process.getQuery().getXactStart());
         createElement(procEl, doc.createElement(STATE), process.getState());
         createElement(procEl, doc.createElement(STATECHANGE), process.getStateChange());
+        createElement(procEl, doc.createElement(GRANTED),  String.valueOf(process.isGranted()));
         procEl.appendChild(createBlockedElement(doc, process));
         createElement(procEl, doc.createElement(QUERY), process.getQuery().getQueryString());
         createElement(procEl, doc.createElement(SLOWQUERY), String.valueOf(process.getQuery().isSlowQuery()));
@@ -77,7 +78,8 @@ public class ProcessParser {
                 caller,
                 query,
                 getNodeValue(el, STATE),
-                getNodeValue(el, STATECHANGE));
+                getNodeValue(el, STATECHANGE),
+                Boolean.getBoolean(getNodeValue(el, GRANTED)));
         XPathFactory xpf = XPathFactory.newInstance();
         XPath xp = xpf.newXPath();
         try {
@@ -121,7 +123,6 @@ public class ProcessParser {
             createElement(procEl, doc.createElement(BLOCKING_PID), String.valueOf(block.getBlockingPid()));
             createElement(procEl, doc.createElement(RELATION), block.getRelation());
             createElement(procEl, doc.createElement(LOCKTYPE), block.getLocktype());
-            createElement(procEl, doc.createElement(GRANTED),  String.valueOf(block.isGranted()));
             blocks.appendChild(procEl);
         }
         return blocks;
@@ -141,8 +142,7 @@ public class ProcessParser {
                     process.addBlock(
                             new Block(Integer.parseInt(getNodeValue(procEl, BLOCKING_PID)),
                                     getNodeValue(procEl, LOCKTYPE),
-                                    getNodeValue(procEl, RELATION),
-                                    Boolean.getBoolean(getNodeValue(procEl, GRANTED))));
+                                    getNodeValue(procEl, RELATION)));
                 }
             }
         } catch (XPathExpressionException e) {

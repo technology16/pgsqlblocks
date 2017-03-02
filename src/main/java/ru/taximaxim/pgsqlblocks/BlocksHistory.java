@@ -1,8 +1,17 @@
 package ru.taximaxim.pgsqlblocks;
 
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
+import org.apache.log4j.Logger;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import ru.taximaxim.pgsqlblocks.dbcdata.DbcData;
+import ru.taximaxim.pgsqlblocks.dbcdata.DbcDataParser;
+import ru.taximaxim.pgsqlblocks.process.Process;
+import ru.taximaxim.pgsqlblocks.process.ProcessParser;
+import ru.taximaxim.pgsqlblocks.process.ProcessStatus;
+import ru.taximaxim.pgsqlblocks.utils.PathBuilder;
+import ru.taximaxim.pgsqlblocks.utils.XmlDocumentWorker;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -11,20 +20,9 @@ import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
-
-import org.apache.log4j.Logger;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-
-import ru.taximaxim.pgsqlblocks.dbcdata.DbcData;
-import ru.taximaxim.pgsqlblocks.dbcdata.DbcDataParser;
-import ru.taximaxim.pgsqlblocks.process.Process;
-import ru.taximaxim.pgsqlblocks.process.ProcessParser;
-import ru.taximaxim.pgsqlblocks.process.ProcessStatus;
-import ru.taximaxim.pgsqlblocks.utils.PathBuilder;
-import ru.taximaxim.pgsqlblocks.utils.XmlDocumentWorker;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Класс для работы с историей блокировок
@@ -83,7 +81,7 @@ public final class BlocksHistory {
     
     public List<DbcData> open(String path) {
         List<DbcData> dbcDataList = new ArrayList<>();
-        Process rootProcess = new Process(0, null,null,null,null);
+        Process rootProcess = new Process(0, null,null,null,null, false);
         if(path == null) {
             return dbcDataList;
         }
