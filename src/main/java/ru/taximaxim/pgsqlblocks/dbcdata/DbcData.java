@@ -144,7 +144,7 @@ public class DbcData extends UpdateProvider implements Comparable<DbcData>, Upda
             String pass = "";
             if (getPass() == null || getPass().isEmpty()) {
                 try {
-                    pass = new PgPassLoader(getHost(), getPort(), getDbname(),  getUser()).getPgPass();
+                    pass = String.valueOf(new PgPassLoader(getHost(), getPort(), getDbname(),  getUser()).getPgPass());
                 } catch (PgPassLoaderException e) {
                     LOG.error("Ошибка получения пароля из pgpass файла " + e.getMessage(), e);
                 }
