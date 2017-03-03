@@ -167,6 +167,11 @@
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
             <version>[9.4.1211]</version>
-        </dependency> 
+        </dependency>
+        <dependency>
+            <groupId>ru.taximaxim</groupId>
+            <artifactId>PgPassLoader</artifactId>
+            <version>0.0.1</version>
+        </dependency>
     </dependencies>
 </project>
