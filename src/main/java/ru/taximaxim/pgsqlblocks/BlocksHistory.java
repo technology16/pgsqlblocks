@@ -45,8 +45,6 @@ import java.util.List;
 
 /**
  * Класс для работы с историей блокировок
- * 
- * @author ismagilov_mg
  */
 public final class BlocksHistory {
     

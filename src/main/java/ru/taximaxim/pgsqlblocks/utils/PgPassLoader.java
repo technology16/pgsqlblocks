@@ -33,8 +33,6 @@ import java.util.regex.Pattern;
 
 /**
  * Reads user password from pgpass file to be used to access certain DB passed to constructor
- * 
- * @author shaidullin_iz
  */
 public class PgPassLoader {
 

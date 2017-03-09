@@ -30,8 +30,6 @@ import java.util.stream.Collectors;
 
 /**
  * Класс для работы с настройка пользователя
- * @author petrov_im
- *
  */
 public final class Settings {
 
