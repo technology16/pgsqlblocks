@@ -2,3 +2,7 @@
 /servers.xml
 /BlocksHistory/
 /.idea/
+*.iml
+/.classpath
+/.project
+/.settings/
