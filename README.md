@@ -23,7 +23,7 @@ _ru.taximaxim.pgsqlblocks.ui_: Тут лежит все, что связано �
 
 ### Запросы
 
-Для получения всех процессов сервера используется [скрипт](https://git.technology45.ru/servicemonitor/pgsqlblocks/blob/master/src/main/resources/query.sql)
+Для получения всех процессов сервера используется [скрипт](src/main/resources/query.sql)
 
 Уничтожить процесс: select pg_terminate_backend(?);
 
@@ -33,3 +33,7 @@ _ru.taximaxim.pgsqlblocks.ui_: Тут лежит все, что связано �
 Все, что связано с UI необходимо писать в пакете ru.taximaxim.pgsqlblocks.ui
 Основной UI приложения написан в классе MainForm.java.
 Для добавления новой колонки в таблицу-дерево, необходимо добавить ее название и ширину в caMainTreeColsName и caMainTreeColsSize соответсвенно.
+
+###License
+
+This application is licensed under the Apache License, Version 2.0. See LICENCE for details.
