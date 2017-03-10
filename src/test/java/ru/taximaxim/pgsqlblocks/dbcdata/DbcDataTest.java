@@ -1,5 +1,7 @@
 package ru.taximaxim.pgsqlblocks.dbcdata;
 
+import com.typesafe.config.Config;
+import com.typesafe.config.ConfigFactory;
 import org.junit.*;
 import ru.taximaxim.pgsqlblocks.process.Process;
 import ru.taximaxim.pgsqlblocks.process.ProcessStatus;
@@ -16,10 +18,21 @@ import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static ru.taximaxim.pgsqlblocks.TEST.*;
 
 public class DbcDataTest {
-    private static final long DELAY_MS = 250;
+    private static final Config CONFIG = ConfigFactory.load();
+    private static final long DELAY_MS = CONFIG.getLong("pgsqlblocks-test-configs.delay-ms");
+    private static final String REMOTE_HOST = CONFIG.getString("pgsqlblocks-test-configs.remote-host");
+    private static final String REMOTE_PORT = CONFIG.getString("pgsqlblocks-test-configs.remote-port");
+    private static final String REMOTE_DB = CONFIG.getString("pgsqlblocks-test-configs.remote-db");
+    private static final String REMOTE_USERNAME = CONFIG.getString("pgsqlblocks-test-configs.remote-username");
+    private static final String REMOTE_PASSWORD = CONFIG.getString("pgsqlblocks-test-configs.remote-password");
+    private static final String CREATE_RULE_SQL = CONFIG.getString("pgsqlblocks-test-configs.create-rule-sql");
+    private static final String TEST_DROP_RULE_SQL = CONFIG.getString("pgsqlblocks-test-configs.drop-rule-sql");
+    private static final String TEST_SELECT_1000_SQL = CONFIG.getString("pgsqlblocks-test-configs.select-1000-sql");
+    private static final String TEST_SELECT_SLEEP_SQL = CONFIG.getString("pgsqlblocks-test-configs.select-sleep-sql");
+    private static final String TEST_CREATE_INDEX_SQL = CONFIG.getString("pgsqlblocks-test-configs.create-index-sql");
+
     private static DbcData testDbc;
     private static List<ConnInfo> connectionList = new ArrayList<>();
     private static List<Thread> threadList = new ArrayList<>();
@@ -48,19 +61,19 @@ public class DbcDataTest {
         connectionList.add(new ConnInfo(getPid(conn3), conn3));
 
         /* prepare db */
-        testDbc.getConnection().prepareStatement(loadQuery(TESTING_DUMP_SQL)).execute();
+        testDbc.getConnection().prepareStatement(loadQuery(CONFIG.getString("pgsqlblocks-test-configs.testing-dump-sql"))).execute();
         /* create rule */
         testDbc.getConnection().prepareStatement(loadQuery(CREATE_RULE_SQL)).execute();
     }
 
     @After
     public void afterTest() throws SQLException {
-        try (PreparedStatement termPs = testDbc.getConnection().prepareStatement(PG_TERMINATE_BACKEND)) {
+        try (PreparedStatement termPs = testDbc.getConnection().prepareStatement(CONFIG.getString("pgsqlblocks-test-configs.pg-terminate-backend"))) {
             for (ConnInfo connInfo : connectionList) {
                 termPs.setInt(1, connInfo.getPid());
                 ResultSet result = termPs.executeQuery();
                 if (result.next()) {
-                    boolean terminatedSuccesed = result.getBoolean(TERMINATED_SUCCESED);
+                    boolean terminatedSuccesed = result.getBoolean(CONFIG.getString("pgsqlblocks-test-configs.terminated-succesed"));
                     connInfo.getConnection().close();
                     assertTrue("Could not terminate process pid " + connInfo.getPid(), terminatedSuccesed);
                 }
@@ -232,9 +245,9 @@ public class DbcDataTest {
 
     private static int getPid(Connection connection) throws SQLException {
         int pid = 0;
-        ResultSet result = connection.prepareStatement(SELECT_PG_BACKEND_PID).executeQuery();
+        ResultSet result = connection.prepareStatement(CONFIG.getString("pgsqlblocks-test-configs.select-pg-backend-pid")).executeQuery();
         if (result.next()) {
-            pid = result.getInt(PID);
+            pid = result.getInt(CONFIG.getString("pgsqlblocks-test-configs.pg-backend"));
         }
         return pid;
     }
