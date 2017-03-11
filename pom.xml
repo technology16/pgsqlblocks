@@ -17,7 +17,22 @@
         <swt.id>Linux-x86_64</swt.id>
         <swt.version>4.5.1</swt.version>
         <mainClass>ru.taximaxim.pgsqlblocks.MainForm</mainClass>
+        <license.licenseName>apache_v2</license.licenseName>
     </properties>
+
+    <organization>
+        <name>"Technology" LLC</name>
+    </organization>
+    <inceptionYear>2017</inceptionYear>
+
+    <licenses>
+        <license>
+            <name>apache_v2</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
+            <comments>A business-friendly OSS license</comments>
+        </license>
+    </licenses>
 
     <profiles>
         <profile>
@@ -130,6 +145,41 @@
                     </descriptorRefs>
                     <finalName>${project.artifactId}-${project.version}-${project.activeProfiles[0].id}</finalName>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>license-maven-plugin</artifactId>
+                <version>1.6</version>
+
+                <configuration>
+                    <sectionDelimiter>*</sectionDelimiter>
+                    <addJavaLicenseAfterPackage>false</addJavaLicenseAfterPackage>
+                    <processStartTag>========================LICENSE_START=================================</processStartTag>
+                    <processEndTag>=========================LICENSE_END==================================</processEndTag>
+                    <verbose>false</verbose>
+                    <includes>
+                        <includes>**/*.java</includes>
+                        <includes>**/*.sql</includes>
+                        <includes>**/*.properties</includes>
+                    </includes>
+                </configuration>
+
+                <executions>
+                    <execution>
+                        <id>generate-license-headers</id>
+                        <goals>
+                            <goal>update-file-header</goal>
+                        </goals>
+                        <phase>process-sources</phase>
+                        <configuration>
+                            <licenseName>apache_v2</licenseName>
+                            <roots>
+                                <root>src/main/</root>
+                                <root>src/test</root>
+                            </roots>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
         <extensions>
