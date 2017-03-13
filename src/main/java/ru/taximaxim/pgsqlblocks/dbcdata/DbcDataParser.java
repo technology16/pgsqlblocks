@@ -1,5 +1,3 @@
-package ru.taximaxim.pgsqlblocks.dbcdata;
-
 /*
  * ========================LICENSE_START=================================
  * pgSqlBlocks
@@ -19,6 +17,7 @@ package ru.taximaxim.pgsqlblocks.dbcdata;
  * limitations under the License.
  * =========================LICENSE_END==================================
  */
+package ru.taximaxim.pgsqlblocks.dbcdata;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;

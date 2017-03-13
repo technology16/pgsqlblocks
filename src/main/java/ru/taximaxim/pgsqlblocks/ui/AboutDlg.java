@@ -1,5 +1,3 @@
-package ru.taximaxim.pgsqlblocks.ui;
-
 /*
  * ========================LICENSE_START=================================
  * pgSqlBlocks
@@ -19,6 +17,7 @@ package ru.taximaxim.pgsqlblocks.ui;
  * limitations under the License.
  * =========================LICENSE_END==================================
  */
+package ru.taximaxim.pgsqlblocks.ui;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;

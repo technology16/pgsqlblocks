@@ -1,5 +1,3 @@
-package ru.taximaxim.pgsqlblocks.process;
-
 /*
  * ========================LICENSE_START=================================
  * pgSqlBlocks
@@ -19,6 +17,7 @@ package ru.taximaxim.pgsqlblocks.process;
  * limitations under the License.
  * =========================LICENSE_END==================================
  */
+package ru.taximaxim.pgsqlblocks.process;
 
 import java.util.ArrayList;
 import java.util.HashSet;

@@ -1,5 +1,3 @@
-package ru.taximaxim.pgsqlblocks.ui;
-
 /*
  * ========================LICENSE_START=================================
  * pgSqlBlocks
@@ -19,6 +17,7 @@ package ru.taximaxim.pgsqlblocks.ui;
  * limitations under the License.
  * =========================LICENSE_END==================================
  */
+package ru.taximaxim.pgsqlblocks.ui;
 
 import org.apache.log4j.WriterAppender;
 import org.apache.log4j.spi.LoggingEvent;
