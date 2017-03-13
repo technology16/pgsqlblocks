@@ -1,3 +1,5 @@
+package ru.taximaxim.pgsqlblocks.ui;
+
 /*
  * ========================LICENSE_START=================================
  * pgSqlBlocks
@@ -17,7 +19,6 @@
  * limitations under the License.
  * =========================LICENSE_END==================================
  */
-package ru.taximaxim.pgsqlblocks.ui;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.MessageDialog;

@@ -153,14 +153,11 @@
 
                 <configuration>
                     <sectionDelimiter>*</sectionDelimiter>
-                    <addJavaLicenseAfterPackage>false</addJavaLicenseAfterPackage>
                     <processStartTag>========================LICENSE_START=================================</processStartTag>
                     <processEndTag>=========================LICENSE_END==================================</processEndTag>
                     <verbose>false</verbose>
                     <includes>
                         <includes>**/*.java</includes>
-                        <includes>**/*.sql</includes>
-                        <includes>**/*.properties</includes>
                     </includes>
                 </configuration>
 

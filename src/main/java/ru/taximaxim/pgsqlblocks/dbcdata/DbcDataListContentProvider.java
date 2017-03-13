@@ -1,3 +1,5 @@
+package ru.taximaxim.pgsqlblocks.dbcdata;
+
 /*
  * ========================LICENSE_START=================================
  * pgSqlBlocks
@@ -17,7 +19,6 @@
  * limitations under the License.
  * =========================LICENSE_END==================================
  */
-package ru.taximaxim.pgsqlblocks.dbcdata;
 
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.Viewer;

@@ -1,3 +1,5 @@
+package ru.taximaxim.pgsqlblocks;
+
 /*
  * ========================LICENSE_START=================================
  * pgSqlBlocks
@@ -17,7 +19,6 @@
  * limitations under the License.
  * =========================LICENSE_END==================================
  */
-package ru.taximaxim.pgsqlblocks;
 
 import org.eclipse.swt.SWT;
 
