@@ -152,15 +152,13 @@
                 <version>1.6</version>
 
                 <configuration>
-                    <sectionDelimiter>*</sectionDelimiter>
                     <addJavaLicenseAfterPackage>false</addJavaLicenseAfterPackage>
+                    <sectionDelimiter>*</sectionDelimiter>
                     <processStartTag>========================LICENSE_START=================================</processStartTag>
                     <processEndTag>=========================LICENSE_END==================================</processEndTag>
                     <verbose>false</verbose>
                     <includes>
                         <includes>**/*.java</includes>
-                        <includes>**/*.sql</includes>
-                        <includes>**/*.properties</includes>
                     </includes>
                 </configuration>
 

@@ -17,7 +17,6 @@
 -- limitations under the License.
 -- =========================LICENSE_END==================================
 ---
--- 0 транзакция
 CREATE OR REPLACE RULE rule_pgsqlblocks_testing AS
     ON INSERT TO public.pgsqlblocks_testing
    WHERE new.count >= 0 DO INSTEAD INSERT INTO public.pgsqlblocks_testing (name, count, description)
