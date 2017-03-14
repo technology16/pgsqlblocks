@@ -65,10 +65,6 @@
             <id>swt-repo</id>
             <url>http://maven-eclipse.github.io/maven</url>
         </repository>
-        <repository>
-            <id>in-house</id>
-            <url>ftp://ftp:ftp@storage.chelny.taximaxim.ru/mvn</url>
-        </repository>
     </repositories>
 
     <build>
@@ -159,9 +155,9 @@
             <version>${swt.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.eclipse.jface</groupId>
+            <groupId>org.eclipse.scout.sdk.deps</groupId>
             <artifactId>org.eclipse.jface</artifactId>
-            <version>[3.11.0.v20150602-1400]</version>
+            <version>3.11.0.v20150602-1400</version>
         </dependency>
          <dependency>
             <groupId>org.postgresql</groupId>
