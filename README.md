@@ -5,8 +5,45 @@ pgSqlBlocks - это standalone приложение, написанное на 
 Отображается информация о состоянии подключения к БД, а также информация о процессах в БД.
 
 Требуется Java JRE версии 1.8 и выше для вашей платформы.
-Запуск jar-файла через консоль командой _java -jar pgSqlBlocks-1.3.6-Linux-64.jar_
+Запуск jar-файла через консоль командой ```java -jar pgSqlBlocks-1.3.6-Linux-64.jar```
 
+#####Для сборки без запуска тестов 
+Выполните команду с использованием флага -DskipTests, к примеру: ```mvn package -P Linux-64 -DskipTests```
+
+#####Для запуска тестов требуется:
+1. Создать роль для тестового пользователя в БД:
+```
+  CREATE ROLE pgsqlblocks_test LOGIN
+    NOSUPERUSER INHERIT CREATEDB NOCREATEROLE NOREPLICATION;
+```
+
+2. Создать файл application.conf в директории src/test/resources:
+```
+pgsqlblocks-test-configs {
+  remote-host = "localhost" // test DB host 
+  remote-db = "postgres" // test DB name
+  remote-port = "5432"
+  remote-username = "pgsqlblocks_test" // test user login
+  remote-password = "pgsqlblocks_test_user_password" // test user password
+
+  select-pg-backend-pid = "select pg_backend_pid();"
+  pg-terminate-backend = "select pg_terminate_backend(?);"
+  terminated-succesed = "pg_terminate_backend"
+  pg-backend = "pg_backend_pid"
+  testing-dump-sql = "testing_dump.sql"
+  create-rule-sql = "create_rule.sql"
+  drop-rule-sql = "drop_rule.sql"
+  select-1000-sql = "select_1000.sql"
+  select-sleep-sql = "select_sleep.sql"
+  create-index-sql = "create_index.sql"
+
+  delay-ms = 250.0 // waiting time between request's
+}
+```
+3. Выполните команду указав профиль, к примеру: ```mvn package -P Linux-64```,
+либо без указания профиля, если требуется собрать для всех платформ ```mvn package```
+
+* Перед каждой сборкой рекомендуется выполнить команду ```mvn clean```
 * Для пользователей Gtk3, если возникают сложности с отображаемыми всплывающими сообщениями, рекомендуется запускать приложение с ключом *SWT_GTK3=0*.
 
 ### Структура пакетов
