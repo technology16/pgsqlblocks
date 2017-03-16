@@ -20,11 +20,15 @@
 package ru.taximaxim.pgsqlblocks.dbcdata;
 
 import org.apache.log4j.Logger;
+import ru.taximaxim.pgsqlblocks.utils.Settings;
 
 import java.text.MessageFormat;
+import java.util.ResourceBundle;
 
 public class DbcDataRunner implements Runnable {
     private static final Logger LOG = Logger.getLogger(DbcDataRunner.class);
+    private Settings settings = Settings.getInstance();
+    private ResourceBundle resourceBundle = settings.getResourceBundle();
     private DbcData dbcData;
 
     public DbcDataRunner(DbcData data) {
@@ -36,20 +40,20 @@ public class DbcDataRunner implements Runnable {
         try {
             dbcData.setInUpdateState(true);
             if (!dbcData.isConnected()) {
-                LOG.debug(MessageFormat.format("  Connecting \"{0}\"...", dbcData.getName()));
+                LOG.debug(MessageFormat.format(resourceBundle.getString("db_connecting"), dbcData.getName()));
                 dbcData.connect();
             }
             if (dbcData.getStatus() == DbcStatus.CONNECTION_ERROR) {
-                LOG.warn(MessageFormat.format("  Error on DbcData: {0}", dbcData.getName()));
+                LOG.warn(MessageFormat.format(resourceBundle.getString("db_update_error"), dbcData.getName()));
                 dbcData.stopUpdater();
             } else {
-                LOG.info(MessageFormat.format("  Updating \"{0}\"...", dbcData.getName()));
+                LOG.info(MessageFormat.format(resourceBundle.getString("db_updating"), dbcData.getName()));
                 dbcData.setProcess(dbcData.getProcessTree(true));
             }
 
-            LOG.debug(MessageFormat.format("  Finish updating \"{0}\"...", dbcData.getName()));
+            LOG.debug(MessageFormat.format(resourceBundle.getString("db_finish_updating"), dbcData.getName()));
         } catch (Exception e) {
-            LOG.error(MessageFormat.format("  Error on connect or update DbcData: {0}", e.getMessage()));
+            LOG.error(MessageFormat.format(resourceBundle.getString("db_error_on_connect"), e.getMessage()));
         } finally {
             dbcData.setInUpdateState(false);
             dbcData.notifyUpdated();

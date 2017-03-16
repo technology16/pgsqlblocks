@@ -26,15 +26,19 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import ru.taximaxim.pgsqlblocks.MainForm;
 import ru.taximaxim.pgsqlblocks.utils.PathBuilder;
+import ru.taximaxim.pgsqlblocks.utils.Settings;
 import ru.taximaxim.pgsqlblocks.utils.XmlDocumentWorker;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.ResourceBundle;
 
 public final class DbcDataListBuilder {
     
     private static final Logger LOG = Logger.getLogger(DbcDataListBuilder.class);
+    private Settings settings = Settings.getInstance();
+    private ResourceBundle resourceBundle = settings.getResourceBundle();
     
     private static final String NAME = "name";
     private static final String SERVERS = "servers";
@@ -126,7 +130,7 @@ public final class DbcDataListBuilder {
 
     public void add(DbcData dbcData) {
         if(getDbcDataList().contains(dbcData)) {
-            LOG.error("Данный сервер уже есть в конфигурационном файле");
+            LOG.error(resourceBundle.getString("db_exists_in_conf_file"));
             return;
         }
         getDbcDataList().add(dbcData);
