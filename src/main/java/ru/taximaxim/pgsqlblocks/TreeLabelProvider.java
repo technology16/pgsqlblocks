@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-  public class TreeLabelProvider implements ITableLabelProvider {
+  public abstract class TreeLabelProvider implements ITableLabelProvider {
         // The listeners
         private List<ILabelProviderListener> listeners;
 
@@ -42,7 +42,7 @@ import java.util.concurrent.ConcurrentMap;
             // TODO Auto-generated method stub
         }
 
-        @Override
+/*        @Override
         public Image getColumnImage(Object element, int columnIndex) {
             return null;
         }
@@ -50,5 +50,5 @@ import java.util.concurrent.ConcurrentMap;
         @Override
         public String getColumnText(Object element, int columnIndex) {
             return "";
-        }
+        }*/
     }

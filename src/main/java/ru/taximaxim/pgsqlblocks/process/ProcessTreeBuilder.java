@@ -148,14 +148,13 @@ public class ProcessTreeBuilder {
             process.getBlocks().forEach(blockedBy -> {
                 //Добавляем для данного процесса родителя с pid = process.getBlocks()
                 Process parentProcess = getProcessByPid(tempProcessList.values(), blockedBy.getBlockingPid());
-                if (parentProcess == null) {
-                    return; //skip this iteration
+                if (parentProcess != null) {
+                    process.setParents(parentProcess);
+                    parentProcess.addChildren(process);
+                    parentProcess.setStatus(ProcessStatus.BLOCKING);
+                    process.setStatus(ProcessStatus.BLOCKED);
+                    dbcData.setContainBlockedProcess(true);
                 }
-                process.setParents(parentProcess);
-                parentProcess.addChildren(process);
-                parentProcess.setStatus(ProcessStatus.BLOCKING);
-                process.setStatus(ProcessStatus.BLOCKED);
-                dbcData.setContainBlockedProcess(true);
             });
         }
     }
@@ -169,17 +168,27 @@ public class ProcessTreeBuilder {
                 getSortDirectionByColumn(sortColumn, sortDirection, process1, process2));
     }
 
-    /* TODO: need to refactoring cases LOCKTYPE and RELATION.
-    For example, by CollectionUtils.isEqualCollection(java.util.Collection a, java.util.Collection b) mayb*/
+    /* TODO: need to refactor LOCKTYPE and RELATION cases
+    For example, by CollectionUtils.isEqualCollection(java.util.Collection a, java.util.Collection b) maybe */
     private int getSortDirectionByColumn(SortColumn sortColumn, SortDirection sortDirection,
                                            Process process1, Process process2) {
         switch (sortColumn) {
             case PID:
-                return Integer.compare(process1.getPid(), process2.getPid())
-                        * (sortDirection == SortDirection.UP ? -1 : 1);
+                if (process1.getPid() > process2.getPid()) {
+                    return sortDirection == SortDirection.UP ? -1 : 1;
+                } else if (process1.getPid() < process2.getPid()) {
+                    return sortDirection == SortDirection.UP ? 1 : -1;
+                } else {
+                    return 0;
+                }
             case BLOCKED_COUNT:
-                return Integer.compare(process1.getChildrenCount(), process2.getChildrenCount())
-                        * (sortDirection == SortDirection.UP ? -1 : 1);
+                if (process1.getChildrenCount() > process2.getChildrenCount()) {
+                    return sortDirection == SortDirection.UP ? -1 : 1;
+                } else if (process1.getChildrenCount() < process2.getChildrenCount()) {
+                    return sortDirection == SortDirection.UP ? 1 : -1;
+                } else {
+                    return 0;
+                }
             case APPLICATION_NAME:
                 return stringCompare(process1.getCaller().getApplicationName(), process2.getCaller().getApplicationName(), sortDirection);
             case DATNAME:
@@ -202,7 +211,7 @@ public class ProcessTreeBuilder {
                 return stringCompare(process1.getQuery().getQueryString(), process2.getQuery().getQueryString(), sortDirection);
             case SLOWQUERY:
                 return Boolean.compare(process1.getQuery().isSlowQuery(), process2.getQuery().isSlowQuery())
-                        * (sortDirection == SortDirection.UP ? -1 : 1);
+                        * (sortDirection == SortDirection.UP ? 1 : -1);
             case BLOCKED:
                 return stringCompare(process1.getBlocks().toString(), process2.getBlocks().toString(), sortDirection);
             case LOCKTYPE:

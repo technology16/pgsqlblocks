@@ -22,13 +22,12 @@ package ru.taximaxim.pgsqlblocks.utils;
 import org.apache.log4j.Logger;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-
-import static java.nio.file.Files.*;
 
 public final class PathBuilder {
 
@@ -43,11 +42,11 @@ public final class PathBuilder {
             String os = System.getProperty("os.name").toLowerCase();
             if (os.contains("win")) {
                 path = Paths.get(System.getProperty("user.home"), "pgSqlBlocks");
-                createDirectories(path);
-                setAttribute(path, "dos:hidden", Boolean.TRUE, LinkOption.NOFOLLOW_LINKS);
+                Files.createDirectories(path);
+                Files.setAttribute(path, "dos:hidden", Boolean.TRUE, LinkOption.NOFOLLOW_LINKS);
             } else {
                 path = Paths.get(System.getProperty("user.home"), ".pgSqlBlocks");
-                createDirectories(path);
+                Files.createDirectories(path);
             }
         } catch (IOException e) {
             LOG.error(String.format("Ошибка создания директории %s: %s", path, e.getMessage()));
@@ -61,12 +60,11 @@ public final class PathBuilder {
         return instance;
     }
 
-    @SuppressWarnings("squid:S3725") // Cannot resolve method notExists()
     public Path getBlockHistoryDir() {
         Path blocksHistoryDir = Paths.get(path.toString(), "blocksHistory");
-        if (notExists(blocksHistoryDir)) {
+        if (Files.notExists(blocksHistoryDir)) {
             try {
-                createDirectory(blocksHistoryDir);
+                Files.createDirectory(blocksHistoryDir);
             } catch (IOException e) {
                 LOG.error(String.format("Ошибка создания директории %s: %s", blocksHistoryDir, e.getMessage()));
             }
@@ -82,12 +80,11 @@ public final class PathBuilder {
         return Paths.get(blocksHistoryDir.toString(), String.format("blocksHistory-%s.xml", dateTime));
     }
 
-    @SuppressWarnings("squid:S3725") // Cannot resolve method notExists()
     public Path getServersPath() {
         Path serversPath = Paths.get(path.toString(), "servers.xml");
-        if (notExists(serversPath)) {
+        if (Files.notExists(serversPath)) {
             try {
-                createFile(serversPath);
+                Files.createFile(serversPath);
             } catch (IOException e) {
                 LOG.error(String.format("Ошибка создания файла %s: %s", serversPath, e.getMessage()));
             }
@@ -95,12 +92,11 @@ public final class PathBuilder {
         return serversPath;
     }
     // TODO разные конфиги log4j.propertires для разных ОС
-    @SuppressWarnings("squid:S3725") // Cannot resolve method notExists()
     public Path getPropertiesPath() {
         Path propPath = Paths.get(path.toString(), "pgsqlblocks.properties");
-        if (notExists(propPath)) {
+        if (Files.notExists(propPath)) {
             try {
-                createFile(propPath);
+                Files.createFile(propPath);
             } catch (IOException e) {
                 LOG.error(String.format("Ошибка создания файла %s: %s", propPath, e.getMessage()));
             }

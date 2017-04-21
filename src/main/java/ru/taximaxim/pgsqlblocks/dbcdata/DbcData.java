@@ -27,7 +27,6 @@ import ru.taximaxim.pgsqlblocks.utils.PgPassLoader;
 import ru.taximaxim.pgsqlblocks.utils.Settings;
 
 import java.sql.*;
-import java.util.Collections;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -105,10 +104,6 @@ public class DbcData extends UpdateProvider implements Comparable<DbcData>, Upda
         return password;
     }
 
-    public String getCovertPass() {
-        return String.join("", Collections.nCopies(password.length(), "*").toArray(new String[0]));
-    }
-
     public String getDbname() {
         return dbname;
     }
@@ -127,9 +122,8 @@ public class DbcData extends UpdateProvider implements Comparable<DbcData>, Upda
     
     @Override
     public String toString() {
-        String password = getCovertPass();
         return String.format("DbcData [name=%1$s, host=%2$s, port=%3$s, user=%4$s, " +
-                        "passwd=" + password + ", dbname=%5$s, enabled=%6$s, backend_pid=%7$s]",
+                        "passwd=********, dbname=%5$s, enabled=%6$s, backend_pid=%7$s]",
             getName(), getHost(), getPort(), getUser(), getDbname(), isEnabledAutoConnect(), getBackendPid());
     }
     
@@ -168,13 +162,11 @@ public class DbcData extends UpdateProvider implements Comparable<DbcData>, Upda
             connection = DriverManager.getConnection(getUrl(), getUser(), pass);
 
             setBackendPid(0);
-            Statement stBackendPid = connection.createStatement();
-            try (ResultSet resultSet = stBackendPid.executeQuery(QUERY_BACKEND_PID)) {
+            try (Statement stBackendPid = connection.createStatement();
+                 ResultSet resultSet = stBackendPid.executeQuery(QUERY_BACKEND_PID)) {
                 if (resultSet.next()) {
                     setBackendPid(resultSet.getInt(PG_BACKEND_PID));
                 }
-            } finally {
-                stBackendPid.close();
             }
 
             setStatus(DbcStatus.CONNECTED);

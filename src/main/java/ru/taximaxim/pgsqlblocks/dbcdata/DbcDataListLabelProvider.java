@@ -22,7 +22,6 @@ package ru.taximaxim.pgsqlblocks.dbcdata;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.DecorationOverlayIcon;
 import org.eclipse.jface.viewers.IDecoration;
-import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.swt.graphics.Image;
 import ru.taximaxim.pgsqlblocks.TreeLabelProvider;
 import ru.taximaxim.pgsqlblocks.utils.Images;
@@ -30,7 +29,7 @@ import ru.taximaxim.pgsqlblocks.utils.Images;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-public class DbcDataListLabelProvider extends TreeLabelProvider implements ITableLabelProvider {
+public class DbcDataListLabelProvider extends TreeLabelProvider {
 
     private static final int BLOCKED_ICON_QUADRANT = IDecoration.TOP_RIGHT;
     private static final int UPDATE_ICON_QUADRANT = IDecoration.BOTTOM_RIGHT;
