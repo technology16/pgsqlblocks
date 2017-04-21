@@ -108,8 +108,7 @@ public final class BlocksHistory {
         }
         NodeList items = doc.getElementsByTagName(SERVER);
         for(int i = 0; i < items.getLength(); i++) {
-            DbcData dbc = null;
-            Process proc = null;
+            DbcData dbc;
             Node node = items.item(i);
             if (node.getNodeType() != Node.ELEMENT_NODE) {
                 continue;
@@ -124,27 +123,33 @@ public final class BlocksHistory {
             } catch (XPathExpressionException e) {
                 LOG.error("Ошибка XPathExpressionException: " + e.getMessage());
             }
-            for(int j = 0; j < (children != null ? children.getLength() : 0); j++) {
-                Node processNode = children.item(j);
-                if (processNode.getNodeType() != Node.ELEMENT_NODE) {
-                    continue;
-                }
-                Element procEl = (Element)processNode;
-                proc = processParser.parseProcess(procEl);
-                
-                for (Process process : proc.getChildren()) {
-                    if (!process.getBlocks().isEmpty()) {
-                        process.getParents().forEach(p -> p.setStatus(ProcessStatus.BLOCKING));
-                        process.setStatus(ProcessStatus.BLOCKED);
-                        dbc.setContainBlockedProcess(true);
-                    }
-                }
-                rootProcess.addChildren(proc);
-                dbc.setProcess(rootProcess);
+            if (children != null) {
+                parseChildren(rootProcess, dbc, children);
             }
             dbcDataList.add(dbc);
         }
         
         return dbcDataList;
+    }
+
+    void parseChildren(Process rootProcess, DbcData dbc, NodeList children) {
+        for(int j = 0; j < children.getLength(); j++) {
+            Node processNode = children.item(j);
+            if (processNode.getNodeType() != Node.ELEMENT_NODE) {
+                continue;
+            }
+            Element procEl = (Element)processNode;
+            Process proc = processParser.parseProcess(procEl);
+
+            for (Process process : proc.getChildren()) {
+                if (!process.getBlocks().isEmpty()) {
+                    process.getParents().forEach(p -> p.setStatus(ProcessStatus.BLOCKING));
+                    process.setStatus(ProcessStatus.BLOCKED);
+                    dbc.setContainBlockedProcess(true);
+                }
+            }
+            rootProcess.addChildren(proc);
+            dbc.setProcess(rootProcess);
+        }
     }
 }
