@@ -23,6 +23,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
+@SuppressWarnings("squid:S2068")
 public class DbcDataParser {
 
     private static final String NAME = "name";
@@ -32,7 +33,6 @@ public class DbcDataParser {
     private static final String USER = "user";
     private static final String PASSWD = "passwd";
     private static final String ENABLED = "enabled";
-    private static final String FALSE = "false";
     private static final String SERVER = "server";
     
     public DbcData parseDbc(Element item) {
@@ -49,7 +49,7 @@ public class DbcDataParser {
         String dbname = dbnameNode == null ? "" : dbnameNode.getNodeValue();
         String user = userNode == null ? "" : userNode.getNodeValue();
         String passwd = passwdNode == null ? "" : passwdNode.getNodeValue();
-        boolean enabled = Boolean.valueOf(enabledNode == null ? FALSE : enabledNode.getNodeValue());
+        boolean enabled = enabledNode != null && Boolean.parseBoolean(enabledNode.getNodeValue());
         return new DbcData(name, host, port, dbname, user, passwd, enabled);
     }
     

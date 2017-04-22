@@ -194,9 +194,10 @@ public class DbcDataTest {
         assertTrue(proc1.get().getParents().stream().anyMatch(x -> x.getPid() == proc2.get().getPid()));
     }
 
-    //TODO: remove ignore annotation and fix test after solving the issue #12290
+    // TODO: remove ignore and fix test after solving the issue #12290
     @Test
     @Ignore
+    @SuppressWarnings("squid:S1607")
     public void testTripleLocks() throws IOException, SQLException, InterruptedException {
         /* create rule */
         testDbc.getConnection().prepareStatement(loadQuery(CREATE_RULE_SQL)).execute();
@@ -242,6 +243,7 @@ public class DbcDataTest {
                 REMOTE_PASSWORD);
     }
 
+    @SuppressWarnings("squid:S2925")
     private void runThreads(PreparedStatement... statements) throws SQLException, InterruptedException {
         for (PreparedStatement statement : statements) {
             Thread thread = getNewThread(statement);

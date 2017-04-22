@@ -19,49 +19,13 @@
  */
 package ru.taximaxim.pgsqlblocks.process;
 
-import org.eclipse.jface.viewers.ILabelProviderListener;
-import org.eclipse.jface.viewers.ITableLabelProvider;
-import org.eclipse.swt.graphics.Image;
-import ru.taximaxim.pgsqlblocks.SortColumn;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import java.util.stream.Collectors;
 
-public class ProcessTreeLabelProvider implements ITableLabelProvider {
-    // The listeners
-    private List<ILabelProviderListener> listeners;
+import org.eclipse.swt.graphics.Image;
+import ru.taximaxim.pgsqlblocks.SortColumn;
+import ru.taximaxim.pgsqlblocks.TreeLabelProvider;
 
-    private ConcurrentMap<String, Image> imagesMap = new ConcurrentHashMap<String, Image>();
-
-    /**
-     * Constructs a FileTreeLabelProvider
-     */
-    public ProcessTreeLabelProvider() {
-        listeners = new ArrayList<ILabelProviderListener>();
-    }
-
-    @Override
-    public void addListener(ILabelProviderListener listener) {
-        listeners.add(listener);
-    }
-
-    @Override
-    public void dispose() {
-        // TODO Auto-generated method stub
-    }
-
-    @Override
-    public boolean isLabelProperty(Object element, String property) {
-        return false;
-    }
-
-    @Override
-    public void removeListener(ILabelProviderListener listener) {
-        // TODO Auto-generated method stub
-    }
+public class ProcessTreeLabelProvider extends TreeLabelProvider {
 
     @Override
     public Image getColumnImage(Object element, int columnIndex) {

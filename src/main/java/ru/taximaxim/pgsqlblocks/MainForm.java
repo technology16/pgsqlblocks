@@ -77,7 +77,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
     
     private static final int TRAY_NOTIFICATION_MAX_LENGTH = 4;
     private static Display display;
-    private static Tray tray;
+    private Tray tray;
 
     private volatile DbcData selectedDbcData;
     private Process selectedProcess;
@@ -203,16 +203,47 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
         
         GridData gridData = new GridData(SWT.FILL, SWT.FILL, true, true);
 
+        fillVerticalSashForm(composite, gridLayout, gridData);
+
+        tray = display.getSystemTray();
+
+        addListeners();
+
+        if (getSupportsTray()) {
+            trayItem = new TrayItem(tray, SWT.NONE);
+            trayItem.setImage(getIconImage());
+            trayItem.setToolTipText("pgSqlBlocks v." + getAppVersion());
+            final Menu trayMenu = new Menu(getShell(), SWT.POP_UP);
+            MenuItem trayMenuItem = new MenuItem(trayMenu, SWT.PUSH);
+            trayMenuItem.setText("Выход");
+            trayMenuItem.addListener(SWT.Selection, event -> getShell().close());
+            trayItem.addListener(SWT.MenuDetect, event -> trayMenu.setVisible(true));
+
+            tip = new ToolTip(getShell(), SWT.BALLOON | SWT.ICON_WARNING);
+            tip.setText("pgSqlBlocks v." + getAppVersion());
+            tip.setAutoHide(true);
+            tip.setVisible(false);
+            trayItem.setToolTip(tip);
+        } else {
+            LOG.warn("The system tray is not available");
+        }
+
+        dbcDataBuilder.getDbcDataList().stream().filter(DbcData::isEnabledAutoConnect).forEach(DbcData::startUpdater);
+
+        return parent;
+    }
+
+    private void fillVerticalSashForm(Composite composite, GridLayout gridLayout, GridData gridData) {
         verticalSf = new SashForm(composite, SWT.VERTICAL);
         {
             verticalSf.setLayout(gridLayout);
             verticalSf.setLayoutData(gridData);
             verticalSf.SASH_WIDTH = SASH_WIDTH;
             verticalSf.setBackground(composite.getDisplay().getSystemColor(SWT.COLOR_WIDGET_BACKGROUND));
-            
+
             Composite topComposite = new Composite(verticalSf, SWT.NONE);
             topComposite.setLayout(gridLayout);
-            
+
             TabFolder tabPanel = new TabFolder(topComposite, SWT.BORDER);
             {
                 tabPanel.setLayoutData(gridData);
@@ -225,7 +256,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
                         currentActivitySf.setLayoutData(gridData);
                         currentActivitySf.SASH_WIDTH = SASH_WIDTH;
                         currentActivitySf.setBackground(topComposite.getDisplay().getSystemColor(SWT.COLOR_WIDGET_BACKGROUND));
-                        
+
                         caServersTable = new TableViewer(currentActivitySf, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL | SWT.FULL_SELECTION);
                         {
                             caServersTable.getTable().setHeaderVisible(true);
@@ -270,7 +301,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
                                 }
                             };
                             caMainTree.setFilters(filters);
-                            
+
                             procComposite = new Composite(caTreeSf, SWT.BORDER);
                             {
                                 procComposite.setLayout(gridLayout);
@@ -286,7 +317,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
                                         terminate(selectedProcess);
                                     }
                                 });
-                                
+
                                 cancelProc = new ToolItem(pcToolBar, SWT.PUSH);
                                 cancelProc.setText("Послать сигнал отмены процесса");
                                 cancelProc.addListener(SWT.Selection, event -> {
@@ -304,7 +335,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
                     currentActivitySf.setWeights(HORIZONTAL_WEIGHTS);
                     currentActivityTi.setControl(currentActivitySf);
                 }
-                
+
                 TabItem blocksHistoryTi = new TabItem(tabPanel, SWT.NONE);
                 {
                     blocksHistoryTi.setText("История блокировок");
@@ -348,7 +379,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
             UIAppender uiAppender = new UIAppender(logComposite);
             uiAppender.setThreshold(Level.INFO);
             Logger.getRootLogger().addAppender(uiAppender);
-            
+
             Composite statusBar = new Composite(composite, SWT.NONE);
             {
                 statusBar.setLayout(gridLayout);
@@ -357,7 +388,11 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
                 appVersionLabel.setText("pgSqlBlocks v." + getAppVersion());
             }
         }
+    }
 
+    // if decomposed, then decrease the readability
+    @java.lang.SuppressWarnings("squid:S3776")
+    private void addListeners() {
         caMainTree.addSelectionChangedListener(event -> {
             if (!caMainTree.getSelection().isEmpty()) {
                 IStructuredSelection selected = (IStructuredSelection) event.getSelection();
@@ -369,7 +404,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
                 procText.setText(String.format("pid=%s%n%s", selectedProcess.getPid(), selectedProcess.getQuery()));
             }
         });
-        
+
         caServersTable.addSelectionChangedListener(event -> {
             if (!caServersTable.getSelection().isEmpty()) {
                 IStructuredSelection selected = (IStructuredSelection) event.getSelection();
@@ -398,36 +433,13 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
                 }
             }
         });
-        tray = display.getSystemTray();
-
-        if (getSupportsTray()) {
-            trayItem = new TrayItem(tray, SWT.NONE);
-            trayItem.setImage(getIconImage());
-            trayItem.setToolTipText("pgSqlBlocks v." + getAppVersion());
-            final Menu trayMenu = new Menu(getShell(), SWT.POP_UP);
-            MenuItem trayMenuItem = new MenuItem(trayMenu, SWT.PUSH);
-            trayMenuItem.setText("Выход");
-            trayMenuItem.addListener(SWT.Selection, event -> getShell().close());
-            trayItem.addListener(SWT.MenuDetect, event -> trayMenu.setVisible(true));
-
-            tip = new ToolTip(getShell(), SWT.BALLOON | SWT.ICON_WARNING);
-            tip.setText("pgSqlBlocks v." + getAppVersion());
-            tip.setAutoHide(true);
-            tip.setVisible(false);
-            trayItem.setToolTip(tip);
-        } else {
-            LOG.warn("The system tray is not available");
-        }
-
-        dbcDataBuilder.getDbcDataList().stream().filter(DbcData::isEnabledAutoConnect).forEach(DbcData::startUpdater);
-
-        return parent;
     }
 
     private boolean getSupportsTray() {
         return tray != null;
     }
 
+    @java.lang.SuppressWarnings("squid:S2696")  //TODO: refactoring sortDirection and sortColumn
     private void fillTreeViewer(TreeViewer treeViewer) {
         for (SortColumn column : SortColumn.values()) {
             TreeViewerColumn treeColumn = new TreeViewerColumn(treeViewer, SWT.NONE);
@@ -478,6 +490,9 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
         return getImage(Images.UNBLOCKED);
     }
 
+    // if decomposed, then decrease the readability
+    @java.lang.SuppressWarnings("squid:S3776")
+    @Override
     protected ToolBarManager createToolBarManager(int style) {
         ToolBarManager toolBarManager = new ToolBarManager(style);
 

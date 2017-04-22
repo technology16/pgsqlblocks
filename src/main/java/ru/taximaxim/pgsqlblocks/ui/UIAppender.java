@@ -42,16 +42,13 @@ public class UIAppender extends WriterAppender{
     private Display display;
     private boolean autoScrollEnabled = true;
 
-    private ModifyListener modifyListener = new ModifyListener() {
-        @Override
-        public void modifyText(ModifyEvent e) {
-            if (text.getText().length() > TEXT_LIMIT) {
-                styledTextContent.replaceTextRange(0, text.getText().length() - TEXT_LIMIT - 1, "");
-                styledTextContent.replaceTextRange(0, styledTextContent.getLine(0).length(), "");
-            }
-            if (autoScrollEnabled) {
-                text.setTopIndex(text.getLineCount() - 1);
-            }
+    private ModifyListener modifyListener = (ModifyEvent e) -> {
+        if (text.getText().length() > TEXT_LIMIT) {
+            styledTextContent.replaceTextRange(0, text.getText().length() - TEXT_LIMIT - 1, "");
+            styledTextContent.replaceTextRange(0, styledTextContent.getLine(0).length(), "");
+        }
+        if (autoScrollEnabled) {
+            text.setTopIndex(text.getLineCount() - 1);
         }
     };
 
@@ -90,6 +87,7 @@ public class UIAppender extends WriterAppender{
         styledTextContent = text.getContent();
     }
 
+    @Override
     public void append(LoggingEvent event) {
         boolean displayIsFine = display == null || display.isDisposed();
         boolean parentIsFine = parent == null || parent.isDisposed();
@@ -99,7 +97,7 @@ public class UIAppender extends WriterAppender{
         SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
         Date time = new Date(event.getTimeStamp());
         String dateTime = sdf.format(time);
-        String excMessage = "";
+        String excMessage;
         Object message = event.getMessage();
         if (message instanceof String) {
             excMessage = (String) message;

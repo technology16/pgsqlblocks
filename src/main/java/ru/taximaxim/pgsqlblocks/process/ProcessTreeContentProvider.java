@@ -38,6 +38,7 @@ public class ProcessTreeContentProvider implements ITreeContentProvider {
      *            the parent object
      * @return Object[]
      */
+    @Override
     public Object[] getChildren(Object arg0) {
         Process process = (Process) arg0;
         if (settings.isOnlyBlocked()) {
@@ -56,6 +57,7 @@ public class ProcessTreeContentProvider implements ITreeContentProvider {
      *            the object
      * @return Object
      */
+    @Override
     public Object getParent(Object arg0) {
         return null;
     }
@@ -67,6 +69,7 @@ public class ProcessTreeContentProvider implements ITreeContentProvider {
      *            the parent object
      * @return boolean
      */
+    @Override
     public boolean hasChildren(Object arg0) {
         return ((Process) arg0).hasChildren();
     }
@@ -78,6 +81,7 @@ public class ProcessTreeContentProvider implements ITreeContentProvider {
      *            the input data
      * @return Object[]
      */
+    @Override
     public Object[] getElements(Object arg0) {
         return getChildren(arg0);
     }
@@ -85,6 +89,7 @@ public class ProcessTreeContentProvider implements ITreeContentProvider {
     /**
      * Disposes any created resources
      */
+    @Override
     public void dispose() {
         // TODO Auto-generated method stub
     }

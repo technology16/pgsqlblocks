@@ -72,6 +72,8 @@ public class ProcessTreeBuilder {
 
     public ProcessTreeBuilder(DbcData dbcData) {
         this.dbcData = dbcData;
+        queryWithIdle = loadQuery(QUERYWITHIDLEFILENAME);
+        queryWithoutIdle = loadQuery(QUERYFILENAME);
     }
 
     public Process buildProcessTree() {
@@ -132,8 +134,14 @@ public class ProcessTreeBuilder {
         } catch (SQLException e) {
             LOG.error(String.format("Ошибка при получении процессов для %s", dbcData.getDbname()), e);
         }
-        
+
         // Пробегаем по списку процессов, ищем ожидающие и блокированные процессы
+        proceedProcesses(tempProcessList);
+
+        return tempProcessList.values();
+    }
+
+    private void proceedProcesses(Map<Integer, Process> tempProcessList) {
         dbcData.setStatus(DbcStatus.CONNECTED);
         dbcData.setContainBlockedProcess(false);
         for (Process process : tempProcessList.values()) {
@@ -149,10 +157,8 @@ public class ProcessTreeBuilder {
                 }
             });
         }
-
-        return tempProcessList.values();
     }
-    
+
     private int stringCompare(String s1, String s2, SortDirection sortDirection) {
         return sortDirection == SortDirection.DOWN ? s1.compareTo(s2) : s2.compareTo(s1);
     }
@@ -162,21 +168,23 @@ public class ProcessTreeBuilder {
                 getSortDirectionByColumn(sortColumn, sortDirection, process1, process2));
     }
 
+    /* TODO: need to refactor LOCKTYPE and RELATION cases
+    For example, by CollectionUtils.isEqualCollection(java.util.Collection a, java.util.Collection b) maybe */
     private int getSortDirectionByColumn(SortColumn sortColumn, SortDirection sortDirection,
                                            Process process1, Process process2) {
         switch (sortColumn) {
             case PID:
-                if(process1.getPid() > process2.getPid()) {
+                if (process1.getPid() > process2.getPid()) {
                     return sortDirection == SortDirection.UP ? -1 : 1;
-                } else if(process1.getPid() < process2.getPid()) {
+                } else if (process1.getPid() < process2.getPid()) {
                     return sortDirection == SortDirection.UP ? 1 : -1;
                 } else {
                     return 0;
                 }
             case BLOCKED_COUNT:
-                if(process1.getChildrenCount() > process2.getChildrenCount()) {
+                if (process1.getChildrenCount() > process2.getChildrenCount()) {
                     return sortDirection == SortDirection.UP ? -1 : 1;
-                } else if(process1.getChildrenCount() < process2.getChildrenCount()) {
+                } else if (process1.getChildrenCount() < process2.getChildrenCount()) {
                     return sortDirection == SortDirection.UP ? 1 : -1;
                 } else {
                     return 0;
@@ -202,45 +210,22 @@ public class ProcessTreeBuilder {
             case QUERY:
                 return stringCompare(process1.getQuery().getQueryString(), process2.getQuery().getQueryString(), sortDirection);
             case SLOWQUERY:
-                return getSortDirectionBySlowQueryColumn(sortDirection, process1, process2);
+                return Boolean.compare(process1.getQuery().isSlowQuery(), process2.getQuery().isSlowQuery())
+                        * (sortDirection == SortDirection.UP ? 1 : -1);
             case BLOCKED:
                 return stringCompare(process1.getBlocks().toString(), process2.getBlocks().toString(), sortDirection);
             case LOCKTYPE:
                 return stringCompare(
-                        process1.getBlocks().stream().map(Block::getLocktype).collect(Collectors.joining(", ")),
-                        process2.getBlocks().stream().map(Block::getLocktype).collect(Collectors.joining(", ")),
+                        process1.getBlocks().stream().map(Block::getLocktype).sorted().collect(Collectors.joining(", ")),
+                        process2.getBlocks().stream().map(Block::getLocktype).sorted().collect(Collectors.joining(", ")),
                         sortDirection);
             case RELATION:
                 return stringCompare(
-                    process1.getBlocks().stream().map(Block::getRelation).collect(Collectors.joining(", ")),
-                    process2.getBlocks().stream().map(Block::getRelation).collect(Collectors.joining(", ")),
+                    process1.getBlocks().stream().map(Block::getRelation).sorted().collect(Collectors.joining(", ")),
+                    process2.getBlocks().stream().map(Block::getRelation).sorted().collect(Collectors.joining(", ")),
                     sortDirection);
             default:
                 return 0;
-        }
-    }
-    // TODO refactor!
-    private int getSortDirectionBySlowQueryColumn(SortDirection sortDirection, Process process1, Process process2) {
-        if(sortDirection == SortDirection.UP) {
-            if(process1.getQuery().isSlowQuery() && process2.getQuery().isSlowQuery()) {
-                return 0;
-            } else if(process1.getQuery().isSlowQuery() && !process2.getQuery().isSlowQuery()) {
-                return 1;
-            } else if(!process1.getQuery().isSlowQuery() && process2.getQuery().isSlowQuery()) {
-                return -1;
-            } else {
-                return 0;
-            }
-        } else {
-            if(process1.getQuery().isSlowQuery() && process2.getQuery().isSlowQuery()) {
-                return 0;
-            } else if(!process1.getQuery().isSlowQuery() && process2.getQuery().isSlowQuery()) {
-                return 1;
-            } else if(process1.getQuery().isSlowQuery() && !process2.getQuery().isSlowQuery()) {
-                return -1;
-            } else {
-                return 0;
-            }
         }
     }
 
@@ -260,15 +245,13 @@ public class ProcessTreeBuilder {
     }
 
     private Process getProcessByPid(Collection<Process> processList, int pid) {
-        return processList.stream().filter(process -> process.getPid() == pid).findFirst().get();
+        return processList.stream().filter(process -> process.getPid() == pid).findFirst().orElse(null);
     }
 
     private String getQuery(boolean showIdle) {
         if (showIdle) {
-            queryWithIdle = (queryWithIdle == null) ? loadQuery(QUERYWITHIDLEFILENAME) : queryWithIdle;
             return queryWithIdle;
         } else {
-            queryWithoutIdle = (queryWithoutIdle == null) ? loadQuery(QUERYFILENAME) : queryWithoutIdle;
             return queryWithoutIdle;
         }
     }

@@ -30,13 +30,13 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public final class PathBuilder {
-    
+
     private static final Logger LOG = Logger.getLogger(PathBuilder.class);
-    
+
     private static PathBuilder instance;
-    
+
     private Path path;
-    
+
     private PathBuilder() {
         try {
             String os = System.getProperty("os.name").toLowerCase();
@@ -52,14 +52,14 @@ public final class PathBuilder {
             LOG.error(String.format("Ошибка создания директории %s: %s", path, e.getMessage()));
         }
     }
-    
+
     public static PathBuilder getInstance() {
         if(instance == null) {
             instance = new PathBuilder();
         }
         return instance;
     }
-    
+
     public Path getBlockHistoryDir() {
         Path blocksHistoryDir = Paths.get(path.toString(), "blocksHistory");
         if (Files.notExists(blocksHistoryDir)) {
@@ -71,15 +71,15 @@ public final class PathBuilder {
         }
         return blocksHistoryDir;
     }
-    
+
     public Path getBlockHistoryPath() {
         Path blocksHistoryDir = getBlockHistoryDir();
         SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy HH-mm-ss");
         String dateTime = sdf.format(new Date(System.currentTimeMillis()));
-        
+
         return Paths.get(blocksHistoryDir.toString(), String.format("blocksHistory-%s.xml", dateTime));
     }
-    
+
     public Path getServersPath() {
         Path serversPath = Paths.get(path.toString(), "servers.xml");
         if (Files.notExists(serversPath)) {
@@ -91,7 +91,7 @@ public final class PathBuilder {
         }
         return serversPath;
     }
-    // TODO разные конфиги log4j.propertires для разных ОС 
+    // TODO разные конфиги log4j.propertires для разных ОС
     public Path getPropertiesPath() {
         Path propPath = Paths.get(path.toString(), "pgsqlblocks.properties");
         if (Files.notExists(propPath)) {

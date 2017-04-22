@@ -22,51 +22,19 @@ package ru.taximaxim.pgsqlblocks.dbcdata;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.DecorationOverlayIcon;
 import org.eclipse.jface.viewers.IDecoration;
-import org.eclipse.jface.viewers.ILabelProviderListener;
-import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.swt.graphics.Image;
+import ru.taximaxim.pgsqlblocks.TreeLabelProvider;
 import ru.taximaxim.pgsqlblocks.utils.Images;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-public class DbcDataListLabelProvider implements ITableLabelProvider {
+public class DbcDataListLabelProvider extends TreeLabelProvider {
 
     private static final int BLOCKED_ICON_QUADRANT = IDecoration.TOP_RIGHT;
     private static final int UPDATE_ICON_QUADRANT = IDecoration.BOTTOM_RIGHT;
-    private List<ILabelProviderListener> listeners;
 
-    private ConcurrentMap<String, Image> imagesMap = new ConcurrentHashMap<>();
     private ConcurrentMap<String, ImageDescriptor> decoratorsMap = new ConcurrentHashMap<>();
-
-    /**
-     * Constructs a FileTreeLabelProvider
-     */
-    public DbcDataListLabelProvider() {
-        listeners = new ArrayList<>();
-    }
-
-    @Override
-    public void addListener(ILabelProviderListener listener) {
-        listeners.add(listener);
-    }
-
-    @Override
-    public void dispose() {
-        // TODO Auto-generated method stub
-    }
-
-    @Override
-    public boolean isLabelProperty(Object element, String property) {
-        return false;
-    }
-
-    @Override
-    public void removeListener(ILabelProviderListener listener) {
-        // TODO Auto-generated method stub
-    }
 
     @Override
     public Image getColumnImage(Object element, int columnIndex) {

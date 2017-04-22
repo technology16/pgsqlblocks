@@ -65,16 +65,14 @@ public class FilterDlg extends Dialog {
       fillOperList(pidCombo);
       pidText = new Text(container, SWT.BORDER);
       pidText.setLayoutData(textGd);
-      pidText.addListener(SWT.Verify, new Listener() {
-          public void handleEvent(Event e) {
-              String string = e.text;
-              char[] chars = new char[string.length()];
-              string.getChars(0, chars.length, chars, 0);
-              for (int i = 0; i < chars.length; i++) {
-                  if (!('0' <= chars[i] && chars[i] <= '9')) {
-                      e.doit = false;
-                      return;
-                  }
+      pidText.addListener(SWT.Verify, e -> {
+          String string = e.text;
+          char[] chars = new char[string.length()];
+          string.getChars(0, chars.length, chars, 0);
+          for (int i = 0; i < chars.length; i++) {
+              if (!('0' <= chars[i] && chars[i] <= '9')) {
+                  e.doit = false;
+                  return;
               }
           }
       });
@@ -100,15 +98,12 @@ public class FilterDlg extends Dialog {
       backendStartText = new Combo(container, SWT.BORDER | SWT.READ_ONLY);
       backendStartText.add("");
       backendStartText.setLayoutData(textGd);
-      backendStartText.addListener(SWT.FOCUSED, new Listener() {
-          @Override
-          public void handleEvent(Event arg0) {
-              DateTimeSelectDlg tt = new DateTimeSelectDlg(getShell(), filterProcess, filterProcess.getBackendStart().getKey());
-              tt.open();
-              backendStartText.removeAll();
-              backendStartText.add(filterProcess.getBackendStart().getValue());
-              backendStartText.select(0);
-          }
+      backendStartText.addListener(SWT.FOCUSED, arg0 -> {
+          DateTimeSelectDlg tt = new DateTimeSelectDlg(getShell(), filterProcess, filterProcess.getBackendStart().getKey());
+          tt.open();
+          backendStartText.removeAll();
+          backendStartText.add(filterProcess.getBackendStart().getValue());
+          backendStartText.select(0);
       });
 
       Label queryStartLabel = new Label(container, SWT.HORIZONTAL);
@@ -118,15 +113,12 @@ public class FilterDlg extends Dialog {
       queryStartText = new Combo(container, SWT.BORDER | SWT.READ_ONLY);
       queryStartText.add("");
       queryStartText.setLayoutData(textGd);
-      queryStartText.addListener(SWT.FOCUSED, new Listener() {
-          @Override
-          public void handleEvent(Event arg0) {
-              DateTimeSelectDlg tt = new DateTimeSelectDlg(getShell(), filterProcess, filterProcess.getQueryStart().getKey());
-              tt.open();
-              queryStartText.removeAll();
-              queryStartText.add(filterProcess.getQueryStart().getValue());
-              queryStartText.select(0);
-          }
+      queryStartText.addListener(SWT.FOCUSED, arg0 -> {
+          DateTimeSelectDlg tt = new DateTimeSelectDlg(getShell(), filterProcess, filterProcess.getQueryStart().getKey());
+          tt.open();
+          queryStartText.removeAll();
+          queryStartText.add(filterProcess.getQueryStart().getValue());
+          queryStartText.select(0);
       });
 
       pidText.setText(filterProcess.getPid().getValue());
