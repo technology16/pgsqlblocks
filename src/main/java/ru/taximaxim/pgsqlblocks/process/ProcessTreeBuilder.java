@@ -27,12 +27,6 @@ import ru.taximaxim.pgsqlblocks.dbcdata.DbcStatus;
 import ru.taximaxim.pgsqlblocks.utils.Settings;
 
 import javafx.util.Pair;
-import org.apache.log4j.Logger;
-import ru.taximaxim.pgsqlblocks.SortColumn;
-import ru.taximaxim.pgsqlblocks.SortDirection;
-import ru.taximaxim.pgsqlblocks.dbcdata.DbcData;
-import ru.taximaxim.pgsqlblocks.dbcdata.DbcStatus;
-import ru.taximaxim.pgsqlblocks.utils.Settings;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -43,10 +37,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class ProcessTreeBuilder {

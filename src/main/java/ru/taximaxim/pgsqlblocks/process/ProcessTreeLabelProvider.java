@@ -19,14 +19,11 @@
  */
 package ru.taximaxim.pgsqlblocks.process;
 
-import org.eclipse.jface.viewers.ITableLabelProvider;
 import java.util.stream.Collectors;
 
 import org.eclipse.swt.graphics.Image;
 import ru.taximaxim.pgsqlblocks.SortColumn;
 import ru.taximaxim.pgsqlblocks.TreeLabelProvider;
-
-import java.util.stream.Collectors;
 
 public class ProcessTreeLabelProvider extends TreeLabelProvider {
 
