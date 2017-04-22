@@ -234,7 +234,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
     }
 
     private void fillVerticalSashForm(Composite composite, GridLayout gridLayout, GridData gridData) {
-        SashForm verticalSf = new SashForm(composite, SWT.VERTICAL);
+        verticalSf = new SashForm(composite, SWT.VERTICAL);
         {
             verticalSf.setLayout(gridLayout);
             verticalSf.setLayoutData(gridData);
