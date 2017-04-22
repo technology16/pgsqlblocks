@@ -62,7 +62,7 @@ public final class PathBuilder {
 
     public Path getBlockHistoryDir() {
         Path blocksHistoryDir = Paths.get(path.toString(), "blocksHistory");
-        if (Files.notExists(blocksHistoryDir)) {
+        if (!blocksHistoryDir.toFile().exists()) {
             try {
                 Files.createDirectory(blocksHistoryDir);
             } catch (IOException e) {
@@ -82,7 +82,7 @@ public final class PathBuilder {
 
     public Path getServersPath() {
         Path serversPath = Paths.get(path.toString(), "servers.xml");
-        if (Files.notExists(serversPath)) {
+        if (!serversPath.toFile().exists()) {
             try {
                 Files.createFile(serversPath);
             } catch (IOException e) {
@@ -94,7 +94,7 @@ public final class PathBuilder {
     // TODO разные конфиги log4j.propertires для разных ОС
     public Path getPropertiesPath() {
         Path propPath = Paths.get(path.toString(), "pgsqlblocks.properties");
-        if (Files.notExists(propPath)) {
+        if (!propPath.toFile().exists()) {
             try {
                 Files.createFile(propPath);
             } catch (IOException e) {

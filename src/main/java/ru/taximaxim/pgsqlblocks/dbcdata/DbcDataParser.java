@@ -30,6 +30,7 @@ public class DbcDataParser {
     private static final String PORT = "port";
     private static final String DBNAME = "dbname";
     private static final String USER = "user";
+    @SuppressWarnings("squid:S2068")
     private static final String PASSWD = "passwd";
     private static final String ENABLED = "enabled";
     private static final String SERVER = "server";

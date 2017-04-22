@@ -121,6 +121,7 @@ public class DbcData extends UpdateProvider implements Comparable<DbcData>, Upda
     }
     
     @Override
+    @SuppressWarnings("squid:S2068")
     public String toString() {
         return String.format("DbcData [name=%1$s, host=%2$s, port=%3$s, user=%4$s, " +
                         "passwd=********, dbname=%5$s, enabled=%6$s, backend_pid=%7$s]",
