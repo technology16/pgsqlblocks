@@ -57,6 +57,7 @@ public class Block {
         if (getBlockingPid() != block.getBlockingPid()) {
             return false;
         }
+
         if (getRelation() != null ? !getRelation().equals(block.getRelation()) : block.getRelation() != null) {
             return false;
         }

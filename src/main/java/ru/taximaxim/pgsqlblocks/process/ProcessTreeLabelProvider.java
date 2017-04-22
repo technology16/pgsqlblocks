@@ -19,11 +19,14 @@
  */
 package ru.taximaxim.pgsqlblocks.process;
 
+import org.eclipse.jface.viewers.ITableLabelProvider;
 import java.util.stream.Collectors;
 
 import org.eclipse.swt.graphics.Image;
 import ru.taximaxim.pgsqlblocks.SortColumn;
 import ru.taximaxim.pgsqlblocks.TreeLabelProvider;
+
+import java.util.stream.Collectors;
 
 public class ProcessTreeLabelProvider extends TreeLabelProvider {
 
@@ -48,7 +51,7 @@ public class ProcessTreeLabelProvider extends TreeLabelProvider {
             case CLIENT: return process.getCaller().getClient();
             case BACKEND_START: return process.getQuery().getBackendStart();
             case QUERY_START: return process.getQuery().getQueryStart();
-            case XACT_START: return process.getQuery().getExactStart();
+            case XACT_START: return process.getQuery().getXactStart();
             case STATE: return process.getState();
             case STATE_CHANGE: return process.getStateChange();
             case BLOCKED: return process.getBlocks().stream()

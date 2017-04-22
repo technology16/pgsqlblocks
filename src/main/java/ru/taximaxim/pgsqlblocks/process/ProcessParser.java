@@ -53,6 +53,7 @@ public class ProcessParser {
     private static final String CHILDREN = "children";
     private static final String BLOCK = "block";
     private static final String BLOCKING_PID = "blockingPid";
+    private static final String GRANTED = "granted";
 
     private static final String XPATH_EXPR_BLOCKED = "blocked/block";
     private static final String XPATH_EXPR_CHILDREN = "children/process";
@@ -66,9 +67,10 @@ public class ProcessParser {
         createElement(procEl, doc.createElement(CLIENT), process.getCaller().getClient());
         createElement(procEl, doc.createElement(BACKENDSTART), process.getQuery().getBackendStart());
         createElement(procEl, doc.createElement(QUERYSTART), process.getQuery().getQueryStart());
-        createElement(procEl, doc.createElement(XACTSTART), process.getQuery().getExactStart());
+        createElement(procEl, doc.createElement(XACTSTART), process.getQuery().getXactStart());
         createElement(procEl, doc.createElement(STATE), process.getState());
         createElement(procEl, doc.createElement(STATECHANGE), process.getStateChange());
+        createElement(procEl, doc.createElement(GRANTED),  String.valueOf(process.isGranted()));
         procEl.appendChild(createBlockedElement(doc, process));
         createElement(procEl, doc.createElement(QUERY), process.getQuery().getQueryString());
         createElement(procEl, doc.createElement(SLOWQUERY), String.valueOf(process.getQuery().isSlowQuery()));
@@ -95,7 +97,8 @@ public class ProcessParser {
                 caller,
                 query,
                 getNodeValue(el, STATE),
-                getNodeValue(el, STATECHANGE));
+                getNodeValue(el, STATECHANGE),
+                Boolean.getBoolean(getNodeValue(el, GRANTED)));
         XPathFactory xpf = XPathFactory.newInstance();
         XPath xp = xpf.newXPath();
         try {
