@@ -390,8 +390,6 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
         }
     }
 
-    // if decomposed, then decrease the readability
-    @java.lang.SuppressWarnings("squid:S3776")
     private void addListeners() {
         caMainTree.addSelectionChangedListener(event -> {
             if (!caMainTree.getSelection().isEmpty()) {
@@ -439,7 +437,6 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
         return tray != null;
     }
 
-    @java.lang.SuppressWarnings("squid:S2696")  //TODO: refactoring sortDirection and sortColumn
     private void fillTreeViewer(TreeViewer treeViewer) {
         for (SortColumn column : SortColumn.values()) {
             TreeViewerColumn treeColumn = new TreeViewerColumn(treeViewer, SWT.NONE);
@@ -490,8 +487,6 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
         return getImage(Images.UNBLOCKED);
     }
 
-    // if decomposed, then decrease the readability
-    @java.lang.SuppressWarnings("squid:S3776")
     @Override
     protected ToolBarManager createToolBarManager(int style) {
         ToolBarManager toolBarManager = new ToolBarManager(style);
