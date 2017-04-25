@@ -35,15 +35,13 @@ public class Process implements Comparable<Process> {
     private final Query query;
     private final List<Process> children = new ArrayList<>();
     private ProcessStatus status = ProcessStatus.WORKING;
-    private final boolean granted;
 
-    public Process(int pid, QueryCaller caller, Query query, String state, String stateChange, boolean granted) {
+    public Process(int pid, QueryCaller caller, Query query, String state, String stateChange) {
         this.pid = pid;
         this.caller = caller;
         this.query = query;
         this.state = state  == null ? "" : state;
         this.stateChange = stateChange  == null ? "" : stateChange;
-        this.granted = granted;
     }
 
     void setParents(Process parents) {
@@ -114,16 +112,11 @@ public class Process implements Comparable<Process> {
         return status;
     }
 
-    public boolean isGranted() {
-        return granted;
-    }
-
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
         result = prime * result + getPid();
-        result = prime * result + (isGranted() ? 1 : 0);
         return result;
     }
 
@@ -140,9 +133,6 @@ public class Process implements Comparable<Process> {
         }
         Process other = (Process) obj;
 
-        if (isGranted() ^ other.isGranted()) {
-            return false;
-        }
         return getPid() == other.getPid();
     }
 
@@ -158,7 +148,6 @@ public class Process implements Comparable<Process> {
                 ", query=" + query +
                 ", children=" + children.size() +
                 ", status=" + status +
-                ", granted='" + granted + '\'' +
                 '}';
     }
 

@@ -70,7 +70,6 @@ public class ProcessParser {
         createElement(procEl, doc.createElement(XACTSTART), process.getQuery().getXactStart());
         createElement(procEl, doc.createElement(STATE), process.getState());
         createElement(procEl, doc.createElement(STATECHANGE), process.getStateChange());
-        createElement(procEl, doc.createElement(GRANTED),  String.valueOf(process.isGranted()));
         procEl.appendChild(createBlockedElement(doc, process));
         createElement(procEl, doc.createElement(QUERY), process.getQuery().getQueryString());
         createElement(procEl, doc.createElement(SLOWQUERY), String.valueOf(process.getQuery().isSlowQuery()));
@@ -97,8 +96,7 @@ public class ProcessParser {
                 caller,
                 query,
                 getNodeValue(el, STATE),
-                getNodeValue(el, STATECHANGE),
-                Boolean.getBoolean(getNodeValue(el, GRANTED)));
+                getNodeValue(el, STATECHANGE));
         XPathFactory xpf = XPathFactory.newInstance();
         XPath xp = xpf.newXPath();
         try {
@@ -161,7 +159,8 @@ public class ProcessParser {
                     process.addBlock(
                             new Block(Integer.parseInt(getNodeValue(procEl, BLOCKING_PID)),
                                     getNodeValue(procEl, LOCKTYPE),
-                                    getNodeValue(procEl, RELATION)));
+                                    getNodeValue(procEl, RELATION),
+                                    false));
                 }
             }
         } catch (XPathExpressionException e) {
