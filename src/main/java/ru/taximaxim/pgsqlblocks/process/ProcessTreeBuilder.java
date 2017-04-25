@@ -130,9 +130,9 @@ public class ProcessTreeBuilder {
                 int blockedBy = processSet.getInt(BLOCKEDBY);
                 if (blockedBy != 0) {
                     Block block = new Block(blockedBy,
-                                                    processSet.getString(LOCKTYPE),
-                                                    processSet.getString(RELATION),
-                                                    GRANTED_FLAG.equals(processSet.getString(GRANTED)));
+                                            processSet.getString(LOCKTYPE),
+                                            processSet.getString(RELATION),
+                                            GRANTED_FLAG.equals(processSet.getString(GRANTED)));
                     tempBlocksList.computeIfAbsent(currentProcess.getPid(), k -> new HashSet<>()).add(block);
                 }
             }
@@ -142,7 +142,6 @@ public class ProcessTreeBuilder {
 
         proceedBlocks(tempProcessList, tempBlocksList);
 
-        // Пробегаем по списку процессов, ищем ожидающие и блокированные процессы
         proceedProcesses(tempProcessList);
 
         return tempProcessList.values();
@@ -151,39 +150,46 @@ public class ProcessTreeBuilder {
     private void proceedBlocks(Map<Integer, Process> tempProcessList, Map<Integer, Set<Block>> tempBlocksList) {
         for (Map.Entry<Integer, Set<Block>> e : tempBlocksList.entrySet()) {
             int blockedPid = e.getKey();
-            for (Block b : e.getValue()) {
-                int blockingPid = b.getBlockingPid();
+            for (Block block : e.getValue()) {
+                int blockingPid = block.getBlockingPid();
                 if (tempBlocksList.containsKey(blockingPid)) {
                     Set<Block> blockingIsBlockedBy = tempBlocksList.get(blockingPid);
 
                     Optional<Block> cycleBlocks = blockingIsBlockedBy.stream()
-                            .filter(bzz -> bzz.getBlockingPid() == blockedPid)
-                            .filter(bzz -> bzz.getRelation().equals(b.getRelation()))
-                            .filter(bzz -> bzz.getLocktype().equals(b.getLocktype()))
-                            .filter(bzz -> bzz.isGranted())
+                            .filter(b -> b.getBlockingPid() == blockedPid)
+                            .filter(b -> b.getRelation().equals(block.getRelation()))
+                            .filter(b -> b.getLocktype().equals(block.getLocktype()))
+                            .filter(b -> b.isGranted())
                             .findFirst();
 
                     if (cycleBlocks.isPresent()) {
-                        if (b.isGranted()){
-                            Process blockedProcess = getProcessByPid(tempProcessList.values(), blockedPid);
-                            Process blockingProcess = getProcessByPid(tempProcessList.values(), blockingPid);
-
-                            // then latest started process get Block
-                            if ((blockingProcess.getQuery().getQueryStart()).compareTo(blockedProcess.getQuery().getQueryStart()) <= 0) {
-                                blockedProcess.addBlock(new Block(blockingPid, b.getLocktype(), b.getRelation(), b.isGranted()));
-                            } else {
-                                blockingProcess.addBlock(new Block(blockedPid, b.getLocktype(), b.getRelation(), b.isGranted()));
-                            }
-                        } else {
-                            tempProcessList.get(blockingPid).addBlock(cycleBlocks.get());
-                        }
+                        proceedBlocksWithCycle(tempProcessList, blockedPid, blockingPid, block, cycleBlocks.get());
                     } else {
-                        tempProcessList.get(blockedPid).addBlock(b);
+                        tempProcessList.get(blockedPid).addBlock(block);
                     }
                 } else {
-                    tempProcessList.get(blockedPid).addBlock(b);
+                    tempProcessList.get(blockedPid).addBlock(block);
                 }
             }
+        }
+    }
+
+    private void proceedBlocksWithCycle(Map<Integer, Process> tempProcessList,
+                                        int blockedPid, int blockingPid, Block b, Block reversedBlock) {
+        if (b.isGranted()) {
+            Process blockedProcess = getProcessByPid(tempProcessList.values(), blockedPid);
+            Process blockingProcess = getProcessByPid(tempProcessList.values(), blockingPid);
+
+            // TODO Do not truncate timestamps to seconds
+            // TODO compare date objects instead of simple String.compareTo
+            // then latest started process get Block
+            if ((blockingProcess.getQuery().getQueryStart()).compareTo(blockedProcess.getQuery().getQueryStart()) <= 0) {
+                blockedProcess.addBlock(new Block(blockingPid, b.getLocktype(), b.getRelation(), b.isGranted()));
+            } else {
+                blockingProcess.addBlock(new Block(blockedPid, b.getLocktype(), b.getRelation(), b.isGranted()));
+            }
+        } else {
+            tempProcessList.get(blockingPid).addBlock(reversedBlock);
         }
     }
 
