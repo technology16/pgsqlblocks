@@ -104,7 +104,6 @@ public class Process implements Comparable<Process> {
         return query;
     }
 
-    // TODO: refactor after after solving the issue #12290
     public int getChildrenCount() {
         return getChildren().size();
     }
@@ -133,6 +132,7 @@ public class Process implements Comparable<Process> {
             return false;
         }
         Process other = (Process) obj;
+
         return getPid() == other.getPid();
     }
 

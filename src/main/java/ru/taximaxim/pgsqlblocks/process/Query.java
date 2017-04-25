@@ -24,13 +24,13 @@ public class Query {
     private final boolean slowQuery;
     private final String backendStart;
     private final String queryStart;
-    private final String exactStart;
+    private final String xactStart;
 
-    Query(String queryString, String backendStart, String queryStart, String exactStart, boolean slowQuery) {
+    Query(String queryString, String backendStart, String queryStart, String xactStart, boolean slowQuery) {
         this.queryString = queryString == null ? "" : queryString;
         this.backendStart = backendStart == null ? "" : backendStart;
         this.queryStart = queryStart == null ? "" : queryStart;
-        this.exactStart = exactStart == null ? "" : exactStart;
+        this.xactStart = xactStart == null ? "" : xactStart;
         this.slowQuery = slowQuery;
     }
 
@@ -50,8 +50,8 @@ public class Query {
         return queryStart;
     }
 
-    public String getExactStart() {
-        return exactStart;
+    public String getXactStart() {
+        return xactStart;
     }
 
     @Override
@@ -61,7 +61,7 @@ public class Query {
                 ", slowQuery=" + slowQuery +
                 ", backendStart='" + backendStart + '\'' +
                 ", queryStart='" + queryStart + '\'' +
-                ", exactStart='" + exactStart + '\'' +
+                ", xactStart='" + xactStart + '\'' +
                 '}';
     }
 }

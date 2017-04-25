@@ -48,7 +48,7 @@ public class ProcessTreeLabelProvider extends TreeLabelProvider {
             case CLIENT: return process.getCaller().getClient();
             case BACKEND_START: return process.getQuery().getBackendStart();
             case QUERY_START: return process.getQuery().getQueryStart();
-            case XACT_START: return process.getQuery().getExactStart();
+            case XACT_START: return process.getQuery().getXactStart();
             case STATE: return process.getState();
             case STATE_CHANGE: return process.getStateChange();
             case BLOCKED: return process.getBlocks().stream()

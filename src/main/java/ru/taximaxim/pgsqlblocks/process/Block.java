@@ -24,11 +24,13 @@ public class Block {
     private final int blockingPid;
     private final String relation;
     private final String locktype;
+    private final boolean granted;
 
-    public Block(int blockingPid, String locktype, String relation) {
+    public Block(int blockingPid, String locktype, String relation, boolean granted) {
         this.blockingPid = blockingPid;
         this.locktype = locktype == null ? "" : locktype;
         this.relation = relation == null ? "" : relation;
+        this.granted = granted;
     }
 
     public String getLocktype() {
@@ -41,6 +43,10 @@ public class Block {
 
     public int getBlockingPid() {
         return blockingPid;
+    }
+
+    public boolean isGranted() {
+        return granted;
     }
 
     @Override
@@ -57,9 +63,15 @@ public class Block {
         if (getBlockingPid() != block.getBlockingPid()) {
             return false;
         }
+
         if (getRelation() != null ? !getRelation().equals(block.getRelation()) : block.getRelation() != null) {
             return false;
         }
+
+        if (isGranted() ^ block.isGranted()) {
+            return false;
+        }
+
         return getLocktype().equals(block.getLocktype());
     }
 
@@ -68,6 +80,7 @@ public class Block {
         int result = getBlockingPid();
         result = 31 * result + (getRelation() != null ? getRelation().hashCode() : 0);
         result = 31 * result + getLocktype().hashCode();
+        result = 31 * result + (isGranted() ? 1 : 0);
         return result;
     }
 
@@ -77,6 +90,7 @@ public class Block {
                 "blockingPid=" + blockingPid +
                 ", relation='" + relation + '\'' +
                 ", locktype='" + locktype + '\'' +
+                ", granted='" + granted + '\'' +
                 '}';
     }
 

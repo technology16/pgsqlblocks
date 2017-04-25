@@ -35,10 +35,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class ProcessTreeBuilder {
@@ -60,9 +57,12 @@ public class ProcessTreeBuilder {
     private static final String XACTSTART = "xact_start";
     private static final String STATECHANGE = "state_change";
     private static final String QUERYSQL = "query";
+    private static final String GRANTED = "granted";
 
     private static final String QUERYFILENAME = "query.sql";
     private static final String QUERYWITHIDLEFILENAME = "query_with_idle.sql";
+
+    private static final String GRANTED_FLAG = "t";
 
     private Settings settings = Settings.getInstance();
     private static String queryWithoutIdle;
@@ -86,6 +86,7 @@ public class ProcessTreeBuilder {
 
     private Collection<Process> queryProcessTree() {
         Map<Integer, Process> tempProcessList = new HashMap<>();
+        Map<Integer, Set<Block>> tempBlocksList = new HashMap<>();
         if (dbcData.getConnection() == null) {
             return tempProcessList.values();
         }
@@ -125,20 +126,71 @@ public class ProcessTreeBuilder {
                             dateParse(processSet.getString(STATECHANGE)));
                     tempProcessList.put(pid, currentProcess);
                 }
-                
+
                 int blockedBy = processSet.getInt(BLOCKEDBY);
                 if (blockedBy != 0) {
-                    currentProcess.addBlock(new Block(blockedBy, processSet.getString(LOCKTYPE), processSet.getString(RELATION)));
+                    Block block = new Block(blockedBy,
+                                            processSet.getString(LOCKTYPE),
+                                            processSet.getString(RELATION),
+                                            GRANTED_FLAG.equals(processSet.getString(GRANTED)));
+                    tempBlocksList.computeIfAbsent(currentProcess.getPid(), k -> new HashSet<>()).add(block);
                 }
             }
         } catch (SQLException e) {
             LOG.error(String.format("Ошибка при получении процессов для %s", dbcData.getDbname()), e);
         }
 
-        // Пробегаем по списку процессов, ищем ожидающие и блокированные процессы
+        proceedBlocks(tempProcessList, tempBlocksList);
+
         proceedProcesses(tempProcessList);
 
         return tempProcessList.values();
+    }
+
+    private void proceedBlocks(Map<Integer, Process> tempProcessList, Map<Integer, Set<Block>> tempBlocksList) {
+        for (Map.Entry<Integer, Set<Block>> e : tempBlocksList.entrySet()) {
+            int blockedPid = e.getKey();
+            for (Block block : e.getValue()) {
+                int blockingPid = block.getBlockingPid();
+                if (tempBlocksList.containsKey(blockingPid)) {
+                    Set<Block> blockingIsBlockedBy = tempBlocksList.get(blockingPid);
+
+                    Optional<Block> cycleBlocks = blockingIsBlockedBy.stream()
+                            .filter(b -> b.getBlockingPid() == blockedPid)
+                            .filter(b -> b.getRelation().equals(block.getRelation()))
+                            .filter(b -> b.getLocktype().equals(block.getLocktype()))
+                            .filter(b -> b.isGranted())
+                            .findFirst();
+
+                    if (cycleBlocks.isPresent()) {
+                        proceedBlocksWithCycle(tempProcessList, blockedPid, blockingPid, block, cycleBlocks.get());
+                    } else {
+                        tempProcessList.get(blockedPid).addBlock(block);
+                    }
+                } else {
+                    tempProcessList.get(blockedPid).addBlock(block);
+                }
+            }
+        }
+    }
+
+    private void proceedBlocksWithCycle(Map<Integer, Process> tempProcessList,
+                                        int blockedPid, int blockingPid, Block b, Block reversedBlock) {
+        if (b.isGranted()) {
+            Process blockedProcess = getProcessByPid(tempProcessList.values(), blockedPid);
+            Process blockingProcess = getProcessByPid(tempProcessList.values(), blockingPid);
+
+            // TODO Do not truncate timestamps to seconds
+            // TODO compare date objects instead of simple String.compareTo
+            // then latest started process get Block
+            if ((blockingProcess.getQuery().getQueryStart()).compareTo(blockedProcess.getQuery().getQueryStart()) <= 0) {
+                blockedProcess.addBlock(new Block(blockingPid, b.getLocktype(), b.getRelation(), b.isGranted()));
+            } else {
+                blockingProcess.addBlock(new Block(blockedPid, b.getLocktype(), b.getRelation(), b.isGranted()));
+            }
+        } else {
+            tempProcessList.get(blockingPid).addBlock(reversedBlock);
+        }
     }
 
     private void proceedProcesses(Map<Integer, Process> tempProcessList) {
@@ -202,7 +254,7 @@ public class ProcessTreeBuilder {
             case QUERY_START:
                 return stringCompare(process1.getQuery().getQueryStart(), process2.getQuery().getQueryStart(), sortDirection);
             case XACT_START:
-                return stringCompare(process1.getQuery().getExactStart(), process2.getQuery().getExactStart(), sortDirection);
+                return stringCompare(process1.getQuery().getXactStart(), process2.getQuery().getXactStart(), sortDirection);
             case STATE:
                 return stringCompare(process1.getState(), process2.getState(), sortDirection);
             case STATE_CHANGE:
