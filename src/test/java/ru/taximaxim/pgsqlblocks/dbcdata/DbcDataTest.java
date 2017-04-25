@@ -221,7 +221,6 @@ public class DbcDataTest {
         assertTrue(proc3.isPresent());
 
         assertEquals(ProcessStatus.BLOCKING, proc1.get().getStatus());
-        // TODO investigate line switch
         assertEquals(ProcessStatus.BLOCKING, proc2.get().getStatus());
         assertEquals(ProcessStatus.BLOCKED, proc3.get().getStatus());
 

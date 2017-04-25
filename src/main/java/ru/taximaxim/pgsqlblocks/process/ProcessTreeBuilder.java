@@ -26,8 +26,6 @@ import ru.taximaxim.pgsqlblocks.dbcdata.DbcData;
 import ru.taximaxim.pgsqlblocks.dbcdata.DbcStatus;
 import ru.taximaxim.pgsqlblocks.utils.Settings;
 
-import javafx.util.Pair;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -64,11 +62,13 @@ public class ProcessTreeBuilder {
     private static final String QUERYFILENAME = "query.sql";
     private static final String QUERYWITHIDLEFILENAME = "query_with_idle.sql";
 
+    private static final String GRANTED_FLAG = "t";
+
     private Settings settings = Settings.getInstance();
     private static String queryWithoutIdle;
     private static String queryWithIdle;
     private final DbcData dbcData;
-    private final Process root = new Process(0, null, null, null, null, false);
+    private final Process root = new Process(0, null, null, null, null);
 
     public ProcessTreeBuilder(DbcData dbcData) {
         this.dbcData = dbcData;
@@ -86,7 +86,7 @@ public class ProcessTreeBuilder {
 
     private Collection<Process> queryProcessTree() {
         Map<Integer, Process> tempProcessList = new HashMap<>();
-        List<Pair<Integer, Map<String, Object>>> tempBlocksList = new ArrayList<>();
+        Map<Integer, Set<Block>> tempBlocksList = new HashMap<>();
         if (dbcData.getConnection() == null) {
             return tempProcessList.values();
         }
@@ -123,27 +123,23 @@ public class ProcessTreeBuilder {
                             caller,
                             query,
                             processSet.getString(STATE),
-                            dateParse(processSet.getString(STATECHANGE)),
-                            Boolean.getBoolean(processSet.getString(GRANTED)));
+                            dateParse(processSet.getString(STATECHANGE)));
                     tempProcessList.put(pid, currentProcess);
                 }
 
                 int blockedBy = processSet.getInt(BLOCKEDBY);
                 if (blockedBy != 0) {
-                    // save block info to temporary list
-                    // tempBlocksList: List<Pair<ProcessPid, Map<FieldName, FieldValue>>>
-                    Map<String, Object> blockInfo = new HashMap<>();
-                    blockInfo.put(BLOCKEDBY, blockedBy);
-                    blockInfo.put(LOCKTYPE, processSet.getString(LOCKTYPE));
-                    blockInfo.put(RELATION, processSet.getString(RELATION));
-                    tempBlocksList.add(new Pair<>(currentProcess.getPid(), blockInfo));
+                    Block block = new Block(blockedBy,
+                                                    processSet.getString(LOCKTYPE),
+                                                    processSet.getString(RELATION),
+                                                    GRANTED_FLAG.equals(processSet.getString(GRANTED)));
+                    tempBlocksList.computeIfAbsent(currentProcess.getPid(), k -> new HashSet<>()).add(block);
                 }
             }
         } catch (SQLException e) {
             LOG.error(String.format("Ошибка при получении процессов для %s", dbcData.getDbname()), e);
         }
 
-        tempBlocksList = tempBlocksList.stream().distinct().collect(Collectors.toList()); // remove duplicates
         proceedBlocks(tempProcessList, tempBlocksList);
 
         // Пробегаем по списку процессов, ищем ожидающие и блокированные процессы
@@ -152,28 +148,41 @@ public class ProcessTreeBuilder {
         return tempProcessList.values();
     }
 
-    private void proceedBlocks(Map<Integer, Process> tempProcessList, List<Pair<Integer, Map<String, Object>>> tempBlocksList) {
-        for(Pair<Integer, Map<String, Object>> blockPair : tempBlocksList) {
-            int processPid = blockPair.getKey();
-            Map<String, Object> blockInfo = blockPair.getValue();
-            int blockedBy = Integer.parseInt(String.valueOf(blockInfo.get(BLOCKEDBY)));
-            String locType = String.valueOf(blockInfo.get(LOCKTYPE));
-            String relation = String.valueOf(blockInfo.get(RELATION));
-            Process currentProcess = getProcessByPid(tempProcessList.values(), processPid);
-            Process blockingProcess = getProcessByPid(tempProcessList.values(), blockedBy);
-            // if processes both get lock or both don't get lock in DB
-            if (currentProcess.isGranted() == blockingProcess.isGranted()) {
-                // then first started process get Block
-                if ((blockingProcess.getQuery().getQueryStart()).compareTo(currentProcess.getQuery().getQueryStart()) <= 0) {
-                    currentProcess.addBlock(new Block(blockedBy, locType, relation));
+    private void proceedBlocks(Map<Integer, Process> tempProcessList, Map<Integer, Set<Block>> tempBlocksList) {
+        for (Map.Entry<Integer, Set<Block>> e : tempBlocksList.entrySet()) {
+            int blockedPid = e.getKey();
+            for (Block b : e.getValue()) {
+                int blockingPid = b.getBlockingPid();
+                if (tempBlocksList.containsKey(blockingPid)) {
+                    Set<Block> blockingIsBlockedBy = tempBlocksList.get(blockingPid);
+
+                    Optional<Block> cycleBlocks = blockingIsBlockedBy.stream()
+                            .filter(bzz -> bzz.getBlockingPid() == blockedPid)
+                            .filter(bzz -> bzz.getRelation().equals(b.getRelation()))
+                            .filter(bzz -> bzz.getLocktype().equals(b.getLocktype()))
+                            .filter(bzz -> bzz.isGranted())
+                            .findFirst();
+
+                    if (cycleBlocks.isPresent()) {
+                        if (b.isGranted()){
+                            Process blockedProcess = getProcessByPid(tempProcessList.values(), blockedPid);
+                            Process blockingProcess = getProcessByPid(tempProcessList.values(), blockingPid);
+
+                            // then latest started process get Block
+                            if ((blockingProcess.getQuery().getQueryStart()).compareTo(blockedProcess.getQuery().getQueryStart()) <= 0) {
+                                blockedProcess.addBlock(new Block(blockingPid, b.getLocktype(), b.getRelation(), b.isGranted()));
+                            } else {
+                                blockingProcess.addBlock(new Block(blockedPid, b.getLocktype(), b.getRelation(), b.isGranted()));
+                            }
+                        } else {
+                            tempProcessList.get(blockingPid).addBlock(cycleBlocks.get());
+                        }
+                    } else {
+                        tempProcessList.get(blockedPid).addBlock(b);
+                    }
                 } else {
-                    blockingProcess.addBlock(new Block(currentProcess.getPid(), locType, relation));
+                    tempProcessList.get(blockedPid).addBlock(b);
                 }
-            // else don't "granted" process get Block
-            } else if (blockingProcess.isGranted()) {
-                currentProcess.addBlock(new Block(blockedBy, locType, relation));
-            } else {
-                blockingProcess.addBlock(new Block(currentProcess.getPid(), locType, relation));
             }
         }
     }
