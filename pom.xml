@@ -15,7 +15,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <swt.artifactId>org.eclipse.swt.gtk.linux.x86_64</swt.artifactId>
         <swt.id>Linux-x86_64</swt.id>
-        <swt.version>4.5.1</swt.version>
+        <swt.version>3.105.2</swt.version>
         <mainClass>ru.taximaxim.pgsqlblocks.MainForm</mainClass>
         <license.licenseName>apache_v2</license.licenseName>
     </properties>
@@ -176,13 +176,6 @@
                 </executions>
             </plugin>
         </plugins>
-        <extensions>
-            <extension>
-                <groupId>org.apache.maven.wagon</groupId>
-                <artifactId>wagon-ftp</artifactId>
-                <version>RELEASE</version>
-            </extension>
-        </extensions>
 
         <testResources>
             <testResource>
@@ -207,14 +200,26 @@
             <version>1.2.17</version>
         </dependency>
         <dependency>
-            <groupId>org.eclipse.swt</groupId>
+            <groupId>org.eclipse.platform</groupId>
             <artifactId>${swt.artifactId}</artifactId>
             <version>${swt.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.eclipse.platform</groupId>
+                    <artifactId>org.eclipse.swt</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
-            <groupId>org.eclipse.jface</groupId>
+            <groupId>org.eclipse.platform</groupId>
             <artifactId>org.eclipse.jface</artifactId>
-            <version>[3.11.0.v20150602-1400]</version>
+            <version>3.12.2</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.eclipse.platform</groupId>
+                    <artifactId>org.eclipse.swt</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
          <dependency>
             <groupId>org.postgresql</groupId>
