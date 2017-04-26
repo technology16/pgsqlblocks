@@ -20,13 +20,17 @@
 package ru.taximaxim.pgsqlblocks.dbcdata;
 
 import org.apache.log4j.Logger;
+import ru.taximaxim.PgPassLoader.PgPass;
+import ru.taximaxim.PgPassLoader.PgPassException;
 import ru.taximaxim.pgsqlblocks.MainForm;
 import ru.taximaxim.pgsqlblocks.process.Process;
 import ru.taximaxim.pgsqlblocks.process.ProcessTreeBuilder;
-import ru.taximaxim.pgsqlblocks.utils.PgPassLoader;
 import ru.taximaxim.pgsqlblocks.utils.Settings;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -157,7 +161,16 @@ public class DbcData extends UpdateProvider implements Comparable<DbcData>, Upda
             return;
         }
         try {
-            String pass = (getPass() == null || getPass().isEmpty()) ? new PgPassLoader(this).getPgPass() : getPass();
+            String pass = "";
+            if (getPass() == null || getPass().isEmpty()) {
+                try {
+                    pass = PgPass.get(getHost(), getPort(), getDbname(),  getUser());
+                } catch (PgPassException e) {
+                    LOG.error("Ошибка получения пароля из pgpass файла " + e.getMessage(), e);
+                }
+            } else {
+                pass = getPass();
+            }
             LOG.info(getName() + " Соединение...");
             DriverManager.setLoginTimeout(settings.getLoginTimeout());
             connection = DriverManager.getConnection(getUrl(), getUser(), pass);
