@@ -166,7 +166,7 @@
         </dependency>
         <dependency>
             <groupId>ru.taximaxim</groupId>
-            <artifactId>PgPassLoader</artifactId>
+            <artifactId>PgPass</artifactId>
             <version>0.0.1</version>
         </dependency>
     </dependencies>

@@ -1,12 +1,12 @@
 package ru.taximaxim.pgsqlblocks.dbcdata;
 
 import org.apache.log4j.Logger;
+import ru.taximaxim.PgPassLoader.PgPass;
+import ru.taximaxim.PgPassLoader.PgPassException;
 import ru.taximaxim.pgsqlblocks.MainForm;
 import ru.taximaxim.pgsqlblocks.process.Process;
 import ru.taximaxim.pgsqlblocks.process.ProcessTreeBuilder;
 import ru.taximaxim.pgsqlblocks.utils.Settings;
-import ru.taximaxim.PgPassLoader.PgPassLoader;
-import ru.taximaxim.PgPassLoader.PgPassLoaderException;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -144,8 +144,8 @@ public class DbcData extends UpdateProvider implements Comparable<DbcData>, Upda
             String pass = "";
             if (getPass() == null || getPass().isEmpty()) {
                 try {
-                    pass = String.valueOf(new PgPassLoader(getHost(), getPort(), getDbname(),  getUser()).getPgPass());
-                } catch (PgPassLoaderException e) {
+                    pass = PgPass.get(getHost(), getPort(), getDbname(),  getUser());
+                } catch (PgPassException e) {
                     LOG.error("Ошибка получения пароля из pgpass файла " + e.getMessage(), e);
                 }
             } else {
