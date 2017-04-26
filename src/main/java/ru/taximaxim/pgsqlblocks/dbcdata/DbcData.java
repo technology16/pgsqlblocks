@@ -28,6 +28,8 @@ import ru.taximaxim.pgsqlblocks.process.ProcessTreeBuilder;
 import ru.taximaxim.pgsqlblocks.utils.Settings;
 
 import java.sql.*;
+import java.text.MessageFormat;
+import java.util.ResourceBundle;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -41,6 +43,7 @@ public class DbcData extends UpdateProvider implements Comparable<DbcData>, Upda
     private static final String PG_BACKEND_PID = "pg_backend_pid";
 
     private Settings settings = Settings.getInstance();
+    private ResourceBundle resourceBundle = settings.getResourceBundle();
     private final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
     private ScheduledFuture<?> updater;
 
@@ -122,7 +125,6 @@ public class DbcData extends UpdateProvider implements Comparable<DbcData>, Upda
     }
     
     @Override
-    @SuppressWarnings("squid:S2068")
     public String toString() {
         return String.format("DbcData [name=%1$s, host=%2$s, port=%3$s, user=%4$s, " +
                         "passwd=********, dbname=%5$s, enabled=%6$s, backend_pid=%7$s]",
@@ -154,7 +156,7 @@ public class DbcData extends UpdateProvider implements Comparable<DbcData>, Upda
     // FIXME report connection result
     public void connect() {
         if(isConnected()) {
-            LOG.info(getName() + " соединение уже создано");
+            LOG.info(MessageFormat.format(resourceBundle.getString("db_already_connected"), getName()));
             return;
         }
         try {
@@ -168,7 +170,7 @@ public class DbcData extends UpdateProvider implements Comparable<DbcData>, Upda
             } else {
                 pass = getPass();
             }
-            LOG.info(getName() + " Соединение...");
+            LOG.info(MessageFormat.format(resourceBundle.getString("db_connecting"), getName()));
             DriverManager.setLoginTimeout(settings.getLoginTimeout());
             connection = DriverManager.getConnection(getUrl(), getUser(), pass);
 
@@ -181,7 +183,7 @@ public class DbcData extends UpdateProvider implements Comparable<DbcData>, Upda
             }
 
             setStatus(DbcStatus.CONNECTED);
-            LOG.info(getName() + " Соединение создано.");
+            LOG.info(MessageFormat.format(resourceBundle.getString("db_connected"), getName()));
         } catch (SQLException e) {
             setStatus(DbcStatus.CONNECTION_ERROR);
             LOG.error(getName() + " " + e.getMessage(), e);
@@ -194,7 +196,7 @@ public class DbcData extends UpdateProvider implements Comparable<DbcData>, Upda
                 connection.close();
                 connection = null;
                 setStatus(DbcStatus.DISABLED);
-                LOG.info(getName() + " Соединение закрыто.");
+                LOG.info(MessageFormat.format(resourceBundle.getString("db_disconnected"), getName()));
             } catch (SQLException e) {
                 connection = null;
                 setStatus(DbcStatus.CONNECTION_ERROR);
@@ -208,7 +210,7 @@ public class DbcData extends UpdateProvider implements Comparable<DbcData>, Upda
         try {
             return !(connection == null || connection.isClosed());
         } catch (SQLException e) {
-            LOG.error("Ошибка isConnected: " + e.getMessage());
+            LOG.error(MessageFormat.format(resourceBundle.getString("error_on_check_is_connected"), e.getMessage()));
         }
         return false;
     }

@@ -23,9 +23,7 @@ import org.apache.log4j.Logger;
 import ru.taximaxim.pgsqlblocks.SortColumn;
 
 import java.io.*;
-import java.util.Arrays;
-import java.util.Properties;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -46,6 +44,7 @@ public final class Settings {
     private static final String CONFIRM_REQUIRED = "confirm_required";
     private static final String CONFIRM_EXIT = "confirm_exit";
     private static final String SHOW_LOG_MESSAGES = "show_log_messages";
+    private static final String CURRENT_LOCALE = "current_locale";
 
     private int updatePeriod;
     private int loginTimeout;
@@ -64,6 +63,7 @@ public final class Settings {
 
     private Properties properties;
     private File propFile;
+    private Locale currentLocale;
 
     private static Settings instance;
 
@@ -80,6 +80,7 @@ public final class Settings {
         defaults.put(CONFIRM_REQUIRED, "true");
         defaults.put(CONFIRM_EXIT, "true");
         defaults.put(SHOW_LOG_MESSAGES, "true");
+        defaults.put(CURRENT_LOCALE, Locale.getDefault().toString());
 
         properties = new Properties(defaults);
         propFile = PathBuilder.getInstance().getPropertiesPath().toFile();
@@ -103,6 +104,7 @@ public final class Settings {
         this.confirmRequired = Boolean.parseBoolean(properties.getProperty(CONFIRM_REQUIRED));
         this.confirmExit = Boolean.parseBoolean(properties.getProperty(CONFIRM_EXIT));
         this.showLogMessages = Boolean.parseBoolean(properties.getProperty(SHOW_LOG_MESSAGES));
+        this.currentLocale = new Locale(properties.getProperty(CURRENT_LOCALE));
     }
 
     public static Settings getInstance() {
@@ -290,6 +292,31 @@ public final class Settings {
      */
     public boolean getShowLogMessages() {
         return showLogMessages;
+    }
+
+
+    /**
+     * Устанавливаем локаль
+     * @param locale
+     * @see #getCurrentLocale
+     */
+    public void setCurrentLocale(Locale locale) {
+        this.currentLocale = locale;
+        saveProperties(CURRENT_LOCALE, currentLocale.toString());
+    }
+
+    /**
+     * Получаем локаль
+     * @return the currentLocale
+     * @see #setCurrentLocale
+     */
+    public Locale getCurrentLocale() {
+        return currentLocale;
+    }
+
+
+    public ResourceBundle getResourceBundle() {
+        return ResourceBundle.getBundle("locales/Language", currentLocale);
     }
 
     private void saveProperties(String key, String value) {
