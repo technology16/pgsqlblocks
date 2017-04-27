@@ -63,7 +63,8 @@ public final class Settings {
 
     private Properties properties;
     private File propFile;
-    private Locale currentLocale;
+    private final Locale locale;
+    private final ResourceBundle resources;
 
     private static Settings instance;
 
@@ -80,7 +81,7 @@ public final class Settings {
         defaults.put(CONFIRM_REQUIRED, "true");
         defaults.put(CONFIRM_EXIT, "true");
         defaults.put(SHOW_LOG_MESSAGES, "true");
-        defaults.put(CURRENT_LOCALE, Locale.getDefault().toString());
+        defaults.put(CURRENT_LOCALE, new Locale.Builder().setLanguage("ru").setRegion("RU").build().toLanguageTag());
 
         properties = new Properties(defaults);
         propFile = PathBuilder.getInstance().getPropertiesPath().toFile();
@@ -104,7 +105,9 @@ public final class Settings {
         this.confirmRequired = Boolean.parseBoolean(properties.getProperty(CONFIRM_REQUIRED));
         this.confirmExit = Boolean.parseBoolean(properties.getProperty(CONFIRM_EXIT));
         this.showLogMessages = Boolean.parseBoolean(properties.getProperty(SHOW_LOG_MESSAGES));
-        this.currentLocale = new Locale(properties.getProperty(CURRENT_LOCALE));
+        this.locale = new Locale.Builder().setLanguageTag(properties.getProperty(CURRENT_LOCALE)).build();
+
+        resources = ResourceBundle.getBundle(ru.taximaxim.pgsqlblocks.l10n.PgSqlBlocks.class.getName(), locale);
     }
 
     public static Settings getInstance() {
@@ -294,29 +297,12 @@ public final class Settings {
         return showLogMessages;
     }
 
-
-    /**
-     * Устанавливаем локаль
-     * @param locale
-     * @see #getCurrentLocale
-     */
-    public void setCurrentLocale(Locale locale) {
-        this.currentLocale = locale;
-        saveProperties(CURRENT_LOCALE, currentLocale.toString());
+    public Locale getLocale() {
+        return locale;
     }
-
-    /**
-     * Получаем локаль
-     * @return the currentLocale
-     * @see #setCurrentLocale
-     */
-    public Locale getCurrentLocale() {
-        return currentLocale;
-    }
-
 
     public ResourceBundle getResourceBundle() {
-        return ResourceBundle.getBundle("locales/Language", currentLocale);
+        return resources;
     }
 
     private void saveProperties(String key, String value) {

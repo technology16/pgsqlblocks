@@ -20,8 +20,8 @@
 package ru.taximaxim.pgsqlblocks.dbcdata;
 
 import org.apache.log4j.Logger;
-import ru.taximaxim.PgPassLoader.PgPass;
-import ru.taximaxim.PgPassLoader.PgPassException;
+import ru.taximaxim.pgpass.PgPass;
+import ru.taximaxim.pgpass.PgPassException;
 import ru.taximaxim.pgsqlblocks.MainForm;
 import ru.taximaxim.pgsqlblocks.process.Process;
 import ru.taximaxim.pgsqlblocks.process.ProcessTreeBuilder;

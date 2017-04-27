@@ -49,14 +49,12 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.MessageFormat;
-import java.text.NumberFormat;
 import java.util.*;
 import java.util.List;
 import java.util.concurrent.*;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 import java.util.stream.Collectors;
-
 
 public class MainForm extends ApplicationWindow implements IUpdateListener {
 
@@ -101,15 +99,14 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
     private ToolTip tip;
     private static SortColumn sortColumn = SortColumn.BLOCKED_COUNT;
     private static SortDirection sortDirection = SortDirection.UP;
-    private Settings settings = Settings.getInstance();
+    private final Settings settings = Settings.getInstance();
     private FilterProcess filterProcess = FilterProcess.getInstance();
     private final DbcDataListBuilder dbcDataBuilder = DbcDataListBuilder.getInstance(this);
     private ConcurrentMap<String, Image> imagesMap = new ConcurrentHashMap<>();
     private MenuManager serversTableMenuMgr = new MenuManager();
     private Set<SortColumn> visibleColumns = settings.getColumnsList();
     private boolean hasBlocks = false;
-    private Locale current_locale = settings.getCurrentLocale();
-    private ResourceBundle resourceBundle = settings.getResourceBundle();
+    private final ResourceBundle resourceBundle = settings.getResourceBundle();
 
     private Composite logComposite;
     private SashForm verticalSf;
@@ -176,7 +173,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
     @Override
     protected Control createContents(Composite parent)
     {
-        Locale.setDefault(current_locale);
+        //Locale.setDefault(current_locale);
         Menu menuBar = new Menu(getShell(), SWT.BAR);
         MenuItem helpMenuHeader = new MenuItem(menuBar, SWT.CASCADE);
         helpMenuHeader.setText("&pgSqlBlocks");
@@ -250,6 +247,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
                 TabItem currentActivityTi = new TabItem(tabPanel, SWT.NONE);
                 {
                     currentActivityTi.setText(resourceBundle.getString("current_activity"));
+                    Locale l = resourceBundle.getLocale();
                     SashForm currentActivitySf = new SashForm(tabPanel, SWT.HORIZONTAL);
                     {
                         currentActivitySf.setLayout(gridLayout);
