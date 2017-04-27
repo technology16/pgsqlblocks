@@ -19,6 +19,8 @@
  */
 package ru.taximaxim.pgsqlblocks;
 
+import java.util.ResourceBundle;
+
 public enum SortColumn {
     PID,
     BLOCKED_COUNT,
@@ -41,42 +43,42 @@ public enum SortColumn {
      * Получение имени колонки
      * @return String
      */
-    public String getName() {
+    public String getName(ResourceBundle resources) {
         switch (this) {
             case PID:
-                return "PID";
+                return resources.getString("pid");
             case BLOCKED_COUNT:
-                return "Блокирует";
+                return resources.getString("num_of_blocked_processes");
             case APPLICATION_NAME:
-                return "Приложение";
+                return resources.getString("application");
             case DATNAME:
-                return "Имя БД";
+                return resources.getString("db_name");
             case USENAME:
-                return "Роль";
+                return resources.getString("user_name");
             case CLIENT:
-                return "Данные клиента";
+                return resources.getString("client");
             case BACKEND_START:
-                return "Подключение к серверу";
+                return resources.getString("backend_start");
             case QUERY_START:
-                return "Старт запроса";
+                return resources.getString("query_start");
             case XACT_START:
-                return "Старт транзакции";
+                return resources.getString("xact_start");
             case STATE:
-                return "Состояние";
+                return resources.getString("state");
             case STATE_CHANGE:
-                return "Изменено";
+                return resources.getString("state_change");
             case BLOCKED:
-                return "Кем блокируется";
+                return resources.getString("blocked_by");
             case LOCKTYPE:
-                return "Тип объекта блокировки";
+                return resources.getString("lock_type");
             case RELATION:
-                return "Объект блокировки";
+                return resources.getString("relation");
             case QUERY:
-                return "Запрос";
+                return resources.getString("query");
             case SLOWQUERY:
-                return "Долгий процесс";
+                return resources.getString("slow_query");
             default:
-                return "Без имени";
+                return resources.getString("undefined");
         }
     }
     /**

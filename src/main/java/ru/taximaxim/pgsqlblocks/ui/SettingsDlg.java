@@ -34,19 +34,22 @@ import java.util.*;
 
 public class SettingsDlg extends Dialog {
 
-    private Settings settings;
+    private final Settings settings;
+    private final ResourceBundle resources;
     private Spinner updatePeriod;
     private Button showIdleButton;
     private Button showToolTip;
     private Button showBackendPidButton;
     private Button confirmRequiredButton;
     private Button confirmExitButton;
+    private Combo languageCombo;
 
     private Set<SortColumn> enabledColumns = new HashSet<>();
 
     public SettingsDlg(Shell shell, Settings settings) {
         super(shell);
         this.settings = settings;
+        this.resources = settings.getResourceBundle();
         enabledColumns.addAll(settings.getColumnsList());
     }
 
@@ -59,20 +62,36 @@ public class SettingsDlg extends Dialog {
         layout.marginLeft = 10;
         container.setLayout(layout);
 
+        populateGeneralGroup(container);
         populateProcessGroup(container);
         populateNotificationGroup(container);
         populateColumnGroup(container);
         return container;
     }
 
+    private void populateGeneralGroup(Composite container) {
+        Group generalGroup = new Group(container, SWT.SHADOW_IN);
+        generalGroup.setText(resources.getString("general"));
+        generalGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
+        generalGroup.setLayout(new GridLayout(2, false));
+
+        Label selectLocale = new Label(generalGroup, SWT.HORIZONTAL);
+        selectLocale.setText(resources.getString("select_ui_language"));
+        selectLocale.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+
+        languageCombo = new Combo (generalGroup, SWT.READ_ONLY);
+        languageCombo.setItems(Settings.SUPPORTED_LANGUAGES);
+        languageCombo.select(languageCombo.indexOf(settings.getLocale().getLanguage()));
+    }
+
     private void populateProcessGroup(Composite container) {
         Group processGroup = new Group(container, SWT.SHADOW_IN);
-        processGroup.setText("Процессы");
+        processGroup.setText(resources.getString("processes"));
         processGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
         processGroup.setLayout(new GridLayout(3, false));
 
         Label updatePeriodLabel = new Label(processGroup, SWT.HORIZONTAL);
-        updatePeriodLabel.setText("Период автообновления");
+        updatePeriodLabel.setText(resources.getString("auto_update_interval"));
 
         GridData textGd = new GridData(GridData.FILL_HORIZONTAL);
         textGd.horizontalSpan = 2;
@@ -84,7 +103,7 @@ public class SettingsDlg extends Dialog {
         updatePeriod.setSelection(settings.getUpdatePeriod());
 
         Label idleShowLabel = new Label(processGroup, SWT.HORIZONTAL);
-        idleShowLabel.setText("Показывать idle процессы");
+        idleShowLabel.setText(resources.getString("show_idle_process"));
         GridData labelGd = new GridData(GridData.FILL_HORIZONTAL);
         labelGd.horizontalSpan = 2;
         idleShowLabel.setLayoutData(labelGd);
@@ -93,7 +112,7 @@ public class SettingsDlg extends Dialog {
         showIdleButton.setSelection(settings.getShowIdle());
 
         Label showBackendPidLabel = new Label(processGroup, SWT.HORIZONTAL);
-        showBackendPidLabel.setText("Показывать собственные запросы среди процессов");
+        showBackendPidLabel.setText(resources.getString("show_pgSqlBlock_process"));
         showBackendPidLabel.setLayoutData(labelGd);
         showBackendPidButton = new Button(processGroup, SWT.CHECK);
         showBackendPidButton.setSelection(settings.getShowBackendPid());
@@ -101,24 +120,24 @@ public class SettingsDlg extends Dialog {
 
     private void populateNotificationGroup(Composite container) {
         Group notificationGroup = new Group(container, SWT.SHADOW_IN);
-        notificationGroup.setText("Уведомления");
+        notificationGroup.setText(resources.getString("notifications"));
         notificationGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
         notificationGroup.setLayout(new GridLayout(2, false));
 
         Label idleShowToolTip = new Label(notificationGroup, SWT.HORIZONTAL);
-        idleShowToolTip.setText("Показывать оповещения о блокировках в трее");
+        idleShowToolTip.setText(resources.getString("show_tray_notifications"));
         idleShowToolTip.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
         showToolTip = new Button(notificationGroup, SWT.CHECK);
         showToolTip.setSelection(settings.getShowToolTip());
 
         Label confirmRequiredLabel = new Label(notificationGroup, SWT.HORIZONTAL);
-        confirmRequiredLabel.setText("Подтверждать отмену/уничтожение процесса");
+        confirmRequiredLabel.setText(resources.getString("prompt_confirmation_on_process_kill"));
         confirmRequiredLabel.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
         confirmRequiredButton = new Button(notificationGroup, SWT.CHECK);
         confirmRequiredButton.setSelection(settings.isConfirmRequired());
 
         Label confirmExitLabel = new Label(notificationGroup, SWT.HORIZONTAL);
-        confirmExitLabel.setText("Подтверждать при выходе из pgSqlBlocks");
+        confirmExitLabel.setText(resources.getString("prompt_confirmation_on_program_close"));
         confirmExitLabel.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
         confirmExitButton = new Button(notificationGroup, SWT.CHECK);
         confirmExitButton.setSelection(settings.isConfirmExit());
@@ -126,13 +145,13 @@ public class SettingsDlg extends Dialog {
 
     private void populateColumnGroup(Composite container) {
         Group columnsGroup = new Group(container, SWT.SHADOW_IN);
-        columnsGroup.setText("Колонки");
+        columnsGroup.setText(resources.getString("columns"));
         columnsGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
         columnsGroup.setLayout(new GridLayout(2, false));
 
         for (SortColumn column : SortColumn.values()) {
             Button newBtn = new Button(columnsGroup, SWT.CHECK);
-            newBtn.setText(column.getName());
+            newBtn.setText(column.getName(settings.getResourceBundle()));
             newBtn.setData(column);
             newBtn.setSelection(enabledColumns.contains(column));
             newBtn.setToolTipText(column.toString());
@@ -153,7 +172,7 @@ public class SettingsDlg extends Dialog {
     @Override
     protected void configureShell(Shell newShell) {
         super.configureShell(newShell);
-        newShell.setText("Настройки");
+        newShell.setText(resources.getString("settings"));
     }
 
     @Override
@@ -165,6 +184,7 @@ public class SettingsDlg extends Dialog {
         settings.setColumnsList(enabledColumns);
         settings.setConfirmRequired(confirmRequiredButton.getSelection());
         settings.setConfirmExit(confirmExitButton.getSelection());
+        settings.setLanguage(languageCombo.getText());
 
         super.okPressed();
     }

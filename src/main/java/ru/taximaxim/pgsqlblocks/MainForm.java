@@ -41,10 +41,7 @@ import ru.taximaxim.pgsqlblocks.process.Process;
 import ru.taximaxim.pgsqlblocks.process.ProcessTreeContentProvider;
 import ru.taximaxim.pgsqlblocks.process.ProcessTreeLabelProvider;
 import ru.taximaxim.pgsqlblocks.ui.*;
-import ru.taximaxim.pgsqlblocks.utils.FilterProcess;
-import ru.taximaxim.pgsqlblocks.utils.Images;
-import ru.taximaxim.pgsqlblocks.utils.PathBuilder;
-import ru.taximaxim.pgsqlblocks.utils.Settings;
+import ru.taximaxim.pgsqlblocks.utils.*;
 
 import java.io.IOException;
 import java.net.URL;
@@ -52,13 +49,12 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.MessageFormat;
+import java.util.*;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.*;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 import java.util.stream.Collectors;
-
 
 public class MainForm extends ApplicationWindow implements IUpdateListener {
 
@@ -67,7 +63,6 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
     private static final String APP_NAME = "pgSqlBlocks";
     private static final String SORT_DIRECTION = "sortDirection";
     private static final String SORT_COLUMN = "sortColumn";
-    private static final String PID = " pid=";
     private static final int ZERO_MARGIN = 0;
     private static final int[] VERTICAL_WEIGHTS = new int[] {80, 20};
     private static final int[] HORIZONTAL_WEIGHTS = new int[] {12, 88};
@@ -104,13 +99,14 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
     private ToolTip tip;
     private static SortColumn sortColumn = SortColumn.BLOCKED_COUNT;
     private static SortDirection sortDirection = SortDirection.UP;
-    private Settings settings = Settings.getInstance();
+    private final Settings settings = Settings.getInstance();
     private FilterProcess filterProcess = FilterProcess.getInstance();
     private final DbcDataListBuilder dbcDataBuilder = DbcDataListBuilder.getInstance(this);
     private ConcurrentMap<String, Image> imagesMap = new ConcurrentHashMap<>();
     private MenuManager serversTableMenuMgr = new MenuManager();
     private Set<SortColumn> visibleColumns = settings.getColumnsList();
     private boolean hasBlocks = false;
+    private final ResourceBundle resourceBundle = settings.getResourceBundle();
 
     private Composite logComposite;
     private SashForm verticalSf;
@@ -123,7 +119,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
             wwin.open();
             display.dispose();
         } catch (Exception e) {
-            LOG.error("Произошла ошибка:", e);
+            LOG.error("An error has occurred:"+ e);
         }
     }
 
@@ -166,8 +162,8 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
 
     @Override
     protected boolean canHandleShellCloseEvent() {
-        if (settings.isConfirmExit() && !MessageDialog.openQuestion(getShell(), "Подтверждение действия",
-                "Вы действительно хотите выйти из pgSqlBlocks?")) {
+        if (settings.isConfirmExit() && !MessageDialog.openQuestion(getShell(), resourceBundle.getString("confirm_action"),
+                resourceBundle.getString("exit_confirm_message"))) {
             return false;
         }
         dbcDataBuilder.getDbcDataList().forEach(DbcData::shutdown);
@@ -177,6 +173,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
     @Override
     protected Control createContents(Composite parent)
     {
+        //Locale.setDefault(current_locale);
         Menu menuBar = new Menu(getShell(), SWT.BAR);
         MenuItem helpMenuHeader = new MenuItem(menuBar, SWT.CASCADE);
         helpMenuHeader.setText("&pgSqlBlocks");
@@ -185,12 +182,12 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
         helpMenuHeader.setMenu(helpMenu);
 
         MenuItem helpGetHelpItem = new MenuItem(helpMenu, SWT.PUSH);
-        helpGetHelpItem.setText("&О приложении");
+        helpGetHelpItem.setText(resourceBundle.getString("about"));
         helpGetHelpItem.addListener(SWT.Selection, e -> new AboutDlg(getShell()).open());
         getShell().setMenuBar(menuBar);
 
         MenuItem exitMenuItem = new MenuItem(helpMenu, SWT.PUSH);
-        exitMenuItem.setText("&Выход");
+        exitMenuItem.setText(resourceBundle.getString("exit"));
         exitMenuItem.addListener(SWT.Selection, e -> getShell().close());
         getShell().setMenuBar(menuBar);
 
@@ -215,7 +212,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
             trayItem.setToolTipText("pgSqlBlocks v." + getAppVersion());
             final Menu trayMenu = new Menu(getShell(), SWT.POP_UP);
             MenuItem trayMenuItem = new MenuItem(trayMenu, SWT.PUSH);
-            trayMenuItem.setText("Выход");
+            trayMenuItem.setText(resourceBundle.getString("exit"));
             trayMenuItem.addListener(SWT.Selection, event -> getShell().close());
             trayItem.addListener(SWT.MenuDetect, event -> trayMenu.setVisible(true));
 
@@ -225,7 +222,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
             tip.setVisible(false);
             trayItem.setToolTip(tip);
         } else {
-            LOG.warn("The system tray is not available");
+            LOG.warn(resourceBundle.getString("system_tray_not_available_message"));
         }
 
         dbcDataBuilder.getDbcDataList().stream().filter(DbcData::isEnabledAutoConnect).forEach(DbcData::startUpdater);
@@ -249,7 +246,8 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
                 tabPanel.setLayoutData(gridData);
                 TabItem currentActivityTi = new TabItem(tabPanel, SWT.NONE);
                 {
-                    currentActivityTi.setText("Текущая активность");
+                    currentActivityTi.setText(resourceBundle.getString("current_activity"));
+                    Locale l = resourceBundle.getLocale();
                     SashForm currentActivitySf = new SashForm(tabPanel, SWT.HORIZONTAL);
                     {
                         currentActivitySf.setLayout(gridLayout);
@@ -262,7 +260,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
                             caServersTable.getTable().setHeaderVisible(true);
                             caServersTable.getTable().setLayoutData(gridData);
                             TableViewerColumn tvColumn = new TableViewerColumn(caServersTable, SWT.NONE);
-                            tvColumn.getColumn().setText("База данных");
+                            tvColumn.getColumn().setText(resourceBundle.getString("database"));
                             tvColumn.getColumn().setWidth(200);
                             caServersTable.setContentProvider(new DbcDataListContentProvider());
                             caServersTable.setLabelProvider(new DbcDataListLabelProvider());
@@ -311,7 +309,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
                                 ToolBar pcToolBar = new ToolBar(procComposite, SWT.FLAT | SWT.RIGHT);
                                 pcToolBar.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
                                 terminateProc = new ToolItem(pcToolBar, SWT.PUSH);
-                                terminateProc.setText("Уничтожить процесс");
+                                terminateProc.setText(resourceBundle.getString("kill_process"));
                                 terminateProc.addListener(SWT.Selection, event -> {
                                     if (selectedProcess != null) {
                                         terminate(selectedProcess);
@@ -319,7 +317,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
                                 });
 
                                 cancelProc = new ToolItem(pcToolBar, SWT.PUSH);
-                                cancelProc.setText("Послать сигнал отмены процесса");
+                                cancelProc.setText(resourceBundle.getString("cancel_process"));
                                 cancelProc.addListener(SWT.Selection, event -> {
                                     if (selectedProcess != null) {
                                         cancel(selectedProcess);
@@ -338,7 +336,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
 
                 TabItem blocksHistoryTi = new TabItem(tabPanel, SWT.NONE);
                 {
-                    blocksHistoryTi.setText("История блокировок");
+                    blocksHistoryTi.setText(resourceBundle.getString("lock_history"));
                     SashForm blocksHistorySf = new SashForm(tabPanel, SWT.HORIZONTAL);
                     {
                         blocksHistorySf.setLayout(gridLayout);
@@ -352,7 +350,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
                             bhServersTable.getTable().setLinesVisible(true);
                             bhServersTable.getTable().setLayoutData(gridData);
                             TableViewerColumn serversTc = new TableViewerColumn(bhServersTable, SWT.NONE);
-                            serversTc.getColumn().setText("База данных");
+                            serversTc.getColumn().setText(resourceBundle.getString("database"));
                             serversTc.getColumn().setWidth(200);
                             bhServersTable.setContentProvider(new DbcDataListContentProvider());
                             bhServersTable.setLabelProvider(new DbcDataListLabelProvider());
@@ -440,7 +438,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
     private void fillTreeViewer(TreeViewer treeViewer) {
         for (SortColumn column : SortColumn.values()) {
             TreeViewerColumn treeColumn = new TreeViewerColumn(treeViewer, SWT.NONE);
-            treeColumn.getColumn().setText(column.getName());
+            treeColumn.getColumn().setText(column.getName(resourceBundle));
             treeColumn.getColumn().setData(SORT_COLUMN, column);
             treeColumn.getColumn().setData(SORT_DIRECTION, SortDirection.UP);
             treeColumn.getColumn().setMoveable(true);
@@ -491,7 +489,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
     protected ToolBarManager createToolBarManager(int style) {
         ToolBarManager toolBarManager = new ToolBarManager(style);
 
-        addDb = new Action(Images.ADD_DATABASE.getDescription(),
+        addDb = new Action(Images.ADD_DATABASE.getDescription(resourceBundle),
                 ImageDescriptor.createFromImage(getImage(Images.ADD_DATABASE))) {
             
             @Override
@@ -511,13 +509,13 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
 
         toolBarManager.add(addDb);
 
-        deleteDB = new Action(Images.DELETE_DATABASE.getDescription(),
+        deleteDB = new Action(Images.DELETE_DATABASE.getDescription(resourceBundle),
                 ImageDescriptor.createFromImage(getImage(Images.DELETE_DATABASE))) {
             @Override
             public void run() {
                 if (MessageDialog.openQuestion(getShell(),
-                        "Подтверждение действия",
-                        String.format("Вы действительно хотите удалить %s?", selectedDbcData.getName()))) {
+                        resourceBundle.getString("confirm_action"),
+                        MessageFormat.format(resourceBundle.getString("delete_confirm_message"), selectedDbcData.getName()))) {
                     dbcDataBuilder.delete(selectedDbcData);
                     selectedDbcData = null;
                     caMainTree.setInput(null);
@@ -529,7 +527,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
         deleteDB.setEnabled(false);
         toolBarManager.add(deleteDB);
 
-        editDB = new Action(Images.EDIT_DATABASE.getDescription(),
+        editDB = new Action(Images.EDIT_DATABASE.getDescription(resourceBundle),
                 ImageDescriptor.createFromImage(getImage(Images.EDIT_DATABASE))) {
 
             @Override
@@ -550,7 +548,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
 
         toolBarManager.add(new Separator());
 
-        connectDB = new Action(Images.CONNECT_DATABASE.getDescription(),
+        connectDB = new Action(Images.CONNECT_DATABASE.getDescription(resourceBundle),
                 ImageDescriptor.createFromImage(getImage(Images.CONNECT_DATABASE))) {
             
             @Override
@@ -562,7 +560,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
         connectDB.setEnabled(false);
         toolBarManager.add(connectDB);
 
-        disconnectDB = new Action(Images.DISCONNECT_DATABASE.getDescription(),
+        disconnectDB = new Action(Images.DISCONNECT_DATABASE.getDescription(resourceBundle),
                 ImageDescriptor.createFromImage(getImage(Images.DISCONNECT_DATABASE))) {
             
             @Override
@@ -576,7 +574,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
 
         toolBarManager.add(new Separator());
 
-        update =  new Action(Images.UPDATE.getDescription(),
+        update =  new Action(Images.UPDATE.getDescription(resourceBundle),
                 ImageDescriptor.createFromImage(getImage(Images.UPDATE))) {
             
             @Override
@@ -589,7 +587,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
 
         toolBarManager.add(update);
 
-        autoUpdate = new Action(Images.AUTOUPDATE.getDescription(),
+        autoUpdate = new Action(Images.AUTOUPDATE.getDescription(resourceBundle),
                 ImageDescriptor.createFromImage(getImage(Images.AUTOUPDATE))) {
             
             @Override
@@ -609,7 +607,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
         autoUpdate.setChecked(settings.isAutoUpdate());
         toolBarManager.add(autoUpdate);
 
-        cancelUpdate = new Action(Images.CANCEL_UPDATE.getDescription(),
+        cancelUpdate = new Action(Images.CANCEL_UPDATE.getDescription(resourceBundle),
                 ImageDescriptor.createFromImage(getImage(Images.CANCEL_UPDATE))) {
 
             @Override
@@ -626,7 +624,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
 
         toolBarManager.add(new Separator());
 
-        Action filterSetting = new Action(Images.FILTER.getDescription(),
+        Action filterSetting = new Action(Images.FILTER.getDescription(resourceBundle),
                 ImageDescriptor.createFromImage(getImage(Images.FILTER))) {
 
             @Override
@@ -639,7 +637,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
         
         toolBarManager.add(filterSetting);
 
-        onlyBlocked = new Action(Images.VIEW_ONLY_BLOCKED.getDescription(),
+        onlyBlocked = new Action(Images.VIEW_ONLY_BLOCKED.getDescription(resourceBundle),
                 ImageDescriptor.createFromImage(getImage(Images.VIEW_ONLY_BLOCKED))) {
             
             @Override
@@ -654,7 +652,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
 
         toolBarManager.add(new Separator());
 
-        Action exportBlocks = new Action(Images.EXPORT_BLOCKS.getDescription(),
+        Action exportBlocks = new Action(Images.EXPORT_BLOCKS.getDescription(resourceBundle),
                 ImageDescriptor.createFromImage(getImage(Images.EXPORT_BLOCKS))) {
             
             @Override
@@ -663,21 +661,21 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
                         .filter(DbcData::hasBlockedProcess).count() > 0) {
                     
                     BlocksHistory.getInstance().save(dbcDataBuilder.getDbcDataList());
-                    LOG.info("Блокировка сохранена...");
+                    LOG.info(resourceBundle.getString("lock_saved"));
                 } else {
-                    LOG.info("Не найдено блокировок для сохранения");
+                    LOG.info(resourceBundle.getString("no_locks"));
                 }
             }
         };
 
         toolBarManager.add(exportBlocks);
 
-        Action importBlocks = new Action(Images.IMPORT_BLOCKS.getDescription()) {
+        Action importBlocks = new Action(Images.IMPORT_BLOCKS.getDescription(resourceBundle)) {
             @Override
             public void run() {
                 FileDialog dialog = new FileDialog(getShell());
                 dialog.setFilterPath(PathBuilder.getInstance().getBlockHistoryDir().toString());
-                dialog.setText("Открыть историю блокировок");
+                dialog.setText(resourceBundle.getString("view_lock_history"));
                 dialog.setFilterExtensions(new String[]{"*.xml"});
 
                 List<DbcData> blockedDbsDataList = BlocksHistory.getInstance().open(dialog.open());
@@ -695,7 +693,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
 
         toolBarManager.add(new Separator());
 
-        Action settingsAction = new Action(Images.SETTINGS.getDescription(),
+        Action settingsAction = new Action(Images.SETTINGS.getDescription(resourceBundle),
                 ImageDescriptor.createFromImage(getImage(Images.SETTINGS))) {
 
             @Override
@@ -736,7 +734,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
 
     void updateLogDisplayActionBtn(boolean showLogMessages) {
         Images image = showLogMessages ? Images.SHOW_LOG_PANEL : Images.HIDE_LOG_PANEL;
-        logDisplay.setText(image.getDescription());
+        logDisplay.setText(image.getDescription(resourceBundle));
         logDisplay.setImageDescriptor(ImageDescriptor.createFromImage(getImage(image)));
     }
 
@@ -752,8 +750,8 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
             boolean newHasBlocks = !blockedDB.isEmpty();
 
             if (newHasBlocks && !hasBlocks) {
-                String message = String.format("В %s БД имеется блокировка: %s",
-                        blockedDB.size() == 1 ? "одной" : "нескольких",
+                String message = MessageFormat.format("{0}: {1}",
+                        blockedDB.size() == 1 ? resourceBundle.getString("one_db_has_lock") : resourceBundle.getString("several_db_has_lock"),
                         String.join(", \n", blockedDB));
                 tip.setMessage(message);
                 tip.setVisible(true);
@@ -773,7 +771,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
         try {
             manifest = new Manifest(manifestPath != null ? manifestPath.openStream() : null);
         } catch (IOException e) {
-            LOG.error("Ошибка при чтении манифеста", e);
+            LOG.error(resourceBundle.getString("error_reading_the_manifest"), e);
         }
         Attributes manifestAttributes = manifest != null ? manifest.getMainAttributes() : null;
         String appVersion = manifestAttributes != null ? manifestAttributes.getValue("Implementation-Version") : null;
@@ -785,8 +783,8 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
     
     private void terminate(Process process) {
         int pid = process.getPid();
-        if (settings.isConfirmRequired() && !MessageDialog.openQuestion(getShell(), "Подтверждение действия",
-                "Вы действительно хотите уничтожить процесс " + pid + "?")) {
+        if (settings.isConfirmRequired() && !MessageDialog.openQuestion(getShell(), resourceBundle.getString("confirm_action"),
+                MessageFormat.format(resourceBundle.getString("kill_process_confirm_message"), pid))) {
             return;
         }
         String term = "select pg_terminate_backend(?);";
@@ -802,17 +800,17 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
             LOG.error(selectedDbcData.getName() + " " + e.getMessage(), e);
         }
         if(kill) {
-            LOG.info(selectedDbcData.getName() + PID + pid + " is terminated.");
+            LOG.info(MessageFormat.format(resourceBundle.getString("process_terminated"), selectedDbcData.getName(), pid));
             selectedDbcData.startUpdater();
         } else {
-            LOG.info(selectedDbcData.getName() + " failed to terminate " + PID + pid);
+            LOG.info(MessageFormat.format(resourceBundle.getString("process_not_terminated"), selectedDbcData.getName(), pid));
         }
     }
 
     private void cancel(Process process) {
         int pid = process.getPid();
-        if (settings.isConfirmRequired() && !MessageDialog.openQuestion(getShell(), "Подтверждение действия",
-                "Вы действительно хотите послать сигнал отмены процесса " + pid + "?")) {
+        if (settings.isConfirmRequired() && !MessageDialog.openQuestion(getShell(), resourceBundle.getString("confirm_action"),
+            MessageFormat.format(resourceBundle.getString("cancel_process_confirm_message"), pid))) {
             return;
         }
         String cancel = "select pg_cancel_backend(?);";
@@ -828,10 +826,10 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
             LOG.error(selectedDbcData.getName() + " " + e.getMessage(), e);
         }
         if(kill) {
-            LOG.info(selectedDbcData.getName() + PID + pid + " is canceled.");
+            LOG.info(MessageFormat.format(resourceBundle.getString("process_cancelled"), selectedDbcData.getName(), pid));
             selectedDbcData.startUpdater();
         } else {
-            LOG.info(selectedDbcData.getName() + " failed to cancel " + PID + pid);
+            LOG.info(MessageFormat.format(resourceBundle.getString("process_not_cancelled"), selectedDbcData.getName(), pid));
         }
     }
 
@@ -845,7 +843,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
     
     private void dbcDataDisconnect() {
         synchronized (selectedDbcData) {
-            LOG.debug(MessageFormat.format("Remove dbcData on disconnect \"{0}\" from updaterList",
+            LOG.debug(MessageFormat.format(resourceBundle.getString("remove_dbcdata_on_disconnect"),
                     selectedDbcData.getName()));
             selectedDbcData.stopUpdater();
             selectedDbcData.disconnect();

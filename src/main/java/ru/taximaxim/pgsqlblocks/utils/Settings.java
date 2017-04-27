@@ -23,16 +23,14 @@ import org.apache.log4j.Logger;
 import ru.taximaxim.pgsqlblocks.SortColumn;
 
 import java.io.*;
-import java.util.Arrays;
-import java.util.Properties;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
  * Класс для работы с настройка пользователя
  */
 public final class Settings {
-
+    public static final String[] SUPPORTED_LANGUAGES = {"ru", "en"};
     private static final Logger LOG = Logger.getLogger(Settings.class);
 
     private static final String UPDATE_PERIOD = "update_period";
@@ -46,6 +44,7 @@ public final class Settings {
     private static final String CONFIRM_REQUIRED = "confirm_required";
     private static final String CONFIRM_EXIT = "confirm_exit";
     private static final String SHOW_LOG_MESSAGES = "show_log_messages";
+    private static final String CURRENT_LOCALE = "current_locale";
 
     private int updatePeriod;
     private int loginTimeout;
@@ -64,6 +63,8 @@ public final class Settings {
 
     private Properties properties;
     private File propFile;
+    private final Locale locale;
+    private final ResourceBundle resources;
 
     private static Settings instance;
 
@@ -80,6 +81,7 @@ public final class Settings {
         defaults.put(CONFIRM_REQUIRED, "true");
         defaults.put(CONFIRM_EXIT, "true");
         defaults.put(SHOW_LOG_MESSAGES, "true");
+        defaults.put(CURRENT_LOCALE, new Locale.Builder().setLanguage(SUPPORTED_LANGUAGES[0]).build().toLanguageTag());
 
         properties = new Properties(defaults);
         propFile = PathBuilder.getInstance().getPropertiesPath().toFile();
@@ -103,6 +105,9 @@ public final class Settings {
         this.confirmRequired = Boolean.parseBoolean(properties.getProperty(CONFIRM_REQUIRED));
         this.confirmExit = Boolean.parseBoolean(properties.getProperty(CONFIRM_EXIT));
         this.showLogMessages = Boolean.parseBoolean(properties.getProperty(SHOW_LOG_MESSAGES));
+        this.locale = new Locale.Builder().setLanguageTag(properties.getProperty(CURRENT_LOCALE)).build();
+
+        resources = ResourceBundle.getBundle(ru.taximaxim.pgsqlblocks.l10n.PgSqlBlocks.class.getName(), locale);
     }
 
     public static Settings getInstance() {
@@ -110,6 +115,10 @@ public final class Settings {
             instance = new Settings();
         }
         return instance;
+    }
+
+    public void setLanguage(String language) {
+        saveProperties(CURRENT_LOCALE, language);
     }
 
     /**
@@ -290,6 +299,14 @@ public final class Settings {
      */
     public boolean getShowLogMessages() {
         return showLogMessages;
+    }
+
+    public Locale getLocale() {
+        return locale;
+    }
+
+    public ResourceBundle getResourceBundle() {
+        return resources;
     }
 
     private void saveProperties(String key, String value) {
