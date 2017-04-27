@@ -42,6 +42,7 @@ public class SettingsDlg extends Dialog {
     private Button showBackendPidButton;
     private Button confirmRequiredButton;
     private Button confirmExitButton;
+    private Combo languageCombo;
 
     private Set<SortColumn> enabledColumns = new HashSet<>();
 
@@ -61,10 +62,26 @@ public class SettingsDlg extends Dialog {
         layout.marginLeft = 10;
         container.setLayout(layout);
 
+        populateGeneralGroup(container);
         populateProcessGroup(container);
         populateNotificationGroup(container);
         populateColumnGroup(container);
         return container;
+    }
+
+    private void populateGeneralGroup(Composite container) {
+        Group generalGroup = new Group(container, SWT.SHADOW_IN);
+        generalGroup.setText(resources.getString("general"));
+        generalGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
+        generalGroup.setLayout(new GridLayout(2, false));
+
+        Label selectLocale = new Label(generalGroup, SWT.HORIZONTAL);
+        selectLocale.setText(resources.getString("select_ui_language"));
+        selectLocale.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+
+        languageCombo = new Combo (generalGroup, SWT.READ_ONLY);
+        languageCombo.setItems(Settings.SUPPORTED_LANGUAGES);
+        languageCombo.select(languageCombo.indexOf(settings.getLocale().getLanguage()));
     }
 
     private void populateProcessGroup(Composite container) {
@@ -167,6 +184,7 @@ public class SettingsDlg extends Dialog {
         settings.setColumnsList(enabledColumns);
         settings.setConfirmRequired(confirmRequiredButton.getSelection());
         settings.setConfirmExit(confirmExitButton.getSelection());
+        settings.setLanguage(languageCombo.getText());
 
         super.okPressed();
     }

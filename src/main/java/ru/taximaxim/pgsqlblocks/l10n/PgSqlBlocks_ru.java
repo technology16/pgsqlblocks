@@ -87,7 +87,9 @@ public class PgSqlBlocks_ru extends ListResourceBundle {
                 {"show_tray_notifications", "Показывать оповещения о блокировках в трее"},
                 {"prompt_confirmation_on_process_kill", "Подтверждать отмену/уничтожение процесса"},
                 {"prompt_confirmation_on_program_close", "Подтверждать при выходе из pgSqlBlocks"},
-                {"columns", "Колонки"}
+                {"columns", "Колонки"},
+                {"general", "Общие"},
+                {"select_ui_language", "Язык интерфейса (требует перезапуска)"}
         };
     }
 }

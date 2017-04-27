@@ -30,7 +30,7 @@ import java.util.stream.Collectors;
  * Класс для работы с настройка пользователя
  */
 public final class Settings {
-
+    public static final String[] SUPPORTED_LANGUAGES = {"ru", "en"};
     private static final Logger LOG = Logger.getLogger(Settings.class);
 
     private static final String UPDATE_PERIOD = "update_period";
@@ -81,7 +81,7 @@ public final class Settings {
         defaults.put(CONFIRM_REQUIRED, "true");
         defaults.put(CONFIRM_EXIT, "true");
         defaults.put(SHOW_LOG_MESSAGES, "true");
-        defaults.put(CURRENT_LOCALE, new Locale.Builder().setLanguage("ru").setRegion("RU").build().toLanguageTag());
+        defaults.put(CURRENT_LOCALE, new Locale.Builder().setLanguage(SUPPORTED_LANGUAGES[0]).build().toLanguageTag());
 
         properties = new Properties(defaults);
         propFile = PathBuilder.getInstance().getPropertiesPath().toFile();
@@ -115,6 +115,10 @@ public final class Settings {
             instance = new Settings();
         }
         return instance;
+    }
+
+    public void setLanguage(String language) {
+        saveProperties(CURRENT_LOCALE, language);
     }
 
     /**

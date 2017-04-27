@@ -87,7 +87,9 @@ public class PgSqlBlocks_en extends ListResourceBundle {
                 {"show_tray_notifications", "Show tray notifications"},
                 {"prompt_confirmation_on_process_kill", "Prompt confirmation on process cancel/kill"},
                 {"prompt_confirmation_on_program_close", "Prompt confirmation on program close"},
-                {"columns", "Columns"}
+                {"columns", "Columns"},
+                {"general", "General"},
+                {"select_ui_language", "UI language (requires restart)"}
         };
     }
 }
