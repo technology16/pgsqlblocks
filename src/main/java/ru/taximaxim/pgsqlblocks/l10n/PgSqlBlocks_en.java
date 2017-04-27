@@ -39,6 +39,44 @@ public class PgSqlBlocks_en extends ListResourceBundle {
                 {"db_update_error", "Error on DbcData: {0}."},
                 {"db_updating", "Updating \"{0}\"..."},
                 {"db_finish_updating", "Finish updating \"{0}\"..."},
-                {"db_error_on_connect", "Error on connect or update DbcData: {0}"}};
+                {"db_error_on_connect", "Error on connect or update DbcData: {0}"},
+
+                // action icons
+                {"add_db", "Add database"},
+                {"delete_db", "Remove database"},
+                {"edit_db", "Edit database"},
+                {"connect", "Connect"},
+                {"disconnect", "Disconnect"},
+                {"update", "Update"},
+                {"autoupdate", "Auto update"},
+                {"view_only_blocked", "Show only blocking and blocked processes"},
+                {"save_blocks", "Save blocks to file"},
+                {"open_blocks", "Open blocks from file"},
+                {"settings", "Settings"},
+                {"process_filter", "Process filter"},
+                {"cancel_update", "Stop update"},
+                {"show_logs_panel", "Hide logs panel"},
+                {"hide_logs_panel", "Show logs panel"},
+                {"default_action", "Default"},
+
+                // columns
+                {"pid", "PID"},
+                {"num_of_blocked_processes", "# blocked by"},
+                {"application", "Application"},
+                {"db_name", "Database"},
+                {"user_name", "Username"},
+                {"client", "Client"},
+                {"backend_start", "Backend start"},
+                {"query_start", "Query start"},
+                {"xact_start", "Xact start"},
+                {"state", "State"},
+                {"state_change", "State change"},
+                {"blocked_by", "Blocked by"},
+                {"lock_type", "Lock type"},
+                {"relation", "Relation"},
+                {"query", "Query"},
+                {"slow_query", "Slow query"},
+                {"undefined", "Undefined"}
+        };
     }
 }

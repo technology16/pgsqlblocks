@@ -438,7 +438,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
     private void fillTreeViewer(TreeViewer treeViewer) {
         for (SortColumn column : SortColumn.values()) {
             TreeViewerColumn treeColumn = new TreeViewerColumn(treeViewer, SWT.NONE);
-            treeColumn.getColumn().setText(column.getName());
+            treeColumn.getColumn().setText(column.getName(resourceBundle));
             treeColumn.getColumn().setData(SORT_COLUMN, column);
             treeColumn.getColumn().setData(SORT_DIRECTION, SortDirection.UP);
             treeColumn.getColumn().setMoveable(true);
@@ -489,7 +489,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
     protected ToolBarManager createToolBarManager(int style) {
         ToolBarManager toolBarManager = new ToolBarManager(style);
 
-        addDb = new Action(Images.ADD_DATABASE.getDescription(),
+        addDb = new Action(Images.ADD_DATABASE.getDescription(resourceBundle),
                 ImageDescriptor.createFromImage(getImage(Images.ADD_DATABASE))) {
             
             @Override
@@ -509,7 +509,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
 
         toolBarManager.add(addDb);
 
-        deleteDB = new Action(Images.DELETE_DATABASE.getDescription(),
+        deleteDB = new Action(Images.DELETE_DATABASE.getDescription(resourceBundle),
                 ImageDescriptor.createFromImage(getImage(Images.DELETE_DATABASE))) {
             @Override
             public void run() {
@@ -527,7 +527,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
         deleteDB.setEnabled(false);
         toolBarManager.add(deleteDB);
 
-        editDB = new Action(Images.EDIT_DATABASE.getDescription(),
+        editDB = new Action(Images.EDIT_DATABASE.getDescription(resourceBundle),
                 ImageDescriptor.createFromImage(getImage(Images.EDIT_DATABASE))) {
 
             @Override
@@ -548,7 +548,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
 
         toolBarManager.add(new Separator());
 
-        connectDB = new Action(Images.CONNECT_DATABASE.getDescription(),
+        connectDB = new Action(Images.CONNECT_DATABASE.getDescription(resourceBundle),
                 ImageDescriptor.createFromImage(getImage(Images.CONNECT_DATABASE))) {
             
             @Override
@@ -560,7 +560,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
         connectDB.setEnabled(false);
         toolBarManager.add(connectDB);
 
-        disconnectDB = new Action(Images.DISCONNECT_DATABASE.getDescription(),
+        disconnectDB = new Action(Images.DISCONNECT_DATABASE.getDescription(resourceBundle),
                 ImageDescriptor.createFromImage(getImage(Images.DISCONNECT_DATABASE))) {
             
             @Override
@@ -574,7 +574,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
 
         toolBarManager.add(new Separator());
 
-        update =  new Action(Images.UPDATE.getDescription(),
+        update =  new Action(Images.UPDATE.getDescription(resourceBundle),
                 ImageDescriptor.createFromImage(getImage(Images.UPDATE))) {
             
             @Override
@@ -587,7 +587,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
 
         toolBarManager.add(update);
 
-        autoUpdate = new Action(Images.AUTOUPDATE.getDescription(),
+        autoUpdate = new Action(Images.AUTOUPDATE.getDescription(resourceBundle),
                 ImageDescriptor.createFromImage(getImage(Images.AUTOUPDATE))) {
             
             @Override
@@ -607,7 +607,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
         autoUpdate.setChecked(settings.isAutoUpdate());
         toolBarManager.add(autoUpdate);
 
-        cancelUpdate = new Action(Images.CANCEL_UPDATE.getDescription(),
+        cancelUpdate = new Action(Images.CANCEL_UPDATE.getDescription(resourceBundle),
                 ImageDescriptor.createFromImage(getImage(Images.CANCEL_UPDATE))) {
 
             @Override
@@ -624,7 +624,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
 
         toolBarManager.add(new Separator());
 
-        Action filterSetting = new Action(Images.FILTER.getDescription(),
+        Action filterSetting = new Action(Images.FILTER.getDescription(resourceBundle),
                 ImageDescriptor.createFromImage(getImage(Images.FILTER))) {
 
             @Override
@@ -637,7 +637,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
         
         toolBarManager.add(filterSetting);
 
-        onlyBlocked = new Action(Images.VIEW_ONLY_BLOCKED.getDescription(),
+        onlyBlocked = new Action(Images.VIEW_ONLY_BLOCKED.getDescription(resourceBundle),
                 ImageDescriptor.createFromImage(getImage(Images.VIEW_ONLY_BLOCKED))) {
             
             @Override
@@ -652,7 +652,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
 
         toolBarManager.add(new Separator());
 
-        Action exportBlocks = new Action(Images.EXPORT_BLOCKS.getDescription(),
+        Action exportBlocks = new Action(Images.EXPORT_BLOCKS.getDescription(resourceBundle),
                 ImageDescriptor.createFromImage(getImage(Images.EXPORT_BLOCKS))) {
             
             @Override
@@ -670,7 +670,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
 
         toolBarManager.add(exportBlocks);
 
-        Action importBlocks = new Action(Images.IMPORT_BLOCKS.getDescription()) {
+        Action importBlocks = new Action(Images.IMPORT_BLOCKS.getDescription(resourceBundle)) {
             @Override
             public void run() {
                 FileDialog dialog = new FileDialog(getShell());
@@ -693,7 +693,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
 
         toolBarManager.add(new Separator());
 
-        Action settingsAction = new Action(Images.SETTINGS.getDescription(),
+        Action settingsAction = new Action(Images.SETTINGS.getDescription(resourceBundle),
                 ImageDescriptor.createFromImage(getImage(Images.SETTINGS))) {
 
             @Override
@@ -734,7 +734,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
 
     void updateLogDisplayActionBtn(boolean showLogMessages) {
         Images image = showLogMessages ? Images.SHOW_LOG_PANEL : Images.HIDE_LOG_PANEL;
-        logDisplay.setText(image.getDescription());
+        logDisplay.setText(image.getDescription(resourceBundle));
         logDisplay.setImageDescriptor(ImageDescriptor.createFromImage(getImage(image)));
     }
 

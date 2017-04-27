@@ -132,7 +132,7 @@ public class SettingsDlg extends Dialog {
 
         for (SortColumn column : SortColumn.values()) {
             Button newBtn = new Button(columnsGroup, SWT.CHECK);
-            newBtn.setText(column.getName());
+            newBtn.setText(column.getName(settings.getResourceBundle()));
             newBtn.setData(column);
             newBtn.setSelection(enabledColumns.contains(column));
             newBtn.setToolTipText(column.toString());

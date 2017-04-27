@@ -19,6 +19,8 @@
  */
 package ru.taximaxim.pgsqlblocks.utils;
 
+import java.util.ResourceBundle;
+
 public enum Images {
 
     ADD_DATABASE,
@@ -112,40 +114,40 @@ public enum Images {
         }
     }
     
-    public String getDescription() {
+    public String getDescription(ResourceBundle resources) {
         switch(this) {
         case ADD_DATABASE:
-            return "Добавить БД";
+            return resources.getString("add_db");
         case DELETE_DATABASE:
-            return "Удалить БД";
+            return resources.getString("delete_db");
         case EDIT_DATABASE:
-            return "Редактировать БД";
+            return resources.getString("edit_db");
         case CONNECT_DATABASE:
-            return "Подключиться";
+            return resources.getString("connect");
         case DISCONNECT_DATABASE:
-            return "Отключиться";
+            return resources.getString("disconnect");
         case UPDATE:
-            return "Обновить";
+            return resources.getString("update");
         case AUTOUPDATE:
-            return "Автообновление";
+            return resources.getString("autoupdate");
         case VIEW_ONLY_BLOCKED:
-            return "Показывать только блокирующие и блокированные процессы";
+            return resources.getString("view_only_blocked");
         case EXPORT_BLOCKS:
-            return "Выгрузить историю блокировок";
+            return resources.getString("save_blocks");
         case IMPORT_BLOCKS:
-            return "Открыть файл с историей блокировок";
+            return resources.getString("open_blocks");
         case SETTINGS:
-            return "Настройки";
+            return resources.getString("settings");
         case FILTER:
-            return "Фильтр";
+            return resources.getString("process_filter");
         case CANCEL_UPDATE:
-            return "Отменить обновление";
+            return resources.getString("cancel_update");
         case SHOW_LOG_PANEL:
-            return "Скрыть панель логов";
+            return resources.getString("show_logs_panel");
         case HIDE_LOG_PANEL:
-            return "Отображать панель логов";
+            return resources.getString("hide_logs_panel");
         default:
-            return "Действие по-умолчанию";
+            return resources.getString("default_action");
         }
     }
 }

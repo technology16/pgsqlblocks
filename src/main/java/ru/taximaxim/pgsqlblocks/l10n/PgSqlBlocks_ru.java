@@ -39,6 +39,44 @@ public class PgSqlBlocks_ru extends ListResourceBundle {
                 {"db_update_error", "Ошибка в DbcData: {0}."},
                 {"db_updating", "Обновление \"{0}\"..."},
                 {"db_finish_updating", "Обновление завершено \"{0}\"."},
-                {"db_error_on_connect", "Ошибка при обновлении DbcData: {0}"}};
+                {"db_error_on_connect", "Ошибка при обновлении DbcData: {0}"},
+
+                // action icons
+                {"add_db", "Добавить БД"},
+                {"delete_db", "Удалить БД"},
+                {"edit_db", "Редактировать БД"},
+                {"connect", "Подключиться"},
+                {"disconnect", "Отключиться"},
+                {"update", "Обновить"},
+                {"autoupdate", "Автообновление"},
+                {"view_only_blocked", "Показывать только блокирующие и блокированные процессы"},
+                {"save_blocks", "Выгрузить историю блокировок"},
+                {"open_blocks", "Открыть файл с историей блокировок"},
+                {"settings", "Настройки"},
+                {"process_filter", "Фильтр"},
+                {"cancel_update", "Отменить обновление"},
+                {"show_logs_panel", "Скрыть панель логов"},
+                {"hide_logs_panel", "Отображать панель логов"},
+                {"default_action", "Действие по-умолчанию"},
+
+                // columns
+                {"pid", "PID"},
+                {"num_of_blocked_processes", "Блокирует"},
+                {"application", "Приложение"},
+                {"db_name", "Имя БД"},
+                {"user_name", "Роль"},
+                {"client", "Данные клиента"},
+                {"backend_start", "Подключение к серверу"},
+                {"query_start", "Старт запроса"},
+                {"xact_start", "Старт транзакции"},
+                {"state", "Состояние"},
+                {"state_change", "Изменено"},
+                {"blocked_by", "Кем блокируется"},
+                {"lock_type", "Тип объекта блокировки"},
+                {"relation", "Объект блокировки"},
+                {"query", "Запрос"},
+                {"slow_query", "Долгий процесс"},
+                {"undefined", "Без имени"}
+        };
     }
 }
