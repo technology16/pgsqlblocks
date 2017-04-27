@@ -76,7 +76,18 @@ public class PgSqlBlocks_ru extends ListResourceBundle {
                 {"relation", "Объект блокировки"},
                 {"query", "Запрос"},
                 {"slow_query", "Долгий процесс"},
-                {"undefined", "Без имени"}
+                {"undefined", "Без имени"},
+
+                // settings dialog
+                {"processes", "Процессы"},
+                {"auto_update_interval", "Период автообновления"},
+                {"show_idle_process", "Показывать idle процессы"},
+                {"show_pgSqlBlock_process", "Показывать собственные запросы среди процессов"},
+                {"notifications", "Уведомления"},
+                {"show_tray_notifications", "Показывать оповещения о блокировках в трее"},
+                {"prompt_confirmation_on_process_kill", "Подтверждать отмену/уничтожение процесса"},
+                {"prompt_confirmation_on_program_close", "Подтверждать при выходе из pgSqlBlocks"},
+                {"columns", "Колонки"}
         };
     }
 }

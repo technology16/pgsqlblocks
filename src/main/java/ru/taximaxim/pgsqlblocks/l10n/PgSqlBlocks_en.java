@@ -76,7 +76,18 @@ public class PgSqlBlocks_en extends ListResourceBundle {
                 {"relation", "Relation"},
                 {"query", "Query"},
                 {"slow_query", "Slow query"},
-                {"undefined", "Undefined"}
+                {"undefined", "Undefined"},
+
+                // settings dialog
+                {"processes", "Processes"},
+                {"auto_update_interval", "Autoupdate interval"},
+                {"show_idle_process", "Show idle processes"},
+                {"show_pgSqlBlock_process", "Show pgSqlBlock process"},
+                {"notifications", "Notifications"},
+                {"show_tray_notifications", "Show tray notifications"},
+                {"prompt_confirmation_on_process_kill", "Prompt confirmation on process cancel/kill"},
+                {"prompt_confirmation_on_program_close", "Prompt confirmation on program close"},
+                {"columns", "Columns"}
         };
     }
 }
