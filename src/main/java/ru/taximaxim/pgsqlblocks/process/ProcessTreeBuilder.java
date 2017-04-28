@@ -150,7 +150,8 @@ public class ProcessTreeBuilder {
     private void proceedBlocks(Map<Integer, Process> tempProcessList, Map<Integer, Set<Block>> tempBlocksList) {
         for (Map.Entry<Integer, Set<Block>> e : tempBlocksList.entrySet()) {
             int blockedPid = e.getKey();
-            for (Block block : e.getValue()) {
+
+            e.getValue().stream().filter(Block::isGranted).forEach(block -> {
                 int blockingPid = block.getBlockingPid();
                 if (tempBlocksList.containsKey(blockingPid)) {
                     Set<Block> blockingIsBlockedBy = tempBlocksList.get(blockingPid);
@@ -170,7 +171,7 @@ public class ProcessTreeBuilder {
                 } else {
                     tempProcessList.get(blockedPid).addBlock(block);
                 }
-            }
+            });
         }
     }
 
