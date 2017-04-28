@@ -30,8 +30,9 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 
-import java.text.SimpleDateFormat;
+import java.text.DateFormat;
 import java.util.Date;
+import java.util.Locale;
 
 public class UIAppender extends WriterAppender{
 
@@ -40,6 +41,7 @@ public class UIAppender extends WriterAppender{
     private StyledText text;
     private StyledTextContent styledTextContent;
     private Display display;
+    private final Locale locale;
     private boolean autoScrollEnabled = true;
 
     private ModifyListener modifyListener = (ModifyEvent e) -> {
@@ -52,9 +54,10 @@ public class UIAppender extends WriterAppender{
         }
     };
 
-    public UIAppender(Composite parent) {
+    public UIAppender(Composite parent, Locale locale) {
         this.parent = parent;
         this.display = parent.getDisplay();
+        this.locale = locale;
         createControl();
     }
 
@@ -94,9 +97,9 @@ public class UIAppender extends WriterAppender{
         if(displayIsFine || parentIsFine || text == null) {
             return;
         }
-        SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+        DateFormat dateTimeFormat = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.FULL, locale);
         Date time = new Date(event.getTimeStamp());
-        String dateTime = sdf.format(time);
+        String dateTime = dateTimeFormat.format(time);
         String excMessage;
         Object message = event.getMessage();
         if (message instanceof String) {

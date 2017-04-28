@@ -374,7 +374,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
             logComposite.setLayout(gridLayout);
             logComposite.setVisible(settings.getShowLogMessages());
             verticalSf.setWeights(VERTICAL_WEIGHTS);
-            UIAppender uiAppender = new UIAppender(logComposite);
+            UIAppender uiAppender = new UIAppender(logComposite, settings.getLocale());
             uiAppender.setThreshold(Level.INFO);
             Logger.getRootLogger().addAppender(uiAppender);
 
