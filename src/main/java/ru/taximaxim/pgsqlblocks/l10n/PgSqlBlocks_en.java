@@ -108,7 +108,24 @@ public class PgSqlBlocks_en extends ListResourceBundle {
                 {"prompt_confirmation_on_program_close", "Prompt confirmation on program close"},
                 {"columns", "Columns"},
                 {"general", "General"},
-                {"select_ui_language", "UI language (requires restart)"}
+                {"select_ui_language", "UI language (requires restart)"},
+
+                // create database dialog
+                {"name", "Connection name*"},
+                {"host", "Host*"},
+                {"port", "Port*"},
+                {"user", "User*"},
+                {"password", "Password"},
+                {"use_pgpass_file", "Password will be stored in insecure storage. Use .pgpass file instead."},
+                {"database", "Database*"},
+                {"connect_automatically", "Auto connect"},
+                {"add_new_connection", "Add new connection"},
+                {"edit_connection", "Edit connection"},
+                {"missing_connection_name", "Missing required field: connection name!"},
+                {"already_exists", "Connection {0} already exists!"},
+                {"missing_host_port", "Missing required field: host and/or port!"},
+                {"missing_database_user", "Missing required field: database and/or user!"},
+                {"attention", "Attention!"}
         };
     }
 }

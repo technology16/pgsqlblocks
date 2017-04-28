@@ -494,7 +494,8 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
             
             @Override
             public void run() {
-                AddDbcDataDlg addDbcDlg = new AddDbcDataDlg(getShell(), null, dbcDataBuilder.getDbcDataList());
+                AddDbcDataDlg addDbcDlg = new AddDbcDataDlg(getShell(), null,
+                                                            dbcDataBuilder.getDbcDataList(), resourceBundle);
                 if (Window.OK == addDbcDlg.open()) {
                     selectedDbcData = addDbcDlg.getNewDbcData();
                     if (selectedDbcData != null) {
@@ -532,7 +533,8 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
 
             @Override
             public void run() {
-                AddDbcDataDlg editDbcDlg = new AddDbcDataDlg(getShell(), selectedDbcData, dbcDataBuilder.getDbcDataList());
+                AddDbcDataDlg editDbcDlg = new AddDbcDataDlg(getShell(), selectedDbcData,
+                                                                dbcDataBuilder.getDbcDataList(), resourceBundle);
                 if (Window.OK == editDbcDlg.open()) {
                     DbcData oldOne = editDbcDlg.getEditedDbcData();
                     DbcData newOne = editDbcDlg.getNewDbcData();

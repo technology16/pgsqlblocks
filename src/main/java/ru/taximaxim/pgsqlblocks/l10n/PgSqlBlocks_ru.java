@@ -108,7 +108,24 @@ public class PgSqlBlocks_ru extends ListResourceBundle {
                 {"prompt_confirmation_on_program_close", "Подтверждать при выходе из pgSqlBlocks"},
                 {"columns", "Колонки"},
                 {"general", "Общие"},
-                {"select_ui_language", "Язык интерфейса (требует перезапуска)"}
+                {"select_ui_language", "Язык интерфейса (требует перезапуска)"},
+
+                // create database dialog
+                {"name", "Имя соединения*"},
+                {"host", "Хост*"},
+                {"port", "Порт*"},
+                {"user", "Имя пользователя*"},
+                {"password", "Пароль"},
+                {"use_pgpass_file", "Указание пароля здесь небезопасно. Используйте .pgpass файл."},
+                {"database", "Имя БД*"},
+                {"connect_automatically", "Подкл. автоматически"},
+                {"add_new_connection", "Добавить новое соединение"},
+                {"edit_connection", "Редактировать соединение"},
+                {"missing_connection_name", "Не заполнено обязательное поле: Имя соединения!"},
+                {"already_exists", "Сервер с таким именем {0} уже существует!"},
+                {"missing_host_port", "Не заполнены обязательные поля: Хост и/или Порт!"},
+                {"missing_database_user", "Не заполнены обязательные поля: Имя БД и/или Имя пользователя!"},
+                {"attention", "Внимание!"}
         };
     }
 }

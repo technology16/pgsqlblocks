@@ -34,16 +34,18 @@ import org.eclipse.swt.widgets.Text;
 
 import ru.taximaxim.pgsqlblocks.dbcdata.DbcData;
 
+import java.text.MessageFormat;
 import java.util.List;
+import java.util.ResourceBundle;
 
 public class AddDbcDataDlg extends Dialog {
 
     private static final String DEFAULT_PORT = "5432";
     private static final int TEXT_WIDTH = 200;
-    public static final String ATTENTION_WORD = "Внимание!";
 
     private final DbcData editedDbcData;
     private final List<DbcData> dbcDataList;
+    private final ResourceBundle resources;
     private DbcData newDbcData;
 
     private Text nameText;
@@ -62,10 +64,11 @@ public class AddDbcDataDlg extends Dialog {
         return editedDbcData;
     }
     
-    public AddDbcDataDlg(Shell shell, DbcData dbcData, List<DbcData> dbcDataList) {
+    public AddDbcDataDlg(Shell shell, DbcData dbcData, List<DbcData> dbcDataList, ResourceBundle resources) {
         super(shell);
         this.editedDbcData = dbcData;
         this.dbcDataList = dbcDataList;
+        this.resources = resources;
     }
     
     @Override
@@ -81,45 +84,45 @@ public class AddDbcDataDlg extends Dialog {
       textGd.widthHint = TEXT_WIDTH;
       
       Label nameLabel = new Label(container, SWT.HORIZONTAL);
-      nameLabel.setText("Имя соединения*");
+      nameLabel.setText(resources.getString("name"));
       nameText = new Text(container, SWT.BORDER);
       nameText.setLayoutData(textGd);
       
       Label hostLabel = new Label(container, SWT.HORIZONTAL);
-      hostLabel.setText("Хост*");
+      hostLabel.setText(resources.getString("host"));
       hostText = new Text(container, SWT.BORDER);
       hostText.setLayoutData(textGd);
       
       Label portLabel = new Label(container, SWT.HORIZONTAL);
-      portLabel.setText("Порт*");
+      portLabel.setText(resources.getString("port"));
       portText = new Text(container, SWT.BORDER);
       portText.setText(DEFAULT_PORT);
       portText.setLayoutData(textGd);
       
       Label userLabel = new Label(container, SWT.HORIZONTAL);
-      userLabel.setText("Имя пользователя*");
+      userLabel.setText(resources.getString("user"));
       userText = new Text(container, SWT.BORDER);
       userText.setLayoutData(textGd);
       
       Label passwdLabel = new Label(container, SWT.HORIZONTAL);
-      passwdLabel.setText("Пароль");
+      passwdLabel.setText(resources.getString("password"));
       passwdText = new Text(container, SWT.BORDER);
       passwdText.setLayoutData(textGd);
       passwdText.setEchoChar('•');
       passwdText.addListener(SWT.FocusOut, event -> {
           if (!passwdText.getText().isEmpty()) {
               MessageDialog.openWarning(null,
-                      ATTENTION_WORD, "Указание пароля здесь небезопасно. Используйте .pgpass файл.");
+                      resources.getString("attention"), resources.getString("use_pgpass_file"));
           }
       });
       
       Label dbnameLabel = new Label(container, SWT.HORIZONTAL);
-      dbnameLabel.setText("Имя БД*");
+      dbnameLabel.setText(resources.getString("database"));
       dbnameText = new Text(container, SWT.BORDER);
       dbnameText.setLayoutData(textGd);
       
       Label enabledLabel = new Label(container, SWT.HORIZONTAL);
-      enabledLabel.setText("Подкл. автоматически");
+      enabledLabel.setText(resources.getString("connect_automatically"));
       enabledButton = new Button(container, SWT.CHECK);
       
       if (editedDbcData != null) {
@@ -139,9 +142,9 @@ public class AddDbcDataDlg extends Dialog {
     protected void configureShell(Shell newShell) {
       super.configureShell(newShell);
       if (editedDbcData == null) {
-          newShell.setText("Добавить новое соединение");
+          newShell.setText(resources.getString("add_new_connection"));
       } else {
-          newShell.setText("Редактировать соединение");
+          newShell.setText(resources.getString("edit_connection"));
       }
     }
 
@@ -160,16 +163,21 @@ public class AddDbcDataDlg extends Dialog {
         String passwd = passwdText.getText();
         boolean enabled = enabledButton.getSelection();
         if (name.isEmpty()) {
-            MessageDialog.openError(null, ATTENTION_WORD, "Не заполнено обязательное поле: Имя соединения!");
+            MessageDialog.openError(null, resources.getString("attention"),
+                    resources.getString("missing_connection_name"));
             return;
-        } else if (editedDbcData != null && !editedDbcData.getName().equals(name) && dbcDataList.stream().anyMatch(d -> d.getName().equals(name))) {
-            MessageDialog.openError(null, ATTENTION_WORD, "Сервер с таким именем существует!");
+        } else if ((editedDbcData != null && !editedDbcData.getName().equals(name) || editedDbcData == null) 
+                && dbcDataList.stream().anyMatch(d -> d.getName().equals(name))) {
+            MessageDialog.openError(null, resources.getString("attention"),
+                    MessageFormat.format(resources.getString("already_exists"), name));
             return;
         } else if (host.isEmpty() || port.isEmpty()) {
-            MessageDialog.openError(null, ATTENTION_WORD, "Не заполнены обязательные поля: Хост и/или Порт!");
+            MessageDialog.openError(null, resources.getString("attention"),
+                    resources.getString("missing_host_port"));
             return;
         } else if (dbname.isEmpty() || user.isEmpty()) {
-            MessageDialog.openError(null, ATTENTION_WORD, "Не заполнены обязательные поля: Имя БД и/или Имя пользователя!");
+            MessageDialog.openError(null, resources.getString("attention"),
+                    resources.getString("missing_database_user"));
             return;
         }
 
