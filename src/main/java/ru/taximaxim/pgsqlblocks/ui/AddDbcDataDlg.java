@@ -117,7 +117,7 @@ public class AddDbcDataDlg extends Dialog {
       });
       
       Label dbnameLabel = new Label(container, SWT.HORIZONTAL);
-      dbnameLabel.setText(resources.getString("database"));
+      dbnameLabel.setText(resources.getString("database_name"));
       dbnameText = new Text(container, SWT.BORDER);
       dbnameText.setLayoutData(textGd);
       
