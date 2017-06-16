@@ -276,7 +276,7 @@ public class DbcData extends UpdateProvider implements Comparable<DbcData>, Upda
     @Override
     public synchronized void startUpdater() {
         if (updater != null){
-            updater.cancel(true);   
+            updater.cancel(true);
         }
 
         if (settings.isAutoUpdate()) {
