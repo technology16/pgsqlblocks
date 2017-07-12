@@ -48,15 +48,15 @@ public class ProcessTreeBuilder {
     private static final String USENAME = "usename";
     private static final String CLIENT = "client";
     private static final String STATE = "state";
-    private static final String BLOCKEDBY = "blockedBy";
+    private static final String BLOCKED_BY = "blockedBy";
     private static final String RELATION = "relation";
     private static final String LOCKTYPE = "locktype";
-    private static final String SLOWQUERY = "slowQuery";
-    private static final String APPLICATIONNAME = "application_name";
-    private static final String BACKENDSTART = "backend_start";
-    private static final String QUERYSTART = "query_start";
-    private static final String XACTSTART = "xact_start";
-    private static final String STATECHANGE = "state_change";
+    private static final String SLOW_QUERY = "slowQuery";
+    private static final String APPLICATION_NAME = "application_name";
+    private static final String BACKEND_START = "backend_start";
+    private static final String QUERY_START = "query_start";
+    private static final String XACT_START = "xact_start";
+    private static final String STATE_CHANGE = "state_change";
     private static final String QUERYSQL = "query";
     private static final String GRANTED = "granted";
 
@@ -116,7 +116,7 @@ public class ProcessTreeBuilder {
                     tempProcessList.put(pid, currentProcess);
                 }
 
-                int blockedBy = processSet.getInt(BLOCKEDBY);
+                int blockedBy = processSet.getInt(BLOCKED_BY);
                 if (blockedBy != 0) {
                     Block block = new Block(blockedBy,
                                             processSet.getString(LOCKTYPE),
@@ -141,13 +141,13 @@ public class ProcessTreeBuilder {
     private Process createProcessFromResultSet(ResultSet resultSet) throws SQLException {
         int pid = resultSet.getInt(PID);
         String state = resultSet.getString(STATE);
-        String stateChangeDate = dateParse(resultSet.getString(STATECHANGE));
+        String stateChangeDate = dateParse(resultSet.getString(STATE_CHANGE));
         Query query = new Query(resultSet.getString(QUERYSQL),
-                dateParse(resultSet.getString(BACKENDSTART)),
-                dateParse(resultSet.getString(QUERYSTART)),
-                dateParse(resultSet.getString(XACTSTART)),
-                resultSet.getBoolean(SLOWQUERY));
-        QueryCaller caller = new QueryCaller(resultSet.getString(APPLICATIONNAME),
+                dateParse(resultSet.getString(BACKEND_START)),
+                dateParse(resultSet.getString(QUERY_START)),
+                dateParse(resultSet.getString(XACT_START)),
+                resultSet.getBoolean(SLOW_QUERY));
+        QueryCaller caller = new QueryCaller(resultSet.getString(APPLICATION_NAME),
                 resultSet.getString(DATNAME),
                 resultSet.getString(USENAME),
                 resultSet.getString(CLIENT));

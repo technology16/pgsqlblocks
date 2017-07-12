@@ -56,6 +56,7 @@ public class DbcData extends UpdateProvider implements Comparable<DbcData>, Upda
     private String password;
     private String dbname;
     private boolean enabled;
+
     private DbcStatus status = DbcStatus.DISABLED;
     private boolean containBlockedProcess;
     private int backendPid;
@@ -122,27 +123,6 @@ public class DbcData extends UpdateProvider implements Comparable<DbcData>, Upda
     
     public Connection getConnection() {
         return connection;
-    }
-    
-    @Override
-    public String toString() {
-        return String.format("DbcData [name=%1$s, host=%2$s, port=%3$s, user=%4$s, " +
-                        "passwd=********, dbname=%5$s, enabled=%6$s, backend_pid=%7$s]",
-            getName(), getHost(), getPort(), getUser(), getDbname(), isEnabledAutoConnect(), getBackendPid());
-    }
-    
-    @Override
-    public int hashCode() {
-        return name.hashCode();
-    }
-    
-    @Override
-    public boolean equals(Object object) {
-        if ((object == null) || !(object instanceof DbcData)) {
-            return false;
-        }
-        DbcData table = (DbcData) object;
-        return this.getName().equals(table.getName());
     }
 
     public DbcStatus getStatus() {
@@ -295,5 +275,27 @@ public class DbcData extends UpdateProvider implements Comparable<DbcData>, Upda
     
     public void shutdown(){
         executor.shutdownNow();
+    }
+
+
+    @Override
+    public String toString() {
+        return String.format("DbcData [name=%1$s, host=%2$s, port=%3$s, user=%4$s, " +
+                        "passwd=********, dbname=%5$s, enabled=%6$s, backend_pid=%7$s]",
+                getName(), getHost(), getPort(), getUser(), getDbname(), isEnabledAutoConnect(), getBackendPid());
+    }
+
+    @Override
+    public int hashCode() {
+        return name.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        if ((object == null) || !(object instanceof DbcData)) {
+            return false;
+        }
+        DbcData table = (DbcData) object;
+        return this.getName().equals(table.getName());
     }
 }

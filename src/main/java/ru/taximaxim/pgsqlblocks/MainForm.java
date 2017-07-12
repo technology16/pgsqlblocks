@@ -104,13 +104,13 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
     private static SortColumn sortColumn = SortColumn.BLOCKED_COUNT;
     private static SortDirection sortDirection = SortDirection.UP;
     private final Settings settings = Settings.getInstance();
+    private final ResourceBundle resourceBundle = settings.getResourceBundle();
     private FilterProcess filterProcess = FilterProcess.getInstance();
     private final DbcDataListBuilder dbcDataBuilder = DbcDataListBuilder.getInstance(this);
     private ConcurrentMap<String, Image> imagesMap = new ConcurrentHashMap<>();
     private MenuManager serversTableMenuMgr = new MenuManager();
     private Set<SortColumn> visibleColumns = settings.getColumnsList();
     private boolean hasBlocks = false;
-    private final ResourceBundle resourceBundle = settings.getResourceBundle();
 
     private Composite logComposite;
     private SashForm verticalSf;
@@ -408,6 +408,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
         fillTreeViewer(blocksJournalTreeViewer);
         blocksJournalTreeViewer.setContentProvider(new ProcessTreeContentProvider(settings));
         blocksJournalTreeViewer.setLabelProvider(new ProcessTreeLabelProvider());
+
 
         tabItem.setControl(sashForm);
     }

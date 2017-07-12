@@ -34,7 +34,7 @@ import java.text.DateFormat;
 import java.util.Date;
 import java.util.Locale;
 
-public class UIAppender extends WriterAppender{
+public class UIAppender extends WriterAppender {
 
     private static final int TEXT_LIMIT = 20000;
     private Composite parent;
