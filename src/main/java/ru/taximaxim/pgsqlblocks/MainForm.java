@@ -36,6 +36,8 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.*;
+import ru.taximaxim.pgsqlblocks.blocksjournal.BlocksJournalContentProvider;
+import ru.taximaxim.pgsqlblocks.blocksjournal.BlocksJournalLabelProvider;
 import ru.taximaxim.pgsqlblocks.dbcdata.*;
 import ru.taximaxim.pgsqlblocks.process.Process;
 import ru.taximaxim.pgsqlblocks.process.ProcessTreeContentProvider;
@@ -298,6 +300,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
                     }
                     serversToolBarState();
                     caMainTree.setInput(selectedDbcData.getProcess());
+                    blocksJournalTreeViewer.setInput(selectedDbcData.getBlocksJournal().getProcesses());
                     updateUi();
                 }
             }
@@ -406,8 +409,8 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
         blocksJournalTreeViewer.getTree().setLinesVisible(true);
         blocksJournalTreeViewer.getTree().setLayoutData(gridData);
         fillTreeViewer(blocksJournalTreeViewer);
-        blocksJournalTreeViewer.setContentProvider(new ProcessTreeContentProvider(settings));
-        blocksJournalTreeViewer.setLabelProvider(new ProcessTreeLabelProvider());
+        blocksJournalTreeViewer.setContentProvider(new BlocksJournalContentProvider());
+        blocksJournalTreeViewer.setLabelProvider(new BlocksJournalLabelProvider());
 
         tabItem.setControl(sashForm);
     }
@@ -556,6 +559,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
                     dbcDataBuilder.delete(selectedDbcData);
                     selectedDbcData = null;
                     caMainTree.setInput(null);
+                    blocksJournalTreeViewer.setInput(null);
                     updateUi();
                 }
             }
@@ -874,6 +878,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
     private void dbcDataConnect() {
         synchronized (selectedDbcData) {
             caMainTree.setInput(selectedDbcData.getProcess());
+            blocksJournalTreeViewer.setInput(selectedDbcData.getBlocksJournal().getProcesses());
             selectedDbcData.startUpdater();
             connectState();
         }
@@ -927,6 +932,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
                 caServersTable.refresh();
                 serversToolBarState();
                 caMainTree.refresh();
+                blocksJournalTreeViewer.refresh();
                 bhMainTree.refresh();
             }
             trayItem.setImage(getIconImage());
