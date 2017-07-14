@@ -124,7 +124,6 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
             display.dispose();
         } catch (Exception e) {
             LOG.error("An error has occurred:"+ e);
-            e.printStackTrace();
         }
     }
 
@@ -427,17 +426,16 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
         pidColumn.getColumn().setWidth(SortColumn.PID.getColSize());
 
         TreeViewerColumn createDateColumn = new TreeViewerColumn(blocksJournalTreeViewer, SWT.NONE);
-        createDateColumn.getColumn().setText("start_date");
+        createDateColumn.getColumn().setText(resourceBundle.getString("block_start_date"));
         createDateColumn.getColumn().setMoveable(true);
         createDateColumn.getColumn().setWidth(150);
 
         TreeViewerColumn closeDateColumn = new TreeViewerColumn(blocksJournalTreeViewer, SWT.NONE);
-        closeDateColumn.getColumn().setText("change_date");
+        closeDateColumn.getColumn().setText(resourceBundle.getString("block_change_date"));
         closeDateColumn.getColumn().setMoveable(true);
         closeDateColumn.getColumn().setWidth(150);
 
-        List<SortColumn> columns = Arrays.asList(SortColumn.values())
-                .stream()
+        List<SortColumn> columns = Arrays.stream(SortColumn.values())
                 .filter(column -> column != SortColumn.PID)
                 .collect(Collectors.toList());
 
@@ -534,7 +532,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
 
     @Override
     protected ToolBarManager createToolBarManager(int style) {
-        ToolBarManager toolBarManager = new ToolBarManager();
+        ToolBarManager toolBarManager = new ToolBarManager(style);
 
         addDb = new Action(Images.ADD_DATABASE.getDescription(resourceBundle),
                 ImageDescriptor.createFromImage(getImage(Images.ADD_DATABASE))) {
@@ -702,43 +700,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
 
         toolBarManager.add(new Separator());
 
-        /*
-        Action exportBlocks = new Action(Images.EXPORT_BLOCKS.getDescription(resourceBundle),
-                ImageDescriptor.createFromImage(getImage(Images.EXPORT_BLOCKS))) {
-            
-            @Override
-            public void run() {
-                if (dbcDataBuilder.getDbcDataList().stream()
-                        .filter(DbcData::hasBlockedProcess).count() > 0) {
-                    
-                    BlocksHistory.getInstance().save(dbcDataBuilder.getDbcDataList());
-                    LOG.info(resourceBundle.getString("lock_saved"));
-                } else {
-                    LOG.info(resourceBundle.getString("no_locks"));
-                }
-            }
-        };
-
-        toolBarManager.add(exportBlocks);
-        */
-
-        /*Action importBlocks = new Action(Images.IMPORT_BLOCKS.getDescription(resourceBundle)) {
-            @Override
-            public void run() {
-                FileDialog dialog = new FileDialog(getShell());
-                dialog.setFilterPath(PathBuilder.getInstance().getBlockHistoryDir().toString());
-                dialog.setText(resourceBundle.getString("view_lock_history"));
-                dialog.setFilterExtensions(new String[]{"*.xml"});
-
-                List<DbcData> blockedDbsDataList = BlocksHistory.getInstance().open(dialog.open());
-
-            }
-        };
-
-        importBlocks.setImageDescriptor(ImageDescriptor.createFromImage(getImage(Images.IMPORT_BLOCKS)));
-        toolBarManager.add(importBlocks);
         toolBarManager.add(new Separator());
-        */
 
         Action settingsAction = new Action(Images.SETTINGS.getDescription(resourceBundle),
                 ImageDescriptor.createFromImage(getImage(Images.SETTINGS))) {

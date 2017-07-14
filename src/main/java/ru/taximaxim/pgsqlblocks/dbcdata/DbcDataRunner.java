@@ -54,7 +54,6 @@ public class DbcDataRunner implements Runnable {
             LOG.debug(MessageFormat.format(resourceBundle.getString("db_finish_updating"), dbcData.getName()));
         } catch (Exception e) {
             LOG.error(MessageFormat.format(resourceBundle.getString("db_error_on_connect"), e.getMessage()));
-            e.printStackTrace();
         } finally {
             dbcData.setInUpdateState(false);
             dbcData.notifyUpdated();
