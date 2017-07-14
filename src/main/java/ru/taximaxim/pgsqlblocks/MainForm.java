@@ -87,8 +87,6 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
     private TableViewer caServersTable;
     private TreeViewer caMainTree;
     private Composite procComposite;
-    private TableViewer bhServersTable;
-    private TreeViewer bhMainTree;
     private Action addDb;
     private Action deleteDB;
     private Action editDB;
@@ -126,6 +124,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
             display.dispose();
         } catch (Exception e) {
             LOG.error("An error has occurred:"+ e);
+            e.printStackTrace();
         }
     }
 
@@ -222,7 +221,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
         verticalSf.SASH_WIDTH = SASH_WIDTH;
         verticalSf.setBackground(composite.getDisplay().getSystemColor(SWT.COLOR_WIDGET_BACKGROUND));
 
-        createTabPanel(verticalSf, gridData);
+        createTopPanel(verticalSf);
 
         createLogPanel(verticalSf, layout);
 
@@ -249,38 +248,25 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
         appVersionLabel.setText("pgSqlBlocks v." + getAppVersion());
     }
 
-    private void createTabPanel(SashForm sashForm, GridData gridData) {
-        Composite topComposite = new Composite(sashForm, SWT.NONE);
-        GridLayout gridLayout = new GridLayout();
-        gridLayout.marginHeight = ZERO_MARGIN;
-        gridLayout.marginWidth = ZERO_MARGIN;
+    private void createTopPanel(SashForm sashForm) {
+        GridData layoutData = new GridData(SWT.FILL, SWT.FILL, true, true);
+        GridLayout layout = new GridLayout();
+        SashForm topPanelSashForm = new SashForm(sashForm, SWT.HORIZONTAL);
+        topPanelSashForm.setLayout(layout);
+        topPanelSashForm.setLayoutData(layoutData);
 
-        topComposite.setLayout(gridLayout);
+        createDbcListPanel(topPanelSashForm);
+        createTabPanel(topPanelSashForm);
 
-        TabFolder tabPanel = new TabFolder(topComposite, SWT.BORDER);
-        tabPanel.setLayoutData(gridData);
+        topPanelSashForm.setWeights(HORIZONTAL_WEIGHTS);
 
-        createTabs(topComposite, tabPanel, gridLayout, gridData);
     }
 
-    private void createTabs(Composite topComposite, TabFolder tabPanel, GridLayout gridLayout, GridData gridData) {
-        createProcessesTab(topComposite, tabPanel, gridLayout, gridData);
-        createBlocksJournalTab(topComposite, tabPanel, gridLayout, gridData);
-        createBlocksHistoryTab(topComposite, tabPanel, gridLayout, gridData);
-    }
-
-    private void createProcessesTab(Composite topComposite, TabFolder tabPanel, GridLayout gridLayout, GridData gridData) {
-        TabItem processesTabItem = new TabItem(tabPanel, SWT.NONE);
-        processesTabItem.setText(resourceBundle.getString("current_activity"));
-        SashForm processesTabSashForm = new SashForm(tabPanel, SWT.HORIZONTAL);
-        processesTabSashForm.setLayout(gridLayout);
-        processesTabSashForm.setLayoutData(gridData);
-        processesTabSashForm.SASH_WIDTH = SASH_WIDTH;
-        processesTabSashForm.setBackground(topComposite.getDisplay().getSystemColor(SWT.COLOR_WIDGET_BACKGROUND));
-
-        caServersTable = new TableViewer(processesTabSashForm, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL | SWT.FULL_SELECTION);
+    private void createDbcListPanel(SashForm sashForm) {
+        GridData layoutData = new GridData(SWT.FILL, SWT.FILL, true, true);
+        caServersTable = new TableViewer(sashForm, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL | SWT.FULL_SELECTION);
         caServersTable.getTable().setHeaderVisible(true);
-        caServersTable.getTable().setLayoutData(gridData);
+        caServersTable.getTable().setLayoutData(layoutData);
         TableViewerColumn tvColumn = new TableViewerColumn(caServersTable, SWT.NONE);
         tvColumn.getColumn().setText(resourceBundle.getString("database"));
         tvColumn.getColumn().setWidth(200);
@@ -333,8 +319,35 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
 
         serversTableMenuMgr.setRemoveAllWhenShown(true);
         caServersTable.getControl().setMenu(mainMenu);
+    }
 
-        caTreeSf = new SashForm(processesTabSashForm, SWT.VERTICAL);
+    private void createTabPanel(SashForm sashForm) {
+        GridLayout layout = new GridLayout();
+        GridData layoutData = new GridData(SWT.FILL, SWT.FILL, true,true);
+        Composite topComposite = new Composite(sashForm, SWT.NONE);
+        layout.marginHeight = ZERO_MARGIN;
+        layout.marginWidth = ZERO_MARGIN;
+
+        topComposite.setLayout(layout);
+        topComposite.setLayoutData(layoutData);
+
+        TabFolder tabPanel = new TabFolder(topComposite, SWT.BORDER);
+        tabPanel.setLayoutData(layoutData);
+
+        createTabs(tabPanel, layout, layoutData);
+    }
+
+    private void createTabs(TabFolder tabPanel, GridLayout gridLayout, GridData gridData) {
+        createProcessesTab(tabPanel, gridLayout, gridData);
+        createBlocksJournalTab(tabPanel, gridLayout, gridData);
+    }
+
+    private void createProcessesTab(TabFolder tabPanel, GridLayout gridLayout, GridData gridData) {
+
+        TabItem processesTabItem = new TabItem(tabPanel, SWT.NONE);
+        processesTabItem.setText(resourceBundle.getString("current_activity"));
+
+        caTreeSf = new SashForm(tabPanel, SWT.VERTICAL);
         caMainTree = new TreeViewer(caTreeSf, SWT.VIRTUAL | SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL | SWT.FULL_SELECTION);
         caMainTree.getTree().setHeaderVisible(true);
         caMainTree.getTree().setLinesVisible(true);
@@ -391,60 +404,55 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
 
         caTreeSf.setWeights(VERTICAL_WEIGHTS);
 
-        processesTabSashForm.setWeights(HORIZONTAL_WEIGHTS);
-        processesTabItem.setControl(processesTabSashForm);
+        processesTabItem.setControl(caTreeSf);
     }
 
-    private void createBlocksJournalTab(Composite topComposite, TabFolder tabPanel, GridLayout gridLayout, GridData gridData) {
+    private void createBlocksJournalTab(TabFolder tabPanel, GridLayout gridLayout, GridData gridData) {
         TabItem tabItem = new TabItem(tabPanel, SWT.NONE);
-        tabItem.setText("Журнал блокировок");
+        tabItem.setText(resourceBundle.getString("blocks_journal"));
         SashForm sashForm = new SashForm(tabPanel, SWT.HORIZONTAL);
         sashForm.setLayout(gridLayout);
         sashForm.setLayoutData(gridData);
         sashForm.SASH_WIDTH = SASH_WIDTH;
-        sashForm.setBackground(topComposite.getDisplay().getSystemColor(SWT.COLOR_WIDGET_BACKGROUND));
 
         blocksJournalTreeViewer = new TreeViewer(sashForm, SWT.VIRTUAL | SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL | SWT.FULL_SELECTION);
         blocksJournalTreeViewer.getTree().setHeaderVisible(true);
         blocksJournalTreeViewer.getTree().setLinesVisible(true);
         blocksJournalTreeViewer.getTree().setLayoutData(gridData);
-        fillTreeViewer(blocksJournalTreeViewer);
+
+        TreeViewerColumn pidColumn = new TreeViewerColumn(blocksJournalTreeViewer, SWT.NONE);
+        pidColumn.getColumn().setText(SortColumn.PID.getName(resourceBundle));
+        pidColumn.getColumn().setMoveable(true);
+        pidColumn.getColumn().setToolTipText(SortColumn.PID.toString());
+        pidColumn.getColumn().setWidth(SortColumn.PID.getColSize());
+
+        TreeViewerColumn createDateColumn = new TreeViewerColumn(blocksJournalTreeViewer, SWT.NONE);
+        createDateColumn.getColumn().setText("start_date");
+        createDateColumn.getColumn().setMoveable(true);
+        createDateColumn.getColumn().setWidth(150);
+
+        TreeViewerColumn closeDateColumn = new TreeViewerColumn(blocksJournalTreeViewer, SWT.NONE);
+        closeDateColumn.getColumn().setText("change_date");
+        closeDateColumn.getColumn().setMoveable(true);
+        closeDateColumn.getColumn().setWidth(150);
+
+        List<SortColumn> columns = Arrays.asList(SortColumn.values())
+                .stream()
+                .filter(column -> column != SortColumn.PID)
+                .collect(Collectors.toList());
+
+        for (SortColumn column : columns) {
+            TreeViewerColumn treeColumn = new TreeViewerColumn(blocksJournalTreeViewer, SWT.NONE);
+            treeColumn.getColumn().setText(column.getName(resourceBundle));
+            treeColumn.getColumn().setMoveable(true);
+            treeColumn.getColumn().setToolTipText(column.toString());
+            treeColumn.getColumn().setWidth(column.getColSize());
+        }
+
         blocksJournalTreeViewer.setContentProvider(new BlocksJournalContentProvider());
         blocksJournalTreeViewer.setLabelProvider(new BlocksJournalLabelProvider());
 
         tabItem.setControl(sashForm);
-    }
-
-    private void createBlocksHistoryTab(Composite topComposite, TabFolder tabPanel, GridLayout gridLayout, GridData gridData) {
-        TabItem blocksHistoryTi = new TabItem(tabPanel, SWT.NONE);
-        blocksHistoryTi.setText(resourceBundle.getString("lock_history"));
-        SashForm blocksHistorySf = new SashForm(tabPanel, SWT.HORIZONTAL);
-        blocksHistorySf.setLayout(gridLayout);
-        blocksHistorySf.setLayoutData(gridData);
-        blocksHistorySf.SASH_WIDTH = SASH_WIDTH;
-        blocksHistorySf.setBackground(topComposite.getDisplay().getSystemColor(SWT.COLOR_WIDGET_BACKGROUND));
-
-        bhServersTable = new TableViewer(blocksHistorySf, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL | SWT.FULL_SELECTION);
-        bhServersTable.getTable().setHeaderVisible(true);
-        bhServersTable.getTable().setLinesVisible(true);
-        bhServersTable.getTable().setLayoutData(gridData);
-        TableViewerColumn serversTc = new TableViewerColumn(bhServersTable, SWT.NONE);
-        serversTc.getColumn().setText(resourceBundle.getString("database"));
-        serversTc.getColumn().setWidth(200);
-        bhServersTable.setContentProvider(new DbcDataListContentProvider());
-        bhServersTable.setLabelProvider(new DbcDataListLabelProvider());
-
-
-        bhMainTree = new TreeViewer(blocksHistorySf, SWT.VIRTUAL | SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL | SWT.FULL_SELECTION);
-        bhMainTree.getTree().setHeaderVisible(true);
-        bhMainTree.getTree().setLinesVisible(true);
-        bhMainTree.getTree().setLayoutData(gridData);
-        fillTreeViewer(bhMainTree);
-        bhMainTree.setContentProvider(new ProcessTreeContentProvider(settings));
-        bhMainTree.setLabelProvider(new ProcessTreeLabelProvider());
-
-        blocksHistorySf.setWeights(HORIZONTAL_WEIGHTS);
-        blocksHistoryTi.setControl(blocksHistorySf);
     }
 
     private void initTray() {
@@ -694,6 +702,7 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
 
         toolBarManager.add(new Separator());
 
+        /*
         Action exportBlocks = new Action(Images.EXPORT_BLOCKS.getDescription(resourceBundle),
                 ImageDescriptor.createFromImage(getImage(Images.EXPORT_BLOCKS))) {
             
@@ -711,8 +720,9 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
         };
 
         toolBarManager.add(exportBlocks);
+        */
 
-        Action importBlocks = new Action(Images.IMPORT_BLOCKS.getDescription(resourceBundle)) {
+        /*Action importBlocks = new Action(Images.IMPORT_BLOCKS.getDescription(resourceBundle)) {
             @Override
             public void run() {
                 FileDialog dialog = new FileDialog(getShell());
@@ -721,19 +731,14 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
                 dialog.setFilterExtensions(new String[]{"*.xml"});
 
                 List<DbcData> blockedDbsDataList = BlocksHistory.getInstance().open(dialog.open());
-                if (!blockedDbsDataList.isEmpty()) {
-                    bhServersTable.setInput(blockedDbsDataList);
-                    bhMainTree.setInput(blockedDbsDataList.get(0).getProcess());
-                    bhMainTree.refresh();
-                    bhServersTable.refresh();
-                }
+
             }
         };
 
         importBlocks.setImageDescriptor(ImageDescriptor.createFromImage(getImage(Images.IMPORT_BLOCKS)));
         toolBarManager.add(importBlocks);
-
         toolBarManager.add(new Separator());
+        */
 
         Action settingsAction = new Action(Images.SETTINGS.getDescription(resourceBundle),
                 ImageDescriptor.createFromImage(getImage(Images.SETTINGS))) {
@@ -750,7 +755,6 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
                             //.filter(x -> x.getStatus() != DbcStatus.CONNECTION_ERROR) // ok, update those too for now
                             .forEach(DbcData::startUpdater);
                     updateTreeViewer(caMainTree);
-                    updateTreeViewer(bhMainTree);
                 }
             }
         };
@@ -933,7 +937,6 @@ public class MainForm extends ApplicationWindow implements IUpdateListener {
                 serversToolBarState();
                 caMainTree.refresh();
                 blocksJournalTreeViewer.refresh();
-                bhMainTree.refresh();
             }
             trayItem.setImage(getIconImage());
             checkBlocks();

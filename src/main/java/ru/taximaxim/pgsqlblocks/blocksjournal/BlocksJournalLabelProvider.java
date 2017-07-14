@@ -5,8 +5,8 @@ import ru.taximaxim.pgsqlblocks.SortColumn;
 import ru.taximaxim.pgsqlblocks.TreeLabelProvider;
 import ru.taximaxim.pgsqlblocks.process.Block;
 import ru.taximaxim.pgsqlblocks.process.Process;
+import ru.taximaxim.pgsqlblocks.utils.DateUtils;
 
-import java.util.Date;
 import java.util.stream.Collectors;
 
 public class BlocksJournalLabelProvider extends TreeLabelProvider {
@@ -33,19 +33,26 @@ public class BlocksJournalLabelProvider extends TreeLabelProvider {
             BlocksJournalProcess journalProcess = (BlocksJournalProcess) element;
             switch (columnIndex) {
                 case 0:
-                    return journalProcess.getDbcName();
+                    return String.valueOf(journalProcess.getProcess().getPid());
                 case 1:
-                    return journalProcess.getCreateDate().toString();
+                    return DateUtils.dateToString(journalProcess.getCreateDate());
                 case 2:
-                    Date closeDate = journalProcess.getCloseDate();
-                    return closeDate != null ? closeDate.toString() : "";
+                    return DateUtils.dateToString(journalProcess.getCloseDate());
             }
             process = journalProcess.getProcess();
         } else {
             process = (Process) element;
+            switch (columnIndex) {
+                case 0:
+                    return String.valueOf(process.getPid());
+                case 1:
+                    return "";
+                case 2:
+                    return "";
+            }
         }
+        columnIndex = columnIndex - 2;
         switch (SortColumn.values()[columnIndex]) {
-            case PID: return String.valueOf(process.getPid());
             case BLOCKED_COUNT: return String.valueOf(process.getChildren().size());
             case APPLICATION_NAME: return process.getCaller().getApplicationName();
             case DATNAME: return process.getCaller().getDatname();
