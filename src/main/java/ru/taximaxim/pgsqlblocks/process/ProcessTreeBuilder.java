@@ -102,28 +102,15 @@ public class ProcessTreeBuilder {
                 PreparedStatement statement = dbcData.getConnection().prepareStatement(getQuery(settings.getShowIdle()));
                 ResultSet processSet = statement.executeQuery()
         ) {
+            int backendPid = dbcData.getBackendPid();
             while (processSet.next()) {
                 int pid = processSet.getInt(PID);
-                if (!settings.getShowBackendPid() && dbcData.getBackendPid() == pid) {
+                if (backendPid == pid && !settings.getShowBackendPid()) {
                     continue;
                 }
                 Process currentProcess = tempProcessList.get(pid);
                 if (currentProcess == null) {
-                    Query query = new Query(processSet.getString(QUERYSQL),
-                            dateParse(processSet.getString(BACKENDSTART)),
-                            dateParse(processSet.getString(QUERYSTART)),
-                            dateParse(processSet.getString(XACTSTART)),
-                            processSet.getBoolean(SLOWQUERY));
-                    QueryCaller caller = new QueryCaller(processSet.getString(APPLICATIONNAME),
-                            processSet.getString(DATNAME),
-                            processSet.getString(USENAME),
-                            processSet.getString(CLIENT));
-                    currentProcess = new Process(
-                            pid,
-                            caller,
-                            query,
-                            processSet.getString(STATE),
-                            dateParse(processSet.getString(STATECHANGE)));
+                    currentProcess = createProcessFromResultSet(processSet);
                     tempProcessList.put(pid, currentProcess);
                 }
 
@@ -147,31 +134,47 @@ public class ProcessTreeBuilder {
         return tempProcessList.values();
     }
 
+    private Process createProcessFromResultSet(ResultSet resultSet) throws SQLException {
+        int pid = resultSet.getInt(PID);
+        String state = resultSet.getString(STATE);
+        String stateChangeDate = dateParse(resultSet.getString(STATECHANGE));
+        Query query = new Query(resultSet.getString(QUERYSQL),
+                dateParse(resultSet.getString(BACKENDSTART)),
+                dateParse(resultSet.getString(QUERYSTART)),
+                dateParse(resultSet.getString(XACTSTART)),
+                resultSet.getBoolean(SLOWQUERY));
+        QueryCaller caller = new QueryCaller(resultSet.getString(APPLICATIONNAME),
+                resultSet.getString(DATNAME),
+                resultSet.getString(USENAME),
+                resultSet.getString(CLIENT));
+        return new Process(pid, caller, query, state, stateChangeDate);
+    }
+
     private void proceedBlocks(Map<Integer, Process> tempProcessList, Map<Integer, Set<Block>> tempBlocksList) {
-        for (Map.Entry<Integer, Set<Block>> e : tempBlocksList.entrySet()) {
-            int blockedPid = e.getKey();
-
-            e.getValue().stream().filter(Block::isGranted).forEach(block -> {
-                int blockingPid = block.getBlockingPid();
-                if (tempBlocksList.containsKey(blockingPid)) {
-                    Set<Block> blockingIsBlockedBy = tempBlocksList.get(blockingPid);
-
-                    Optional<Block> cycleBlocks = blockingIsBlockedBy.stream()
-                            .filter(b -> b.getBlockingPid() == blockedPid)
-                            .filter(b -> b.getRelation().equals(block.getRelation()))
-                            .filter(b -> b.getLocktype().equals(block.getLocktype()))
-                            .filter(b -> b.isGranted())
-                            .findFirst();
-
-                    if (cycleBlocks.isPresent()) {
-                        proceedBlocksWithCycle(tempProcessList, blockedPid, blockingPid, block, cycleBlocks.get());
-                    } else {
-                        tempProcessList.get(blockedPid).addBlock(block);
-                    }
-                } else {
-                    tempProcessList.get(blockedPid).addBlock(block);
-                }
-            });
+        for (Map.Entry<Integer, Set<Block>> entry : tempBlocksList.entrySet()) {
+            int blockedPid = entry.getKey();
+            Set<Block> blocks = entry.getValue();
+            blocks.stream()
+                    .filter(Block::isGranted)
+                    .forEach(block -> {
+                        int blockingPid = block.getBlockingPid();
+                        if (tempBlocksList.containsKey(blockingPid)) {
+                            Set<Block> blockingIsBlockedBy = tempBlocksList.get(blockingPid);
+                            Optional<Block> cycleBlock = blockingIsBlockedBy.stream()
+                                    .filter(b -> b.getBlockingPid() == blockedPid)
+                                    .filter(b -> b.getRelation().equals(block.getRelation()))
+                                    .filter(b -> b.getLocktype().equals(block.getLocktype()))
+                                    .filter(b -> b.isGranted())
+                                    .findFirst();
+                            if (cycleBlock.isPresent()) {
+                                proceedBlocksWithCycle(tempProcessList, blockedPid, blockingPid, block, cycleBlock.get());
+                            } else {
+                                tempProcessList.get(blockedPid).addBlock(block);
+                            }
+                        } else {
+                            tempProcessList.get(blockedPid).addBlock(block);
+                        }
+                    });
         }
     }
 
@@ -210,6 +213,10 @@ public class ProcessTreeBuilder {
                 }
             });
         }
+    }
+
+    private Process getProcessByPid(Collection<Process> processList, int pid) {
+        return processList.stream().filter(process -> process.getPid() == pid).findFirst().orElse(null);
     }
 
     private int stringCompare(String s1, String s2, SortDirection sortDirection) {
@@ -297,9 +304,6 @@ public class ProcessTreeBuilder {
         return sdfp.format(date);
     }
 
-    private Process getProcessByPid(Collection<Process> processList, int pid) {
-        return processList.stream().filter(process -> process.getPid() == pid).findFirst().orElse(null);
-    }
 
     private String getQuery(boolean showIdle) {
         if (showIdle) {

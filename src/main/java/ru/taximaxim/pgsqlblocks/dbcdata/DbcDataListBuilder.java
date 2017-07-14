@@ -60,11 +60,7 @@ public final class DbcDataListBuilder {
 
     public static DbcDataListBuilder getInstance(MainForm mainForm) {
         if(instance == null) {
-            synchronized(DbcDataListBuilder.class) {
-                if(instance == null) {
-                    instance = new DbcDataListBuilder(mainForm);
-                }
-            }
+            instance = new DbcDataListBuilder(mainForm);
         }
         return instance;
     }
