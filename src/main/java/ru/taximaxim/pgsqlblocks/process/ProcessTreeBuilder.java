@@ -44,24 +44,24 @@ public class ProcessTreeBuilder {
     private static final Logger LOG = Logger.getLogger(ProcessTreeBuilder.class);
 
     private static final String PID = "pid";
-    private static final String DATNAME = "datname";
-    private static final String USENAME = "usename";
+    private static final String DAT_NAME = "datname";
+    private static final String USE_NAME = "usename";
     private static final String CLIENT = "client";
     private static final String STATE = "state";
     private static final String BLOCKED_BY = "blockedBy";
     private static final String RELATION = "relation";
-    private static final String LOCKTYPE = "locktype";
+    private static final String LOCK_TYPE = "locktype";
     private static final String SLOW_QUERY = "slowQuery";
     private static final String APPLICATION_NAME = "application_name";
     private static final String BACKEND_START = "backend_start";
     private static final String QUERY_START = "query_start";
     private static final String XACT_START = "xact_start";
     private static final String STATE_CHANGE = "state_change";
-    private static final String QUERYSQL = "query";
+    private static final String QUERY_SQL = "query";
     private static final String GRANTED = "granted";
 
-    private static final String QUERYFILENAME = "query.sql";
-    private static final String QUERYWITHIDLEFILENAME = "query_with_idle.sql";
+    private static final String QUERY_FILE_NAME = "query.sql";
+    private static final String QUERY_WITH_IDLE_FILE_NAME = "query_with_idle.sql";
 
     private static final String GRANTED_FLAG = "t";
 
@@ -74,8 +74,8 @@ public class ProcessTreeBuilder {
 
     public ProcessTreeBuilder(DbcData dbcData) {
         this.dbcData = dbcData;
-        queryWithIdle = loadQuery(QUERYWITHIDLEFILENAME);
-        queryWithoutIdle = loadQuery(QUERYFILENAME);
+        queryWithIdle = loadQuery(QUERY_WITH_IDLE_FILE_NAME);
+        queryWithoutIdle = loadQuery(QUERY_FILE_NAME);
     }
 
     public Process buildProcessTree() {
@@ -119,7 +119,7 @@ public class ProcessTreeBuilder {
                 int blockedBy = processSet.getInt(BLOCKED_BY);
                 if (blockedBy != 0) {
                     Block block = new Block(blockedBy,
-                                            processSet.getString(LOCKTYPE),
+                                            processSet.getString(LOCK_TYPE),
                                             processSet.getString(RELATION),
                                             GRANTED_FLAG.equals(processSet.getString(GRANTED)));
                     tempBlocksList.computeIfAbsent(currentProcess.getPid(), k -> new HashSet<>()).add(block);
@@ -142,14 +142,14 @@ public class ProcessTreeBuilder {
         int pid = resultSet.getInt(PID);
         String state = resultSet.getString(STATE);
         String stateChangeDate = dateParse(resultSet.getString(STATE_CHANGE));
-        Query query = new Query(resultSet.getString(QUERYSQL),
+        Query query = new Query(resultSet.getString(QUERY_SQL),
                 dateParse(resultSet.getString(BACKEND_START)),
                 dateParse(resultSet.getString(QUERY_START)),
                 dateParse(resultSet.getString(XACT_START)),
                 resultSet.getBoolean(SLOW_QUERY));
         QueryCaller caller = new QueryCaller(resultSet.getString(APPLICATION_NAME),
-                resultSet.getString(DATNAME),
-                resultSet.getString(USENAME),
+                resultSet.getString(DAT_NAME),
+                resultSet.getString(USE_NAME),
                 resultSet.getString(CLIENT));
         return new Process(pid, caller, query, state, stateChangeDate);
     }
@@ -238,7 +238,7 @@ public class ProcessTreeBuilder {
                 getSortDirectionByColumn(sortColumn, sortDirection, process1, process2));
     }
 
-    /* TODO: need to refactor LOCKTYPE and RELATION cases
+    /* TODO: need to refactor LOCK_TYPE and RELATION cases
     For example, by CollectionUtils.isEqualCollection(java.util.Collection a, java.util.Collection b) maybe */
     private int getSortDirectionByColumn(SortColumn sortColumn, SortDirection sortDirection,
                                            Process process1, Process process2) {
@@ -323,7 +323,7 @@ public class ProcessTreeBuilder {
         }
     }
 
-    private String loadQuery(String queryFile){
+    private String loadQuery(String queryFile) {
         try (InputStream input = ClassLoader.getSystemResourceAsStream(queryFile);
              BufferedReader reader = new BufferedReader(new InputStreamReader(input, "UTF-8"))) {
             StringBuilder out = new StringBuilder();

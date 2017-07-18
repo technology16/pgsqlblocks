@@ -8,12 +8,14 @@ import ru.taximaxim.pgsqlblocks.common.models.DBModel;
 import ru.taximaxim.pgsqlblocks.common.ui.DBModelsView;
 import ru.taximaxim.pgsqlblocks.common.ui.DBModelsViewListener;
 import ru.taximaxim.pgsqlblocks.common.ui.DBProcessesView;
+import ru.taximaxim.pgsqlblocks.common.ui.DBProcessesViewDataSource;
 import ru.taximaxim.pgsqlblocks.modules.db.controller.DBController;
 import ru.taximaxim.pgsqlblocks.modules.db.controller.DBControllerListener;
 import ru.taximaxim.pgsqlblocks.modules.db.model.DBStatus;
 import ru.taximaxim.pgsqlblocks.modules.processes.view.ProcessesView;
 import ru.taximaxim.pgsqlblocks.utils.Settings;
 
+import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -47,21 +49,25 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
 
     public void load() {
         dbModelsView = new DBModelsView(view.getLeftPanelComposite(), SWT.NONE);
+        dbModelsView.getTreeViewer().setInput(dbControllers);
         dbModelsView.addListener(this);
         dbProcessesView = new DBProcessesView(view.getRightPanelComposite(), SWT.NONE);
-        getDatabases();
+        dbProcessesView.getTreeViewer().setDataSource(new DBProcessesViewDataSource(resourceBundle));
+
+        loadDatabases();
+        DriverManager.setLoginTimeout(settings.getLoginTimeout());
     }
 
-    private void getDatabases() {
+    private void loadDatabases() {
         List<DBModel> dbModels = dbModelsProvider.get();
         dbModels.forEach(this::addDatabase);
+        dbModelsView.getTreeViewer().refresh();
     }
 
     private void addDatabase(DBModel dbModel) {
         DBController controller = new DBController(dbModel);
         controller.addListener(this);
         dbControllers.add(controller);
-        dbModelsView.getTreeViewer().add(controller);
     }
 
     private void saveDatabases() {
@@ -76,9 +82,7 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
 
     @Override
     public void dbControllerDidConnect(DBController controller) {
-        if (settings.isAutoUpdate()) {
-            // TODO запускаем обновление запросов бд
-        }
+        controller.startProcessesUpdater(settings.getUpdatePeriod());
     }
 
     @Override
@@ -98,7 +102,7 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
 
     @Override
     public void processesUpdated(DBController controller) {
-
+        System.out.println("processes updated + " + controller.getProcesses().size());
     }
 
     @Override
@@ -114,4 +118,9 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
             controller.disconnect();
         }
     }
+
+    public void close() {
+        dbControllers.forEach(DBController::shutdown);
+    }
+
 }

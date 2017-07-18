@@ -1,6 +1,7 @@
 package ru.taximaxim.pgsqlblocks.modules.application.view;
 
 import org.eclipse.jface.action.ToolBarManager;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.window.ApplicationWindow;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
@@ -8,8 +9,10 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.*;
+import ru.taximaxim.pgsqlblocks.utils.Settings;
 
 import java.text.MessageFormat;
+import java.util.ResourceBundle;
 
 public class ApplicationView extends ApplicationWindow {
 
@@ -26,6 +29,9 @@ public class ApplicationView extends ApplicationWindow {
 
     private static final String APP_NAME = "pgSqlBlocks";
     private static final int[] ICON_SIZES = { 32, 48, 256/*, 512*/ };
+
+    private Settings settings = Settings.getInstance();
+    private ResourceBundle resourceBundle = settings.getResourceBundle();
 
     public ApplicationView() {
         super(null);
@@ -140,5 +146,22 @@ public class ApplicationView extends ApplicationWindow {
 
     public void setListener(ApplicationViewListener listener) {
         viewListener = listener;
+    }
+
+    @Override
+    protected void handleShellCloseEvent() {
+        super.handleShellCloseEvent();
+    }
+
+    @Override
+    protected boolean canHandleShellCloseEvent() {
+        if (settings.isConfirmExit() && !MessageDialog.openQuestion(getShell(), resourceBundle.getString("confirm_action"),
+                resourceBundle.getString("exit_confirm_message"))) {
+            return false;
+        }
+        if (viewListener != null) {
+            viewListener.applicationViewWillDisappear();
+        }
+        return super.canHandleShellCloseEvent();
     }
 }

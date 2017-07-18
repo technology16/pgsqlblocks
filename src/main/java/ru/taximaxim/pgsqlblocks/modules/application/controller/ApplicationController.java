@@ -35,6 +35,11 @@ public class ApplicationController implements ApplicationViewListener {
         addProcessesModule();
     }
 
+    @Override
+    public void applicationViewWillDisappear() {
+        processesController.close();
+    }
+
     private void addProcessesModule() {
         processesController = new ProcessesController(new DBModelsLocalProvider());
         TabItem processesTabItem = new TabItem(applicationView.getTabFolder(), SWT.NONE);
