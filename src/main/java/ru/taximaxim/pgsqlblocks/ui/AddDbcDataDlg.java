@@ -166,16 +166,19 @@ public class AddDbcDataDlg extends Dialog {
             MessageDialog.openError(null, resources.getString("attention"),
                     resources.getString("missing_connection_name"));
             return;
-        } else if ((editedDbcData != null && !editedDbcData.getName().equals(name) || editedDbcData == null) 
+        }
+        if ((editedDbcData != null && !editedDbcData.getName().equals(name) || editedDbcData == null)
                 && dbcDataList.stream().anyMatch(d -> d.getName().equals(name))) {
             MessageDialog.openError(null, resources.getString("attention"),
                     MessageFormat.format(resources.getString("already_exists"), name));
             return;
-        } else if (host.isEmpty() || port.isEmpty()) {
+        }
+        if (host.isEmpty() || port.isEmpty()) {
             MessageDialog.openError(null, resources.getString("attention"),
                     resources.getString("missing_host_port"));
             return;
-        } else if (dbname.isEmpty() || user.isEmpty()) {
+        }
+        if (dbname.isEmpty() || user.isEmpty()) {
             MessageDialog.openError(null, resources.getString("attention"),
                     resources.getString("missing_database_user"));
             return;

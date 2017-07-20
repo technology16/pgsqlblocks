@@ -10,8 +10,8 @@ import java.util.List;
 
 public class DBModelsListSerializer {
 
-    private static String ROOT_ELEMENT_TAG_NAME = "servers";
-    private static String ELEMENTS_ROOT_ELEMENT_TAG_NAME = "server";
+    private final static String ROOT_ELEMENT_TAG_NAME = "servers";
+    private final static String ELEMENTS_ROOT_ELEMENT_TAG_NAME = "server";
 
     public List<DBModel> deserialize(Document document) {
         List<DBModel> dbModels = new ArrayList<>();
@@ -35,6 +35,7 @@ public class DBModelsListSerializer {
             Element dbModelElement = modelSerializer.serialize(document, dbModel);
             rootElement.appendChild(dbModelElement);
         }
+        document.appendChild(rootElement);
         return document;
     }
 

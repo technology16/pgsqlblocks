@@ -30,6 +30,9 @@ import java.util.stream.Collectors;
  * Класс для работы с настройка пользователя
  */
 public final class Settings {
+
+    private final List<SettingsListener> listeners = new ArrayList<>();
+
     public static final String[] SUPPORTED_LANGUAGES = {"ru", "en"};
     private static final Logger LOG = Logger.getLogger(Settings.class);
 
@@ -117,6 +120,14 @@ public final class Settings {
         return instance;
     }
 
+    public void addListener(SettingsListener listener) {
+        listeners.add(listener);
+    }
+
+    public void removeListener(SettingsListener listener) {
+        listeners.remove(listener);
+    }
+
     public void setLanguage(String language) {
         saveProperties(CURRENT_LOCALE, language);
     }
@@ -126,8 +137,11 @@ public final class Settings {
      * @param updatePeriod
      */
     public void setUpdatePeriod(int updatePeriod) {
-        this.updatePeriod = updatePeriod;
-        saveProperties(UPDATE_PERIOD, Integer.toString(updatePeriod));
+        if (this.updatePeriod != updatePeriod) {
+            this.updatePeriod = updatePeriod;
+            saveProperties(UPDATE_PERIOD, Integer.toString(updatePeriod));
+            listeners.forEach(listener -> listener.settingsUpdatePeriodChanged(this.updatePeriod));
+        }
     }
 
     /**
@@ -173,8 +187,11 @@ public final class Settings {
      * @param autoUpdate the autoUpdate to set
      */
     public void setAutoUpdate(boolean autoUpdate) {
-        this.autoUpdate = autoUpdate;
-        saveProperties(AUTO_UPDATE, Boolean.toString(autoUpdate));
+        if (this.autoUpdate != autoUpdate) {
+            this.autoUpdate = autoUpdate;
+            saveProperties(AUTO_UPDATE, Boolean.toString(autoUpdate));
+            listeners.forEach(listener -> listener.settingsAutoUpdateChanged(this.autoUpdate));
+        }
     }
 
     /**
@@ -199,8 +216,11 @@ public final class Settings {
      * @param showIdle the showIdle to set
      */
     public void setShowIdle(boolean showIdle) {
-        this.showIdle = showIdle;
-        saveProperties(SHOW_IDLE, Boolean.toString(showIdle));
+        if (this.showIdle != showIdle) {
+            this.showIdle = showIdle;
+            saveProperties(SHOW_IDLE, Boolean.toString(showIdle));
+            listeners.forEach(listener -> listener.settingsShowIdleChanged(this.showIdle));
+        }
     }
 
     /**
@@ -216,8 +236,11 @@ public final class Settings {
      * @param showBackendPid the showIdle to set
      */
     public void setShowBackendPid(boolean showBackendPid) {
-        this.showBackendPid = showBackendPid;
-        saveProperties(SHOW_BACKEND_PID, Boolean.toString(showBackendPid));
+        if (this.showBackendPid != showBackendPid) {
+            this.showBackendPid = showBackendPid;
+            saveProperties(SHOW_BACKEND_PID, Boolean.toString(showBackendPid));
+            listeners.forEach(listener -> listener.settingsShowBackendPidChanged(this.showBackendPid));
+        }
     }
 
     /**

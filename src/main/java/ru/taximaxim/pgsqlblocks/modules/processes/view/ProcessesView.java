@@ -6,22 +6,31 @@ import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.ToolBar;
 
 public class ProcessesView extends Composite {
 
     private Composite leftPanelComposite;
     private Composite rightPanelComposite;
 
+    private ToolBar toolBar;
+
     public ProcessesView(Composite parentComposite, int style) {
         super(parentComposite, style);
         GridLayout layout = new GridLayout();
+        layout.marginBottom = 0;
         GridData layoutData = new GridData(SWT.FILL, SWT.FILL, true, true);
         setLayout(layout);
         setLayoutData(layoutData);
         createContent();
     }
 
+    public ToolBar getToolBar() {
+        return toolBar;
+    }
+
     private void createContent() {
+        toolBar = new ToolBar(this, SWT.HORIZONTAL);
         GridData layoutData = new GridData(SWT.FILL, SWT.FILL, true, true);
         GridLayout layout = new GridLayout();
         layout.marginWidth = 0;

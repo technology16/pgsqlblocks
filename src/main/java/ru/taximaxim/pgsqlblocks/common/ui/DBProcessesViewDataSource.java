@@ -5,6 +5,7 @@ import org.eclipse.swt.graphics.Image;
 import ru.taximaxim.pgsqlblocks.common.models.DBBlock;
 import ru.taximaxim.pgsqlblocks.common.models.DBProcess;
 
+import java.util.List;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
@@ -13,6 +14,11 @@ public class DBProcessesViewDataSource extends TMTreeViewerDataSource {
     private final ResourceBundle resourceBundle;
 
     public DBProcessesViewDataSource(ResourceBundle resourceBundle) {
+        this.resourceBundle = resourceBundle;
+    }
+
+    public DBProcessesViewDataSource(ResourceBundle resourceBundle, TMTreeViewerDataSourceFilter dataFilter) {
+        super(dataFilter);
         this.resourceBundle = resourceBundle;
     }
 
@@ -137,8 +143,9 @@ public class DBProcessesViewDataSource extends TMTreeViewerDataSource {
 
     @Override
     public Image getColumnImage(Object element, int columnIndex) {
+        DBProcess process = (DBProcess)element;
         if (columnIndex == 0) {
-
+            return getImage(process.getStatus().getStatusImage().getImageAddr());
         }
         return null;
     }
@@ -195,12 +202,22 @@ public class DBProcessesViewDataSource extends TMTreeViewerDataSource {
 
     @Override
     public Object[] getElements(Object inputElement) {
-        return new Object[0];
+        List<DBProcess> input = (List<DBProcess>) inputElement;
+        if (dataFilter == null) {
+            return input.toArray();
+        } else {
+            return filterInput(input).toArray();
+        }
+    }
+
+    private List<DBProcess> filterInput(List<DBProcess> input) {
+        return input.stream().filter(process -> dataFilter.filter(process)).collect(Collectors.toList());
     }
 
     @Override
     public Object[] getChildren(Object parentElement) {
-        return new Object[0];
+        DBProcess process = (DBProcess)parentElement;
+        return process.getChildren().toArray();
     }
 
     @Override
@@ -210,7 +227,8 @@ public class DBProcessesViewDataSource extends TMTreeViewerDataSource {
 
     @Override
     public boolean hasChildren(Object element) {
-        return false;
+        DBProcess process = (DBProcess)element;
+        return process.hasChildren();
     }
 
 }

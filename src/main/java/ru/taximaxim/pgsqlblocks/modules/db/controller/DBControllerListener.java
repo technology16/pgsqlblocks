@@ -14,8 +14,14 @@ public interface DBControllerListener {
 
     void dbControllerConnectionFailed(DBController controller, SQLException exception);
 
+    void dbControllerDisconnectFailed(DBController controller, SQLException exception);
+
     void dbControllerDidDisconnect(DBController controller);
 
-    void processesUpdated(DBController controller);
+    void dbControllerWillUpdateProcesses(DBController controller);
+
+    void dbControllerProcessesUpdated(DBController controller);
+
+    void dbControllerBlockedChanged(DBController controller);
 
 }

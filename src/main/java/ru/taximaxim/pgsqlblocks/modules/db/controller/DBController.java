@@ -6,7 +6,6 @@ import ru.taximaxim.pgpass.PgPassException;
 import ru.taximaxim.pgsqlblocks.common.DBQueries;
 import ru.taximaxim.pgsqlblocks.common.models.*;
 import ru.taximaxim.pgsqlblocks.modules.db.model.DBStatus;
-import ru.taximaxim.pgsqlblocks.process.ProcessStatus;
 import ru.taximaxim.pgsqlblocks.utils.Settings;
 
 import java.sql.*;
@@ -16,14 +15,13 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class DBController {
 
     private DBModel model;
 
-    private List<DBProcess> allProcesses = new ArrayList<>();
-    private List<DBProcess> processes = new ArrayList<>();
+    private final List<DBProcess> processes = new ArrayList<>();
 
     private static final Logger LOG = Logger.getLogger(DBController.class);
 
@@ -36,6 +34,8 @@ public class DBController {
     private ResourceBundle resourceBundle = settings.getResourceBundle();
 
     private DBStatus status = DBStatus.DISABLED;
+
+    private boolean blocked = false;
 
     private int backendPid;
 
@@ -52,8 +52,12 @@ public class DBController {
         return model.clone();
     }
 
+    public void setModel(DBModel model) {
+        this.model = model;
+    }
+
     public String getConnectionUrl() {
-        return String.format("jdbc:postgresql://%1$s:%2$s/%3$s", model.getHost(), model.getPort(), model.getDatabaseName());
+        return String.format("jdbc:postgresql://%1$s:%2$s/%3$s?ApplicationName=pgSqlBlocks", model.getHost(), model.getPort(), model.getDatabaseName());
     }
 
     public boolean isEnabledAutoConnection() {
@@ -89,13 +93,15 @@ public class DBController {
 
     public void disconnect() {
         if (isConnected()) {
+            setBackendPid(0);
             stopProcessesUpdater();
             try {
                 connection.close();
                 setStatus(DBStatus.DISABLED);
                 listeners.forEach(listener -> listener.dbControllerDidDisconnect(this));
-            } catch (SQLException e) {
-                e.printStackTrace();
+            } catch (SQLException exception) {
+                setStatus(DBStatus.CONNECTION_ERROR);
+                listeners.forEach(listener -> listener.dbControllerDisconnectFailed(this, exception));
             }
         }
     }
@@ -118,6 +124,17 @@ public class DBController {
         this.backendPid = backendPid;
     }
 
+    private void setBlocked(boolean blocked) {
+        if (this.blocked != blocked) {
+            this.blocked = blocked;
+            listeners.forEach(listener -> listener.dbControllerBlockedChanged(this));
+        }
+    }
+
+    public boolean isBlocked() {
+        return blocked;
+    }
+
     public boolean isConnected() {
         try {
             return !(connection == null || connection.isClosed());
@@ -128,13 +145,7 @@ public class DBController {
     }
 
     public List<DBProcess> getProcesses() {
-        processes.clear();
-        processes.addAll(allProcesses);
         return processes;
-    }
-
-    public List<DBProcess> getAllProcesses() {
-        return allProcesses;
     }
 
     public DBStatus getStatus() {
@@ -158,6 +169,9 @@ public class DBController {
     }
 
     public void updateProcesses() {
+        if (!isConnected()) {
+            connect();
+        }
         executor.execute(this::loadProcesses);
     }
 
@@ -168,6 +182,7 @@ public class DBController {
 
     private void loadProcesses() {
         try {
+            listeners.forEach(listener -> listener.dbControllerWillUpdateProcesses(this));
             try(
                 PreparedStatement preparedStatement = connection.prepareStatement(getProcessesQuery());
                 ResultSet resultSet = preparedStatement.executeQuery()
@@ -187,7 +202,7 @@ public class DBController {
                 }
                 proceedBlocks(tmpProcesses, tmpBlocks);
                 proceedProcesses(tmpProcesses);
-                processesLoaded(tmpProcesses.values());
+                processesLoaded(tmpProcesses.values().stream().filter(process -> !process.hasParent()).collect(Collectors.toList()));
             }
         } catch (SQLException e) {
             LOG.error(String.format("Ошибка при получении процессов для %s", model.getName()), e);
@@ -252,10 +267,12 @@ public class DBController {
         }
     }
 
-    private void processesLoaded(Collection<DBProcess> loadedProcesses) {
-        allProcesses.clear();
-        allProcesses.addAll(loadedProcesses);
-        listeners.forEach(listener -> listener.processesUpdated(this));
+    private void processesLoaded(List<DBProcess> loadedProcesses) {
+        processes.clear();
+        processes.addAll(loadedProcesses);
+        listeners.forEach(listener -> listener.dbControllerProcessesUpdated(this));
+        boolean hasBlockedProcesses = processes.stream().anyMatch(DBProcess::hasChildren);
+        setBlocked(hasBlockedProcesses);
     }
 
     private String getProcessesQuery() {

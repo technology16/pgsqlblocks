@@ -6,6 +6,9 @@ import ru.taximaxim.pgsqlblocks.common.models.DBModel;
 import ru.taximaxim.pgsqlblocks.utils.PathBuilder;
 import ru.taximaxim.pgsqlblocks.utils.XmlDocumentWorker;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.util.Collections;
 import java.util.List;
@@ -15,22 +18,27 @@ public class DBModelsLocalProvider implements DBModelsProvider {
     private XmlDocumentWorker documentWorker = new XmlDocumentWorker();
     private File file = PathBuilder.getInstance().getServersPath().toFile();
 
+    private DBModelsListSerializer serializer = new DBModelsListSerializer();
+
     @Override
     public List<DBModel> get() {
         Document document = documentWorker.open(file);
         if (document == null) {
             return Collections.emptyList();
         }
-        DBModelsListSerializer serializer = new DBModelsListSerializer();
         return serializer.deserialize(document);
     }
 
     @Override
     public void save(List<DBModel> models) {
-        DBModelsListSerializer serializer = new DBModelsListSerializer();
-        Document document = documentWorker.open(file);
-        serializer.serialize(document, models);
-        documentWorker.save(document, file);
+        DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
+        try {
+            Document document = documentBuilderFactory.newDocumentBuilder().newDocument();
+            serializer.serialize(document, models);
+            documentWorker.save(document, file);
+        } catch (ParserConfigurationException e) {
+
+        }
     }
 
 

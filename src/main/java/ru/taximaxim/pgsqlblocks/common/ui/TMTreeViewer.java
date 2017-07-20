@@ -10,7 +10,6 @@ public class TMTreeViewer extends TreeViewer {
 
     private TMTreeViewerDataSource dataSource;
 
-
     public TMTreeViewer(Composite parent) {
         super(parent);
     }
@@ -34,9 +33,9 @@ public class TMTreeViewer extends TreeViewer {
             throw new IllegalStateException("TMTreeViewer already contains data source");
         }
         this.dataSource = dataSource;
-        setLabelProvider(dataSource);
-        setContentProvider(dataSource);
         createColumns();
+        setLabelProvider(this.dataSource);
+        setContentProvider(this.dataSource);
     }
 
     private void createColumns() {

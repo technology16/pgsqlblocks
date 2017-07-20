@@ -80,6 +80,11 @@ public class ApplicationView extends ApplicationWindow {
     }
 
     @Override
+    public ToolBarManager getToolBarManager() {
+        return toolBarManager;
+    }
+
+    @Override
     protected Control createContents(Composite mainComposite) {
         this.composite = mainComposite;
 
@@ -126,6 +131,7 @@ public class ApplicationView extends ApplicationWindow {
 
     private void createBottomPanel(SashForm sashForm) {
         GridLayout layout = new GridLayout();
+        layout.marginTop = 0;
         GridData layoutData = new GridData(SWT.FILL, SWT.FILL, true, true);
         bottomPanelComposite = new Composite(sashForm, SWT.NONE);
         bottomPanelComposite.setLayout(layout);

@@ -5,6 +5,7 @@ import org.eclipse.swt.widgets.TabItem;
 import ru.taximaxim.pgsqlblocks.common.DBModelsLocalProvider;
 import ru.taximaxim.pgsqlblocks.modules.application.view.ApplicationView;
 import ru.taximaxim.pgsqlblocks.modules.application.view.ApplicationViewListener;
+import ru.taximaxim.pgsqlblocks.modules.logs.view.LogsView;
 import ru.taximaxim.pgsqlblocks.modules.processes.controller.ProcessesController;
 import ru.taximaxim.pgsqlblocks.modules.processes.view.ProcessesView;
 import ru.taximaxim.pgsqlblocks.utils.Settings;
@@ -18,6 +19,7 @@ public class ApplicationController implements ApplicationViewListener {
     private final Settings settings = Settings.getInstance();
     private final ResourceBundle resourceBundle = settings.getResourceBundle();
 
+    private LogsView logsView;
     // submodules
     private ProcessesController processesController;
 
@@ -33,6 +35,7 @@ public class ApplicationController implements ApplicationViewListener {
     @Override
     public void applicationViewDidLoad() {
         addProcessesModule();
+        addLogsModule();
     }
 
     @Override
@@ -48,6 +51,10 @@ public class ApplicationController implements ApplicationViewListener {
         processesTabItem.setControl(processesView);
         processesController.setView(processesView);
         processesController.load();
+    }
+
+    private void addLogsModule() {
+        logsView = new LogsView(applicationView.getBottomPanelComposite(), SWT.NONE);
     }
 
 }

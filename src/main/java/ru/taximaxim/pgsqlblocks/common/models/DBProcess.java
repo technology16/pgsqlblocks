@@ -48,8 +48,12 @@ public class DBProcess {
         this.parents.add(parentProcess);
     }
 
-    public boolean hasChilder() {
+    public boolean hasChildren() {
         return !children.isEmpty();
+    }
+
+    public boolean hasParent() {
+        return !parents.isEmpty();
     }
 
     public DBProcessStatus getStatus() {
@@ -84,5 +88,18 @@ public class DBProcess {
         return queryCaller;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof DBProcess)) return false;
 
+        DBProcess process = (DBProcess) o;
+
+        return pid == process.pid;
+    }
+
+    @Override
+    public int hashCode() {
+        return pid;
+    }
 }
