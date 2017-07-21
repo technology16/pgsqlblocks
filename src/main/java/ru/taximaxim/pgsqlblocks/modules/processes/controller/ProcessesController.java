@@ -4,6 +4,9 @@ package ru.taximaxim.pgsqlblocks.modules.processes.controller;
 import org.apache.log4j.Logger;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.ToolItem;
 import ru.taximaxim.pgsqlblocks.common.DBModelsProvider;
 import ru.taximaxim.pgsqlblocks.common.models.DBModel;
@@ -12,6 +15,7 @@ import ru.taximaxim.pgsqlblocks.modules.db.controller.DBController;
 import ru.taximaxim.pgsqlblocks.modules.db.controller.DBControllerListener;
 import ru.taximaxim.pgsqlblocks.modules.db.model.DBStatus;
 import ru.taximaxim.pgsqlblocks.modules.processes.view.ProcessesView;
+import ru.taximaxim.pgsqlblocks.modules.processesfilter.controller.DBProcessesFiltersController;
 import ru.taximaxim.pgsqlblocks.utils.ImageUtils;
 import ru.taximaxim.pgsqlblocks.utils.Images;
 import ru.taximaxim.pgsqlblocks.utils.Settings;
@@ -39,6 +43,10 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
     private DBModelsView dbModelsView;
     private DBProcessesView dbProcessesView;
 
+    private final DBProcessesFiltersController dbProcessesFiltersController = new DBProcessesFiltersController();
+
+    private Composite dbProcessesFiltersViewContainer;
+
     private final DBProcessesViewDataSourceFilter dbProcessViewFilter = new DBProcessesViewDataSourceFilter();
 
     private ToolItem addDatabaseToolItem;
@@ -49,6 +57,7 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
     private ToolItem updateProcessesToolItem;
     private ToolItem autoUpdateToolItem;
     private ToolItem showOnlyBlockedProcessesToolItem;
+    private ToolItem toggleVisibilityProcessesFilterPanelToolItem;
 
     private DBModelsProvider dbModelsProvider;
 
@@ -69,6 +78,17 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
         dbModelsView.getTreeViewer().setInput(dbControllers);
         dbModelsView.addListener(this);
         dbProcessViewFilter.addListener(this);
+
+        GridLayout layout = new GridLayout();
+        GridData layoutData = new GridData(SWT.FILL, SWT.TOP, true, false);
+
+        dbProcessesFiltersViewContainer = new Composite(view.getRightPanelComposite(), SWT.NONE);
+        dbProcessesFiltersViewContainer.setLayout(layout);
+        dbProcessesFiltersViewContainer.setLayoutData(layoutData);
+        ((GridData) dbProcessesFiltersViewContainer.getLayoutData()).exclude = true;
+        dbProcessesFiltersViewContainer.setVisible(false);
+        dbProcessesFiltersController.presentInView(dbProcessesFiltersViewContainer);
+
         dbProcessesView = new DBProcessesView(view.getRightPanelComposite(), SWT.NONE);
         DBProcessesViewDataSource dbProcessesViewDataSource = new DBProcessesViewDataSource(resourceBundle, dbProcessViewFilter);
         dbProcessesView.getTreeViewer().setDataSource(dbProcessesViewDataSource);
@@ -127,13 +147,21 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
         showOnlyBlockedProcessesToolItem.setToolTipText(Images.VIEW_ONLY_BLOCKED.getDescription(resourceBundle));
         showOnlyBlockedProcessesToolItem.addListener(SWT.Selection, event ->
                 dbProcessViewFilter.setShowOnlyBlockedProcesses(showOnlyBlockedProcessesToolItem.getSelection()));
+
+        toggleVisibilityProcessesFilterPanelToolItem = new ToolItem(view.getToolBar(), SWT.CHECK);
+        toggleVisibilityProcessesFilterPanelToolItem.setImage(ImageUtils.getImage(Images.FILTER));
+        toggleVisibilityProcessesFilterPanelToolItem.setToolTipText(Images.FILTER.getDescription(resourceBundle));
+        toggleVisibilityProcessesFilterPanelToolItem.addListener(SWT.Selection, event ->
+                setProcessesFilterViewVisibility(toggleVisibilityProcessesFilterPanelToolItem.getSelection()));
     }
 
     private void changeToolItemsStateForController(DBController controller) {
-        deleteDatabaseToolItem.setEnabled(!controller.isConnected());
-        editDatabaseToolItem.setEnabled(!controller.isConnected());
-        connectDatabaseToolItem.setEnabled(!controller.isConnected());
-        disconnectDatabaseToolItem.setEnabled(controller.isConnected());
+        toggleVisibilityProcessesFilterPanelToolItem.setEnabled(controller != null);
+        boolean isEnabled = controller != null && !controller.isConnected();
+        deleteDatabaseToolItem.setEnabled(isEnabled);
+        editDatabaseToolItem.setEnabled(isEnabled);
+        connectDatabaseToolItem.setEnabled(isEnabled);
+        disconnectDatabaseToolItem.setEnabled(isEnabled);
     }
 
     private void loadDatabases() {
@@ -163,6 +191,7 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
         dbController.removeListener(this);
         dbController.shutdown();
         dbControllers.remove(dbController);
+        changeToolItemsStateForController(null);
     }
 
     private void saveDatabases() {
@@ -241,6 +270,12 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
 
     private void setAutoUpdate(boolean autoUpdate) {
         settings.setAutoUpdate(autoUpdate);
+    }
+
+    public void setProcessesFilterViewVisibility(boolean isVisible) {
+        ((GridData) dbProcessesFiltersViewContainer.getLayoutData()).exclude = !isVisible;
+        dbProcessesFiltersViewContainer.setVisible(isVisible);
+        dbProcessesView.getParent().layout();
     }
 
     @Override

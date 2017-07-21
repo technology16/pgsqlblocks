@@ -13,10 +13,6 @@ public class DBProcessesViewDataSource extends TMTreeViewerDataSource {
 
     private final ResourceBundle resourceBundle;
 
-    public DBProcessesViewDataSource(ResourceBundle resourceBundle) {
-        this.resourceBundle = resourceBundle;
-    }
-
     public DBProcessesViewDataSource(ResourceBundle resourceBundle, TMTreeViewerDataSourceFilter dataFilter) {
         super(dataFilter);
         this.resourceBundle = resourceBundle;
