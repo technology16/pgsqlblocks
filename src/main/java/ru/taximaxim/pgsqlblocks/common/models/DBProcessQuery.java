@@ -1,19 +1,21 @@
 package ru.taximaxim.pgsqlblocks.common.models;
 
+import java.util.Date;
+
 public class DBProcessQuery {
 
     private final String queryString;
     private final boolean slowQuery;
-    private final String backendStart;
-    private final String queryStart;
-    private final String xactStart;
+    private final Date backendStart;
+    private final Date queryStart;
+    private final Date xactStart;
 
-    public DBProcessQuery(String queryString, boolean slowQuery, String backendStart, String queryStart, String xactStart) {
+    public DBProcessQuery(String queryString, boolean slowQuery, Date backendStart, Date queryStart, Date xactStart) {
         this.queryString = queryString == null ? "" : queryString;
         this.slowQuery = slowQuery;
-        this.backendStart = backendStart == null ? "" : backendStart;
-        this.queryStart = queryStart == null ? "" : queryStart;
-        this.xactStart = xactStart == null ? "" : xactStart;
+        this.backendStart = backendStart;
+        this.queryStart = queryStart;
+        this.xactStart = xactStart;
     }
 
     public String getQueryString() {
@@ -24,15 +26,15 @@ public class DBProcessQuery {
         return slowQuery;
     }
 
-    public String getBackendStart() {
+    public Date getBackendStart() {
         return backendStart;
     }
 
-    public String getQueryStart() {
+    public Date getQueryStart() {
         return queryStart;
     }
 
-    public String getXactStart() {
+    public Date getXactStart() {
         return xactStart;
     }
 
@@ -56,18 +58,18 @@ public class DBProcessQuery {
 
         if (slowQuery != that.slowQuery) return false;
         if (!queryString.equals(that.queryString)) return false;
-        if (!backendStart.equals(that.backendStart)) return false;
-        if (!queryStart.equals(that.queryStart)) return false;
-        return xactStart.equals(that.xactStart);
+        if (backendStart != null ? !backendStart.equals(that.backendStart) : that.backendStart != null) return false;
+        if (queryStart != null ? !queryStart.equals(that.queryStart) : that.queryStart != null) return false;
+        return xactStart != null ? xactStart.equals(that.xactStart) : that.xactStart == null;
     }
 
     @Override
     public int hashCode() {
         int result = queryString.hashCode();
         result = 31 * result + (slowQuery ? 1 : 0);
-        result = 31 * result + backendStart.hashCode();
-        result = 31 * result + queryStart.hashCode();
-        result = 31 * result + xactStart.hashCode();
+        result = 31 * result + (backendStart != null ? backendStart.hashCode() : 0);
+        result = 31 * result + (queryStart != null ? queryStart.hashCode() : 0);
+        result = 31 * result + (xactStart != null ? xactStart.hashCode() : 0);
         return result;
     }
 }

@@ -1,13 +1,13 @@
 package ru.taximaxim.pgsqlblocks.common.ui;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.*;
 import ru.taximaxim.pgsqlblocks.common.FilterCondition;
 import ru.taximaxim.pgsqlblocks.common.FilterValueType;
 import ru.taximaxim.pgsqlblocks.common.models.DBProcessFilter;
+import ru.taximaxim.pgsqlblocks.modules.db.controller.DBController;
 import ru.taximaxim.pgsqlblocks.utils.Settings;
 
 import java.util.ArrayList;
@@ -19,11 +19,16 @@ public class DBProcessesFiltersView extends Composite {
     private Settings settings = Settings.getInstance();
     private ResourceBundle resourceBundle = settings.getResourceBundle();
 
+    private Group group;
+
     private Combo pidFilterCombo;
     private Text pidFilterText;
 
     private Combo applicationFilterCombo;
     private Text applicationFilterText;
+
+    private Combo databaseFilterCombo;
+    private Text databaseFilterText;
 
     private Combo queryFilterCombo;
     private Text queryFilterText;
@@ -42,7 +47,7 @@ public class DBProcessesFiltersView extends Composite {
     }
 
     private void createContent() {
-        Group group = new Group(this, SWT.NONE);
+        group = new Group(this, SWT.NONE);
         GridLayout layout = new GridLayout(9, false);
         GridData layoutData = new GridData(SWT.FILL, SWT.TOP, true, false);
         group.setLayout(layout);
@@ -55,9 +60,16 @@ public class DBProcessesFiltersView extends Composite {
         textLayoutData.widthHint = 150;
         textLayoutData.minimumWidth = 150;
 
-        Label pidFilterLabel = new Label(group, SWT.NONE);
-        pidFilterLabel.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
-        pidFilterLabel.setText(resourceBundle.getString("pid"));
+        createPidFilterView(comboLayoutData, textLayoutData);
+        createApplicationFilterView(comboLayoutData, textLayoutData);
+        createDatabaseFilterView(comboLayoutData, textLayoutData);
+        createQueryFilterView(comboLayoutData, textLayoutData);
+    }
+
+    private void createPidFilterView(GridData comboLayoutData, GridData textLayoutData) {
+        Label label = new Label(group, SWT.NONE);
+        label.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
+        label.setText(resourceBundle.getString("pid"));
 
         pidFilterCombo = new Combo(group, SWT.DROP_DOWN | SWT.READ_ONLY);
         pidFilterCombo.setLayoutData(comboLayoutData);
@@ -72,18 +84,43 @@ public class DBProcessesFiltersView extends Composite {
         pidFilterText.setLayoutData(textLayoutData);
         pidFilterText.addListener(SWT.Verify, new IntegerValueTypeVerifyListener());
         pidFilterText.addModifyListener(e -> {
-                String pidFilterTextText = pidFilterText.getText();
-                if (pidFilterTextText.startsWith("0") && pidFilterTextText.length() > 1) {
-                    pidFilterText.setText("0");
-                    pidFilterText.setSelection(1);
-                } else {
-                    listeners.forEach(listener -> listener.processesFiltersViewPidFilterValueChanged(convertTextToInteger(pidFilterText.getText())));
-                }
+            String pidFilterTextText = pidFilterText.getText();
+            if (pidFilterTextText.startsWith("0") && pidFilterTextText.length() > 1) {
+                pidFilterText.setText("0");
+                pidFilterText.setSelection(1);
+            } else {
+                listeners.forEach(listener -> listener.processesFiltersViewPidFilterValueChanged(convertTextToInteger(pidFilterText.getText())));
+            }
+        });
+    }
+
+    private void createDatabaseFilterView(GridData comboLayoutData, GridData textLayoutData) {
+        Label label = new Label(group, SWT.NONE);
+        label.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
+        label.setText(resourceBundle.getString("db_name"));
+
+        databaseFilterCombo = new Combo(group, SWT.DROP_DOWN | SWT.READ_ONLY);
+        databaseFilterCombo.setLayoutData(comboLayoutData);
+        fillCombo(databaseFilterCombo, FilterValueType.STRING);
+        databaseFilterCombo.select(0);
+        databaseFilterCombo.addModifyListener(e -> {
+            FilterCondition condition = FilterCondition.getFilterConditionFromConditionText(databaseFilterCombo.getText());
+            listeners.forEach(listener -> listener.processesFiltersViewDatabaseFilterConditionChanged(condition));
         });
 
-        Label applicationFilterLabel = new Label(group, SWT.NONE);
-        applicationFilterLabel.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
-        applicationFilterLabel.setText(resourceBundle.getString("application"));
+        databaseFilterText = new Text(group, SWT.NONE);
+        databaseFilterText.setLayoutData(textLayoutData);
+        databaseFilterText.addModifyListener(e -> {
+            String queryFilterTextText = databaseFilterText.getText();
+            final String result = queryFilterTextText.isEmpty() ? null : queryFilterTextText;
+            listeners.forEach(listener -> listener.processesFiltersViewDatabaseFilterValueChanged(result));
+        });
+    }
+
+    private void createApplicationFilterView(GridData comboLayoutData, GridData textLayoutData) {
+        Label label = new Label(group, SWT.NONE);
+        label.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
+        label.setText(resourceBundle.getString("application"));
 
         applicationFilterCombo = new Combo(group, SWT.DROP_DOWN | SWT.READ_ONLY);
         applicationFilterCombo.setLayoutData(comboLayoutData);
@@ -101,10 +138,12 @@ public class DBProcessesFiltersView extends Composite {
             final String result = queryFilterTextText.isEmpty() ? null : queryFilterTextText;
             listeners.forEach(listener -> listener.processesFiltersViewApplicationFilterValueChanged(result));
         });
+    }
 
-        Label queryFilterLabel = new Label(group, SWT.NONE);
-        queryFilterLabel.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
-        queryFilterLabel.setText(resourceBundle.getString("query"));
+    private void createQueryFilterView(GridData comboLayoutData, GridData textLayoutData) {
+        Label label = new Label(group, SWT.NONE);
+        label.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
+        label.setText(resourceBundle.getString("query"));
 
         queryFilterCombo = new Combo(group, SWT.DROP_DOWN | SWT.READ_ONLY);
         queryFilterCombo.setLayoutData(comboLayoutData);
@@ -151,12 +190,27 @@ public class DBProcessesFiltersView extends Composite {
         }
     }
 
-    public void fillViewWithData(DBProcessFilter filter) {
-        if (filter != null) {
+    public void fillViewForController(DBController controller) {
+        if (controller != null) {
+            DBProcessFilter filter = controller.getProcessesFilters();
             Integer pidFilterValue = filter.getPidFilter().getValue();
             FilterCondition pidFilterCondition = filter.getPidFilter().getCondition();
             pidFilterText.setText(pidFilterValue == null ? "" : String.valueOf(pidFilterValue));
             pidFilterCombo.setText(pidFilterCondition.toString());
+
+            String databaseFilterValue = filter.getDatabaseFilter().getValue();
+            FilterCondition databaseFilterCondition = filter.getDatabaseFilter().getCondition();
+            if (databaseFilterValue == null && databaseFilterCondition == FilterCondition.NONE) {
+                databaseFilterText.setText(controller.getModel().getDatabaseName());
+            } else {
+                databaseFilterText.setText(databaseFilterValue == null ? "" : databaseFilterValue);
+            }
+            databaseFilterCombo.setText(databaseFilterCondition.toString());
+
+            String applicationFilterValue = filter.getApplicationFilter().getValue();
+            FilterCondition applicationFilterCondition = filter.getApplicationFilter().getCondition();
+            applicationFilterText.setText(applicationFilterValue == null ? "" : applicationFilterValue);
+            applicationFilterCombo.setText(applicationFilterCondition.toString());
 
             String queryFilterValue = filter.getQueryFilter().getValue();
             FilterCondition queryFilterCondition = filter.getQueryFilter().getCondition();
@@ -169,6 +223,9 @@ public class DBProcessesFiltersView extends Composite {
 
             applicationFilterText.setText("");
             applicationFilterCombo.setText("");
+
+            databaseFilterText.setText("");
+            databaseFilterCombo.setText("");
 
             queryFilterCombo.setText("");
             queryFilterText.setText("");

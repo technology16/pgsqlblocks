@@ -1,6 +1,7 @@
 package ru.taximaxim.pgsqlblocks.common.models;
 
 import org.apache.log4j.Logger;
+import ru.taximaxim.pgsqlblocks.utils.DateUtils;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -28,12 +29,12 @@ public class DBProcessDeserializer {
     public DBProcess deserialize(ResultSet resultSet) throws SQLException {
         int pid = resultSet.getInt(PID);
         String state = resultSet.getString(STATE);
-        String stateChangeDate = dateParse(resultSet.getString(STATE_CHANGE));
+        Date stateChangeDate = DateUtils.dateFromString(resultSet.getString(STATE_CHANGE));
 
         String queryString = resultSet.getString(QUERY_SQL);
-        String backendStart = dateParse(resultSet.getString(BACKEND_START));
-        String queryStart = dateParse(resultSet.getString(QUERY_START));
-        String xactStart = dateParse(resultSet.getString(XACT_START));
+        Date backendStart = DateUtils.dateFromString(resultSet.getString(BACKEND_START));
+        Date queryStart = DateUtils.dateFromString(resultSet.getString(QUERY_START));
+        Date xactStart = DateUtils.dateFromString(resultSet.getString(XACT_START));
 
         boolean slowQuery = resultSet.getBoolean(SLOW_QUERY);
 
@@ -45,21 +46,6 @@ public class DBProcessDeserializer {
         DBProcessQueryCaller caller = new DBProcessQueryCaller(appName, databaseName, userName, client);
 
         return new DBProcess(pid, caller, state, stateChangeDate, query);
-    }
-
-    private String dateParse(String dateString) {
-        if(dateString == null || dateString.length() == 0) {
-            return "";
-        }
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ssX");
-        SimpleDateFormat sdfp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        Date date = null;
-        try {
-            date = sdf.parse(dateString);
-        } catch (ParseException e) {
-            LOG.error("Формат даты " + dateString + " не поддерживается", e);
-        }
-        return sdfp.format(date);
     }
 
 }

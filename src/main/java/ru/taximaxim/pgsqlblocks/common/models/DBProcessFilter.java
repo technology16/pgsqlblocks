@@ -16,23 +16,31 @@ public class DBProcessFilter implements FilterListener {
 
     private final StringValueTypeFilter applicationFilter = new StringValueTypeFilter();
 
+    private final StringValueTypeFilter databaseFilter = new StringValueTypeFilter();
+
     private final StringValueTypeFilter queryFilter = new StringValueTypeFilter();
 
     public DBProcessFilter() {
         pidFilter.addListener(this);
         applicationFilter.addListener(this);
         queryFilter.addListener(this);
+        databaseFilter.addListener(this);
     }
 
     public boolean filter(DBProcess process) {
         boolean pidFilterResult = !pidFilter.isActive() || pidFilter.filter(process.getPid());
         boolean queryFilterResult = !queryFilter.isActive() || queryFilter.filter(process.getQuery().getQueryString());
         boolean applicationFilterResult = !applicationFilter.isActive() || applicationFilter.filter(process.getQueryCaller().getApplicationName());
-        return pidFilterResult && queryFilterResult && applicationFilterResult;
+        boolean databaseFilterResult = !databaseFilter.isActive() || databaseFilter.filter(process.getQueryCaller().getDatabaseName());
+
+        return pidFilterResult && queryFilterResult && applicationFilterResult && databaseFilterResult;
     }
 
     public void resetFilters() {
         pidFilter.reset();
+        databaseFilter.reset();
+        queryFilter.reset();
+        applicationFilter.reset();
         listeners.forEach(DBProcessFilterListener::dbProcessFilterChanged);
     }
 
@@ -46,6 +54,10 @@ public class DBProcessFilter implements FilterListener {
 
     public StringValueTypeFilter getApplicationFilter() {
         return applicationFilter;
+    }
+
+    public StringValueTypeFilter getDatabaseFilter() {
+        return databaseFilter;
     }
 
     public void addListener(DBProcessFilterListener listener) {

@@ -16,4 +16,8 @@ public interface DBProcessesFiltersViewListener {
 
     void processesFiltersViewApplicationFilterValueChanged(String value);
 
+    void processesFiltersViewDatabaseFilterConditionChanged(FilterCondition condition);
+
+    void processesFiltersViewDatabaseFilterValueChanged(String value);
+
 }

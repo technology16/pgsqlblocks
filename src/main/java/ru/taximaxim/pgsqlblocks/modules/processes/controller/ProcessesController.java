@@ -194,7 +194,7 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
         dbController.shutdown();
         dbControllers.remove(dbController);
         changeToolItemsStateForController(null);
-        dbProcessesFiltersView.fillViewWithData(null);
+        dbProcessesFiltersView.fillViewForController(null);
     }
 
     private void saveDatabases() {
@@ -346,7 +346,7 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
     public void didSelectController(DBController controller) {
         dbProcessesView.getTreeViewer().setInput(controller.getFilteredProcesses());
         changeToolItemsStateForController(controller);
-        dbProcessesFiltersView.fillViewWithData(controller.getProcessesFilters());
+        dbProcessesFiltersView.fillViewForController(controller);
     }
 
     @Override
@@ -448,5 +448,23 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
         }
         DBController selectedController = (DBController) dbModelsView.getTreeViewer().getStructuredSelection().getFirstElement();
         selectedController.getProcessesFilters().getApplicationFilter().setValue(value);
+    }
+
+    @Override
+    public void processesFiltersViewDatabaseFilterConditionChanged(FilterCondition condition) {
+        if (dbModelsView.getTreeViewer().getStructuredSelection().getFirstElement() == null) {
+            return;
+        }
+        DBController selectedController = (DBController) dbModelsView.getTreeViewer().getStructuredSelection().getFirstElement();
+        selectedController.getProcessesFilters().getDatabaseFilter().setCondition(condition);
+    }
+
+    @Override
+    public void processesFiltersViewDatabaseFilterValueChanged(String value) {
+        if (dbModelsView.getTreeViewer().getStructuredSelection().getFirstElement() == null) {
+            return;
+        }
+        DBController selectedController = (DBController) dbModelsView.getTreeViewer().getStructuredSelection().getFirstElement();
+        selectedController.getProcessesFilters().getDatabaseFilter().setValue(value);
     }
 }

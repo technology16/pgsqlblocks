@@ -4,6 +4,7 @@ package ru.taximaxim.pgsqlblocks.common.ui;
 import org.eclipse.swt.graphics.Image;
 import ru.taximaxim.pgsqlblocks.common.models.DBBlock;
 import ru.taximaxim.pgsqlblocks.common.models.DBProcess;
+import ru.taximaxim.pgsqlblocks.utils.DateUtils;
 import ru.taximaxim.pgsqlblocks.utils.ImageUtils;
 
 import java.util.List;
@@ -164,15 +165,15 @@ public class DBProcessesViewDataSource extends TMTreeViewerDataSource {
             case 5:
                 return process.getQueryCaller().getClient();
             case 6:
-                return process.getQuery().getBackendStart();
+                return DateUtils.dateToString(process.getQuery().getBackendStart());
             case 7:
-                return process.getQuery().getQueryStart();
+                return DateUtils.dateToString(process.getQuery().getQueryStart());
             case 8:
-                return process.getQuery().getXactStart();
+                return DateUtils.dateToString(process.getQuery().getXactStart());
             case 9:
                 return process.getState();
             case 10:
-                return process.getStateChange();
+                return DateUtils.dateToString(process.getStateChange());
             case 11:
                 return process.getBlocks().stream()
                     .map(b -> String.valueOf(b.getBlockingPid()))
