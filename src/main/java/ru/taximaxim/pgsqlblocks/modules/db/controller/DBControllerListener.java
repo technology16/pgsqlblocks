@@ -24,4 +24,6 @@ public interface DBControllerListener {
 
     void dbControllerBlockedChanged(DBController controller);
 
+    void dbControllerProcessesFilterChanged(DBController controller);
+
 }

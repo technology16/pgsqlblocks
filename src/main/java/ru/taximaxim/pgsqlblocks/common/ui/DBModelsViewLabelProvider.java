@@ -28,9 +28,7 @@ public class DBModelsViewLabelProvider extends TreeLabelProvider {
         return controller.getModel().getName();
     }
     private Image getImage(DBController controller) {
-        String imagePath = controller.getStatus().getStatusImage().getImageAddr();
-        Image image = imagesMap.computeIfAbsent(imagePath,
-                k -> new Image(null, getClass().getClassLoader().getResourceAsStream(k)));
+        Image image = ImageUtils.getImage(controller.getStatus().getStatusImage());
 
         if (controller.isBlocked()) {
             String decoratorBlockedPath = Images.DECORATOR_BLOCKED.getImageAddr();

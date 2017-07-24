@@ -1,4 +1,4 @@
-package ru.taximaxim.pgsqlblocks.common.ui;
+package ru.taximaxim.pgsqlblocks.dialogs;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.MessageDialog;

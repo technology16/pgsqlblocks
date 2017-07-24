@@ -3,6 +3,7 @@ package ru.taximaxim.pgsqlblocks.modules.db.controller;
 import org.apache.log4j.Logger;
 import ru.taximaxim.pgpass.PgPass;
 import ru.taximaxim.pgpass.PgPassException;
+import ru.taximaxim.pgsqlblocks.common.models.DBProcessFilter;
 import ru.taximaxim.pgsqlblocks.common.DBQueries;
 import ru.taximaxim.pgsqlblocks.common.models.*;
 import ru.taximaxim.pgsqlblocks.modules.db.model.DBStatus;
@@ -17,11 +18,12 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-public class DBController {
+public class DBController implements DBProcessFilterListener {
 
     private DBModel model;
 
     private final List<DBProcess> processes = new ArrayList<>();
+    private final List<DBProcess> filteredProcesses = new ArrayList<>();
 
     private static final Logger LOG = Logger.getLogger(DBController.class);
 
@@ -29,6 +31,8 @@ public class DBController {
     private static final String BLOCKED_BY = "blockedBy";
 
     private List<DBControllerListener> listeners = new ArrayList<>();
+
+    private final DBProcessFilter processesFilters = new DBProcessFilter();
 
     private Settings settings = Settings.getInstance();
     private ResourceBundle resourceBundle = settings.getResourceBundle();
@@ -46,6 +50,7 @@ public class DBController {
 
     public DBController(DBModel model) {
         this.model = model;
+        processesFilters.addListener(this);
     }
 
     public DBModel getModel() {
@@ -106,6 +111,10 @@ public class DBController {
         }
     }
 
+    public DBProcessFilter getProcessesFilters() {
+        return processesFilters;
+    }
+
     private int getPgBackendPid() throws SQLException {
         try (Statement stBackendPid = connection.createStatement();
              ResultSet resultSet = stBackendPid.executeQuery(DBQueries.getPgBackendPidQuery())) {
@@ -146,6 +155,10 @@ public class DBController {
 
     public List<DBProcess> getProcesses() {
         return processes;
+    }
+
+    public List<DBProcess> getFilteredProcesses() {
+        return filteredProcesses;
     }
 
     public DBStatus getStatus() {
@@ -270,6 +283,10 @@ public class DBController {
     private void processesLoaded(List<DBProcess> loadedProcesses) {
         processes.clear();
         processes.addAll(loadedProcesses);
+
+        filteredProcesses.clear();
+        filteredProcesses.addAll(processes.stream().filter(processesFilters::filter).collect(Collectors.toList()));
+
         listeners.forEach(listener -> listener.dbControllerProcessesUpdated(this));
         boolean hasBlockedProcesses = processes.stream().anyMatch(DBProcess::hasChildren);
         setBlocked(hasBlockedProcesses);
@@ -307,4 +324,10 @@ public class DBController {
         return model.hashCode();
     }
 
+    @Override
+    public void dbProcessFilterChanged() {
+        filteredProcesses.clear();
+        filteredProcesses.addAll(processes.stream().filter(processesFilters::filter).collect(Collectors.toList()));
+        listeners.forEach(listener -> listener.dbControllerProcessesFilterChanged(this));
+    }
 }

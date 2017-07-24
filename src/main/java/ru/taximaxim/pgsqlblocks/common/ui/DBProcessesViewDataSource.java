@@ -4,6 +4,7 @@ package ru.taximaxim.pgsqlblocks.common.ui;
 import org.eclipse.swt.graphics.Image;
 import ru.taximaxim.pgsqlblocks.common.models.DBBlock;
 import ru.taximaxim.pgsqlblocks.common.models.DBProcess;
+import ru.taximaxim.pgsqlblocks.utils.ImageUtils;
 
 import java.util.List;
 import java.util.ResourceBundle;
@@ -141,7 +142,7 @@ public class DBProcessesViewDataSource extends TMTreeViewerDataSource {
     public Image getColumnImage(Object element, int columnIndex) {
         DBProcess process = (DBProcess)element;
         if (columnIndex == 0) {
-            return getImage(process.getStatus().getStatusImage().getImageAddr());
+            return ImageUtils.getImage(process.getStatus().getStatusImage());
         }
         return null;
     }

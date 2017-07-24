@@ -3,12 +3,9 @@ package ru.taximaxim.pgsqlblocks.common.ui;
 import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
-import org.eclipse.swt.graphics.Image;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
 public abstract class TMTreeViewerDataSource implements ITableLabelProvider, ITreeContentProvider {
 
@@ -25,8 +22,6 @@ public abstract class TMTreeViewerDataSource implements ITableLabelProvider, ITr
     public void setDataFilter(TMTreeViewerDataSourceFilter dataFilter) {
         this.dataFilter = dataFilter;
     }
-
-    protected final ConcurrentMap<String, Image> imagesMap = new ConcurrentHashMap<>();
 
     protected List<ILabelProviderListener> listeners = new ArrayList<>();
 
@@ -56,12 +51,6 @@ public abstract class TMTreeViewerDataSource implements ITableLabelProvider, ITr
     @Override
     public void removeListener(ILabelProviderListener listener) {
         listeners.remove(listener);
-    }
-
-
-    protected Image getImage(String path) {
-        return imagesMap.computeIfAbsent(path, k ->
-                new Image(null, getClass().getClassLoader().getResourceAsStream(path)));
     }
 
 }

@@ -9,13 +9,15 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.ToolItem;
 import ru.taximaxim.pgsqlblocks.common.DBModelsProvider;
+import ru.taximaxim.pgsqlblocks.common.FilterCondition;
 import ru.taximaxim.pgsqlblocks.common.models.DBModel;
 import ru.taximaxim.pgsqlblocks.common.ui.*;
+import ru.taximaxim.pgsqlblocks.dialogs.AddDatabaseDialog;
+import ru.taximaxim.pgsqlblocks.dialogs.EditDatabaseDialog;
 import ru.taximaxim.pgsqlblocks.modules.db.controller.DBController;
 import ru.taximaxim.pgsqlblocks.modules.db.controller.DBControllerListener;
 import ru.taximaxim.pgsqlblocks.modules.db.model.DBStatus;
 import ru.taximaxim.pgsqlblocks.modules.processes.view.ProcessesView;
-import ru.taximaxim.pgsqlblocks.modules.processesfilter.controller.DBProcessesFiltersController;
 import ru.taximaxim.pgsqlblocks.utils.ImageUtils;
 import ru.taximaxim.pgsqlblocks.utils.Images;
 import ru.taximaxim.pgsqlblocks.utils.Settings;
@@ -31,7 +33,7 @@ import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
 public class ProcessesController implements DBControllerListener, DBModelsViewListener, SettingsListener,
-        DBProcessesViewDataSourceFilterListener {
+        DBProcessesViewDataSourceFilterListener, DBProcessesFiltersViewListener {
 
     private static final Logger LOG = Logger.getLogger(ProcessesController.class);
 
@@ -42,8 +44,7 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
 
     private DBModelsView dbModelsView;
     private DBProcessesView dbProcessesView;
-
-    private final DBProcessesFiltersController dbProcessesFiltersController = new DBProcessesFiltersController();
+    private DBProcessesFiltersView dbProcessesFiltersView;
 
     private Composite dbProcessesFiltersViewContainer;
 
@@ -87,7 +88,8 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
         dbProcessesFiltersViewContainer.setLayoutData(layoutData);
         ((GridData) dbProcessesFiltersViewContainer.getLayoutData()).exclude = true;
         dbProcessesFiltersViewContainer.setVisible(false);
-        dbProcessesFiltersController.presentInView(dbProcessesFiltersViewContainer);
+        dbProcessesFiltersView = new DBProcessesFiltersView(dbProcessesFiltersViewContainer, SWT.NONE);
+        dbProcessesFiltersView.addListener(this);
 
         dbProcessesView = new DBProcessesView(view.getRightPanelComposite(), SWT.NONE);
         DBProcessesViewDataSource dbProcessesViewDataSource = new DBProcessesViewDataSource(resourceBundle, dbProcessViewFilter);
@@ -192,6 +194,7 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
         dbController.shutdown();
         dbControllers.remove(dbController);
         changeToolItemsStateForController(null);
+        dbProcessesFiltersView.fillViewWithData(null);
     }
 
     private void saveDatabases() {
@@ -335,9 +338,15 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
     }
 
     @Override
+    public void dbControllerProcessesFilterChanged(DBController controller) {
+        dbProcessesView.getTreeViewer().refresh();
+    }
+
+    @Override
     public void didSelectController(DBController controller) {
-        dbProcessesView.getTreeViewer().setInput(controller.getProcesses());
+        dbProcessesView.getTreeViewer().setInput(controller.getFilteredProcesses());
         changeToolItemsStateForController(controller);
+        dbProcessesFiltersView.fillViewWithData(controller.getProcessesFilters());
     }
 
     @Override
@@ -386,4 +395,22 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
     }
 
 
+    @Override
+    public void pidFilterConditionChanged(FilterCondition condition) {
+        if (dbModelsView.getTreeViewer().getStructuredSelection().getFirstElement() == null) {
+            return;
+        }
+        DBController selectedController = (DBController) dbModelsView.getTreeViewer().getStructuredSelection().getFirstElement();
+        selectedController.getProcessesFilters().getPidFilter().setCondition(condition);
+    }
+
+    @Override
+    public void pidFilterValueChanged(Integer value) {
+        if (dbModelsView.getTreeViewer().getStructuredSelection().getFirstElement() == null) {
+            return;
+        }
+        DBController selectedController = (DBController) dbModelsView.getTreeViewer().getStructuredSelection().getFirstElement();
+        selectedController.getProcessesFilters().getPidFilter().setValue(value);
+
+    }
 }
