@@ -4,8 +4,16 @@ import ru.taximaxim.pgsqlblocks.common.FilterCondition;
 
 public interface DBProcessesFiltersViewListener {
 
-    void pidFilterConditionChanged(FilterCondition condition);
+    void processesFiltersViewPidFilterConditionChanged(FilterCondition condition);
 
-    void pidFilterValueChanged(Integer value);
+    void processesFiltersViewPidFilterValueChanged(Integer value);
+
+    void processesFiltersViewQueryFilterConditionChanged(FilterCondition condition);
+
+    void processesFiltersViewQueryFilterValueChanged(String value);
+
+    void processesFiltersViewApplicationFilterConditionChanged(FilterCondition condition);
+
+    void processesFiltersViewApplicationFilterValueChanged(String value);
 
 }

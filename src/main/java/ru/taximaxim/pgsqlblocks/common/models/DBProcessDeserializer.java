@@ -34,6 +34,7 @@ public class DBProcessDeserializer {
         String backendStart = dateParse(resultSet.getString(BACKEND_START));
         String queryStart = dateParse(resultSet.getString(QUERY_START));
         String xactStart = dateParse(resultSet.getString(XACT_START));
+
         boolean slowQuery = resultSet.getBoolean(SLOW_QUERY);
 
         DBProcessQuery query = new DBProcessQuery(queryString, slowQuery, backendStart, queryStart, xactStart);

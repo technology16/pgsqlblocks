@@ -163,7 +163,7 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
         deleteDatabaseToolItem.setEnabled(isEnabled);
         editDatabaseToolItem.setEnabled(isEnabled);
         connectDatabaseToolItem.setEnabled(isEnabled);
-        disconnectDatabaseToolItem.setEnabled(isEnabled);
+        disconnectDatabaseToolItem.setEnabled(controller != null && !isEnabled);
     }
 
     private void loadDatabases() {
@@ -396,7 +396,7 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
 
 
     @Override
-    public void pidFilterConditionChanged(FilterCondition condition) {
+    public void processesFiltersViewPidFilterConditionChanged(FilterCondition condition) {
         if (dbModelsView.getTreeViewer().getStructuredSelection().getFirstElement() == null) {
             return;
         }
@@ -405,12 +405,48 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
     }
 
     @Override
-    public void pidFilterValueChanged(Integer value) {
+    public void processesFiltersViewPidFilterValueChanged(Integer value) {
         if (dbModelsView.getTreeViewer().getStructuredSelection().getFirstElement() == null) {
             return;
         }
         DBController selectedController = (DBController) dbModelsView.getTreeViewer().getStructuredSelection().getFirstElement();
         selectedController.getProcessesFilters().getPidFilter().setValue(value);
 
+    }
+
+    @Override
+    public void processesFiltersViewQueryFilterConditionChanged(FilterCondition condition) {
+        if (dbModelsView.getTreeViewer().getStructuredSelection().getFirstElement() == null) {
+            return;
+        }
+        DBController selectedController = (DBController) dbModelsView.getTreeViewer().getStructuredSelection().getFirstElement();
+        selectedController.getProcessesFilters().getQueryFilter().setCondition(condition);
+    }
+
+    @Override
+    public void processesFiltersViewQueryFilterValueChanged(String value) {
+        if (dbModelsView.getTreeViewer().getStructuredSelection().getFirstElement() == null) {
+            return;
+        }
+        DBController selectedController = (DBController) dbModelsView.getTreeViewer().getStructuredSelection().getFirstElement();
+        selectedController.getProcessesFilters().getQueryFilter().setValue(value);
+    }
+
+    @Override
+    public void processesFiltersViewApplicationFilterConditionChanged(FilterCondition condition) {
+        if (dbModelsView.getTreeViewer().getStructuredSelection().getFirstElement() == null) {
+            return;
+        }
+        DBController selectedController = (DBController) dbModelsView.getTreeViewer().getStructuredSelection().getFirstElement();
+        selectedController.getProcessesFilters().getApplicationFilter().setCondition(condition);
+    }
+
+    @Override
+    public void processesFiltersViewApplicationFilterValueChanged(String value) {
+        if (dbModelsView.getTreeViewer().getStructuredSelection().getFirstElement() == null) {
+            return;
+        }
+        DBController selectedController = (DBController) dbModelsView.getTreeViewer().getStructuredSelection().getFirstElement();
+        selectedController.getProcessesFilters().getApplicationFilter().setValue(value);
     }
 }
