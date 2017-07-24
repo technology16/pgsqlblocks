@@ -20,11 +20,17 @@ public class DBProcessFilter implements FilterListener {
 
     private final StringValueTypeFilter queryFilter = new StringValueTypeFilter();
 
+    private final StringValueTypeFilter userNameFilter = new StringValueTypeFilter();
+
+    private final StringValueTypeFilter clientFilter = new StringValueTypeFilter();
+
     public DBProcessFilter() {
         pidFilter.addListener(this);
         applicationFilter.addListener(this);
         queryFilter.addListener(this);
         databaseFilter.addListener(this);
+        userNameFilter.addListener(this);
+        clientFilter.addListener(this);
     }
 
     public boolean filter(DBProcess process) {
@@ -32,8 +38,10 @@ public class DBProcessFilter implements FilterListener {
         boolean queryFilterResult = !queryFilter.isActive() || queryFilter.filter(process.getQuery().getQueryString());
         boolean applicationFilterResult = !applicationFilter.isActive() || applicationFilter.filter(process.getQueryCaller().getApplicationName());
         boolean databaseFilterResult = !databaseFilter.isActive() || databaseFilter.filter(process.getQueryCaller().getDatabaseName());
-
-        return pidFilterResult && queryFilterResult && applicationFilterResult && databaseFilterResult;
+        boolean userNameFilterResult = !userNameFilter.isActive() || userNameFilter.filter(process.getQueryCaller().getUserName());
+        boolean clientFilterResult = !clientFilter.isActive() || clientFilter.filter(process.getQueryCaller().getClient());
+        return pidFilterResult && queryFilterResult && applicationFilterResult && databaseFilterResult
+                && userNameFilterResult && clientFilterResult;
     }
 
     public void resetFilters() {
@@ -41,6 +49,8 @@ public class DBProcessFilter implements FilterListener {
         databaseFilter.reset();
         queryFilter.reset();
         applicationFilter.reset();
+        userNameFilter.reset();
+        clientFilter.reset();
         listeners.forEach(DBProcessFilterListener::dbProcessFilterChanged);
     }
 
@@ -58,6 +68,14 @@ public class DBProcessFilter implements FilterListener {
 
     public StringValueTypeFilter getDatabaseFilter() {
         return databaseFilter;
+    }
+
+    public StringValueTypeFilter getUserNameFilter() {
+        return userNameFilter;
+    }
+
+    public StringValueTypeFilter getClientFilter() {
+        return clientFilter;
     }
 
     public void addListener(DBProcessFilterListener listener) {

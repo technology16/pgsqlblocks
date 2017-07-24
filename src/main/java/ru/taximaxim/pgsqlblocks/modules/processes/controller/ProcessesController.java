@@ -467,4 +467,40 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
         DBController selectedController = (DBController) dbModelsView.getTreeViewer().getStructuredSelection().getFirstElement();
         selectedController.getProcessesFilters().getDatabaseFilter().setValue(value);
     }
+
+    @Override
+    public void processesFiltersViewUserNameFilterConditionChanged(FilterCondition condition) {
+        if (dbModelsView.getTreeViewer().getStructuredSelection().getFirstElement() == null) {
+            return;
+        }
+        DBController selectedController = (DBController) dbModelsView.getTreeViewer().getStructuredSelection().getFirstElement();
+        selectedController.getProcessesFilters().getUserNameFilter().setCondition(condition);
+    }
+
+    @Override
+    public void processesFiltersViewUserNameFilterValueChanged(String value) {
+        if (dbModelsView.getTreeViewer().getStructuredSelection().getFirstElement() == null) {
+            return;
+        }
+        DBController selectedController = (DBController) dbModelsView.getTreeViewer().getStructuredSelection().getFirstElement();
+        selectedController.getProcessesFilters().getUserNameFilter().setValue(value);
+    }
+
+    @Override
+    public void processesFiltersViewClientFilterConditionChanged(FilterCondition condition) {
+        if (dbModelsView.getTreeViewer().getStructuredSelection().getFirstElement() == null) {
+            return;
+        }
+        DBController selectedController = (DBController) dbModelsView.getTreeViewer().getStructuredSelection().getFirstElement();
+        selectedController.getProcessesFilters().getClientFilter().setCondition(condition);
+    }
+
+    @Override
+    public void processesFiltersViewClientFilterValueChanged(String value) {
+        if (dbModelsView.getTreeViewer().getStructuredSelection().getFirstElement() == null) {
+            return;
+        }
+        DBController selectedController = (DBController) dbModelsView.getTreeViewer().getStructuredSelection().getFirstElement();
+        selectedController.getProcessesFilters().getClientFilter().setValue(value);
+    }
 }

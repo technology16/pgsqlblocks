@@ -30,6 +30,12 @@ public class DBProcessesFiltersView extends Composite {
     private Combo databaseFilterCombo;
     private Text databaseFilterText;
 
+    private Combo userNameFilterCombo;
+    private Text userNameFilterText;
+
+    private Combo clientFilterCombo;
+    private Text clientFilterText;
+
     private Combo queryFilterCombo;
     private Text queryFilterText;
 
@@ -63,6 +69,8 @@ public class DBProcessesFiltersView extends Composite {
         createPidFilterView(comboLayoutData, textLayoutData);
         createApplicationFilterView(comboLayoutData, textLayoutData);
         createDatabaseFilterView(comboLayoutData, textLayoutData);
+        createUserNameFilterView(comboLayoutData, textLayoutData);
+        createClientFilterView(comboLayoutData, textLayoutData);
         createQueryFilterView(comboLayoutData, textLayoutData);
     }
 
@@ -111,8 +119,8 @@ public class DBProcessesFiltersView extends Composite {
         databaseFilterText = new Text(group, SWT.NONE);
         databaseFilterText.setLayoutData(textLayoutData);
         databaseFilterText.addModifyListener(e -> {
-            String queryFilterTextText = databaseFilterText.getText();
-            final String result = queryFilterTextText.isEmpty() ? null : queryFilterTextText;
+            String text = databaseFilterText.getText();
+            final String result = text.isEmpty() ? null : text;
             listeners.forEach(listener -> listener.processesFiltersViewDatabaseFilterValueChanged(result));
         });
     }
@@ -134,8 +142,8 @@ public class DBProcessesFiltersView extends Composite {
         applicationFilterText = new Text(group, SWT.NONE);
         applicationFilterText.setLayoutData(textLayoutData);
         applicationFilterText.addModifyListener(e -> {
-            String queryFilterTextText = applicationFilterText.getText();
-            final String result = queryFilterTextText.isEmpty() ? null : queryFilterTextText;
+            String text = applicationFilterText.getText();
+            final String result = text.isEmpty() ? null : text;
             listeners.forEach(listener -> listener.processesFiltersViewApplicationFilterValueChanged(result));
         });
     }
@@ -157,9 +165,55 @@ public class DBProcessesFiltersView extends Composite {
         queryFilterText = new Text(group, SWT.NONE);
         queryFilterText.setLayoutData(textLayoutData);
         queryFilterText.addModifyListener(e -> {
-            String queryFilterTextText = queryFilterText.getText();
-            final String result = queryFilterTextText.isEmpty() ? null : queryFilterTextText;
+            String text = queryFilterText.getText();
+            final String result = text.isEmpty() ? null : text;
             listeners.forEach(listener -> listener.processesFiltersViewQueryFilterValueChanged(result));
+        });
+    }
+
+    private void createUserNameFilterView(GridData comboLayoutData, GridData textLayoutData) {
+        Label label = new Label(group, SWT.NONE);
+        label.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
+        label.setText(resourceBundle.getString("user_name"));
+
+        userNameFilterCombo = new Combo(group, SWT.DROP_DOWN | SWT.READ_ONLY);
+        userNameFilterCombo.setLayoutData(comboLayoutData);
+        fillCombo(userNameFilterCombo, FilterValueType.STRING);
+        userNameFilterCombo.select(0);
+        userNameFilterCombo.addModifyListener(e -> {
+            FilterCondition condition = FilterCondition.getFilterConditionFromConditionText(userNameFilterCombo.getText());
+            listeners.forEach(listener -> listener.processesFiltersViewUserNameFilterConditionChanged(condition));
+        });
+
+        userNameFilterText = new Text(group, SWT.NONE);
+        userNameFilterText.setLayoutData(textLayoutData);
+        userNameFilterText.addModifyListener(e -> {
+            String text = userNameFilterText.getText();
+            final String result = text.isEmpty() ? null : text;
+            listeners.forEach(listener -> listener.processesFiltersViewUserNameFilterValueChanged(result));
+        });
+    }
+
+    private void createClientFilterView(GridData comboLayoutData, GridData textLayoutData) {
+        Label label = new Label(group, SWT.NONE);
+        label.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
+        label.setText(resourceBundle.getString("client"));
+
+        clientFilterCombo = new Combo(group, SWT.DROP_DOWN | SWT.READ_ONLY);
+        clientFilterCombo.setLayoutData(comboLayoutData);
+        fillCombo(clientFilterCombo, FilterValueType.STRING);
+        clientFilterCombo.select(0);
+        clientFilterCombo.addModifyListener(e -> {
+            FilterCondition condition = FilterCondition.getFilterConditionFromConditionText(clientFilterCombo.getText());
+            listeners.forEach(listener -> listener.processesFiltersViewClientFilterConditionChanged(condition));
+        });
+
+        clientFilterText = new Text(group, SWT.NONE);
+        clientFilterText.setLayoutData(textLayoutData);
+        clientFilterText.addModifyListener(e -> {
+            String text = clientFilterText.getText();
+            final String result = text.isEmpty() ? null : text;
+            listeners.forEach(listener -> listener.processesFiltersViewClientFilterValueChanged(result));
         });
     }
 
@@ -191,45 +245,58 @@ public class DBProcessesFiltersView extends Composite {
     }
 
     public void fillViewForController(DBController controller) {
-        if (controller != null) {
-            DBProcessFilter filter = controller.getProcessesFilters();
-            Integer pidFilterValue = filter.getPidFilter().getValue();
-            FilterCondition pidFilterCondition = filter.getPidFilter().getCondition();
-            pidFilterText.setText(pidFilterValue == null ? "" : String.valueOf(pidFilterValue));
-            pidFilterCombo.setText(pidFilterCondition.toString());
-
-            String databaseFilterValue = filter.getDatabaseFilter().getValue();
-            FilterCondition databaseFilterCondition = filter.getDatabaseFilter().getCondition();
-            if (databaseFilterValue == null && databaseFilterCondition == FilterCondition.NONE) {
-                databaseFilterText.setText(controller.getModel().getDatabaseName());
-            } else {
-                databaseFilterText.setText(databaseFilterValue == null ? "" : databaseFilterValue);
-            }
-            databaseFilterCombo.setText(databaseFilterCondition.toString());
-
-            String applicationFilterValue = filter.getApplicationFilter().getValue();
-            FilterCondition applicationFilterCondition = filter.getApplicationFilter().getCondition();
-            applicationFilterText.setText(applicationFilterValue == null ? "" : applicationFilterValue);
-            applicationFilterCombo.setText(applicationFilterCondition.toString());
-
-            String queryFilterValue = filter.getQueryFilter().getValue();
-            FilterCondition queryFilterCondition = filter.getQueryFilter().getCondition();
-            queryFilterText.setText(queryFilterValue == null ? "" : queryFilterValue);
-            queryFilterCombo.setText(queryFilterCondition.toString());
-
-        } else {
-            pidFilterText.setText("");
-            pidFilterCombo.setText("");
-
-            applicationFilterText.setText("");
-            applicationFilterCombo.setText("");
-
-            databaseFilterText.setText("");
-            databaseFilterCombo.setText("");
-
-            queryFilterCombo.setText("");
-            queryFilterText.setText("");
+        if (controller == null) {
+            resetFiltersContent();
+            return;
         }
+
+        DBProcessFilter filter = controller.getProcessesFilters();
+
+        Integer pidFilterValue = filter.getPidFilter().getValue();
+        FilterCondition pidFilterCondition = filter.getPidFilter().getCondition();
+        pidFilterText.setText(pidFilterValue == null ? "" : String.valueOf(pidFilterValue));
+        pidFilterCombo.setText(pidFilterCondition.toString());
+
+        String databaseFilterValue = filter.getDatabaseFilter().getValue();
+        FilterCondition databaseFilterCondition = filter.getDatabaseFilter().getCondition();
+        if (databaseFilterValue == null && databaseFilterCondition == FilterCondition.NONE) {
+            databaseFilterText.setText(controller.getModel().getDatabaseName());
+        } else {
+            databaseFilterText.setText(databaseFilterValue == null ? "" : databaseFilterValue);
+        }
+        databaseFilterCombo.setText(databaseFilterCondition.toString());
+
+        String clientFilterValue = filter.getClientFilter().getValue();
+        FilterCondition clientFilterCondition = filter.getApplicationFilter().getCondition();
+        clientFilterText.setText(clientFilterValue == null ? "" : clientFilterValue);
+        clientFilterCombo.setText(clientFilterCondition.toString());
+
+        String applicationFilterValue = filter.getApplicationFilter().getValue();
+        FilterCondition applicationFilterCondition = filter.getApplicationFilter().getCondition();
+        applicationFilterText.setText(applicationFilterValue == null ? "" : applicationFilterValue);
+        applicationFilterCombo.setText(applicationFilterCondition.toString());
+
+        String queryFilterValue = filter.getQueryFilter().getValue();
+        FilterCondition queryFilterCondition = filter.getQueryFilter().getCondition();
+        queryFilterText.setText(queryFilterValue == null ? "" : queryFilterValue);
+        queryFilterCombo.setText(queryFilterCondition.toString());
+    }
+
+    public void resetFiltersContent() {
+        pidFilterText.setText("");
+        pidFilterCombo.setText("");
+
+        applicationFilterText.setText("");
+        applicationFilterCombo.setText("");
+
+        databaseFilterText.setText("");
+        databaseFilterCombo.setText("");
+
+        queryFilterCombo.setText("");
+        queryFilterText.setText("");
+
+        clientFilterCombo.setText("");
+        clientFilterText.setText("");
     }
 
     public void addListener(DBProcessesFiltersViewListener listener) {

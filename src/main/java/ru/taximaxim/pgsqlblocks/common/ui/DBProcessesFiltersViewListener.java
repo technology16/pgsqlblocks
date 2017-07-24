@@ -20,4 +20,12 @@ public interface DBProcessesFiltersViewListener {
 
     void processesFiltersViewDatabaseFilterValueChanged(String value);
 
+    void processesFiltersViewUserNameFilterConditionChanged(FilterCondition condition);
+
+    void processesFiltersViewUserNameFilterValueChanged(String value);
+
+    void processesFiltersViewClientFilterConditionChanged(FilterCondition condition);
+
+    void processesFiltersViewClientFilterValueChanged(String value);
+
 }
