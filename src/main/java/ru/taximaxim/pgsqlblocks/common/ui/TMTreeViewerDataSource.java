@@ -31,6 +31,8 @@ public abstract class TMTreeViewerDataSource implements ITableLabelProvider, ITr
 
     abstract int columnWidthForColumnIndex(int columnIndex);
 
+    abstract boolean columnIsSortableAtIndex(int columnIndex);
+
     abstract String columnTooltipForColumnIndex(int columnIndex);
 
     @Override

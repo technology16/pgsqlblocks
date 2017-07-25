@@ -2,15 +2,19 @@ package ru.taximaxim.pgsqlblocks.modules.processes.controller;
 
 
 import org.apache.log4j.Logger;
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.ToolItem;
+import org.eclipse.swt.widgets.TreeColumn;
 import ru.taximaxim.pgsqlblocks.common.DBModelsProvider;
 import ru.taximaxim.pgsqlblocks.common.FilterCondition;
 import ru.taximaxim.pgsqlblocks.common.models.DBModel;
+import ru.taximaxim.pgsqlblocks.common.models.DBProcess;
 import ru.taximaxim.pgsqlblocks.common.ui.*;
 import ru.taximaxim.pgsqlblocks.dialogs.AddDatabaseDialog;
 import ru.taximaxim.pgsqlblocks.dialogs.EditDatabaseDialog;
@@ -33,7 +37,7 @@ import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
 public class ProcessesController implements DBControllerListener, DBModelsViewListener, SettingsListener,
-        DBProcessesViewDataSourceFilterListener, DBProcessesFiltersViewListener {
+        DBProcessesViewDataSourceFilterListener, DBProcessesFiltersViewListener, TMTreeViewerSortColumnSelectionListener {
 
     private static final Logger LOG = Logger.getLogger(ProcessesController.class);
 
@@ -94,6 +98,7 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
         dbProcessesView = new DBProcessesView(view.getRightPanelComposite(), SWT.NONE);
         DBProcessesViewDataSource dbProcessesViewDataSource = new DBProcessesViewDataSource(resourceBundle, dbProcessViewFilter);
         dbProcessesView.getTreeViewer().setDataSource(dbProcessesViewDataSource);
+        dbProcessesView.getTreeViewer().addSortColumnSelectionListener(this);
 
         loadDatabases();
         DriverManager.setLoginTimeout(settings.getLoginTimeout());
@@ -502,5 +507,10 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
         }
         DBController selectedController = (DBController) dbModelsView.getTreeViewer().getStructuredSelection().getFirstElement();
         selectedController.getProcessesFilters().getClientFilter().setValue(value);
+    }
+
+    @Override
+    public void didSelectSortColumn(TreeColumn column, int columnIndex, int sortDirection) {
+        dbProcessesView.getTreeViewer().setComparator(new DBProcessesViewComparator(columnIndex, sortDirection));
     }
 }

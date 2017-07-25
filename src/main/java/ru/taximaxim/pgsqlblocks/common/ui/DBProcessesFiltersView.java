@@ -295,6 +295,9 @@ public class DBProcessesFiltersView extends Composite {
         queryFilterCombo.setText("");
         queryFilterText.setText("");
 
+        userNameFilterCombo.setText("");
+        userNameFilterText.setText("");
+
         clientFilterCombo.setText("");
         clientFilterText.setText("");
     }

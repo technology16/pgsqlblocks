@@ -1,6 +1,7 @@
 package ru.taximaxim.pgsqlblocks.common.models;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class DBProcess {
 
@@ -63,6 +64,27 @@ public class DBProcess {
 
     public Set<DBBlock> getBlocks() {
         return blocks;
+    }
+
+    public String getBlocksPidsString() {
+        return blocks.stream()
+                .map(b -> String.valueOf(b.getBlockingPid()))
+                .collect(Collectors.joining(","));
+    }
+
+    public String getBlocksLocktypesString() {
+        return blocks.stream()
+                .map(DBBlock::getLocktype)
+                .distinct()
+                .collect(Collectors.joining(","));
+    }
+
+    public String getBlocksRelationsString() {
+        return blocks.stream()
+                .map(DBBlock::getRelation)
+                .filter(r -> r != null && !r.isEmpty())
+                .distinct()
+                .collect(Collectors.joining(","));
     }
 
     public int getPid() {

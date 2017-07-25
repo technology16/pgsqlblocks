@@ -140,6 +140,11 @@ public class DBProcessesViewDataSource extends TMTreeViewerDataSource {
     }
 
     @Override
+    boolean columnIsSortableAtIndex(int columnIndex) {
+        return true;
+    }
+
+    @Override
     public Image getColumnImage(Object element, int columnIndex) {
         DBProcess process = (DBProcess)element;
         if (columnIndex == 0) {
@@ -175,20 +180,11 @@ public class DBProcessesViewDataSource extends TMTreeViewerDataSource {
             case 10:
                 return DateUtils.dateToString(process.getStateChange());
             case 11:
-                return process.getBlocks().stream()
-                    .map(b -> String.valueOf(b.getBlockingPid()))
-                    .collect(Collectors.joining(","));
+                return process.getBlocksPidsString();
             case 12:
-                return process.getBlocks().stream()
-                        .map(DBBlock::getLocktype)
-                        .distinct()
-                        .collect(Collectors.joining(","));
+                return process.getBlocksLocktypesString();
             case 13:
-                return process.getBlocks().stream()
-                    .map(DBBlock::getRelation)
-                    .filter(r -> r != null && !r.isEmpty())
-                    .distinct()
-                    .collect(Collectors.joining(","));
+                return process.getBlocksRelationsString();
             case 14:
                 return process.getQuery().getQueryString();
             case 15:
