@@ -59,6 +59,7 @@ public class PgSqlBlocks_en extends ListResourceBundle {
                 {"db_updating", "Updating \"{0}\"..."},
                 {"db_finish_updating", "Finish updating \"{0}\"..."},
                 {"db_error_on_connect", "Error on connect or update DbcData: {0}"},
+                {"include_blocked_processes", "Include blocked/blocking processes"},
 
                 // action icons
                 {"add_db", "Add database"},

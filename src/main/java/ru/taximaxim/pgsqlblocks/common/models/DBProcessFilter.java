@@ -10,6 +10,8 @@ import java.util.List;
 
 public class DBProcessFilter implements FilterListener {
 
+    private boolean includeBlockedProcessesWhenFiltering = false;
+
     private final List<DBProcessFilterListener> listeners = new ArrayList<>();
 
     private final IntegerValueTypeFilter pidFilter = new IntegerValueTypeFilter();
@@ -34,6 +36,9 @@ public class DBProcessFilter implements FilterListener {
     }
 
     public boolean filter(DBProcess process) {
+        if (process.hasChildren() && !includeBlockedProcessesWhenFiltering) {
+            return true;
+        }
         boolean pidFilterResult = !pidFilter.isActive() || pidFilter.filter(process.getPid());
         boolean queryFilterResult = !queryFilter.isActive() || queryFilter.filter(process.getQuery().getQueryString());
         boolean applicationFilterResult = !applicationFilter.isActive() || applicationFilter.filter(process.getQueryCaller().getApplicationName());
@@ -76,6 +81,17 @@ public class DBProcessFilter implements FilterListener {
 
     public StringValueTypeFilter getClientFilter() {
         return clientFilter;
+    }
+
+    public boolean isIncludeBlockedProcessesWhenFiltering() {
+        return includeBlockedProcessesWhenFiltering;
+    }
+
+    public void setIncludeBlockedProcessesWhenFiltering(boolean includeBlockedProcessesWhenFiltering) {
+        if (this.includeBlockedProcessesWhenFiltering != includeBlockedProcessesWhenFiltering) {
+            this.includeBlockedProcessesWhenFiltering = includeBlockedProcessesWhenFiltering;
+            listeners.forEach(DBProcessFilterListener::dbProcessFilterChanged);
+        }
     }
 
     public void addListener(DBProcessFilterListener listener) {

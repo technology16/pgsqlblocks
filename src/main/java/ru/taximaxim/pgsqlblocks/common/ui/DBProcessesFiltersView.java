@@ -39,6 +39,8 @@ public class DBProcessesFiltersView extends Composite {
     private Combo queryFilterCombo;
     private Text queryFilterText;
 
+    private Button includeBlockedButton;
+
     private final List<DBProcessesFiltersViewListener> listeners = new ArrayList<>();
 
     public DBProcessesFiltersView(Composite parent, int style) {
@@ -72,6 +74,7 @@ public class DBProcessesFiltersView extends Composite {
         createUserNameFilterView(comboLayoutData, textLayoutData);
         createClientFilterView(comboLayoutData, textLayoutData);
         createQueryFilterView(comboLayoutData, textLayoutData);
+        createIncludeBlockedProcessesView();
     }
 
     private void createPidFilterView(GridData comboLayoutData, GridData textLayoutData) {
@@ -217,6 +220,19 @@ public class DBProcessesFiltersView extends Composite {
         });
     }
 
+    private void createIncludeBlockedProcessesView() {
+        Composite composite = new Composite(group, SWT.NONE);
+        GridData layoutData = new GridData(SWT.FILL, SWT.FILL, false, false, 3, 1);
+        composite.setLayout(new GridLayout());
+        composite.setLayoutData(layoutData);
+
+        includeBlockedButton = new Button(composite, SWT.CHECK);
+        includeBlockedButton.setText(resourceBundle.getString("include_blocked_processes"));
+        includeBlockedButton.addListener(SWT.Selection, e -> {
+            listeners.forEach(listener -> listener.processesFiltersViewIncludeBlockedValueChanged(includeBlockedButton.getSelection()));
+        });
+    }
+
     private Integer convertTextToInteger(String text) {
         if (text.isEmpty())
             return null;
@@ -280,6 +296,8 @@ public class DBProcessesFiltersView extends Composite {
         FilterCondition queryFilterCondition = filter.getQueryFilter().getCondition();
         queryFilterText.setText(queryFilterValue == null ? "" : queryFilterValue);
         queryFilterCombo.setText(queryFilterCondition.toString());
+
+        includeBlockedButton.setSelection(filter.isIncludeBlockedProcessesWhenFiltering());
     }
 
     public void resetFiltersContent() {
@@ -300,6 +318,8 @@ public class DBProcessesFiltersView extends Composite {
 
         clientFilterCombo.setText("");
         clientFilterText.setText("");
+
+        includeBlockedButton.setSelection(false);
     }
 
     public void addListener(DBProcessesFiltersViewListener listener) {

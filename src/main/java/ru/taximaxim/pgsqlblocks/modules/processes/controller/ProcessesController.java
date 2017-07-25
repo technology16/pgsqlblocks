@@ -199,6 +199,7 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
         dbController.shutdown();
         dbControllers.remove(dbController);
         changeToolItemsStateForController(null);
+        dbProcessesView.getTreeViewer().setInput(null);
         dbProcessesFiltersView.fillViewForController(null);
     }
 
@@ -507,6 +508,15 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
         }
         DBController selectedController = (DBController) dbModelsView.getTreeViewer().getStructuredSelection().getFirstElement();
         selectedController.getProcessesFilters().getClientFilter().setValue(value);
+    }
+
+    @Override
+    public void processesFiltersViewIncludeBlockedValueChanged(boolean includeBlocked) {
+        if (dbModelsView.getTreeViewer().getStructuredSelection().getFirstElement() == null) {
+            return;
+        }
+        DBController selectedController = (DBController) dbModelsView.getTreeViewer().getStructuredSelection().getFirstElement();
+        selectedController.getProcessesFilters().setIncludeBlockedProcessesWhenFiltering(includeBlocked);
     }
 
     @Override
