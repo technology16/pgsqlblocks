@@ -331,8 +331,7 @@ public class DBController implements DBProcessFilterListener {
         listeners.forEach(listener -> listener.dbControllerProcessesFilterChanged(this));
     }
 
-    public void terminateProcess(DBProcess process) {
-        final int processPid = process.getPid();
+    public boolean terminateProcessWithPid(int processPid) throws SQLException {
         boolean processTerminated = false;
         try {
             PreparedStatement preparedStatement = connection.prepareStatement(DBQueries.PG_TERMINATE_BACKED_QUERY);
@@ -343,19 +342,13 @@ public class DBController implements DBProcessFilterListener {
                 }
             }
         } catch (SQLException e) {
-            listeners.forEach(listener -> listener.dbControllerTerminateProcessFailed(this, processPid, e));
-            return;
+            throw e;
         }
-        if (processTerminated) {
-            listeners.forEach(listener -> listener.dbControllerDidTerminateProcess(this, processPid));
-        } else {
-            listeners.forEach(listener -> listener.dbControllerTerminateProcessFailed(this, processPid, null));
-        }
+        return processTerminated;
     }
 
 
-    public void cancelProcess(DBProcess process) {
-        final int processPid = process.getPid();
+    public boolean cancelProcessWithPid(int processPid) throws SQLException {
         boolean processCanceled = false;
         try {
             PreparedStatement preparedStatement = connection.prepareStatement(DBQueries.PG_CANCEL_BACKED_QUERY);
@@ -365,15 +358,10 @@ public class DBController implements DBProcessFilterListener {
                     processCanceled = resultSet.getBoolean(1);
                 }
             }
-        } catch (SQLException e) {
-            listeners.forEach(listener -> listener.dbControllerCancelProcessFailed(this, processPid, e));
-            return;
+        } catch (SQLException exception) {
+            throw exception;
         }
-        if (processCanceled) {
-            listeners.forEach(listener -> listener.dbControllerDidCancelProcess(this, processPid));
-        } else {
-            listeners.forEach(listener -> listener.dbControllerCancelProcessFailed(this, processPid, null));
-        }
+        return processCanceled;
     }
 
 }

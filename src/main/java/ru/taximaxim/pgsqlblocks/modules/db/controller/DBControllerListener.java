@@ -27,12 +27,4 @@ public interface DBControllerListener {
 
     void dbControllerProcessesFilterChanged(DBController controller);
 
-    void dbControllerDidTerminateProcess(DBController controller, int processPid);
-
-    void dbControllerTerminateProcessFailed(DBController controller, int processPid, Exception exception);
-
-    void dbControllerDidCancelProcess(DBController controller, int processPid);
-
-    void dbControllerCancelProcessFailed(DBController controller, int processPid, Exception exception);
-
 }

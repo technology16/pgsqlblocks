@@ -353,34 +353,6 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
     }
 
     @Override
-    public void dbControllerDidTerminateProcess(DBController controller, int processPid) {
-        LOG.info(MessageFormat.format(resourceBundle.getString("process_terminated"), controller.getModel().getName(), processPid));
-        controller.updateProcesses();
-    }
-
-    @Override
-    public void dbControllerTerminateProcessFailed(DBController controller, int processPid, Exception exception) {
-        if (exception != null) {
-            LOG.error(controller.getModel().getName() + " " + exception.getMessage(), exception);
-        }
-        LOG.info(MessageFormat.format(resourceBundle.getString("process_not_terminated"), controller.getModel().getName(), processPid));
-    }
-
-    @Override
-    public void dbControllerDidCancelProcess(DBController controller, int processPid) {
-        LOG.info(MessageFormat.format(resourceBundle.getString("process_cancelled"), controller.getModel().getName(), processPid));
-        controller.updateProcesses();
-    }
-
-    @Override
-    public void dbControllerCancelProcessFailed(DBController controller, int processPid, Exception exception) {
-        if (exception != null) {
-            LOG.error(controller.getModel().getName() + " " + exception.getMessage(), exception);
-        }
-        LOG.info(MessageFormat.format(resourceBundle.getString("process_not_cancelled"), controller.getModel().getName(), processPid));
-    }
-
-    @Override
     public void didSelectController(DBController controller) {
         dbProcessesView.getTreeViewer().setInput(controller.getFilteredProcesses());
         changeToolItemsStateForController(controller);
@@ -576,12 +548,23 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
         }
         DBController selectedController = (DBController) dbModelsView.getTreeViewer().getStructuredSelection().getFirstElement();
         if (selectedProcess != null) {
-            int pid = selectedProcess.getPid();
+            final int processPid = selectedProcess.getPid();
             if (settings.isConfirmRequired() && !MessageDialog.openQuestion(view.getShell(), resourceBundle.getString("confirm_action"),
-                    MessageFormat.format(resourceBundle.getString("kill_process_confirm_message"), pid))) {
+                    MessageFormat.format(resourceBundle.getString("kill_process_confirm_message"), processPid))) {
                 return;
             }
-            selectedController.terminateProcess(selectedProcess);
+            try {
+                boolean result = selectedController.terminateProcessWithPid(processPid);
+                if (result) {
+                    LOG.info(MessageFormat.format(resourceBundle.getString("process_terminated"), selectedController.getModel().getName(), processPid));
+                    selectedController.updateProcesses();
+                } else {
+                    LOG.info(MessageFormat.format(resourceBundle.getString("process_not_terminated"), selectedController.getModel().getName(), processPid));
+                }
+            } catch (SQLException exception) {
+                LOG.error(selectedController.getModel().getName() + " " + exception.getMessage(), exception);
+                LOG.info(MessageFormat.format(resourceBundle.getString("process_not_terminated"), selectedController.getModel().getName(), processPid));
+            }
         }
     }
 
@@ -592,12 +575,23 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
         }
         DBController selectedController = (DBController) dbModelsView.getTreeViewer().getStructuredSelection().getFirstElement();
         if (selectedProcess != null) {
-            int pid = selectedProcess.getPid();
+            final int processPid = selectedProcess.getPid();
             if (settings.isConfirmRequired() && !MessageDialog.openQuestion(view.getShell(), resourceBundle.getString("confirm_action"),
-                    MessageFormat.format(resourceBundle.getString("cancel_process_confirm_message"), pid))) {
+                    MessageFormat.format(resourceBundle.getString("cancel_process_confirm_message"), processPid))) {
                 return;
             }
-            selectedController.cancelProcess(selectedProcess);
+            try {
+                boolean result = selectedController.cancelProcessWithPid(processPid);
+                if (result) {
+                    LOG.info(MessageFormat.format(resourceBundle.getString("process_cancelled"), selectedController.getModel().getName(), processPid));
+                    selectedController.updateProcesses();
+                } else {
+                    LOG.info(MessageFormat.format(resourceBundle.getString("process_not_cancelled"), selectedController.getModel().getName(), processPid));
+                }
+            } catch (SQLException exception) {
+                LOG.error(selectedController.getModel().getName() + " " + exception.getMessage(), exception);
+                LOG.info(MessageFormat.format(resourceBundle.getString("process_not_cancelled"), selectedController.getModel().getName(), processPid));
+            }
         }
     }
 }
