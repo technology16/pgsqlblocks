@@ -23,7 +23,6 @@ public class ApplicationView extends ApplicationWindow {
     private SashForm sashForm;
 
     private ToolBarManager toolBarManager;
-    private TabFolder tabFolder;
 
     private Display display;
 
@@ -61,6 +60,7 @@ public class ApplicationView extends ApplicationWindow {
     @Override
     protected void configureShell(Shell shell) {
         super.configureShell(shell);
+        shell.setMinimumSize(1024, 768);
         shell.setText(APP_NAME);
         shell.setImages(loadIcons());
     }
@@ -118,22 +118,12 @@ public class ApplicationView extends ApplicationWindow {
         topPanelComposite = new Composite(sashForm, SWT.NONE);
         topPanelComposite.setLayout(layout);
         topPanelComposite.setLayoutData(layoutData);
-        createTabFolder(topPanelComposite);
-    }
-
-    private void createTabFolder(Composite composite) {
-        GridLayout layout = new GridLayout();
-        layout.marginWidth = 0;
-        layout.marginHeight = 0;
-        GridData layoutData = new GridData(SWT.FILL, SWT.FILL, true, true);
-        tabFolder = new TabFolder(composite, SWT.BORDER);
-        tabFolder.setLayout(layout);
-        tabFolder.setLayoutData(layoutData);
     }
 
     private void createBottomPanel(SashForm sashForm) {
         GridLayout layout = new GridLayout();
-        layout.marginTop = 0;
+        layout.marginHeight = 0;
+        layout.marginWidth = 0;
         GridData layoutData = new GridData(SWT.FILL, SWT.FILL, true, true);
         bottomPanelComposite = new Composite(sashForm, SWT.NONE);
         bottomPanelComposite.setLayout(layout);
@@ -154,10 +144,6 @@ public class ApplicationView extends ApplicationWindow {
 
     public Composite getBottomPanelComposite() {
         return bottomPanelComposite;
-    }
-
-    public TabFolder getTabFolder() {
-        return tabFolder;
     }
 
     public void setListener(ApplicationViewListener listener) {

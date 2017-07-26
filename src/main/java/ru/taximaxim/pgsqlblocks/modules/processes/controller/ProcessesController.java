@@ -10,8 +10,7 @@ import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.ToolItem;
-import org.eclipse.swt.widgets.TreeColumn;
+import org.eclipse.swt.widgets.*;
 import ru.taximaxim.pgsqlblocks.PgSqlBlocks;
 import ru.taximaxim.pgsqlblocks.common.DBModelsProvider;
 import ru.taximaxim.pgsqlblocks.common.FilterCondition;
@@ -57,6 +56,8 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
 
     private final DBProcessesViewDataSourceFilter dbProcessesViewDataSourceFilter = new DBProcessesViewDataSourceFilter();
 
+    private TabFolder tabFolder;
+
     private ToolItem addDatabaseToolItem;
     private ToolItem deleteDatabaseToolItem;
     private ToolItem editDatabaseToolItem;
@@ -84,24 +85,42 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
 
     public void load() {
         createToolItems();
+
         dbModelsView = new DBModelsView(view.getLeftPanelComposite(), SWT.NONE);
         dbModelsView.getTreeViewer().setInput(dbControllers);
         dbModelsView.addListener(this);
+
         dbProcessesViewDataSourceFilter.addListener(this);
 
-        dbProcessesFiltersView = new DBProcessesFiltersView(view.getRightPanelComposite(), SWT.NONE);
+        tabFolder = new TabFolder(view.getRightPanelComposite(), SWT.NONE);
+        GridLayout tabFolderLayout = new GridLayout();
+        tabFolderLayout.marginWidth = 0;
+        tabFolderLayout.marginHeight = 0;
+        tabFolder.setLayout(tabFolderLayout);
+        tabFolder.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+
+        TabItem processesTabItem = new TabItem(tabFolder, SWT.NONE);
+        processesTabItem.setText(resourceBundle.getString("current_activity"));
+
+        Composite processesViewComposite = new Composite(tabFolder, SWT.NONE);
+        processesViewComposite.setLayout(new GridLayout());
+        processesViewComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+
+        dbProcessesFiltersView = new DBProcessesFiltersView(processesViewComposite, SWT.NONE);
         dbProcessesFiltersView.addListener(this);
         dbProcessesFiltersView.hide();
 
-        dbProcessesView = new DBProcessesView(view.getRightPanelComposite(), SWT.NONE);
+        dbProcessesView = new DBProcessesView(processesViewComposite, SWT.NONE);
         DBProcessesViewDataSource dbProcessesViewDataSource = new DBProcessesViewDataSource(resourceBundle, dbProcessesViewDataSourceFilter);
         dbProcessesView.getTreeViewer().setDataSource(dbProcessesViewDataSource);
         dbProcessesView.getTreeViewer().addSortColumnSelectionListener(this);
         dbProcessesView.getTreeViewer().addSelectionChangedListener(this::dbProcessesViewSelectionChanged);
 
-        dbProcessInfoView = new DBProcessInfoView(view.getRightPanelComposite(), SWT.NONE);
+        dbProcessInfoView = new DBProcessInfoView(processesViewComposite, SWT.NONE);
         dbProcessInfoView.addListener(this);
         dbProcessInfoView.hide();
+
+        processesTabItem.setControl(processesViewComposite);
 
         loadDatabases();
 
@@ -169,7 +188,7 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
 
         new ToolItem(view.getToolBar(), SWT.SEPARATOR);
 
-        ToolItem showSettingsDialogToolItem = new ToolItem(view.getToolBar(), SWT.CHECK);
+        ToolItem showSettingsDialogToolItem = new ToolItem(view.getToolBar(), SWT.PUSH);
         showSettingsDialogToolItem.setImage(ImageUtils.getImage(Images.SETTINGS));
         showSettingsDialogToolItem.setToolTipText(Images.SETTINGS.getDescription(resourceBundle));
         showSettingsDialogToolItem.addListener(SWT.Selection, event -> showSettingsDialog());
