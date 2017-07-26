@@ -10,7 +10,7 @@ import java.io.InputStreamReader;
 public final class DBQueries {
     private static final Logger LOG = Logger.getLogger(DBQueries.class);
 
-    private final static String PG_BACKEND_PID_QUERY = "select pg_backend_pid();";
+    public final static String PG_BACKEND_PID_QUERY = "select pg_backend_pid();";
 
     private static String processesQuery;
     private static String processesQueryWithIdle;
@@ -18,9 +18,9 @@ public final class DBQueries {
     private static final String PROCESSES_QUERY_FILE_NAME = "query.sql";
     private static final String PROCESSES_QUERY_WITH_IDLE_FILE_NAME = "query_with_idle.sql";
 
-    public static String getPgBackendPidQuery() {
-        return PG_BACKEND_PID_QUERY;
-    }
+    public static final String PG_TERMINATE_BACKED_QUERY = "select pg_terminate_backend(?);";
+
+    public static final String PG_CANCEL_BACKED_QUERY = "select pg_cancel_backend(?);";
 
     public synchronized static String getProcessesQuery() {
         if (processesQuery == null) {

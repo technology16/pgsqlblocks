@@ -12,12 +12,16 @@ import ru.taximaxim.pgsqlblocks.utils.DateUtils;
 import ru.taximaxim.pgsqlblocks.utils.Settings;
 
 import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.ResourceBundle;
 
 public class DBProcessInfoView extends Composite {
 
     private Settings settings = Settings.getInstance();
     private ResourceBundle resourceBundle = settings.getResourceBundle();
+
+    private final List<DBProcessInfoViewListener> listeners = new ArrayList<>();
 
     private ToolBar toolBar;
     private ToolItem cancelProcessToolItem;
@@ -37,6 +41,7 @@ public class DBProcessInfoView extends Composite {
 
     private void createContent() {
         toolBar = new ToolBar(this, SWT.HORIZONTAL);
+        toolBar.setEnabled(false);
         GridLayout layout = new GridLayout();
         GridData layoutData = new GridData(SWT.FILL, SWT.TOP, true, false);
         toolBar.setLayout(layout);
@@ -44,9 +49,15 @@ public class DBProcessInfoView extends Composite {
 
         cancelProcessToolItem = new ToolItem(toolBar, SWT.PUSH);
         cancelProcessToolItem.setText("Cancel process");
+        cancelProcessToolItem.addListener(SWT.Selection, event -> {
+            listeners.forEach(DBProcessInfoViewListener::dbProcessInfoViewCancelProcessToolItemClicked);
+        });
 
         terminateProcessToolItem = new ToolItem(toolBar, SWT.PUSH);
         terminateProcessToolItem.setText("Terminate process");
+        terminateProcessToolItem.addListener(SWT.Selection, event -> {
+            listeners.forEach(DBProcessInfoViewListener::dbProcessInfoViewTerminateProcessToolItemClicked);
+        });
 
         processInfoText = new Text(this, SWT.MULTI | SWT.READ_ONLY | SWT.WRAP | SWT.V_SCROLL);
         GridData textLayoutData = new GridData(SWT.FILL, SWT.BOTTOM, true, false);
@@ -56,6 +67,10 @@ public class DBProcessInfoView extends Composite {
 
     public void setTextContent(String content) {
         processInfoText.setText(content);
+    }
+
+    public ToolBar getToolBar() {
+        return toolBar;
     }
 
     public void show(DBProcess process) {
@@ -73,7 +88,7 @@ public class DBProcessInfoView extends Composite {
         String xactStart = DateUtils.dateToString(process.getQuery().getXactStart());
         String query = process.getQuery().getQueryString();
 
-        String content = MessageFormat.format("{0}: {1}\n{2} :{3}\n{4}: {5}\n{6}: {7}\n{8}: {9}\n{10}: {11}",
+        String content = MessageFormat.format("{0}: {1}\n{2}: {3}\n{4}: {5}\n{6}: {7}\n{8}: {9}\n{10}: {11}",
                 pidTitle, pid,backendStartTitle, backendStart, queryStartTitle, queryStart, xactStartTitle, xactStart,
                 slowQueryTitle, isSlowQuery, queryTitle, query);
 
@@ -85,10 +100,19 @@ public class DBProcessInfoView extends Composite {
     }
 
     public void hide() {
+        processInfoText.setText("");
         this.setVisible(false);
         GridData layoutData = (GridData) this.getLayoutData();
         layoutData.exclude = true;
         this.getParent().layout();
+    }
+
+    public void addListener(DBProcessInfoViewListener listener) {
+        listeners.add(listener);
+    }
+
+    public void removeListener(DBProcessInfoViewListener listener) {
+        listeners.remove(listener);
     }
 
 }

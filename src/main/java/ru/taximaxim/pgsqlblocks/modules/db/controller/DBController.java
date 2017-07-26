@@ -117,7 +117,7 @@ public class DBController implements DBProcessFilterListener {
 
     private int getPgBackendPid() throws SQLException {
         try (Statement stBackendPid = connection.createStatement();
-             ResultSet resultSet = stBackendPid.executeQuery(DBQueries.getPgBackendPidQuery())) {
+             ResultSet resultSet = stBackendPid.executeQuery(DBQueries.PG_BACKEND_PID_QUERY)) {
             if (resultSet.next()) {
                 return resultSet.getInt(PG_BACKEND_PID);
             }
@@ -330,4 +330,50 @@ public class DBController implements DBProcessFilterListener {
         filteredProcesses.addAll(processes.stream().filter(processesFilters::filter).collect(Collectors.toList()));
         listeners.forEach(listener -> listener.dbControllerProcessesFilterChanged(this));
     }
+
+    public void terminateProcess(DBProcess process) {
+        final int processPid = process.getPid();
+        boolean processTerminated = false;
+        try {
+            PreparedStatement preparedStatement = connection.prepareStatement(DBQueries.PG_TERMINATE_BACKED_QUERY);
+            preparedStatement.setInt(1, processPid);
+            ResultSet resultSet = preparedStatement.executeQuery(); {
+                if (resultSet.next()) {
+                    processTerminated = resultSet.getBoolean(1);
+                }
+            }
+        } catch (SQLException e) {
+            listeners.forEach(listener -> listener.dbControllerTerminateProcessFailed(this, processPid, e));
+            return;
+        }
+        if (processTerminated) {
+            listeners.forEach(listener -> listener.dbControllerDidTerminateProcess(this, processPid));
+        } else {
+            listeners.forEach(listener -> listener.dbControllerTerminateProcessFailed(this, processPid, null));
+        }
+    }
+
+
+    public void cancelProcess(DBProcess process) {
+        final int processPid = process.getPid();
+        boolean processCanceled = false;
+        try {
+            PreparedStatement preparedStatement = connection.prepareStatement(DBQueries.PG_CANCEL_BACKED_QUERY);
+            preparedStatement.setInt(1, processPid);
+            ResultSet resultSet = preparedStatement.executeQuery(); {
+                if (resultSet.next()) {
+                    processCanceled = resultSet.getBoolean(1);
+                }
+            }
+        } catch (SQLException e) {
+            listeners.forEach(listener -> listener.dbControllerCancelProcessFailed(this, processPid, e));
+            return;
+        }
+        if (processCanceled) {
+            listeners.forEach(listener -> listener.dbControllerDidCancelProcess(this, processPid));
+        } else {
+            listeners.forEach(listener -> listener.dbControllerCancelProcessFailed(this, processPid, null));
+        }
+    }
+
 }

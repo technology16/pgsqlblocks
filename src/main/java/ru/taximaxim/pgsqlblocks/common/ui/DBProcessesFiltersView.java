@@ -322,6 +322,20 @@ public class DBProcessesFiltersView extends Composite {
         includeBlockedButton.setSelection(false);
     }
 
+    public void show() {
+        this.setVisible(true);
+        GridData layoutData = (GridData) this.getLayoutData();
+        layoutData.exclude = false;
+        this.getParent().layout();
+    }
+
+    public void hide() {
+        this.setVisible(false);
+        GridData layoutData = (GridData) this.getLayoutData();
+        layoutData.exclude = true;
+        this.getParent().layout();
+    }
+
     public void addListener(DBProcessesFiltersViewListener listener) {
         listeners.add(listener);
     }

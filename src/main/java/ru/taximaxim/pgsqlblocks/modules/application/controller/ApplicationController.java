@@ -34,15 +34,15 @@ public class ApplicationController implements ApplicationViewListener {
 
     @Override
     public void applicationViewDidLoad() {
+
+        logsView = new LogsView(applicationView.getBottomPanelComposite(), SWT.NONE);
+
         processesController = new ProcessesController(new DBModelsLocalProvider());
         TabItem processesTabItem = new TabItem(applicationView.getTabFolder(), SWT.NONE);
         processesTabItem.setText(resourceBundle.getString("current_activity"));
         ProcessesView processesView = new ProcessesView(applicationView.getTabFolder(), SWT.NONE);
         processesTabItem.setControl(processesView);
         processesController.setView(processesView);
-
-        logsView = new LogsView(applicationView.getBottomPanelComposite(), SWT.NONE);
-
         processesController.load();
     }
 

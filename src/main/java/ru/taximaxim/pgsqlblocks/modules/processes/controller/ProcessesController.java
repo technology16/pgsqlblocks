@@ -2,6 +2,7 @@ package ru.taximaxim.pgsqlblocks.modules.processes.controller;
 
 
 import org.apache.log4j.Logger;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
@@ -9,7 +10,6 @@ import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.swt.widgets.TreeColumn;
 import ru.taximaxim.pgsqlblocks.common.DBModelsProvider;
@@ -38,7 +38,8 @@ import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
 public class ProcessesController implements DBControllerListener, DBModelsViewListener, SettingsListener,
-        DBProcessesViewDataSourceFilterListener, DBProcessesFiltersViewListener, TMTreeViewerSortColumnSelectionListener {
+        DBProcessesViewDataSourceFilterListener, DBProcessesFiltersViewListener,
+        TMTreeViewerSortColumnSelectionListener, DBProcessInfoViewListener {
 
     private static final Logger LOG = Logger.getLogger(ProcessesController.class);
 
@@ -51,8 +52,6 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
     private DBProcessesView dbProcessesView;
     private DBProcessesFiltersView dbProcessesFiltersView;
     private DBProcessInfoView dbProcessInfoView;
-
-    private Composite dbProcessesFiltersViewContainer;
 
     private final DBProcessesViewDataSourceFilter dbProcessesViewDataSourceFilter = new DBProcessesViewDataSourceFilter();
 
@@ -88,16 +87,9 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
         dbModelsView.addListener(this);
         dbProcessesViewDataSourceFilter.addListener(this);
 
-        GridLayout layout = new GridLayout();
-        GridData layoutData = new GridData(SWT.FILL, SWT.TOP, true, false);
-
-        dbProcessesFiltersViewContainer = new Composite(view.getRightPanelComposite(), SWT.NONE);
-        dbProcessesFiltersViewContainer.setLayout(layout);
-        dbProcessesFiltersViewContainer.setLayoutData(layoutData);
-        ((GridData) dbProcessesFiltersViewContainer.getLayoutData()).exclude = true;
-        dbProcessesFiltersViewContainer.setVisible(false);
-        dbProcessesFiltersView = new DBProcessesFiltersView(dbProcessesFiltersViewContainer, SWT.NONE);
+        dbProcessesFiltersView = new DBProcessesFiltersView(view.getRightPanelComposite(), SWT.NONE);
         dbProcessesFiltersView.addListener(this);
+        dbProcessesFiltersView.hide();
 
         dbProcessesView = new DBProcessesView(view.getRightPanelComposite(), SWT.NONE);
         DBProcessesViewDataSource dbProcessesViewDataSource = new DBProcessesViewDataSource(resourceBundle, dbProcessesViewDataSourceFilter);
@@ -106,6 +98,7 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
         dbProcessesView.getTreeViewer().addSelectionChangedListener(this::dbProcessesViewSelectionChanged);
 
         dbProcessInfoView = new DBProcessInfoView(view.getRightPanelComposite(), SWT.NONE);
+        dbProcessInfoView.addListener(this);
         dbProcessInfoView.hide();
 
         loadDatabases();
@@ -174,8 +167,9 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
     }
 
     private void changeToolItemsStateForController(DBController controller) {
-        toggleVisibilityProcessesFilterPanelToolItem.setEnabled(controller != null);
         boolean isEnabled = controller != null && !controller.isConnected();
+        dbProcessInfoView.getToolBar().setEnabled(!isEnabled);
+        toggleVisibilityProcessesFilterPanelToolItem.setEnabled(controller != null);
         deleteDatabaseToolItem.setEnabled(isEnabled);
         editDatabaseToolItem.setEnabled(isEnabled);
         connectDatabaseToolItem.setEnabled(isEnabled);
@@ -198,19 +192,14 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
         dbControllers.add(index, controller);
     }
 
-    private void deleteDatabase(DBModel dbModel) {
-        Optional<DBController> opt = dbControllers.stream().filter(dbc -> dbc.getModel().equals(dbModel)).findFirst();
-        if (opt.isPresent()) {
-            deleteDatabase(opt.get());
-        }
-    }
-
     private void deleteDatabase(DBController dbController) {
         dbController.removeListener(this);
         dbController.shutdown();
         dbControllers.remove(dbController);
         changeToolItemsStateForController(null);
         dbProcessesView.getTreeViewer().setInput(null);
+        toggleVisibilityProcessesFilterPanelToolItem.setSelection(false);
+        dbProcessesFiltersView.hide();
         dbProcessesFiltersView.fillViewForController(null);
     }
 
@@ -295,9 +284,11 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
     }
 
     public void setProcessesFilterViewVisibility(boolean isVisible) {
-        ((GridData) dbProcessesFiltersViewContainer.getLayoutData()).exclude = !isVisible;
-        dbProcessesFiltersViewContainer.setVisible(isVisible);
-        dbProcessesView.getParent().layout();
+        if (isVisible) {
+            dbProcessesFiltersView.show();
+        } else {
+            dbProcessesFiltersView.hide();
+        }
     }
 
     @Override
@@ -359,6 +350,34 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
     @Override
     public void dbControllerProcessesFilterChanged(DBController controller) {
         dbProcessesView.getTreeViewer().refresh();
+    }
+
+    @Override
+    public void dbControllerDidTerminateProcess(DBController controller, int processPid) {
+        LOG.info(MessageFormat.format(resourceBundle.getString("process_terminated"), controller.getModel().getName(), processPid));
+        controller.updateProcesses();
+    }
+
+    @Override
+    public void dbControllerTerminateProcessFailed(DBController controller, int processPid, Exception exception) {
+        if (exception != null) {
+            LOG.error(controller.getModel().getName() + " " + exception.getMessage(), exception);
+        }
+        LOG.info(MessageFormat.format(resourceBundle.getString("process_not_terminated"), controller.getModel().getName(), processPid));
+    }
+
+    @Override
+    public void dbControllerDidCancelProcess(DBController controller, int processPid) {
+        LOG.info(MessageFormat.format(resourceBundle.getString("process_cancelled"), controller.getModel().getName(), processPid));
+        controller.updateProcesses();
+    }
+
+    @Override
+    public void dbControllerCancelProcessFailed(DBController controller, int processPid, Exception exception) {
+        if (exception != null) {
+            LOG.error(controller.getModel().getName() + " " + exception.getMessage(), exception);
+        }
+        LOG.info(MessageFormat.format(resourceBundle.getString("process_not_cancelled"), controller.getModel().getName(), processPid));
     }
 
     @Override
@@ -540,29 +559,45 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
     private void dbProcessesViewSelectionChanged(SelectionChangedEvent event) {
         ISelection selection = event.getSelection();
         if (selection.isEmpty()) {
-            hideProcessInfoView();
+            selectedProcess = null;
+            dbProcessInfoView.hide();
         } else {
             IStructuredSelection structuredSelection = (IStructuredSelection)selection;
             DBProcess process = (DBProcess)structuredSelection.getFirstElement();
-            showProcessInfoView(process);
+            selectedProcess = process;
+            dbProcessInfoView.show(process);
         }
     }
 
-    private void setSelectedProcess(DBProcess process) {
-        selectedProcess = process;
+    @Override
+    public void dbProcessInfoViewTerminateProcessToolItemClicked() {
+        if (dbModelsView.getTreeViewer().getStructuredSelection().getFirstElement() == null) {
+            return;
+        }
+        DBController selectedController = (DBController) dbModelsView.getTreeViewer().getStructuredSelection().getFirstElement();
         if (selectedProcess != null) {
-            showProcessInfoView(selectedProcess);
-        } else {
-            hideProcessInfoView();
+            int pid = selectedProcess.getPid();
+            if (settings.isConfirmRequired() && !MessageDialog.openQuestion(view.getShell(), resourceBundle.getString("confirm_action"),
+                    MessageFormat.format(resourceBundle.getString("kill_process_confirm_message"), pid))) {
+                return;
+            }
+            selectedController.terminateProcess(selectedProcess);
         }
     }
 
-    private void showProcessInfoView(DBProcess process) {
-        dbProcessInfoView.show(process);
+    @Override
+    public void dbProcessInfoViewCancelProcessToolItemClicked() {
+        if (dbModelsView.getTreeViewer().getStructuredSelection().getFirstElement() == null) {
+            return;
+        }
+        DBController selectedController = (DBController) dbModelsView.getTreeViewer().getStructuredSelection().getFirstElement();
+        if (selectedProcess != null) {
+            int pid = selectedProcess.getPid();
+            if (settings.isConfirmRequired() && !MessageDialog.openQuestion(view.getShell(), resourceBundle.getString("confirm_action"),
+                    MessageFormat.format(resourceBundle.getString("cancel_process_confirm_message"), pid))) {
+                return;
+            }
+            selectedController.cancelProcess(selectedProcess);
+        }
     }
-
-    private void hideProcessInfoView() {
-        dbProcessInfoView.hide();
-    }
-
 }
