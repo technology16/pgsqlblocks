@@ -7,7 +7,7 @@ public class PgSqlBlocks {
 
     private static PgSqlBlocks instance;
 
-    private ApplicationController applicationController;
+    private final ApplicationController applicationController;
 
     private PgSqlBlocks() {
         applicationController = new ApplicationController();
@@ -21,6 +21,10 @@ public class PgSqlBlocks {
         if (instance == null)
             instance = new PgSqlBlocks();
         return instance;
+    }
+
+    public ApplicationController getApplicationController() {
+        return applicationController;
     }
 
     public void launchWithArgs(String[] args) {

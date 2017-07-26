@@ -12,6 +12,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.swt.widgets.TreeColumn;
+import ru.taximaxim.pgsqlblocks.PgSqlBlocks;
 import ru.taximaxim.pgsqlblocks.common.DBModelsProvider;
 import ru.taximaxim.pgsqlblocks.common.FilterCondition;
 import ru.taximaxim.pgsqlblocks.common.models.DBModel;
@@ -19,6 +20,7 @@ import ru.taximaxim.pgsqlblocks.common.models.DBProcess;
 import ru.taximaxim.pgsqlblocks.common.ui.*;
 import ru.taximaxim.pgsqlblocks.dialogs.AddDatabaseDialog;
 import ru.taximaxim.pgsqlblocks.dialogs.EditDatabaseDialog;
+import ru.taximaxim.pgsqlblocks.dialogs.SettingsDialog;
 import ru.taximaxim.pgsqlblocks.modules.db.controller.DBController;
 import ru.taximaxim.pgsqlblocks.modules.db.controller.DBControllerListener;
 import ru.taximaxim.pgsqlblocks.modules.db.model.DBStatus;
@@ -164,6 +166,19 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
         toggleVisibilityProcessesFilterPanelToolItem.setToolTipText(Images.FILTER.getDescription(resourceBundle));
         toggleVisibilityProcessesFilterPanelToolItem.addListener(SWT.Selection, event ->
                 setProcessesFilterViewVisibility(toggleVisibilityProcessesFilterPanelToolItem.getSelection()));
+
+        new ToolItem(view.getToolBar(), SWT.SEPARATOR);
+
+        ToolItem showSettingsDialogToolItem = new ToolItem(view.getToolBar(), SWT.CHECK);
+        showSettingsDialogToolItem.setImage(ImageUtils.getImage(Images.SETTINGS));
+        showSettingsDialogToolItem.setToolTipText(Images.SETTINGS.getDescription(resourceBundle));
+        showSettingsDialogToolItem.addListener(SWT.Selection, event -> showSettingsDialog());
+
+        ToolItem toggleLogsPanelVisibilityToolItem = new ToolItem(view.getToolBar(), SWT.CHECK);
+        toggleLogsPanelVisibilityToolItem.setImage(ImageUtils.getImage(Images.SHOW_LOG_PANEL));
+        toggleLogsPanelVisibilityToolItem.setToolTipText(Images.SHOW_LOG_PANEL.getDescription(resourceBundle));
+        toggleLogsPanelVisibilityToolItem.setSelection(true);
+        toggleLogsPanelVisibilityToolItem.addListener(SWT.Selection, event -> toggleLogsPanelVisibility(toggleLogsPanelVisibilityToolItem));
     }
 
     private void changeToolItemsStateForController(DBController controller) {
@@ -174,6 +189,19 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
         editDatabaseToolItem.setEnabled(isEnabled);
         connectDatabaseToolItem.setEnabled(isEnabled);
         disconnectDatabaseToolItem.setEnabled(controller != null && !isEnabled);
+    }
+
+    private void toggleLogsPanelVisibility(ToolItem toolItem) {
+        boolean isShow = toolItem.getSelection();
+        if (isShow) {
+            toolItem.setImage(ImageUtils.getImage(Images.SHOW_LOG_PANEL));
+            toolItem.setToolTipText(Images.SHOW_LOG_PANEL.getDescription(resourceBundle));
+            PgSqlBlocks.getInstance().getApplicationController().showLogsView();
+        } else {
+            toolItem.setImage(ImageUtils.getImage(Images.HIDE_LOG_PANEL));
+            toolItem.setToolTipText(Images.HIDE_LOG_PANEL.getDescription(resourceBundle));
+            PgSqlBlocks.getInstance().getApplicationController().hideLogsView();
+        }
     }
 
     private void loadDatabases() {
@@ -373,6 +401,11 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
         settings.removeListener(this);
     }
 
+    private void showSettingsDialog() {
+        SettingsDialog settingsDialog = new SettingsDialog(view.getShell(), settings);
+        settingsDialog.open();
+    }
+
     @Override
     public void settingsUpdatePeriodChanged(int updatePeriod) {
         if (settings.isAutoUpdate()) {
@@ -382,12 +415,9 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
 
     @Override
     public void settingsShowIdleChanged(boolean isShowIdle) {
-
-    }
-
-    @Override
-    public void settingsShowBackendPidChanged(boolean isShowBackendPid) {
-
+        if (settings.isAutoUpdate()) {
+            dbControllers.stream().filter(DBController::isConnected).forEach(dbc -> dbc.startProcessesUpdater(settings.getUpdatePeriod()));
+        }
     }
 
     @Override

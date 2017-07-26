@@ -239,7 +239,6 @@ public final class Settings {
         if (this.showBackendPid != showBackendPid) {
             this.showBackendPid = showBackendPid;
             saveProperties(SHOW_BACKEND_PID, Boolean.toString(showBackendPid));
-            listeners.forEach(listener -> listener.settingsShowBackendPidChanged(this.showBackendPid));
         }
     }
 

@@ -20,6 +20,8 @@ public class ApplicationView extends ApplicationWindow {
     private Composite topPanelComposite;
     private Composite bottomPanelComposite;
 
+    private SashForm sashForm;
+
     private ToolBarManager toolBarManager;
     private TabFolder tabFolder;
 
@@ -90,7 +92,7 @@ public class ApplicationView extends ApplicationWindow {
 
         GridLayout layout = new GridLayout();
         GridData layoutData = new GridData(SWT.FILL, SWT.FILL, true, true);
-        SashForm sashForm = new SashForm(mainComposite, SWT.VERTICAL);
+        sashForm = new SashForm(mainComposite, SWT.VERTICAL);
         sashForm.setLayout(layout);
         sashForm.setLayoutData(layoutData);
         sashForm.SASH_WIDTH = 2;
@@ -136,6 +138,14 @@ public class ApplicationView extends ApplicationWindow {
         bottomPanelComposite = new Composite(sashForm, SWT.NONE);
         bottomPanelComposite.setLayout(layout);
         bottomPanelComposite.setLayoutData(layoutData);
+    }
+
+    public void hideBottomPanel() {
+        sashForm.setWeights(new int[] {100, 0});
+    }
+
+    public void showBottomPanel() {
+        sashForm.setWeights(new int[] {80,20});
     }
 
     public Composite getTopPanelComposite() {

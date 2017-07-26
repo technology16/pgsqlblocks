@@ -56,9 +56,9 @@ public class DBProcessesViewDataSource extends TMTreeViewerDataSource<DBProcess>
             case 13:
                 return resourceBundle.getString("relation");
             case 14:
-                return resourceBundle.getString("query");
-            case 15:
                 return resourceBundle.getString("slow_query");
+            case 15:
+                return resourceBundle.getString("query");
             default:
                 return resourceBundle.getString("undefined");
         }
@@ -96,9 +96,9 @@ public class DBProcessesViewDataSource extends TMTreeViewerDataSource<DBProcess>
             case 13:
                 return "RELATION";
             case 14:
-                return "QUERY";
-            case 15:
                 return "SLOW_QUERY";
+            case 15:
+                return "QUERY";
             default:
                 return "UNDEFINED";
         }
@@ -132,9 +132,9 @@ public class DBProcessesViewDataSource extends TMTreeViewerDataSource<DBProcess>
             case 14:
                 return 150;
             case 15:
-                return 110;
-            default:
                 return 100;
+            default:
+                return 110;
         }
     }
 
@@ -185,9 +185,9 @@ public class DBProcessesViewDataSource extends TMTreeViewerDataSource<DBProcess>
             case 13:
                 return process.getBlocksRelationsString();
             case 14:
-                return process.getQuery().getQueryString();
-            case 15:
                 return String.valueOf(process.getQuery().isSlowQuery());
+            case 15:
+                return process.getQuery().getQueryString();
             default:
                 return "UNDEFINED";
         }
