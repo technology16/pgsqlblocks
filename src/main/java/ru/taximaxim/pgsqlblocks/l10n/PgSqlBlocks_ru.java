@@ -34,6 +34,7 @@ public class PgSqlBlocks_ru extends ListResourceBundle {
                 {"about", "&О приложении"},
                 {"exit", "&Выход"},
                 {"current_activity", "Текущая активность"},
+                {"blocks_journal", "Журнал блокировок"},
                 {"database", "Базы данных"},
                 {"kill_process", "Уничтожить процесс"},
                 {"cancel_process", "Послать сигнал отмены процесса"},
@@ -97,6 +98,8 @@ public class PgSqlBlocks_ru extends ListResourceBundle {
                 {"query", "Запрос"},
                 {"slow_query", "Долгий процесс"},
                 {"undefined", "Без имени"},
+                {"block_start_date", "Блокировка началась"},
+                {"block_change_date", "Блокировка изменена"},
 
                 // settings dialog
                 {"processes", "Процессы"},

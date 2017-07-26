@@ -35,6 +35,7 @@ public class PgSqlBlocks_en extends ListResourceBundle {
                 {"exit", "&Exit"},
                 {"current_activity", "Current Activity"},
                 {"database", "Database"},
+                {"blocks_journal", "Blocks journal"},
                 {"kill_process", "Kill process"},
                 {"cancel_process", "Cancel process"},
                 {"lock_history", "Lock history"},
@@ -97,6 +98,8 @@ public class PgSqlBlocks_en extends ListResourceBundle {
                 {"query", "Query"},
                 {"slow_query", "Slow query"},
                 {"undefined", "Undefined"},
+                {"block_start_date", "Block started"},
+                {"block_change_date", "Block changed"},
 
                 // settings dialog
                 {"processes", "Processes"},

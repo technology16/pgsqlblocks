@@ -20,7 +20,6 @@
 package ru.taximaxim.pgsqlblocks.process;
 
 import org.apache.log4j.Logger;
-import ru.taximaxim.pgsqlblocks.BlocksJournal;
 import ru.taximaxim.pgsqlblocks.SortColumn;
 import ru.taximaxim.pgsqlblocks.SortDirection;
 import ru.taximaxim.pgsqlblocks.dbcdata.DbcData;
@@ -70,7 +69,6 @@ public class ProcessTreeBuilder {
     private static String queryWithIdle;
     private final DbcData dbcData;
     private final Process root = new Process(0, null, null, null, null);
-    private final BlocksJournal blocksJournal = new BlocksJournal();
 
     public ProcessTreeBuilder(DbcData dbcData) {
         this.dbcData = dbcData;
@@ -133,8 +131,6 @@ public class ProcessTreeBuilder {
 
         proceedProcesses(tempProcessList);
 
-        addBlockingProcessesToJournal(tempProcessList);
-
         return tempProcessList.values();
     }
 
@@ -152,12 +148,6 @@ public class ProcessTreeBuilder {
                 resultSet.getString(USE_NAME),
                 resultSet.getString(CLIENT));
         return new Process(pid, caller, query, state, stateChangeDate);
-    }
-
-    private void addBlockingProcessesToJournal(Map<Integer, Process> processes) {
-        List<Process> blockingProcesses = new ArrayList<>();
-        processes.values().stream().filter(p-> !p.hasParent() && p.hasChildren()).forEach(blockingProcesses::add);
-        blocksJournal.addProcesses(blockingProcesses);
     }
 
     private void proceedBlocks(Map<Integer, Process> tempProcessList, Map<Integer, Set<Block>> tempBlocksList) {

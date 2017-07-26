@@ -22,6 +22,7 @@ package ru.taximaxim.pgsqlblocks.dbcdata;
 import org.apache.log4j.Logger;
 import ru.taximaxim.pgpass.PgPass;
 import ru.taximaxim.pgpass.PgPassException;
+import ru.taximaxim.pgsqlblocks.blocksjournal.BlocksJournal;
 import ru.taximaxim.pgsqlblocks.MainForm;
 import ru.taximaxim.pgsqlblocks.process.Process;
 import ru.taximaxim.pgsqlblocks.process.ProcessTreeBuilder;
@@ -29,10 +30,12 @@ import ru.taximaxim.pgsqlblocks.utils.Settings;
 
 import java.sql.*;
 import java.text.MessageFormat;
+import java.util.List;
 import java.util.ResourceBundle;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
+import java.util.stream.Collectors;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
 
@@ -64,6 +67,7 @@ public class DbcData extends UpdateProvider implements Comparable<DbcData>, Upda
 
     private Connection connection;
     private final ProcessTreeBuilder treeBuilder = new ProcessTreeBuilder(this);
+    private final BlocksJournal blocksJournal;
 
     public DbcData(String name,String host, String port,String dbname, String user, String passwd, boolean enabled) {
         this.name = name;
@@ -73,7 +77,7 @@ public class DbcData extends UpdateProvider implements Comparable<DbcData>, Upda
         this.user = user;
         this.enabled = enabled;
         this.password = passwd;
-
+        this.blocksJournal = new BlocksJournal(name);
         process = treeBuilder.buildProcessTree();
     }
 
@@ -219,8 +223,20 @@ public class DbcData extends UpdateProvider implements Comparable<DbcData>, Upda
 
     public Process getProcessTree(boolean needUpdate) {
         Process rootProcess = needUpdate ? treeBuilder.buildProcessTree() : process;
+        if (needUpdate) {
+            List<Process> blockingProcesses = rootProcess.getChildren().stream().filter(Process::hasChildren).collect(Collectors.toList());
+            addBlockingProcessesToJournal(blockingProcesses);
+        }
         treeBuilder.processSort(rootProcess, MainForm.getSortColumn(), MainForm.getSortDirection());
         return rootProcess;
+    }
+
+    private void addBlockingProcessesToJournal(List<Process> processes) {
+        blocksJournal.putProcesses(processes);
+    }
+
+    public BlocksJournal getBlocksJournal() {
+        return blocksJournal;
     }
 
     public boolean hasBlockedProcess() {
