@@ -2,7 +2,6 @@ package ru.taximaxim.pgsqlblocks.common.ui;
 
 
 import org.eclipse.swt.graphics.Image;
-import ru.taximaxim.pgsqlblocks.common.models.DBBlock;
 import ru.taximaxim.pgsqlblocks.common.models.DBProcess;
 import ru.taximaxim.pgsqlblocks.utils.DateUtils;
 import ru.taximaxim.pgsqlblocks.utils.ImageUtils;
@@ -11,7 +10,7 @@ import java.util.List;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
-public class DBProcessesViewDataSource extends TMTreeViewerDataSource {
+public class DBProcessesViewDataSource extends TMTreeViewerDataSource<DBProcess> {
 
     private final ResourceBundle resourceBundle;
 

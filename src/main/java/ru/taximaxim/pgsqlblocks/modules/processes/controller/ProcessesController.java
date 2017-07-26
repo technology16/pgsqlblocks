@@ -2,8 +2,9 @@ package ru.taximaxim.pgsqlblocks.modules.processes.controller;
 
 
 import org.apache.log4j.Logger;
-import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.jface.viewers.ViewerComparator;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
@@ -49,10 +50,11 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
     private DBModelsView dbModelsView;
     private DBProcessesView dbProcessesView;
     private DBProcessesFiltersView dbProcessesFiltersView;
+    private DBProcessInfoView dbProcessInfoView;
 
     private Composite dbProcessesFiltersViewContainer;
 
-    private final DBProcessesViewDataSourceFilter dbProcessViewFilter = new DBProcessesViewDataSourceFilter();
+    private final DBProcessesViewDataSourceFilter dbProcessesViewDataSourceFilter = new DBProcessesViewDataSourceFilter();
 
     private ToolItem addDatabaseToolItem;
     private ToolItem deleteDatabaseToolItem;
@@ -68,6 +70,8 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
 
     private List<DBController> dbControllers = new ArrayList<>();
 
+    private DBProcess selectedProcess;
+
     public ProcessesController(DBModelsProvider dbModelsProvider) {
         this.dbModelsProvider = dbModelsProvider;
         settings.addListener(this);
@@ -82,7 +86,7 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
         dbModelsView = new DBModelsView(view.getLeftPanelComposite(), SWT.NONE);
         dbModelsView.getTreeViewer().setInput(dbControllers);
         dbModelsView.addListener(this);
-        dbProcessViewFilter.addListener(this);
+        dbProcessesViewDataSourceFilter.addListener(this);
 
         GridLayout layout = new GridLayout();
         GridData layoutData = new GridData(SWT.FILL, SWT.TOP, true, false);
@@ -96,11 +100,18 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
         dbProcessesFiltersView.addListener(this);
 
         dbProcessesView = new DBProcessesView(view.getRightPanelComposite(), SWT.NONE);
-        DBProcessesViewDataSource dbProcessesViewDataSource = new DBProcessesViewDataSource(resourceBundle, dbProcessViewFilter);
+        DBProcessesViewDataSource dbProcessesViewDataSource = new DBProcessesViewDataSource(resourceBundle, dbProcessesViewDataSourceFilter);
         dbProcessesView.getTreeViewer().setDataSource(dbProcessesViewDataSource);
         dbProcessesView.getTreeViewer().addSortColumnSelectionListener(this);
+        dbProcessesView.getTreeViewer().addSelectionChangedListener(this::dbProcessesViewSelectionChanged);
+
+        dbProcessInfoView = new DBProcessInfoView(view.getRightPanelComposite(), SWT.NONE);
+        dbProcessInfoView.hide();
 
         loadDatabases();
+
+        dbControllers.stream().filter(DBController::isEnabledAutoConnection).forEach(DBController::connect);
+
         DriverManager.setLoginTimeout(settings.getLoginTimeout());
     }
 
@@ -153,7 +164,7 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
         showOnlyBlockedProcessesToolItem.setImage(ImageUtils.getImage(Images.VIEW_ONLY_BLOCKED));
         showOnlyBlockedProcessesToolItem.setToolTipText(Images.VIEW_ONLY_BLOCKED.getDescription(resourceBundle));
         showOnlyBlockedProcessesToolItem.addListener(SWT.Selection, event ->
-                dbProcessViewFilter.setShowOnlyBlockedProcesses(showOnlyBlockedProcessesToolItem.getSelection()));
+                dbProcessesViewDataSourceFilter.setShowOnlyBlockedProcesses(showOnlyBlockedProcessesToolItem.getSelection()));
 
         toggleVisibilityProcessesFilterPanelToolItem = new ToolItem(view.getToolBar(), SWT.CHECK);
         toggleVisibilityProcessesFilterPanelToolItem.setImage(ImageUtils.getImage(Images.FILTER));
@@ -223,12 +234,14 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
 
     private void editDatabase(DBModel oldModel, DBModel newModel) {
         Optional<DBController> opt = dbControllers.stream().filter(dbc -> dbc.getModel().equals(oldModel)).findFirst();
-        if (opt.isPresent()) {
-            DBController changedController = opt.get();
-            changedController.setModel(newModel);
-        }
-        dbModelsView.getTreeViewer().refresh(true, true);
-        saveDatabases();
+        opt.ifPresent(controller -> {
+            controller.setModel(newModel);
+            dbModelsView.getTreeViewer().refresh(true, true);
+            saveDatabases();
+            if (controller.isEnabledAutoConnection()) {
+                controller.connect();
+            }
+        });
     }
 
     private void openEditSelectedDatabaseDialog() {
@@ -523,4 +536,33 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
     public void didSelectSortColumn(TreeColumn column, int columnIndex, int sortDirection) {
         dbProcessesView.getTreeViewer().setComparator(new DBProcessesViewComparator(columnIndex, sortDirection));
     }
+
+    private void dbProcessesViewSelectionChanged(SelectionChangedEvent event) {
+        ISelection selection = event.getSelection();
+        if (selection.isEmpty()) {
+            hideProcessInfoView();
+        } else {
+            IStructuredSelection structuredSelection = (IStructuredSelection)selection;
+            DBProcess process = (DBProcess)structuredSelection.getFirstElement();
+            showProcessInfoView(process);
+        }
+    }
+
+    private void setSelectedProcess(DBProcess process) {
+        selectedProcess = process;
+        if (selectedProcess != null) {
+            showProcessInfoView(selectedProcess);
+        } else {
+            hideProcessInfoView();
+        }
+    }
+
+    private void showProcessInfoView(DBProcess process) {
+        dbProcessInfoView.show(process);
+    }
+
+    private void hideProcessInfoView() {
+        dbProcessInfoView.hide();
+    }
+
 }

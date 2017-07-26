@@ -56,6 +56,7 @@ public class AddDatabaseDialog extends Dialog {
         GridLayout layout = new GridLayout(2, false);
         layout.marginRight = 5;
         layout.marginLeft = 10;
+        layout.marginTop = 10;
         container.setLayout(layout);
 
         GridData textGd = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1);

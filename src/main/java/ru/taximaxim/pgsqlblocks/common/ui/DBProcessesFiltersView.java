@@ -222,7 +222,7 @@ public class DBProcessesFiltersView extends Composite {
 
     private void createIncludeBlockedProcessesView() {
         Composite composite = new Composite(group, SWT.NONE);
-        GridData layoutData = new GridData(SWT.FILL, SWT.FILL, false, false, 3, 1);
+        GridData layoutData = new GridData(SWT.FILL, SWT.FILL, false, false, 9, 1);
         composite.setLayout(new GridLayout());
         composite.setLayoutData(layoutData);
 

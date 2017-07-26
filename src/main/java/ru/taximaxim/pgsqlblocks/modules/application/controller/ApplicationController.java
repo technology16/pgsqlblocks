@@ -34,8 +34,16 @@ public class ApplicationController implements ApplicationViewListener {
 
     @Override
     public void applicationViewDidLoad() {
-        addProcessesModule();
-        addLogsModule();
+        processesController = new ProcessesController(new DBModelsLocalProvider());
+        TabItem processesTabItem = new TabItem(applicationView.getTabFolder(), SWT.NONE);
+        processesTabItem.setText(resourceBundle.getString("current_activity"));
+        ProcessesView processesView = new ProcessesView(applicationView.getTabFolder(), SWT.NONE);
+        processesTabItem.setControl(processesView);
+        processesController.setView(processesView);
+
+        logsView = new LogsView(applicationView.getBottomPanelComposite(), SWT.NONE);
+
+        processesController.load();
     }
 
     @Override
@@ -43,18 +51,5 @@ public class ApplicationController implements ApplicationViewListener {
         processesController.close();
     }
 
-    private void addProcessesModule() {
-        processesController = new ProcessesController(new DBModelsLocalProvider());
-        TabItem processesTabItem = new TabItem(applicationView.getTabFolder(), SWT.NONE);
-        processesTabItem.setText(resourceBundle.getString("current_activity"));
-        ProcessesView processesView = new ProcessesView(applicationView.getTabFolder(), SWT.NONE);
-        processesTabItem.setControl(processesView);
-        processesController.setView(processesView);
-        processesController.load();
-    }
-
-    private void addLogsModule() {
-        logsView = new LogsView(applicationView.getBottomPanelComposite(), SWT.NONE);
-    }
 
 }

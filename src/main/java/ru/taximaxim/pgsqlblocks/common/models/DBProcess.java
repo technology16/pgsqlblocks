@@ -121,4 +121,19 @@ public class DBProcess {
     public int hashCode() {
         return pid;
     }
+
+    @Override
+    public String toString() {
+        return "DBProcess{" +
+                "parents=" + parents +
+                ", children=" + children +
+                ", blocks=" + blocks +
+                ", pid=" + pid +
+                ", state='" + state + '\'' +
+                ", stateChange=" + stateChange +
+                ", query=" + query +
+                ", queryCaller=" + queryCaller +
+                ", status=" + status +
+                '}';
+    }
 }

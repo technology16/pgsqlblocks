@@ -7,9 +7,9 @@ import org.eclipse.jface.viewers.ITreeContentProvider;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class TMTreeViewerDataSource implements ITableLabelProvider, ITreeContentProvider {
+public abstract class TMTreeViewerDataSource<T> implements ITableLabelProvider, ITreeContentProvider {
 
-    protected TMTreeViewerDataSourceFilter dataFilter;
+    protected TMTreeViewerDataSourceFilter<T> dataFilter;
 
     public TMTreeViewerDataSource() {
 
