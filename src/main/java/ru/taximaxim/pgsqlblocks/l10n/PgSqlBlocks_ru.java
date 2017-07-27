@@ -43,6 +43,7 @@ public class PgSqlBlocks_ru extends ListResourceBundle {
                 {"no_locks", "Не найдено блокировок для сохранения"},
                 {"view_lock_history", "Открыть историю блокировок"},
                 {"one_db_has_lock", "В одной имеется блокировка"},
+                {"db_has_lock", "В {0} имеется блокировк"},
                 {"several_db_has_lock", "В нескольких имеется блокировка"},
                 {"error_reading_the_manifest", "Ошибка при чтении манифеста"},
                 {"process_terminated", "{0}  pid={1} остановлен."},

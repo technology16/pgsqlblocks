@@ -1,20 +1,28 @@
 package ru.taximaxim.pgsqlblocks.modules.application.view;
 
+import org.apache.log4j.Logger;
 import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.window.ApplicationWindow;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
+import org.eclipse.swt.events.ShellEvent;
+import org.eclipse.swt.events.ShellListener;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.*;
+import ru.taximaxim.pgsqlblocks.utils.ImageUtils;
+import ru.taximaxim.pgsqlblocks.utils.Images;
 import ru.taximaxim.pgsqlblocks.utils.Settings;
 
 import java.text.MessageFormat;
 import java.util.ResourceBundle;
 
 public class ApplicationView extends ApplicationWindow {
+
+    private static final Logger LOG = Logger.getLogger(ApplicationView.class);
+
 
     private Composite composite;
     private Composite topPanelComposite;
@@ -24,7 +32,9 @@ public class ApplicationView extends ApplicationWindow {
 
     private ToolBarManager toolBarManager;
 
-    private Display display;
+    private static Display display;
+
+    private Tray tray;
 
     private ApplicationViewListener viewListener;
 
@@ -42,12 +52,11 @@ public class ApplicationView extends ApplicationWindow {
 
     public void show() {
         try {
-            display = Display.getCurrent();
+            display = Display.getDefault();
             open();
-            if (display != null)
-                display.dispose();
-        } catch (Exception ex) {
-            ex.printStackTrace();
+            display.dispose();
+        } catch (Exception exception) {
+            LOG.error("An error has occurred:"+ exception);
         }
     }
 
@@ -90,6 +99,8 @@ public class ApplicationView extends ApplicationWindow {
     protected Control createContents(Composite mainComposite) {
         this.composite = mainComposite;
 
+        initTray();
+
         GridLayout layout = new GridLayout();
         GridData layoutData = new GridData(SWT.FILL, SWT.FILL, true, true);
         sashForm = new SashForm(mainComposite, SWT.VERTICAL);
@@ -112,8 +123,34 @@ public class ApplicationView extends ApplicationWindow {
         return  mainComposite;
     }
 
+    private void initTray() {
+        tray = display.getSystemTray();
+        if (tray != null) {
+            TrayItem trayItem = new TrayItem(tray, SWT.NONE);
+            trayItem.setImage(ImageUtils.getImage(Images.UNBLOCKED));
+            trayItem.setToolTipText(APP_NAME);
+            final Menu trayMenu = new Menu(getShell(), SWT.POP_UP);
+            MenuItem trayMenuItem = new MenuItem(trayMenu, SWT.PUSH);
+            trayMenuItem.setText(resourceBundle.getString("exit"));
+            trayMenuItem.addListener(SWT.Selection, event -> {
+                if (settings.isConfirmExit()) {
+                    getShell().forceActive();
+                }
+                getShell().close();
+            });
+            trayItem.addListener(SWT.MenuDetect, event -> trayMenu.setVisible(true));
+
+            ToolTip tip = new ToolTip(getShell(), SWT.BALLOON | SWT.ICON_WARNING);
+            tip.setText(APP_NAME);
+            tip.setAutoHide(true);
+            tip.setVisible(false);
+            trayItem.setToolTip(tip);
+        }
+    }
+
     private void createTopPanel(SashForm sashForm) {
         GridLayout layout = new GridLayout();
+        layout.marginBottom = 0;
         GridData layoutData = new GridData(SWT.FILL, SWT.FILL, true, true);
         topPanelComposite = new Composite(sashForm, SWT.NONE);
         topPanelComposite.setLayout(layout);
@@ -122,8 +159,7 @@ public class ApplicationView extends ApplicationWindow {
 
     private void createBottomPanel(SashForm sashForm) {
         GridLayout layout = new GridLayout();
-        layout.marginHeight = 0;
-        layout.marginWidth = 0;
+        layout.marginTop = 0;
         GridData layoutData = new GridData(SWT.FILL, SWT.FILL, true, true);
         bottomPanelComposite = new Composite(sashForm, SWT.NONE);
         bottomPanelComposite.setLayout(layout);
@@ -144,6 +180,14 @@ public class ApplicationView extends ApplicationWindow {
 
     public Composite getBottomPanelComposite() {
         return bottomPanelComposite;
+    }
+
+    public Tray getTray() {
+        return tray;
+    }
+
+    public boolean trayIsAvailable() {
+        return tray != null;
     }
 
     public void setListener(ApplicationViewListener listener) {

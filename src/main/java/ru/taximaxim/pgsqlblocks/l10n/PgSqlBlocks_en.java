@@ -43,6 +43,7 @@ public class PgSqlBlocks_en extends ListResourceBundle {
                 {"no_locks", "No locks were found to save"},
                 {"view_lock_history", "View lock history"},
                 {"one_db_has_lock", "In one database there is a lock"},
+                {"db_has_lock", "In {0} there is a lock"},
                 {"several_db_has_lock", "Several databases have a lock"},
                 {"error_reading_the_manifest", "Error reading the manifest"},
                 {"process_terminated", "{0}  pid={1} is terminated."},

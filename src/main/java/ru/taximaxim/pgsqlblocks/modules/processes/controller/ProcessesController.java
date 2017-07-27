@@ -215,11 +215,11 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
         if (isShow) {
             toolItem.setImage(ImageUtils.getImage(Images.SHOW_LOG_PANEL));
             toolItem.setToolTipText(Images.SHOW_LOG_PANEL.getDescription(resourceBundle));
-            PgSqlBlocks.getInstance().getApplicationController().showLogsView();
+            PgSqlBlocks.getInstance().getApplicationController().getApplicationView().showBottomPanel();
         } else {
             toolItem.setImage(ImageUtils.getImage(Images.HIDE_LOG_PANEL));
             toolItem.setToolTipText(Images.HIDE_LOG_PANEL.getDescription(resourceBundle));
-            PgSqlBlocks.getInstance().getApplicationController().hideLogsView();
+            PgSqlBlocks.getInstance().getApplicationController().getApplicationView().hideBottomPanel();
         }
     }
 
@@ -338,6 +338,45 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
         }
     }
 
+    private void showDBBlockedMessageInTray(DBController controller) {
+        view.getDisplay().asyncExec(() -> {
+            if (PgSqlBlocks.getInstance().getApplicationController().getApplicationView().trayIsAvailable()) {
+                Tray tray = PgSqlBlocks.getInstance().getApplicationController().getApplicationView().getTray();
+                TrayItem trayItem = tray.getItem(0);
+                trayItem.setImage(ImageUtils.getImage(Images.BLOCKED));
+                ToolTip toolTip = trayItem.getToolTip();
+                toolTip.setMessage(MessageFormat.format(resourceBundle.getString("db_has_lock"), controller.getModel().getName()));
+                toolTip.setVisible(true);
+            } else {
+                LOG.error("Tray is not available");
+            }
+        });
+    }
+
+    private void hideTrayMessageIfAllDatabasesUnblocked() {
+        view.getDisplay().asyncExec(() -> {
+            if (PgSqlBlocks.getInstance().getApplicationController().getApplicationView().trayIsAvailable()) {
+                if (!dbControllers.stream().anyMatch(DBController::isBlocked)) {
+                    Tray tray = PgSqlBlocks.getInstance().getApplicationController().getApplicationView().getTray();
+                    TrayItem trayItem = tray.getItem(0);
+                    trayItem.setImage(ImageUtils.getImage(Images.UNBLOCKED));
+                    ToolTip toolTip = trayItem.getToolTip();
+                    toolTip.setVisible(false);
+                }
+            }
+        });
+    }
+
+    private void showSettingsDialog() {
+        SettingsDialog settingsDialog = new SettingsDialog(view.getShell(), settings);
+        settingsDialog.open();
+    }
+
+    public void close() {
+        dbControllers.forEach(DBController::shutdown);
+        settings.removeListener(this);
+    }
+
     @Override
     public void dbControllerStatusChanged(DBController controller, DBStatus newStatus) {
         dbModelsView.getTreeViewer().refresh(controller, true, true);
@@ -392,6 +431,11 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
     @Override
     public void dbControllerBlockedChanged(DBController controller) {
         view.getDisplay().asyncExec(() -> dbModelsView.getTreeViewer().refresh(controller));
+        if (controller.isBlocked()) {
+            showDBBlockedMessageInTray(controller);
+        } else {
+            hideTrayMessageIfAllDatabasesUnblocked();
+        }
     }
 
     @Override
@@ -413,16 +457,6 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
         } else {
             controller.disconnect();
         }
-    }
-
-    public void close() {
-        dbControllers.forEach(DBController::shutdown);
-        settings.removeListener(this);
-    }
-
-    private void showSettingsDialog() {
-        SettingsDialog settingsDialog = new SettingsDialog(view.getShell(), settings);
-        settingsDialog.open();
     }
 
     @Override
