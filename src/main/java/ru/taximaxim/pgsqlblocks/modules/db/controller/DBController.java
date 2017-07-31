@@ -18,7 +18,7 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-public class DBController implements DBProcessFilterListener {
+public class DBController implements DBProcessFilterListener, DBBlocksJournalListener {
 
     private DBModel model;
 
@@ -48,8 +48,11 @@ public class DBController implements DBProcessFilterListener {
     private final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
     private ScheduledFuture<?> updater;
 
+    private final DBBlocksJournal blocksJournal = new DBBlocksJournal();
+
     public DBController(DBModel model) {
         this.model = model;
+        blocksJournal.addListener(this);
         processesFilters.addListener(this);
     }
 
@@ -159,6 +162,10 @@ public class DBController implements DBProcessFilterListener {
 
     public List<DBProcess> getFilteredProcesses() {
         return filteredProcesses;
+    }
+
+    public DBBlocksJournal getBlocksJournal() {
+        return blocksJournal;
     }
 
     public DBStatus getStatus() {
@@ -287,6 +294,8 @@ public class DBController implements DBProcessFilterListener {
         filteredProcesses.clear();
         filteredProcesses.addAll(processes.stream().filter(processesFilters::filter).collect(Collectors.toList()));
 
+        blocksJournal.add(loadedProcesses.stream().filter(DBProcess::hasChildren).collect(Collectors.toList()));
+
         listeners.forEach(listener -> listener.dbControllerProcessesUpdated(this));
         boolean hasBlockedProcesses = processes.stream().anyMatch(DBProcess::hasChildren);
         setBlocked(hasBlockedProcesses);
@@ -364,4 +373,13 @@ public class DBController implements DBProcessFilterListener {
         return processCanceled;
     }
 
+    @Override
+    public void dbBlocksJournalDidAddProcesses() {
+        listeners.forEach(listener -> listener.dbControllerBlocksJournalChanged(this));
+    }
+
+    @Override
+    public void dbBlocksJournalDidCloseProcesses() {
+        listeners.forEach(listener -> listener.dbControllerBlocksJournalChanged(this));
+    }
 }

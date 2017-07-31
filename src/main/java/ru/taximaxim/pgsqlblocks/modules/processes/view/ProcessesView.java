@@ -52,7 +52,7 @@ public class ProcessesView extends Composite {
         GridLayout layout = new GridLayout();
         layout.marginHeight = 0;
         layout.marginWidth = 0;
-        GridData layoutData = new GridData(SWT.FILL, SWT.FILL, false, true);
+        GridData layoutData = new GridData(SWT.FILL, SWT.FILL, true, true);
         leftPanelComposite = new Composite(sashForm, SWT.NONE);
         leftPanelComposite.setLayout(layout);
         leftPanelComposite.setLayoutData(layoutData);

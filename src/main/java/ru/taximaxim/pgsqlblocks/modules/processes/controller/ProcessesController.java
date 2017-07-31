@@ -8,6 +8,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.*;
@@ -54,6 +55,8 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
     private DBProcessesFiltersView dbProcessesFiltersView;
     private DBProcessInfoView dbProcessInfoView;
 
+    private DBProcessesView dbBlocksJournalView;
+
     private final DBProcessesViewDataSourceFilter dbProcessesViewDataSourceFilter = new DBProcessesViewDataSourceFilter();
 
     private TabFolder tabFolder;
@@ -93,18 +96,25 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
         dbProcessesViewDataSourceFilter.addListener(this);
 
         tabFolder = new TabFolder(view.getRightPanelComposite(), SWT.NONE);
-        GridLayout tabFolderLayout = new GridLayout();
-        tabFolderLayout.marginWidth = 0;
-        tabFolderLayout.marginHeight = 0;
-        tabFolder.setLayout(tabFolderLayout);
+
         tabFolder.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
-        TabItem processesTabItem = new TabItem(tabFolder, SWT.NONE);
+        createProcessesTab();
+        createBlocksJournalTab();
+
+        loadDatabases();
+
+        dbControllers.stream().filter(DBController::isEnabledAutoConnection).forEach(DBController::connect);
+
+        DriverManager.setLoginTimeout(settings.getLoginTimeout());
+    }
+
+    private void createProcessesTab() {
+        TabItem processesTabItem = new TabItem(tabFolder, SWT.BORDER);
         processesTabItem.setText(resourceBundle.getString("current_activity"));
 
         Composite processesViewComposite = new Composite(tabFolder, SWT.NONE);
         processesViewComposite.setLayout(new GridLayout());
-        processesViewComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
         dbProcessesFiltersView = new DBProcessesFiltersView(processesViewComposite, SWT.NONE);
         dbProcessesFiltersView.addListener(this);
@@ -121,12 +131,18 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
         dbProcessInfoView.hide();
 
         processesTabItem.setControl(processesViewComposite);
+    }
 
-        loadDatabases();
+    private void createBlocksJournalTab() {
+        TabItem blocksJournalTabItem = new TabItem(tabFolder, SWT.NONE);
+        blocksJournalTabItem.setText(resourceBundle.getString("blocks_journal"));
 
-        dbControllers.stream().filter(DBController::isEnabledAutoConnection).forEach(DBController::connect);
+        Composite dbBlocksJournalViewComposite = new Composite(tabFolder, SWT.NONE);
+        dbBlocksJournalViewComposite.setLayout(new GridLayout());
 
-        DriverManager.setLoginTimeout(settings.getLoginTimeout());
+        dbBlocksJournalView = new DBProcessesView(dbBlocksJournalViewComposite, SWT.NONE);
+        dbBlocksJournalView.getTreeViewer().setDataSource(new DBBlocksJournalViewDataSource(resourceBundle));
+        blocksJournalTabItem.setControl(dbBlocksJournalViewComposite);
     }
 
     private void createToolItems() {
@@ -245,6 +261,7 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
         dbControllers.remove(dbController);
         changeToolItemsStateForController(null);
         dbProcessesView.getTreeViewer().setInput(null);
+        dbBlocksJournalView.getTreeViewer().setInput(null);
         toggleVisibilityProcessesFilterPanelToolItem.setSelection(false);
         dbProcessesFiltersView.hide();
         dbProcessesFiltersView.fillViewForController(null);
@@ -444,8 +461,21 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
     }
 
     @Override
+    public void dbControllerBlocksJournalChanged(DBController controller) {
+        view.getDisplay().asyncExec(() -> {
+            if (dbModelsView.getTreeViewer().getStructuredSelection().getFirstElement() != null) {
+                DBController selectedController = (DBController) dbModelsView.getTreeViewer().getStructuredSelection().getFirstElement();
+                if (controller.equals(selectedController)) {
+                    dbBlocksJournalView.getTreeViewer().refresh();
+                }
+            }
+        });
+    }
+
+    @Override
     public void didSelectController(DBController controller) {
         dbProcessesView.getTreeViewer().setInput(controller.getFilteredProcesses());
+        dbBlocksJournalView.getTreeViewer().setInput(controller.getBlocksJournal().getProcesses());
         changeToolItemsStateForController(controller);
         dbProcessesFiltersView.fillViewForController(controller);
     }
