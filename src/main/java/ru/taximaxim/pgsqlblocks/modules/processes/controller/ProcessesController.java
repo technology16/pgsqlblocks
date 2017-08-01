@@ -8,13 +8,13 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.*;
 import ru.taximaxim.pgsqlblocks.PgSqlBlocks;
 import ru.taximaxim.pgsqlblocks.common.DBModelsProvider;
 import ru.taximaxim.pgsqlblocks.common.FilterCondition;
+import ru.taximaxim.pgsqlblocks.common.models.DBBlocksJournalProcess;
 import ru.taximaxim.pgsqlblocks.common.models.DBModel;
 import ru.taximaxim.pgsqlblocks.common.models.DBProcess;
 import ru.taximaxim.pgsqlblocks.common.ui.*;
@@ -56,6 +56,8 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
     private DBProcessInfoView dbProcessInfoView;
 
     private DBProcessesView dbBlocksJournalView;
+
+    private DBProcessInfoView dbBlocksJournalProcessInfoView;
 
     private final DBProcessesViewDataSourceFilter dbProcessesViewDataSourceFilter = new DBProcessesViewDataSourceFilter();
 
@@ -142,6 +144,12 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
 
         dbBlocksJournalView = new DBProcessesView(dbBlocksJournalViewComposite, SWT.NONE);
         dbBlocksJournalView.getTreeViewer().setDataSource(new DBBlocksJournalViewDataSource(resourceBundle));
+        dbBlocksJournalView.getTreeViewer().addSelectionChangedListener(this::dbBlocksJournalViewSelectionChanged);
+
+        dbBlocksJournalProcessInfoView = new DBProcessInfoView(dbBlocksJournalViewComposite, SWT.NONE);
+        dbBlocksJournalProcessInfoView.hideToolBar();
+        dbBlocksJournalProcessInfoView.hide();
+
         blocksJournalTabItem.setControl(dbBlocksJournalViewComposite);
     }
 
@@ -651,6 +659,24 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
             DBProcess process = (DBProcess)structuredSelection.getFirstElement();
             selectedProcess = process;
             dbProcessInfoView.show(process);
+        }
+    }
+
+    private void dbBlocksJournalViewSelectionChanged(SelectionChangedEvent event) {
+        ISelection selection = event.getSelection();
+        if (selection.isEmpty()) {
+            dbBlocksJournalProcessInfoView.hide();
+        } else {
+            DBProcess process = null;
+            IStructuredSelection structuredSelection = (IStructuredSelection)selection;
+            Object element = structuredSelection.getFirstElement();
+            if (element instanceof DBBlocksJournalProcess) {
+                DBBlocksJournalProcess blocksJournalProcess = (DBBlocksJournalProcess)element;
+                process = blocksJournalProcess.getProcess();
+            } else {
+                process = (DBProcess)element;
+            }
+            dbBlocksJournalProcessInfoView.show(process);
         }
     }
 

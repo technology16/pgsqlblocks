@@ -18,9 +18,9 @@ public final class DBQueries {
     private static final String PROCESSES_QUERY_FILE_NAME = "query.sql";
     private static final String PROCESSES_QUERY_WITH_IDLE_FILE_NAME = "query_with_idle.sql";
 
-    public static final String PG_TERMINATE_BACKED_QUERY = "select pg_terminate_backend(?);";
+    public static final String PG_TERMINATE_BACKEND_QUERY = "select pg_terminate_backend(?);";
 
-    public static final String PG_CANCEL_BACKED_QUERY = "select pg_cancel_backend(?);";
+    public static final String PG_CANCEL_BACKEND_QUERY = "select pg_cancel_backend(?);";
 
     public synchronized static String getProcessesQuery() {
         if (processesQuery == null) {

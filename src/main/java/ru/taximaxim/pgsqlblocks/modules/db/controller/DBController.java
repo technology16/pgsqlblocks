@@ -343,7 +343,7 @@ public class DBController implements DBProcessFilterListener, DBBlocksJournalLis
     public boolean terminateProcessWithPid(int processPid) throws SQLException {
         boolean processTerminated = false;
         try {
-            PreparedStatement preparedStatement = connection.prepareStatement(DBQueries.PG_TERMINATE_BACKED_QUERY);
+            PreparedStatement preparedStatement = connection.prepareStatement(DBQueries.PG_TERMINATE_BACKEND_QUERY);
             preparedStatement.setInt(1, processPid);
             ResultSet resultSet = preparedStatement.executeQuery(); {
                 if (resultSet.next()) {
@@ -360,7 +360,7 @@ public class DBController implements DBProcessFilterListener, DBBlocksJournalLis
     public boolean cancelProcessWithPid(int processPid) throws SQLException {
         boolean processCanceled = false;
         try {
-            PreparedStatement preparedStatement = connection.prepareStatement(DBQueries.PG_CANCEL_BACKED_QUERY);
+            PreparedStatement preparedStatement = connection.prepareStatement(DBQueries.PG_CANCEL_BACKEND_QUERY);
             preparedStatement.setInt(1, processPid);
             ResultSet resultSet = preparedStatement.executeQuery(); {
                 if (resultSet.next()) {

@@ -65,6 +65,20 @@ public class DBProcessInfoView extends Composite {
         processInfoText.setLayoutData(textLayoutData);
     }
 
+    public void hideToolBar() {
+        this.toolBar.setVisible(false);
+        GridData layoutData = (GridData) this.toolBar.getLayoutData();
+        layoutData.exclude = true;
+        this.layout();
+    }
+
+    public void showToolBar() {
+        this.toolBar.setVisible(true);
+        GridData layoutData = (GridData) this.toolBar.getLayoutData();
+        layoutData.exclude = false;
+        this.layout();
+    }
+
     public void setTextContent(String content) {
         processInfoText.setText(content);
     }
