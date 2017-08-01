@@ -118,6 +118,34 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
         Composite processesViewComposite = new Composite(tabFolder, SWT.NONE);
         processesViewComposite.setLayout(new GridLayout());
 
+        ToolBar processesViewToolBar = new ToolBar(processesViewComposite, SWT.HORIZONTAL);
+        processesViewToolBar.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
+
+        updateProcessesToolItem = new ToolItem(processesViewToolBar, SWT.PUSH);
+        updateProcessesToolItem.setImage(ImageUtils.getImage(Images.UPDATE));
+        updateProcessesToolItem.setToolTipText(Images.UPDATE.getDescription(resourceBundle));
+        updateProcessesToolItem.addListener(SWT.Selection, event -> updateProcessesInSelectedDatabase());
+
+        autoUpdateToolItem = new ToolItem(processesViewToolBar, SWT.CHECK);
+        autoUpdateToolItem.setImage(ImageUtils.getImage(Images.AUTOUPDATE));
+        autoUpdateToolItem.setToolTipText(Images.AUTOUPDATE.getDescription(resourceBundle));
+        autoUpdateToolItem.addListener(SWT.Selection, event -> setAutoUpdate(autoUpdateToolItem.getSelection()));
+        autoUpdateToolItem.setSelection(settings.isAutoUpdate());
+
+        new ToolItem(processesViewToolBar, SWT.SEPARATOR);
+
+        showOnlyBlockedProcessesToolItem = new ToolItem(processesViewToolBar, SWT.CHECK);
+        showOnlyBlockedProcessesToolItem.setImage(ImageUtils.getImage(Images.VIEW_ONLY_BLOCKED));
+        showOnlyBlockedProcessesToolItem.setToolTipText(Images.VIEW_ONLY_BLOCKED.getDescription(resourceBundle));
+        showOnlyBlockedProcessesToolItem.addListener(SWT.Selection, event ->
+                dbProcessesViewDataSourceFilter.setShowOnlyBlockedProcesses(showOnlyBlockedProcessesToolItem.getSelection()));
+
+        toggleVisibilityProcessesFilterPanelToolItem = new ToolItem(processesViewToolBar, SWT.CHECK);
+        toggleVisibilityProcessesFilterPanelToolItem.setImage(ImageUtils.getImage(Images.FILTER));
+        toggleVisibilityProcessesFilterPanelToolItem.setToolTipText(Images.FILTER.getDescription(resourceBundle));
+        toggleVisibilityProcessesFilterPanelToolItem.addListener(SWT.Selection, event ->
+                setProcessesFilterViewVisibility(toggleVisibilityProcessesFilterPanelToolItem.getSelection()));
+
         dbProcessesFiltersView = new DBProcessesFiltersView(processesViewComposite, SWT.NONE);
         dbProcessesFiltersView.addListener(this);
         dbProcessesFiltersView.hide();
@@ -182,33 +210,6 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
         disconnectDatabaseToolItem.setToolTipText(Images.DISCONNECT_DATABASE.getDescription(resourceBundle));
         disconnectDatabaseToolItem.setEnabled(false);
         disconnectDatabaseToolItem.addListener(SWT.Selection, event -> disconnectSelectedDatabase());
-
-        new ToolItem(view.getToolBar(), SWT.SEPARATOR);
-
-        updateProcessesToolItem = new ToolItem(view.getToolBar(), SWT.PUSH);
-        updateProcessesToolItem.setImage(ImageUtils.getImage(Images.UPDATE));
-        updateProcessesToolItem.setToolTipText(Images.UPDATE.getDescription(resourceBundle));
-        updateProcessesToolItem.addListener(SWT.Selection, event -> updateProcessesInSelectedDatabase());
-
-        autoUpdateToolItem = new ToolItem(view.getToolBar(), SWT.CHECK);
-        autoUpdateToolItem.setImage(ImageUtils.getImage(Images.AUTOUPDATE));
-        autoUpdateToolItem.setToolTipText(Images.AUTOUPDATE.getDescription(resourceBundle));
-        autoUpdateToolItem.addListener(SWT.Selection, event -> setAutoUpdate(autoUpdateToolItem.getSelection()));
-        autoUpdateToolItem.setSelection(settings.isAutoUpdate());
-
-        new ToolItem(view.getToolBar(), SWT.SEPARATOR);
-
-        showOnlyBlockedProcessesToolItem = new ToolItem(view.getToolBar(), SWT.CHECK);
-        showOnlyBlockedProcessesToolItem.setImage(ImageUtils.getImage(Images.VIEW_ONLY_BLOCKED));
-        showOnlyBlockedProcessesToolItem.setToolTipText(Images.VIEW_ONLY_BLOCKED.getDescription(resourceBundle));
-        showOnlyBlockedProcessesToolItem.addListener(SWT.Selection, event ->
-                dbProcessesViewDataSourceFilter.setShowOnlyBlockedProcesses(showOnlyBlockedProcessesToolItem.getSelection()));
-
-        toggleVisibilityProcessesFilterPanelToolItem = new ToolItem(view.getToolBar(), SWT.CHECK);
-        toggleVisibilityProcessesFilterPanelToolItem.setImage(ImageUtils.getImage(Images.FILTER));
-        toggleVisibilityProcessesFilterPanelToolItem.setToolTipText(Images.FILTER.getDescription(resourceBundle));
-        toggleVisibilityProcessesFilterPanelToolItem.addListener(SWT.Selection, event ->
-                setProcessesFilterViewVisibility(toggleVisibilityProcessesFilterPanelToolItem.getSelection()));
 
         new ToolItem(view.getToolBar(), SWT.SEPARATOR);
 
