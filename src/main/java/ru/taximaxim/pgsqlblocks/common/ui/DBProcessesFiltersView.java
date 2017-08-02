@@ -60,7 +60,7 @@ public class DBProcessesFiltersView extends Composite {
         GridData layoutData = new GridData(SWT.FILL, SWT.TOP, true, false);
         group.setLayout(layout);
         group.setLayoutData(layoutData);
-        group.setText("Filters");
+        group.setText(resourceBundle.getString("process_filter"));
 
         GridData comboLayoutData = new GridData(SWT.LEFT, SWT.CENTER, false,false);
         comboLayoutData.widthHint = 60;

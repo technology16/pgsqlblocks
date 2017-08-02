@@ -48,13 +48,13 @@ public class DBProcessInfoView extends Composite {
         toolBar.setLayoutData(layoutData);
 
         cancelProcessToolItem = new ToolItem(toolBar, SWT.PUSH);
-        cancelProcessToolItem.setText("Cancel process");
+        cancelProcessToolItem.setText(resourceBundle.getString("cancel_process"));
         cancelProcessToolItem.addListener(SWT.Selection, event -> {
             listeners.forEach(DBProcessInfoViewListener::dbProcessInfoViewCancelProcessToolItemClicked);
         });
 
         terminateProcessToolItem = new ToolItem(toolBar, SWT.PUSH);
-        terminateProcessToolItem.setText("Terminate process");
+        terminateProcessToolItem.setText(resourceBundle.getString("kill_process"));
         terminateProcessToolItem.addListener(SWT.Selection, event -> {
             listeners.forEach(DBProcessInfoViewListener::dbProcessInfoViewTerminateProcessToolItemClicked);
         });

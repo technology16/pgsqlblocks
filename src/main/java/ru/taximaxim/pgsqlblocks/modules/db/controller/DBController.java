@@ -1,17 +1,29 @@
 package ru.taximaxim.pgsqlblocks.modules.db.controller;
 
 import org.apache.log4j.Logger;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 import ru.taximaxim.pgpass.PgPass;
 import ru.taximaxim.pgpass.PgPassException;
 import ru.taximaxim.pgsqlblocks.common.models.DBProcessFilter;
 import ru.taximaxim.pgsqlblocks.common.DBQueries;
 import ru.taximaxim.pgsqlblocks.common.models.*;
 import ru.taximaxim.pgsqlblocks.modules.db.model.DBStatus;
+import ru.taximaxim.pgsqlblocks.utils.DateUtils;
+import ru.taximaxim.pgsqlblocks.utils.PathBuilder;
 import ru.taximaxim.pgsqlblocks.utils.Settings;
+import ru.taximaxim.pgsqlblocks.utils.XmlDocumentWorker;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.sql.*;
 import java.text.MessageFormat;
 import java.util.*;
+import java.util.Date;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -50,8 +62,11 @@ public class DBController implements DBProcessFilterListener, DBBlocksJournalLis
 
     private final DBBlocksJournal blocksJournal = new DBBlocksJournal();
 
+    private Date blocksJournalCreateDate;
+
     public DBController(DBModel model) {
         this.model = model;
+        blocksJournalCreateDate = new Date();
         blocksJournal.addListener(this);
         processesFilters.addListener(this);
     }
@@ -209,7 +224,7 @@ public class DBController implements DBProcessFilterListener, DBBlocksJournalLis
             ) {
                 Map<Integer, DBProcess> tmpProcesses = new HashMap<>();
                 Map<Integer, Set<DBBlock>> tmpBlocks = new HashMap<>();
-                DBProcessDeserializer processDeserializer = new DBProcessDeserializer();
+                DBProcessSerializer processDeserializer = new DBProcessSerializer();
                 DBBlockDeserializer blockDeserializer = new DBBlockDeserializer();
                 while(resultSet.next()) {
                     DBProcess process = processDeserializer.deserialize(resultSet);
@@ -379,7 +394,42 @@ public class DBController implements DBProcessFilterListener, DBBlocksJournalLis
     }
 
     @Override
-    public void dbBlocksJournalDidCloseProcesses() {
+    public void dbBlocksJournalDidCloseAllProcesses() {
+        if (blocksJournal.size() >= 1000) {
+            try {
+                saveJournalToFile();
+                blocksJournal.clear();
+            } catch (ParserConfigurationException e) {
+                LOG.error(e.getMessage(), e);
+            }
+        }
         listeners.forEach(listener -> listener.dbControllerBlocksJournalChanged(this));
+    }
+
+    public void saveJournalToFile() throws ParserConfigurationException {
+        if (blocksJournal.isEmpty()) {
+            return;
+        }
+        String.format("blocksJournal-%s-%s.xml", this.model.getName(), DateUtils.dateToString(blocksJournalCreateDate));
+        String fileName = "blocksJournal-" + this.model.getName() + " "
+                + DateUtils.dateToString(blocksJournalCreateDate) + ".xml";
+        Path blocksJournalsDirPath = PathBuilder.getInstance().getBlocksJournalsDir();
+        Path currentJournalPath = Paths.get(blocksJournalsDirPath.toString(), fileName);
+        File currentJournalFile = currentJournalPath.toFile();
+
+        DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
+        Document document = documentBuilder.newDocument();
+        DBBlocksJournalProcessSerializer serializer = new DBBlocksJournalProcessSerializer();
+        Element rootElement = document.createElement("blocksJournal");
+        blocksJournal.getProcesses().forEach(journalProcess -> {
+            Element el = serializer.serialize(document, journalProcess);
+            rootElement.appendChild(el);
+        });
+        document.appendChild(rootElement);
+        XmlDocumentWorker documentWorker = new XmlDocumentWorker();
+        documentWorker.save(document, currentJournalFile);
+        blocksJournalCreateDate = new Date();
+
     }
 }

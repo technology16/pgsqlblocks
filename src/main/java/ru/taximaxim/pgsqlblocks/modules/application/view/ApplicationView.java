@@ -12,6 +12,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.*;
+import ru.taximaxim.pgsqlblocks.ui.AboutDlg;
 import ru.taximaxim.pgsqlblocks.utils.ImageUtils;
 import ru.taximaxim.pgsqlblocks.utils.Images;
 import ru.taximaxim.pgsqlblocks.utils.Settings;
@@ -101,6 +102,8 @@ public class ApplicationView extends ApplicationWindow {
 
         initTray();
 
+        createApplicationMenu();
+
         GridLayout layout = new GridLayout();
         GridData layoutData = new GridData(SWT.FILL, SWT.FILL, true, true);
         sashForm = new SashForm(mainComposite, SWT.VERTICAL);
@@ -121,6 +124,25 @@ public class ApplicationView extends ApplicationWindow {
         }
 
         return  mainComposite;
+    }
+
+    private void createApplicationMenu() {
+        Menu menuBar = new Menu(getShell(), SWT.BAR);
+        MenuItem helpMenuHeader = new MenuItem(menuBar, SWT.CASCADE);
+        helpMenuHeader.setText("&pgSqlBlocks");
+
+        Menu helpMenu = new Menu(getShell(), SWT.DROP_DOWN);
+        helpMenuHeader.setMenu(helpMenu);
+
+        MenuItem helpGetHelpItem = new MenuItem(helpMenu, SWT.PUSH);
+        helpGetHelpItem.setText(resourceBundle.getString("about"));
+        helpGetHelpItem.addListener(SWT.Selection, e -> new AboutDlg(getShell()).open());
+        getShell().setMenuBar(menuBar);
+
+        MenuItem exitMenuItem = new MenuItem(helpMenu, SWT.PUSH);
+        exitMenuItem.setText(resourceBundle.getString("exit"));
+        exitMenuItem.addListener(SWT.Selection, e -> getShell().close());
+        getShell().setMenuBar(menuBar);
     }
 
     private void initTray() {

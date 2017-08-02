@@ -30,6 +30,13 @@ public final class DateUtils {
         return dateFormatWithoutTimeZone.format(date);
     }
 
+    public static String dateToStringWithTz(Date date) {
+        if (date == null) {
+            return "";
+        }
+        return dateFormat.format(date);
+    }
+
     public static int compareDates(Date d1, Date d2) {
         if (d1 == null) {
             return d2 == null ? 0 : -1;

@@ -51,8 +51,20 @@ public class DBBlocksJournal {
                 .collect(Collectors.toList());
         if (!openedProcesses.isEmpty()) {
             openedProcesses.forEach(DBBlocksJournalProcess::close);
-            listeners.forEach(DBBlocksJournalListener::dbBlocksJournalDidCloseProcesses);
+            listeners.forEach(DBBlocksJournalListener::dbBlocksJournalDidCloseAllProcesses);
         }
+    }
+
+    public void clear() {
+        processes.clear();
+    }
+
+    public int size() {
+        return processes.size();
+    }
+
+    public boolean isEmpty() {
+        return processes.isEmpty();
     }
 
     public void addListener(DBBlocksJournalListener listener) {

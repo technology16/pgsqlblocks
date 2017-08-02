@@ -5,6 +5,6 @@ public interface DBBlocksJournalListener {
 
     void dbBlocksJournalDidAddProcesses();
 
-    void dbBlocksJournalDidCloseProcesses();
+    void dbBlocksJournalDidCloseAllProcesses();
 
 }
