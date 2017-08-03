@@ -11,6 +11,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.*;
+import org.xml.sax.SAXException;
 import ru.taximaxim.pgsqlblocks.PgSqlBlocks;
 import ru.taximaxim.pgsqlblocks.common.DBModelsProvider;
 import ru.taximaxim.pgsqlblocks.common.FilterCondition;
@@ -32,6 +33,7 @@ import ru.taximaxim.pgsqlblocks.utils.Settings;
 import ru.taximaxim.pgsqlblocks.utils.SettingsListener;
 
 import javax.xml.parsers.ParserConfigurationException;
+import java.io.IOException;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.text.MessageFormat;
@@ -413,13 +415,6 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
 
     public void close() {
         dbControllers.forEach(DBController::shutdown);
-        for (DBController dbController : dbControllers) {
-            try {
-                dbController.saveJournalToFile();
-            } catch (ParserConfigurationException e) {
-                LOG.error(e.getMessage(), e);
-            }
-        }
         settings.removeListener(this);
     }
 

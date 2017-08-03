@@ -26,11 +26,14 @@ public class DBBlocksJournal {
             List<DBBlocksJournalProcess> newProcesses = processes.stream()
                     .map(DBBlocksJournalProcess::new)
                     .collect(Collectors.toList());
-            this.processes.stream()
+            List<DBBlocksJournalProcess> needCloseProcesses = this.processes.stream()
                     .filter(DBBlocksJournalProcess::isOpened)
                     .filter(p -> !newProcesses.contains(p))
-                    .collect(Collectors.toList())
-                    .forEach(DBBlocksJournalProcess::close);
+                    .collect(Collectors.toList());
+            if (!needCloseProcesses.isEmpty()) {
+                needCloseProcesses.forEach(DBBlocksJournalProcess::close);
+                listeners.forEach(listener -> listener.dbBlocksJournalDidCloseProcesses(needCloseProcesses));
+            }
             for (DBBlocksJournalProcess process : newProcesses) {
                 if (this.processes.contains(process)) {
                     DBBlocksJournalProcess prevJournalProcess = this.processes.get(this.processes.lastIndexOf(process));
@@ -51,6 +54,7 @@ public class DBBlocksJournal {
                 .collect(Collectors.toList());
         if (!openedProcesses.isEmpty()) {
             openedProcesses.forEach(DBBlocksJournalProcess::close);
+            listeners.forEach(listener -> listener.dbBlocksJournalDidCloseProcesses(openedProcesses));
             listeners.forEach(DBBlocksJournalListener::dbBlocksJournalDidCloseAllProcesses);
         }
     }

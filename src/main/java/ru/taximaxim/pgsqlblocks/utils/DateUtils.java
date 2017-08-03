@@ -1,10 +1,14 @@
 package ru.taximaxim.pgsqlblocks.utils;
 
+import org.apache.log4j.Logger;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public final class DateUtils {
+
+    private static final Logger LOG = Logger.getLogger(DateUtils.class);
 
     private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ssX");
 
@@ -17,8 +21,8 @@ public final class DateUtils {
         Date result = null;
         try {
             result = dateFormat.parse(dateString);
-        } catch (ParseException e) {
-            System.out.println(e);
+        } catch (ParseException exception) {
+            LOG.error(exception.getMessage(), exception);
         }
         return result;
     }

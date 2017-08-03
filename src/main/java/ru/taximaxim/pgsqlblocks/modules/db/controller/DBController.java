@@ -3,6 +3,7 @@ package ru.taximaxim.pgsqlblocks.modules.db.controller;
 import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.xml.sax.SAXException;
 import ru.taximaxim.pgpass.PgPass;
 import ru.taximaxim.pgpass.PgPassException;
 import ru.taximaxim.pgsqlblocks.common.models.DBProcessFilter;
@@ -18,6 +19,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.*;
@@ -58,6 +60,7 @@ public class DBController implements DBProcessFilterListener, DBBlocksJournalLis
     private Connection connection;
 
     private final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
+    private final ScheduledExecutorService journalsSaveExecutor = Executors.newSingleThreadScheduledExecutor();
     private ScheduledFuture<?> updater;
 
     private final DBBlocksJournal blocksJournal = new DBBlocksJournal();
@@ -213,6 +216,7 @@ public class DBController implements DBProcessFilterListener, DBBlocksJournalLis
     public void shutdown() {
         stopProcessesUpdater();
         executor.shutdownNow();
+        saveUnclosedBlockedProcessesToFile();
     }
 
     private void loadProcesses() {
@@ -395,41 +399,68 @@ public class DBController implements DBProcessFilterListener, DBBlocksJournalLis
 
     @Override
     public void dbBlocksJournalDidCloseAllProcesses() {
-        if (blocksJournal.size() >= 1000) {
-            try {
-                saveJournalToFile();
-                blocksJournal.clear();
-            } catch (ParserConfigurationException e) {
-                LOG.error(e.getMessage(), e);
-            }
-        }
         listeners.forEach(listener -> listener.dbControllerBlocksJournalChanged(this));
     }
 
-    public void saveJournalToFile() throws ParserConfigurationException {
-        if (blocksJournal.isEmpty()) {
-            return;
-        }
-        String.format("blocksJournal-%s-%s.xml", this.model.getName(), DateUtils.dateToString(blocksJournalCreateDate));
-        String fileName = "blocksJournal-" + this.model.getName() + " "
-                + DateUtils.dateToString(blocksJournalCreateDate) + ".xml";
+    @Override
+    public void dbBlocksJournalDidCloseProcesses(List<DBBlocksJournalProcess> processes) {
+        asyncSaveClosedBlockedProcessesToFile(processes);
+    }
+
+    private void asyncSaveClosedBlockedProcessesToFile(List<DBBlocksJournalProcess> processes) {
+        journalsSaveExecutor.execute(() -> {
+            try {
+                saveBlockedProcessesToFile(processes);
+            } catch (ParserConfigurationException | IOException | SAXException e) {
+                LOG.error("Error while saving blocked processes to journal", e);
+            }
+        });
+    }
+
+    public void saveBlockedProcessesToFile(List<DBBlocksJournalProcess> processes) throws ParserConfigurationException, IOException, SAXException {
+
+        String fileName = String.format("%s-%s.xml", this.model.getName(), DateUtils.dateToString(blocksJournalCreateDate));
         Path blocksJournalsDirPath = PathBuilder.getInstance().getBlocksJournalsDir();
         Path currentJournalPath = Paths.get(blocksJournalsDirPath.toString(), fileName);
         File currentJournalFile = currentJournalPath.toFile();
 
         DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
         DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
-        Document document = documentBuilder.newDocument();
+
+        boolean fileExists = currentJournalFile.exists();
+        Document document;
+        Element rootElement;
+        if (fileExists) {
+            document = documentBuilder.parse(currentJournalFile);
+            rootElement = document.getDocumentElement();
+        } else {
+            document = documentBuilder.newDocument();
+            rootElement = document.createElement("blocksJournal");
+        }
         DBBlocksJournalProcessSerializer serializer = new DBBlocksJournalProcessSerializer();
-        Element rootElement = document.createElement("blocksJournal");
-        blocksJournal.getProcesses().forEach(journalProcess -> {
+        processes.forEach(journalProcess -> {
             Element el = serializer.serialize(document, journalProcess);
             rootElement.appendChild(el);
         });
-        document.appendChild(rootElement);
+        if (!fileExists) {
+            document.appendChild(rootElement);
+        }
         XmlDocumentWorker documentWorker = new XmlDocumentWorker();
         documentWorker.save(document, currentJournalFile);
-        blocksJournalCreateDate = new Date();
+    }
 
+    public void saveUnclosedBlockedProcessesToFile() {
+        if (blocksJournal.isEmpty()) {
+            return;
+        }
+        List<DBBlocksJournalProcess> openedBlockedProcesses = blocksJournal.getProcesses().stream().filter(DBBlocksJournalProcess::isOpened).collect(Collectors.toList());
+        if (openedBlockedProcesses.isEmpty()) {
+            return;
+        }
+        try {
+            saveBlockedProcessesToFile(openedBlockedProcesses);
+        } catch (ParserConfigurationException | IOException | SAXException e) {
+            LOG.error(e.getMessage(), e);
+        }
     }
 }
