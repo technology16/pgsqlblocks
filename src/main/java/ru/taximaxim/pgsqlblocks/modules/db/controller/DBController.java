@@ -216,6 +216,7 @@ public class DBController implements DBProcessFilterListener, DBBlocksJournalLis
     public void shutdown() {
         stopProcessesUpdater();
         executor.shutdownNow();
+        journalsSaveExecutor.shutdown();
         saveUnclosedBlockedProcessesToFile();
     }
 

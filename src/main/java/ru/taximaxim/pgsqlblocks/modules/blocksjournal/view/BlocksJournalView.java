@@ -77,6 +77,7 @@ public class BlocksJournalView extends ApplicationWindow {
         ToolItem updateFilesListToolItem = new ToolItem(toolBar, SWT.PUSH);
         updateFilesListToolItem.setImage(ImageUtils.getImage(Images.UPDATE));
         updateFilesListToolItem.setToolTipText(resourceBundle.getString("refresh_files_list"));
+        updateFilesListToolItem.addListener(SWT.Selection, e -> getJournalFilesFromJournalsDir());
 
         SashForm sashForm = new SashForm(contentComposite, SWT.HORIZONTAL);
         sashForm.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
