@@ -66,6 +66,7 @@ public class PgSqlBlocks_ru extends ListResourceBundle {
                 {"refresh_files_list", "Обновить список файлов"},
                 {"show_saved_blocks_journals", "Показать сохраненные журналы блокировок"},
                 {"saved_blocks_journals", "Сохраненные журналы блокировок"},
+                {"open_dir", "Открыть директорию"},
 
                 // action icons
                 {"add_db", "Добавить БД"},

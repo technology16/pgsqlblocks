@@ -66,6 +66,7 @@ public class PgSqlBlocks_en extends ListResourceBundle {
                 {"refresh_files_list", "Refresh list of files"},
                 {"show_saved_blocks_journals", "Show saved blocks journals"},
                 {"saved_blocks_journals", "Saved blocks journals"},
+                {"open_dir", "Open directory"},
 
                 // action icons
                 {"add_db", "Add database"},

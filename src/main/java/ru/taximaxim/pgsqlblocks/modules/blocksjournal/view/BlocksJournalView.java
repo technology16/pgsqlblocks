@@ -1,5 +1,6 @@
 package ru.taximaxim.pgsqlblocks.modules.blocksjournal.view;
 
+import org.apache.log4j.Logger;
 import org.eclipse.jface.viewers.*;
 import org.eclipse.jface.window.ApplicationWindow;
 import org.eclipse.swt.SWT;
@@ -8,13 +9,12 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.*;
+import org.eclipse.swt.widgets.Composite;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
-import ru.taximaxim.pgsqlblocks.blocksjournal.BlocksJournalContentProvider;
-import ru.taximaxim.pgsqlblocks.blocksjournal.BlocksJournalLabelProvider;
 import ru.taximaxim.pgsqlblocks.common.models.DBBlocksJournalProcess;
 import ru.taximaxim.pgsqlblocks.common.models.DBBlocksJournalProcessSerializer;
 import ru.taximaxim.pgsqlblocks.common.models.DBProcess;
@@ -27,6 +27,7 @@ import ru.taximaxim.pgsqlblocks.utils.PathBuilder;
 import ru.taximaxim.pgsqlblocks.utils.XmlDocumentWorker;
 
 import javax.xml.parsers.ParserConfigurationException;
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -36,6 +37,8 @@ import java.util.List;
 import java.util.ResourceBundle;
 
 public class BlocksJournalView extends ApplicationWindow {
+
+    private static final Logger LOG = Logger.getLogger(BlocksJournalView.class);
 
     private TableViewer filesTable;
 
@@ -78,6 +81,17 @@ public class BlocksJournalView extends ApplicationWindow {
         updateFilesListToolItem.setImage(ImageUtils.getImage(Images.UPDATE));
         updateFilesListToolItem.setToolTipText(resourceBundle.getString("refresh_files_list"));
         updateFilesListToolItem.addListener(SWT.Selection, e -> getJournalFilesFromJournalsDir());
+
+        ToolItem openJournalDirectoryToolItem = new ToolItem(toolBar, SWT.PUSH);
+        openJournalDirectoryToolItem.setImage(ImageUtils.getImage(Images.FOLDER));
+        openJournalDirectoryToolItem.setToolTipText(resourceBundle.getString("open_dir"));
+        openJournalDirectoryToolItem.addListener(SWT.Selection, event -> {
+            try {
+                Desktop.getDesktop().open(PathBuilder.getInstance().getBlocksJournalsDir().toFile());
+            } catch (IOException exception) {
+                LOG.error(exception.getMessage(), exception);
+            }
+        });
 
         SashForm sashForm = new SashForm(contentComposite, SWT.HORIZONTAL);
         sashForm.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
