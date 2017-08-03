@@ -76,6 +76,12 @@ public class XmlDocumentWorker {
         
         return doc;
     }
+
+    public Document openJournalFile(File file) throws ParserConfigurationException, IOException, SAXException {
+        DocumentBuilderFactory df = DocumentBuilderFactory.newInstance();
+        DocumentBuilder db = df.newDocumentBuilder();
+        return db.parse(file);
+    }
     
     private void createConfFile(File xmlFile) {
         DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();

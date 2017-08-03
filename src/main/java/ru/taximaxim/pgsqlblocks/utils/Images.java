@@ -49,6 +49,7 @@ public enum Images {
     PROC_BLOCKED,
     SHOW_LOG_PANEL,
     HIDE_LOG_PANEL,
+    BLOCKS_JOURNAL_FOLDER,
     DEFAULT;
 
     /**
@@ -109,6 +110,8 @@ public enum Images {
             return "images/log_show_16.png";
         case HIDE_LOG_PANEL:
             return "images/log_hide_16.png";
+        case BLOCKS_JOURNAL_FOLDER:
+            return "images/blocks_journal_folder_16.png";
         default:
             return "images/void_16.png";
         }
@@ -146,6 +149,8 @@ public enum Images {
             return resources.getString("show_logs_panel");
         case HIDE_LOG_PANEL:
             return resources.getString("hide_logs_panel");
+        case BLOCKS_JOURNAL_FOLDER:
+            return resources.getString("show_saved_blocks_journals");
         default:
             return resources.getString("default_action");
         }

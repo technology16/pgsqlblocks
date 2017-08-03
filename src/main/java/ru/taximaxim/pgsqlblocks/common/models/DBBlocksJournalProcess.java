@@ -18,6 +18,12 @@ public class DBBlocksJournalProcess {
         this.process = process;
     }
 
+    public DBBlocksJournalProcess(Date createDate, Date closeDate, DBProcess process) {
+        this.createDate = createDate;
+        this.closeDate = closeDate;
+        this.process = process;
+    }
+
     public DBProcess getProcess() {
         return process;
     }

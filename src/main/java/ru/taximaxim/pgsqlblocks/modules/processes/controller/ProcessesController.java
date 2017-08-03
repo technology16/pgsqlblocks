@@ -21,6 +21,7 @@ import ru.taximaxim.pgsqlblocks.common.ui.*;
 import ru.taximaxim.pgsqlblocks.dialogs.AddDatabaseDialog;
 import ru.taximaxim.pgsqlblocks.dialogs.EditDatabaseDialog;
 import ru.taximaxim.pgsqlblocks.dialogs.SettingsDialog;
+import ru.taximaxim.pgsqlblocks.modules.blocksjournal.view.BlocksJournalView;
 import ru.taximaxim.pgsqlblocks.modules.db.controller.DBController;
 import ru.taximaxim.pgsqlblocks.modules.db.controller.DBControllerListener;
 import ru.taximaxim.pgsqlblocks.modules.db.model.DBStatus;
@@ -224,6 +225,17 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
         toggleLogsPanelVisibilityToolItem.setToolTipText(Images.SHOW_LOG_PANEL.getDescription(resourceBundle));
         toggleLogsPanelVisibilityToolItem.setSelection(true);
         toggleLogsPanelVisibilityToolItem.addListener(SWT.Selection, event -> toggleLogsPanelVisibility(toggleLogsPanelVisibilityToolItem));
+
+        new ToolItem(view.getToolBar(), SWT.SEPARATOR);
+
+        ToolItem openBlocksJournalToolItem = new ToolItem(view.getToolBar(), SWT.PUSH);
+        openBlocksJournalToolItem.setImage(ImageUtils.getImage(Images.BLOCKS_JOURNAL_FOLDER));
+        openBlocksJournalToolItem.setToolTipText(Images.BLOCKS_JOURNAL_FOLDER.getDescription(resourceBundle));
+        openBlocksJournalToolItem.addListener(SWT.Selection, event -> {
+            BlocksJournalView blocksJournalView = new BlocksJournalView(resourceBundle);
+            blocksJournalView.open();
+        });
+
     }
 
     private void changeToolItemsStateForController(DBController controller) {

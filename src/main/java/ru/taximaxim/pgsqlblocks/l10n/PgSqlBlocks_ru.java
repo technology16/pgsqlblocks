@@ -62,6 +62,10 @@ public class PgSqlBlocks_ru extends ListResourceBundle {
                 {"db_finish_updating", "Обновление завершено \"{0}\"."},
                 {"db_error_on_connect", "Ошибка при обновлении DbcData: {0}"},
                 {"include_blocked_processes", "Учитывать блокирующие/блокированные процессы"},
+                {"journals", "Журналы"},
+                {"refresh_files_list", "Обновить список файлов"},
+                {"show_saved_blocks_journals", "Показать сохраненные журналы блокировок"},
+                {"saved_blocks_journals", "Сохраненные журналы блокировок"},
 
                 // action icons
                 {"add_db", "Добавить БД"},

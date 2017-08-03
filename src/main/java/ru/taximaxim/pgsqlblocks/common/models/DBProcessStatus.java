@@ -3,9 +3,30 @@ package ru.taximaxim.pgsqlblocks.common.models;
 import ru.taximaxim.pgsqlblocks.utils.Images;
 
 public enum DBProcessStatus {
-    WORKING,
-    BLOCKING,
-    BLOCKED;
+    WORKING("Working"),
+    BLOCKING("Blocking"),
+    BLOCKED("Blocked");
+
+    private final String descr;
+
+    DBProcessStatus(String descr) {
+        this.descr = descr;
+    }
+
+    public String getDescr() {
+        return descr;
+    }
+
+    public static DBProcessStatus getInstanceForDescr(String descr) {
+        if (descr == null || descr.isEmpty())
+            return WORKING;
+        switch (descr) {
+            case "Working": return WORKING;
+            case "Blocking": return BLOCKING;
+            case "Blocked": return BLOCKED;
+            default: return WORKING;
+        }
+    }
 
     /**
      * Получение иконки в зависимости от состояния
@@ -23,4 +44,5 @@ public enum DBProcessStatus {
                 return Images.DEFAULT;
         }
     }
+
 }
