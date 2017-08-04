@@ -525,7 +525,7 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
                     ImageDescriptor.createFromImage(ImageUtils.getImage(Images.DISCONNECT_DATABASE))) {
                 @Override
                 public void run() {
-                    selectedController.disconnect();
+                    disconnectSelectedDatabase();
                 }
             };
             menuManager.add(disconnectAction);
@@ -534,7 +534,7 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
                     ImageDescriptor.createFromImage(ImageUtils.getImage(Images.CONNECT_DATABASE))) {
                 @Override
                 public void run() {
-                    selectedController.connect();
+                    connectToSelectedDatabase();
                 }
             };
             menuManager.add(connectAction);
@@ -551,7 +551,7 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
                 ImageDescriptor.createFromImage(ImageUtils.getImage(Images.UPDATE))) {
             @Override
             public void run() {
-                selectedController.updateProcesses();
+                updateProcessesInSelectedDatabase();
             }
         };
         menuManager.add(updateProcessesAction);
