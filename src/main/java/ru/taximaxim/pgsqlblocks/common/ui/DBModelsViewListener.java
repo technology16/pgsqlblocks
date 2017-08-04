@@ -1,11 +1,14 @@
 package ru.taximaxim.pgsqlblocks.common.ui;
 
+import org.eclipse.jface.action.IMenuManager;
 import ru.taximaxim.pgsqlblocks.modules.db.controller.DBController;
 
 public interface DBModelsViewListener {
 
-    void didSelectController(DBController controller);
+    void dbModelsViewDidSelectController(DBController controller);
 
-    void didCallActionToController(DBController controller);
+    void dbModelsViewDidCallActionToController(DBController controller);
+
+    void dbModelsViewDidShowMenu(IMenuManager menuManager);
 
 }

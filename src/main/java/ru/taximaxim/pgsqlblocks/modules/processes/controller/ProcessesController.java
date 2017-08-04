@@ -2,7 +2,10 @@ package ru.taximaxim.pgsqlblocks.modules.processes.controller;
 
 
 import org.apache.log4j.Logger;
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
@@ -11,7 +14,6 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.*;
-import org.xml.sax.SAXException;
 import ru.taximaxim.pgsqlblocks.PgSqlBlocks;
 import ru.taximaxim.pgsqlblocks.common.DBModelsProvider;
 import ru.taximaxim.pgsqlblocks.common.FilterCondition;
@@ -32,8 +34,6 @@ import ru.taximaxim.pgsqlblocks.utils.Images;
 import ru.taximaxim.pgsqlblocks.utils.Settings;
 import ru.taximaxim.pgsqlblocks.utils.SettingsListener;
 
-import javax.xml.parsers.ParserConfigurationException;
-import java.io.IOException;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.text.MessageFormat;
@@ -96,8 +96,9 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
         createToolItems();
 
         dbModelsView = new DBModelsView(view.getLeftPanelComposite(), SWT.NONE);
-        dbModelsView.getTreeViewer().setInput(dbControllers);
+        dbModelsView.getTableViewer().setInput(dbControllers);
         dbModelsView.addListener(this);
+
 
         dbProcessesViewDataSourceFilter.addListener(this);
 
@@ -266,7 +267,7 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
     private void loadDatabases() {
         List<DBModel> dbModels = dbModelsProvider.get();
         dbModels.forEach(this::addDatabase);
-        dbModelsView.getTreeViewer().refresh();
+        dbModelsView.getTableViewer().refresh();
     }
 
     private void addDatabase(DBModel dbModel) {
@@ -304,7 +305,7 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
         AddDatabaseDialog addDatabaseDialog = new AddDatabaseDialog(view.getShell(), reservedConnectionNames);
         if (addDatabaseDialog.open() == Window.OK) {
             addDatabase(addDatabaseDialog.getCreatedModel());
-            dbModelsView.getTreeViewer().refresh();
+            dbModelsView.getTableViewer().refresh();
             saveDatabases();
         }
     }
@@ -313,7 +314,7 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
         Optional<DBController> opt = dbControllers.stream().filter(dbc -> dbc.getModel().equals(oldModel)).findFirst();
         opt.ifPresent(controller -> {
             controller.setModel(newModel);
-            dbModelsView.getTreeViewer().refresh(true, true);
+            dbModelsView.getTableViewer().refresh(true, true);
             saveDatabases();
             if (controller.isEnabledAutoConnection()) {
                 controller.connect();
@@ -322,10 +323,10 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
     }
 
     private void openEditSelectedDatabaseDialog() {
-        if (dbModelsView.getTreeViewer().getStructuredSelection().getFirstElement() == null) {
+        if (dbModelsView.getTableViewer().getStructuredSelection().getFirstElement() == null) {
             return;
         }
-        DBController selectedController = (DBController) dbModelsView.getTreeViewer().getStructuredSelection().getFirstElement();
+        DBController selectedController = (DBController) dbModelsView.getTableViewer().getStructuredSelection().getFirstElement();
         List<String> reservedConnectionNames = dbControllers.stream()
                 .map(DBController::getModel)
                 .map(DBModel::getName)
@@ -337,32 +338,32 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
     }
 
     private void deleteSelectedDatabase() {
-        if (dbModelsView.getTreeViewer().getStructuredSelection().getFirstElement() == null) {
+        if (dbModelsView.getTableViewer().getStructuredSelection().getFirstElement() == null) {
             return;
         }
-        DBController selectedController = (DBController) dbModelsView.getTreeViewer().getStructuredSelection().getFirstElement();
+        DBController selectedController = (DBController) dbModelsView.getTableViewer().getStructuredSelection().getFirstElement();
         deleteDatabase(selectedController);
-        dbModelsView.getTreeViewer().refresh();
+        dbModelsView.getTableViewer().refresh();
         saveDatabases();
     }
 
     private void connectToSelectedDatabase() {
-        if (dbModelsView.getTreeViewer().getStructuredSelection().getFirstElement() != null) {
-            DBController selectedController = (DBController) dbModelsView.getTreeViewer().getStructuredSelection().getFirstElement();
+        if (dbModelsView.getTableViewer().getStructuredSelection().getFirstElement() != null) {
+            DBController selectedController = (DBController) dbModelsView.getTableViewer().getStructuredSelection().getFirstElement();
             selectedController.connect();
         }
     }
 
     private void disconnectSelectedDatabase() {
-        if (dbModelsView.getTreeViewer().getStructuredSelection().getFirstElement() != null) {
-            DBController selectedController = (DBController) dbModelsView.getTreeViewer().getStructuredSelection().getFirstElement();
+        if (dbModelsView.getTableViewer().getStructuredSelection().getFirstElement() != null) {
+            DBController selectedController = (DBController) dbModelsView.getTableViewer().getStructuredSelection().getFirstElement();
             selectedController.disconnect();
         }
     }
 
     private void updateProcessesInSelectedDatabase() {
-        if (dbModelsView.getTreeViewer().getStructuredSelection().getFirstElement() != null) {
-            DBController selectedController = (DBController) dbModelsView.getTreeViewer().getStructuredSelection().getFirstElement();
+        if (dbModelsView.getTableViewer().getStructuredSelection().getFirstElement() != null) {
+            DBController selectedController = (DBController) dbModelsView.getTableViewer().getStructuredSelection().getFirstElement();
             selectedController.updateProcesses();
         }
     }
@@ -420,7 +421,7 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
 
     @Override
     public void dbControllerStatusChanged(DBController controller, DBStatus newStatus) {
-        dbModelsView.getTreeViewer().refresh(controller, true, true);
+        dbModelsView.getTableViewer().refresh(controller, true, true);
     }
 
     @Override
@@ -460,8 +461,8 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
     @Override
     public void dbControllerProcessesUpdated(DBController controller) {
         view.getDisplay().asyncExec(() -> {
-            if (dbModelsView.getTreeViewer().getStructuredSelection().getFirstElement() != null) {
-                DBController selectedController = (DBController) dbModelsView.getTreeViewer().getStructuredSelection().getFirstElement();
+            if (dbModelsView.getTableViewer().getStructuredSelection().getFirstElement() != null) {
+                DBController selectedController = (DBController) dbModelsView.getTableViewer().getStructuredSelection().getFirstElement();
                 if (controller.equals(selectedController)) {
                     dbProcessesView.getTreeViewer().refresh();
                 }
@@ -471,7 +472,7 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
 
     @Override
     public void dbControllerBlockedChanged(DBController controller) {
-        view.getDisplay().asyncExec(() -> dbModelsView.getTreeViewer().refresh(controller));
+        view.getDisplay().asyncExec(() -> dbModelsView.getTableViewer().refresh(controller));
         if (controller.isBlocked()) {
             showDBBlockedMessageInTray(controller);
         } else {
@@ -487,8 +488,8 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
     @Override
     public void dbControllerBlocksJournalChanged(DBController controller) {
         view.getDisplay().asyncExec(() -> {
-            if (dbModelsView.getTreeViewer().getStructuredSelection().getFirstElement() != null) {
-                DBController selectedController = (DBController) dbModelsView.getTreeViewer().getStructuredSelection().getFirstElement();
+            if (dbModelsView.getTableViewer().getStructuredSelection().getFirstElement() != null) {
+                DBController selectedController = (DBController) dbModelsView.getTableViewer().getStructuredSelection().getFirstElement();
                 if (controller.equals(selectedController)) {
                     dbBlocksJournalView.getTreeViewer().refresh();
                 }
@@ -497,7 +498,7 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
     }
 
     @Override
-    public void didSelectController(DBController controller) {
+    public void dbModelsViewDidSelectController(DBController controller) {
         dbProcessesView.getTreeViewer().setInput(controller.getFilteredProcesses());
         dbBlocksJournalView.getTreeViewer().setInput(controller.getBlocksJournal().getProcesses());
         changeToolItemsStateForController(controller);
@@ -505,12 +506,55 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
     }
 
     @Override
-    public void didCallActionToController(DBController controller) {
+    public void dbModelsViewDidCallActionToController(DBController controller) {
         if (!controller.isConnected()) {
             controller.connect();
         } else {
             controller.disconnect();
         }
+    }
+
+    @Override
+    public void dbModelsViewDidShowMenu(IMenuManager menuManager) {
+        if (dbModelsView.getTableViewer().getStructuredSelection().getFirstElement() == null) {
+            return;
+        }
+        DBController selectedController = (DBController) dbModelsView.getTableViewer().getStructuredSelection().getFirstElement();
+        if (selectedController.isConnected()) {
+            Action disconnectAction = new Action(Images.DISCONNECT_DATABASE.getDescription(resourceBundle),
+                    ImageDescriptor.createFromImage(ImageUtils.getImage(Images.DISCONNECT_DATABASE))) {
+                @Override
+                public void run() {
+                    selectedController.disconnect();
+                }
+            };
+            menuManager.add(disconnectAction);
+        } else {
+            Action connectAction = new Action(Images.CONNECT_DATABASE.getDescription(resourceBundle),
+                    ImageDescriptor.createFromImage(ImageUtils.getImage(Images.CONNECT_DATABASE))) {
+                @Override
+                public void run() {
+                    selectedController.connect();
+                }
+            };
+            menuManager.add(connectAction);
+            Action editAction = new Action(Images.EDIT_DATABASE.getDescription(resourceBundle),
+                    ImageDescriptor.createFromImage(ImageUtils.getImage(Images.EDIT_DATABASE))) {
+                @Override
+                public void run() {
+                    openEditSelectedDatabaseDialog();
+                }
+            };
+            menuManager.add(editAction);
+        }
+        Action updateProcessesAction = new Action(Images.UPDATE.getDescription(resourceBundle),
+                ImageDescriptor.createFromImage(ImageUtils.getImage(Images.UPDATE))) {
+            @Override
+            public void run() {
+                selectedController.updateProcesses();
+            }
+        };
+        menuManager.add(updateProcessesAction);
     }
 
     @Override
@@ -544,119 +588,119 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
 
     @Override
     public void processesFiltersViewPidFilterConditionChanged(FilterCondition condition) {
-        if (dbModelsView.getTreeViewer().getStructuredSelection().getFirstElement() == null) {
+        if (dbModelsView.getTableViewer().getStructuredSelection().getFirstElement() == null) {
             return;
         }
-        DBController selectedController = (DBController) dbModelsView.getTreeViewer().getStructuredSelection().getFirstElement();
+        DBController selectedController = (DBController) dbModelsView.getTableViewer().getStructuredSelection().getFirstElement();
         selectedController.getProcessesFilters().getPidFilter().setCondition(condition);
     }
 
     @Override
     public void processesFiltersViewPidFilterValueChanged(Integer value) {
-        if (dbModelsView.getTreeViewer().getStructuredSelection().getFirstElement() == null) {
+        if (dbModelsView.getTableViewer().getStructuredSelection().getFirstElement() == null) {
             return;
         }
-        DBController selectedController = (DBController) dbModelsView.getTreeViewer().getStructuredSelection().getFirstElement();
+        DBController selectedController = (DBController) dbModelsView.getTableViewer().getStructuredSelection().getFirstElement();
         selectedController.getProcessesFilters().getPidFilter().setValue(value);
 
     }
 
     @Override
     public void processesFiltersViewQueryFilterConditionChanged(FilterCondition condition) {
-        if (dbModelsView.getTreeViewer().getStructuredSelection().getFirstElement() == null) {
+        if (dbModelsView.getTableViewer().getStructuredSelection().getFirstElement() == null) {
             return;
         }
-        DBController selectedController = (DBController) dbModelsView.getTreeViewer().getStructuredSelection().getFirstElement();
+        DBController selectedController = (DBController) dbModelsView.getTableViewer().getStructuredSelection().getFirstElement();
         selectedController.getProcessesFilters().getQueryFilter().setCondition(condition);
     }
 
     @Override
     public void processesFiltersViewQueryFilterValueChanged(String value) {
-        if (dbModelsView.getTreeViewer().getStructuredSelection().getFirstElement() == null) {
+        if (dbModelsView.getTableViewer().getStructuredSelection().getFirstElement() == null) {
             return;
         }
-        DBController selectedController = (DBController) dbModelsView.getTreeViewer().getStructuredSelection().getFirstElement();
+        DBController selectedController = (DBController) dbModelsView.getTableViewer().getStructuredSelection().getFirstElement();
         selectedController.getProcessesFilters().getQueryFilter().setValue(value);
     }
 
     @Override
     public void processesFiltersViewApplicationFilterConditionChanged(FilterCondition condition) {
-        if (dbModelsView.getTreeViewer().getStructuredSelection().getFirstElement() == null) {
+        if (dbModelsView.getTableViewer().getStructuredSelection().getFirstElement() == null) {
             return;
         }
-        DBController selectedController = (DBController) dbModelsView.getTreeViewer().getStructuredSelection().getFirstElement();
+        DBController selectedController = (DBController) dbModelsView.getTableViewer().getStructuredSelection().getFirstElement();
         selectedController.getProcessesFilters().getApplicationFilter().setCondition(condition);
     }
 
     @Override
     public void processesFiltersViewApplicationFilterValueChanged(String value) {
-        if (dbModelsView.getTreeViewer().getStructuredSelection().getFirstElement() == null) {
+        if (dbModelsView.getTableViewer().getStructuredSelection().getFirstElement() == null) {
             return;
         }
-        DBController selectedController = (DBController) dbModelsView.getTreeViewer().getStructuredSelection().getFirstElement();
+        DBController selectedController = (DBController) dbModelsView.getTableViewer().getStructuredSelection().getFirstElement();
         selectedController.getProcessesFilters().getApplicationFilter().setValue(value);
     }
 
     @Override
     public void processesFiltersViewDatabaseFilterConditionChanged(FilterCondition condition) {
-        if (dbModelsView.getTreeViewer().getStructuredSelection().getFirstElement() == null) {
+        if (dbModelsView.getTableViewer().getStructuredSelection().getFirstElement() == null) {
             return;
         }
-        DBController selectedController = (DBController) dbModelsView.getTreeViewer().getStructuredSelection().getFirstElement();
+        DBController selectedController = (DBController) dbModelsView.getTableViewer().getStructuredSelection().getFirstElement();
         selectedController.getProcessesFilters().getDatabaseFilter().setCondition(condition);
     }
 
     @Override
     public void processesFiltersViewDatabaseFilterValueChanged(String value) {
-        if (dbModelsView.getTreeViewer().getStructuredSelection().getFirstElement() == null) {
+        if (dbModelsView.getTableViewer().getStructuredSelection().getFirstElement() == null) {
             return;
         }
-        DBController selectedController = (DBController) dbModelsView.getTreeViewer().getStructuredSelection().getFirstElement();
+        DBController selectedController = (DBController) dbModelsView.getTableViewer().getStructuredSelection().getFirstElement();
         selectedController.getProcessesFilters().getDatabaseFilter().setValue(value);
     }
 
     @Override
     public void processesFiltersViewUserNameFilterConditionChanged(FilterCondition condition) {
-        if (dbModelsView.getTreeViewer().getStructuredSelection().getFirstElement() == null) {
+        if (dbModelsView.getTableViewer().getStructuredSelection().getFirstElement() == null) {
             return;
         }
-        DBController selectedController = (DBController) dbModelsView.getTreeViewer().getStructuredSelection().getFirstElement();
+        DBController selectedController = (DBController) dbModelsView.getTableViewer().getStructuredSelection().getFirstElement();
         selectedController.getProcessesFilters().getUserNameFilter().setCondition(condition);
     }
 
     @Override
     public void processesFiltersViewUserNameFilterValueChanged(String value) {
-        if (dbModelsView.getTreeViewer().getStructuredSelection().getFirstElement() == null) {
+        if (dbModelsView.getTableViewer().getStructuredSelection().getFirstElement() == null) {
             return;
         }
-        DBController selectedController = (DBController) dbModelsView.getTreeViewer().getStructuredSelection().getFirstElement();
+        DBController selectedController = (DBController) dbModelsView.getTableViewer().getStructuredSelection().getFirstElement();
         selectedController.getProcessesFilters().getUserNameFilter().setValue(value);
     }
 
     @Override
     public void processesFiltersViewClientFilterConditionChanged(FilterCondition condition) {
-        if (dbModelsView.getTreeViewer().getStructuredSelection().getFirstElement() == null) {
+        if (dbModelsView.getTableViewer().getStructuredSelection().getFirstElement() == null) {
             return;
         }
-        DBController selectedController = (DBController) dbModelsView.getTreeViewer().getStructuredSelection().getFirstElement();
+        DBController selectedController = (DBController) dbModelsView.getTableViewer().getStructuredSelection().getFirstElement();
         selectedController.getProcessesFilters().getClientFilter().setCondition(condition);
     }
 
     @Override
     public void processesFiltersViewClientFilterValueChanged(String value) {
-        if (dbModelsView.getTreeViewer().getStructuredSelection().getFirstElement() == null) {
+        if (dbModelsView.getTableViewer().getStructuredSelection().getFirstElement() == null) {
             return;
         }
-        DBController selectedController = (DBController) dbModelsView.getTreeViewer().getStructuredSelection().getFirstElement();
+        DBController selectedController = (DBController) dbModelsView.getTableViewer().getStructuredSelection().getFirstElement();
         selectedController.getProcessesFilters().getClientFilter().setValue(value);
     }
 
     @Override
     public void processesFiltersViewIncludeBlockedValueChanged(boolean includeBlocked) {
-        if (dbModelsView.getTreeViewer().getStructuredSelection().getFirstElement() == null) {
+        if (dbModelsView.getTableViewer().getStructuredSelection().getFirstElement() == null) {
             return;
         }
-        DBController selectedController = (DBController) dbModelsView.getTreeViewer().getStructuredSelection().getFirstElement();
+        DBController selectedController = (DBController) dbModelsView.getTableViewer().getStructuredSelection().getFirstElement();
         selectedController.getProcessesFilters().setIncludeBlockedProcessesWhenFiltering(includeBlocked);
     }
 
@@ -698,10 +742,10 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
 
     @Override
     public void dbProcessInfoViewTerminateProcessToolItemClicked() {
-        if (dbModelsView.getTreeViewer().getStructuredSelection().getFirstElement() == null) {
+        if (dbModelsView.getTableViewer().getStructuredSelection().getFirstElement() == null) {
             return;
         }
-        DBController selectedController = (DBController) dbModelsView.getTreeViewer().getStructuredSelection().getFirstElement();
+        DBController selectedController = (DBController) dbModelsView.getTableViewer().getStructuredSelection().getFirstElement();
         if (selectedProcess != null) {
             final int processPid = selectedProcess.getPid();
             if (settings.isConfirmRequired() && !MessageDialog.openQuestion(view.getShell(), resourceBundle.getString("confirm_action"),
@@ -725,10 +769,10 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
 
     @Override
     public void dbProcessInfoViewCancelProcessToolItemClicked() {
-        if (dbModelsView.getTreeViewer().getStructuredSelection().getFirstElement() == null) {
+        if (dbModelsView.getTableViewer().getStructuredSelection().getFirstElement() == null) {
             return;
         }
-        DBController selectedController = (DBController) dbModelsView.getTreeViewer().getStructuredSelection().getFirstElement();
+        DBController selectedController = (DBController) dbModelsView.getTableViewer().getStructuredSelection().getFirstElement();
         if (selectedProcess != null) {
             final int processPid = selectedProcess.getPid();
             if (settings.isConfirmRequired() && !MessageDialog.openQuestion(view.getShell(), resourceBundle.getString("confirm_action"),

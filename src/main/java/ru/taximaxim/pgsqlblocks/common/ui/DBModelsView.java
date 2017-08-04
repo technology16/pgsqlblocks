@@ -1,5 +1,7 @@
 package ru.taximaxim.pgsqlblocks.common.ui;
 
+import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
@@ -7,8 +9,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.ToolBar;
-import org.eclipse.swt.widgets.ToolItem;
+import org.eclipse.swt.widgets.Menu;
 import ru.taximaxim.pgsqlblocks.modules.db.controller.DBController;
 import ru.taximaxim.pgsqlblocks.utils.Settings;
 
@@ -21,6 +22,7 @@ public class DBModelsView extends Composite {
 
     private Settings settings = Settings.getInstance();
     private ResourceBundle resourceBundle = settings.getResourceBundle();
+
 
     private static int DATABASE_TABLE_WIDTH = 200;
 
@@ -53,19 +55,32 @@ public class DBModelsView extends Composite {
             if (!event.getSelection().isEmpty()) {
                 IStructuredSelection selection = (IStructuredSelection) event.getSelection();
                 DBController selectedController = (DBController) selection.getFirstElement();
-                listeners.forEach(listener -> listener.didSelectController(selectedController));
+                listeners.forEach(listener -> listener.dbModelsViewDidSelectController(selectedController));
             }
         });
         tableViewer.addDoubleClickListener(event -> {
             if (!event.getSelection().isEmpty()) {
                 IStructuredSelection selection = (IStructuredSelection) event.getSelection();
                 DBController selectedController = (DBController) selection.getFirstElement();
-                listeners.forEach(listener -> listener.didCallActionToController(selectedController));
+                listeners.forEach(listener -> listener.dbModelsViewDidCallActionToController(selectedController));
             }
         });
+
+        MenuManager menuManager = new MenuManager();
+        Menu menu = menuManager.createContextMenu(tableViewer.getControl());
+        menuManager.setRemoveAllWhenShown(true);
+        menuManager.addMenuListener(this::menuDidShow);
+        tableViewer.getControl().setMenu(menu);
+
     }
 
-    public TableViewer getTreeViewer() {
+    private void menuDidShow(IMenuManager manager) {
+        if (tableViewer.getSelection() instanceof IStructuredSelection) {
+            listeners.forEach(listener -> listener.dbModelsViewDidShowMenu(manager));
+        }
+    }
+
+    public TableViewer getTableViewer() {
         return tableViewer;
     }
 
