@@ -1,13 +1,13 @@
 package ru.taximaxim.pgsqlblocks.common.ui;
 
-import org.eclipse.jface.viewers.TreeViewer;
-import org.eclipse.jface.viewers.TreeViewerColumn;
+import org.eclipse.jface.viewers.*;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeColumn;
+import org.eclipse.swt.widgets.TreeItem;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,6 +44,7 @@ public class TMTreeViewer extends TreeViewer {
         createColumns();
         setLabelProvider(this.dataSource);
         setContentProvider(this.dataSource);
+        addDoubleClickListener(new DoubleClickListener());
     }
 
     private void selectSortColumn(TreeColumn column, int columnIndex) {
@@ -98,5 +99,19 @@ public class TMTreeViewer extends TreeViewer {
         sortColumnSelectionListeners.remove(listener);
     }
 
-
+    private class DoubleClickListener implements IDoubleClickListener {
+        @Override
+        public void doubleClick(final DoubleClickEvent event) {
+            TreeItem[] selectedItems = getTree().getSelection();
+            if (selectedItems.length != 1) {
+                return;
+            }
+            TreeItem selectedItem = selectedItems[0];
+            if (selectedItem.getExpanded()) {
+                internalCollapseToLevel(selectedItem, AbstractTreeViewer.ALL_LEVELS);
+            } else {
+                internalExpandToLevel(selectedItem, 1);
+            }
+        }
+    }
 }
