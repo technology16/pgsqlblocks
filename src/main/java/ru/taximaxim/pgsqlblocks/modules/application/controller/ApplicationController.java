@@ -16,14 +16,13 @@ public class ApplicationController implements ApplicationViewListener {
     private final ApplicationView applicationView;
 
     private final Settings settings = Settings.getInstance();
-    private final ResourceBundle resourceBundle = settings.getResourceBundle();
 
     private LogsView logsView;
     // submodules
     private ProcessesController processesController;
 
     public ApplicationController() {
-        applicationView = new ApplicationView();
+        applicationView = new ApplicationView(settings);
         applicationView.setListener(this);
     }
 
@@ -34,9 +33,9 @@ public class ApplicationController implements ApplicationViewListener {
     @Override
     public void applicationViewDidLoad() {
 
-        logsView = new LogsView(applicationView.getBottomPanelComposite(), SWT.NONE);
+        logsView = new LogsView(applicationView.getBottomPanelComposite(), settings, SWT.NONE);
 
-        processesController = new ProcessesController(new DBModelsLocalProvider());
+        processesController = new ProcessesController(settings, new DBModelsLocalProvider());
         ProcessesView processesView = new ProcessesView(applicationView.getTopPanelComposite(), SWT.NONE);
         processesController.setView(processesView);
         processesController.load();

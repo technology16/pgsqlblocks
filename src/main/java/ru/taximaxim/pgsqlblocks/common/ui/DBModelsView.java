@@ -20,8 +20,7 @@ import java.util.ResourceBundle;
 
 public class DBModelsView extends Composite {
 
-    private Settings settings = Settings.getInstance();
-    private ResourceBundle resourceBundle = settings.getResourceBundle();
+    private final ResourceBundle resourceBundle;
 
 
     private static int DATABASE_TABLE_WIDTH = 200;
@@ -30,8 +29,9 @@ public class DBModelsView extends Composite {
 
     private List<DBModelsViewListener> listeners = new ArrayList<>();
 
-    public DBModelsView(Composite parent, int style) {
+    public DBModelsView(ResourceBundle resourceBundle, Composite parent, int style) {
         super(parent, style);
+        this.resourceBundle = resourceBundle;
         GridLayout layout = new GridLayout();
         layout.marginHeight = 0;
         layout.marginWidth = 0;

@@ -42,11 +42,13 @@ public class ApplicationView extends ApplicationWindow {
     private static final String APP_NAME = "pgSqlBlocks";
     private static final int[] ICON_SIZES = { 32, 48, 256/*, 512*/ };
 
-    private Settings settings = Settings.getInstance();
-    private ResourceBundle resourceBundle = settings.getResourceBundle();
+    private final Settings settings;
+    private final ResourceBundle resourceBundle;
 
-    public ApplicationView() {
+    public ApplicationView(Settings settings) {
         super(null);
+        this.settings = settings;
+        this.resourceBundle = settings.getResourceBundle();
         setBlockOnOpen(true);
         addToolBar(SWT.RIGHT | SWT.FLAT);
     }

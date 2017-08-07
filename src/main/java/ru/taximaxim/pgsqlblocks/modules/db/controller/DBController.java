@@ -48,8 +48,8 @@ public class DBController implements DBProcessFilterListener, DBBlocksJournalLis
 
     private final DBProcessFilter processesFilters = new DBProcessFilter();
 
-    private Settings settings = Settings.getInstance();
-    private ResourceBundle resourceBundle = settings.getResourceBundle();
+    private final Settings settings;
+    private final ResourceBundle resourceBundle;
 
     private DBStatus status = DBStatus.DISABLED;
 
@@ -67,7 +67,9 @@ public class DBController implements DBProcessFilterListener, DBBlocksJournalLis
 
     private Date blocksJournalCreateDate;
 
-    public DBController(DBModel model) {
+    public DBController(Settings settings, DBModel model) {
+        this.settings = settings;
+        this.resourceBundle = settings.getResourceBundle();
         this.model = model;
         blocksJournalCreateDate = new Date();
         blocksJournal.addListener(this);

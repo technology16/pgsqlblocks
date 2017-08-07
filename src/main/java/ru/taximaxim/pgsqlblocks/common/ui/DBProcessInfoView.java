@@ -18,8 +18,7 @@ import java.util.ResourceBundle;
 
 public class DBProcessInfoView extends Composite {
 
-    private Settings settings = Settings.getInstance();
-    private ResourceBundle resourceBundle = settings.getResourceBundle();
+    private final ResourceBundle resourceBundle;
 
     private final List<DBProcessInfoViewListener> listeners = new ArrayList<>();
 
@@ -28,8 +27,9 @@ public class DBProcessInfoView extends Composite {
     private ToolItem terminateProcessToolItem;
     private Text processInfoText;
 
-    public DBProcessInfoView(Composite parent, int style) {
+    public DBProcessInfoView(ResourceBundle resourceBundle, Composite parent, int style) {
         super(parent, style);
+        this.resourceBundle = resourceBundle;
         GridLayout layout = new GridLayout();
         layout.marginWidth = 0;
         layout.marginHeight = 0;

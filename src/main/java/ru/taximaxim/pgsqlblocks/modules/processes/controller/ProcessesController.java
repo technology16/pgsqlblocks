@@ -49,8 +49,8 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
 
     private static final Logger LOG = Logger.getLogger(ProcessesController.class);
 
-    private Settings settings = Settings.getInstance();
-    private ResourceBundle resourceBundle = settings.getResourceBundle();
+    private final Settings settings;
+    private final ResourceBundle resourceBundle;
 
     private ProcessesView view;
 
@@ -83,7 +83,9 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
 
     private DBProcess selectedProcess;
 
-    public ProcessesController(DBModelsProvider dbModelsProvider) {
+    public ProcessesController(Settings settings, DBModelsProvider dbModelsProvider) {
+        this.settings = settings;
+        this.resourceBundle = settings.getResourceBundle();
         this.dbModelsProvider = dbModelsProvider;
         settings.addListener(this);
     }
@@ -95,7 +97,7 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
     public void load() {
         createToolItems();
 
-        dbModelsView = new DBModelsView(view.getLeftPanelComposite(), SWT.NONE);
+        dbModelsView = new DBModelsView(resourceBundle, view.getLeftPanelComposite(), SWT.NONE);
         dbModelsView.getTableViewer().setInput(dbControllers);
         dbModelsView.addListener(this);
 
@@ -151,7 +153,7 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
         toggleVisibilityProcessesFilterPanelToolItem.addListener(SWT.Selection, event ->
                 setProcessesFilterViewVisibility(toggleVisibilityProcessesFilterPanelToolItem.getSelection()));
 
-        dbProcessesFiltersView = new DBProcessesFiltersView(processesViewComposite, SWT.NONE);
+        dbProcessesFiltersView = new DBProcessesFiltersView(resourceBundle, processesViewComposite, SWT.NONE);
         dbProcessesFiltersView.addListener(this);
         dbProcessesFiltersView.hide();
 
@@ -161,7 +163,7 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
         dbProcessesView.getTreeViewer().addSortColumnSelectionListener(this);
         dbProcessesView.getTreeViewer().addSelectionChangedListener(this::dbProcessesViewSelectionChanged);
 
-        dbProcessInfoView = new DBProcessInfoView(processesViewComposite, SWT.NONE);
+        dbProcessInfoView = new DBProcessInfoView(resourceBundle, processesViewComposite, SWT.NONE);
         dbProcessInfoView.addListener(this);
         dbProcessInfoView.hide();
 
@@ -179,7 +181,7 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
         dbBlocksJournalView.getTreeViewer().setDataSource(new DBBlocksJournalViewDataSource(resourceBundle));
         dbBlocksJournalView.getTreeViewer().addSelectionChangedListener(this::dbBlocksJournalViewSelectionChanged);
 
-        dbBlocksJournalProcessInfoView = new DBProcessInfoView(dbBlocksJournalViewComposite, SWT.NONE);
+        dbBlocksJournalProcessInfoView = new DBProcessInfoView(resourceBundle, dbBlocksJournalViewComposite, SWT.NONE);
         dbBlocksJournalProcessInfoView.hideToolBar();
         dbBlocksJournalProcessInfoView.hide();
 
@@ -235,7 +237,7 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
         openBlocksJournalToolItem.setImage(ImageUtils.getImage(Images.BLOCKS_JOURNAL_FOLDER));
         openBlocksJournalToolItem.setToolTipText(Images.BLOCKS_JOURNAL_FOLDER.getDescription(resourceBundle));
         openBlocksJournalToolItem.addListener(SWT.Selection, event -> {
-            BlocksJournalView blocksJournalView = new BlocksJournalView(resourceBundle);
+            BlocksJournalView blocksJournalView = new BlocksJournalView(settings);
             blocksJournalView.open();
         });
 
@@ -275,7 +277,7 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
     }
 
     private void addDatabase(DBModel dbModel, int index) {
-        DBController controller = new DBController(dbModel);
+        DBController controller = new DBController(settings, dbModel);
         controller.addListener(this);
         dbControllers.add(index, controller);
     }
@@ -302,7 +304,7 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
                 .map(DBController::getModel)
                 .map(DBModel::getName)
                 .collect(Collectors.toList());
-        AddDatabaseDialog addDatabaseDialog = new AddDatabaseDialog(view.getShell(), reservedConnectionNames);
+        AddDatabaseDialog addDatabaseDialog = new AddDatabaseDialog(resourceBundle, view.getShell(), reservedConnectionNames);
         if (addDatabaseDialog.open() == Window.OK) {
             addDatabase(addDatabaseDialog.getCreatedModel());
             dbModelsView.getTableViewer().refresh();
@@ -331,7 +333,7 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
                 .map(DBController::getModel)
                 .map(DBModel::getName)
                 .collect(Collectors.toList());
-        EditDatabaseDialog editDatabaseDialog = new EditDatabaseDialog(view.getShell(), reservedConnectionNames, selectedController.getModel());
+        EditDatabaseDialog editDatabaseDialog = new EditDatabaseDialog(resourceBundle, view.getShell(), reservedConnectionNames, selectedController.getModel());
         if (editDatabaseDialog.open() == Window.OK) {
             editDatabase(editDatabaseDialog.getEditedModel(), editDatabaseDialog.getCreatedModel());
         }
@@ -410,7 +412,7 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
     }
 
     private void showSettingsDialog() {
-        SettingsDialog settingsDialog = new SettingsDialog(view.getShell(), settings);
+        SettingsDialog settingsDialog = new SettingsDialog(settings, view.getShell());
         settingsDialog.open();
     }
 
@@ -472,11 +474,13 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
 
     @Override
     public void dbControllerBlockedChanged(DBController controller) {
-        view.getDisplay().asyncExec(() -> dbModelsView.getTableViewer().refresh(controller));
-        if (controller.isBlocked()) {
-            showDBBlockedMessageInTray(controller);
-        } else {
-            hideTrayMessageIfAllDatabasesUnblocked();
+        if (settings.getShowToolTip()) {
+            view.getDisplay().asyncExec(() -> dbModelsView.getTableViewer().refresh(controller));
+            if (controller.isBlocked()) {
+                showDBBlockedMessageInTray(controller);
+            } else {
+                hideTrayMessageIfAllDatabasesUnblocked();
+            }
         }
     }
 

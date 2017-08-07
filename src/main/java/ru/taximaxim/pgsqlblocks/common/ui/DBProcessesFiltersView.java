@@ -16,8 +16,7 @@ import java.util.ResourceBundle;
 
 public class DBProcessesFiltersView extends Composite {
 
-    private Settings settings = Settings.getInstance();
-    private ResourceBundle resourceBundle = settings.getResourceBundle();
+    private ResourceBundle resourceBundle;
 
     private Group group;
 
@@ -43,8 +42,9 @@ public class DBProcessesFiltersView extends Composite {
 
     private final List<DBProcessesFiltersViewListener> listeners = new ArrayList<>();
 
-    public DBProcessesFiltersView(Composite parent, int style) {
+    public DBProcessesFiltersView(ResourceBundle resourceBundle, Composite parent, int style) {
         super(parent, style);
+        this.resourceBundle = resourceBundle;
         GridLayout layout = new GridLayout();
         layout.marginWidth = 0;
         layout.marginHeight = 0;

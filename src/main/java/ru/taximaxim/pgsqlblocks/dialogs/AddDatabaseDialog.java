@@ -16,8 +16,7 @@ import java.util.ResourceBundle;
 
 public class AddDatabaseDialog extends Dialog {
 
-    protected final Settings settings = Settings.getInstance();
-    protected final ResourceBundle resourceBundle = settings.getResourceBundle();
+    protected final ResourceBundle resourceBundle;
 
     protected DBModel createdModel;
 
@@ -34,8 +33,9 @@ public class AddDatabaseDialog extends Dialog {
 
     private List<String> reservedConnectionNames;
 
-    public AddDatabaseDialog(Shell shell, List<String> reservedConnectionNames) {
+    public AddDatabaseDialog(ResourceBundle resourceBundle, Shell shell, List<String> reservedConnectionNames) {
         super(shell);
+        this.resourceBundle = resourceBundle;
         this.reservedConnectionNames = reservedConnectionNames;
     }
 

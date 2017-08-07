@@ -5,16 +5,16 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 import ru.taximaxim.pgsqlblocks.common.models.DBModel;
-import ru.taximaxim.pgsqlblocks.dialogs.AddDatabaseDialog;
 
 import java.util.List;
+import java.util.ResourceBundle;
 
 public class EditDatabaseDialog extends AddDatabaseDialog {
 
     private DBModel editedModel;
 
-    public EditDatabaseDialog(Shell shell, List<String> reservedConnectionNames, DBModel editedModel) {
-        super(shell, reservedConnectionNames);
+    public EditDatabaseDialog(ResourceBundle resourceBundle, Shell shell, List<String> reservedConnectionNames, DBModel editedModel) {
+        super(resourceBundle, shell, reservedConnectionNames);
         reservedConnectionNames.remove(editedModel.getName());
         this.editedModel = editedModel;
     }

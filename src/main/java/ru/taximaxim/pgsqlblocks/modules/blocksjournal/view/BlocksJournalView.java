@@ -21,10 +21,7 @@ import ru.taximaxim.pgsqlblocks.common.models.DBProcess;
 import ru.taximaxim.pgsqlblocks.common.ui.DBBlocksJournalViewDataSource;
 import ru.taximaxim.pgsqlblocks.common.ui.DBProcessInfoView;
 import ru.taximaxim.pgsqlblocks.common.ui.DBProcessesView;
-import ru.taximaxim.pgsqlblocks.utils.ImageUtils;
-import ru.taximaxim.pgsqlblocks.utils.Images;
-import ru.taximaxim.pgsqlblocks.utils.PathBuilder;
-import ru.taximaxim.pgsqlblocks.utils.XmlDocumentWorker;
+import ru.taximaxim.pgsqlblocks.utils.*;
 
 import javax.xml.parsers.ParserConfigurationException;
 import java.awt.*;
@@ -46,7 +43,8 @@ public class BlocksJournalView extends ApplicationWindow {
 
     private DBProcessInfoView processInfoView;
 
-    private ResourceBundle resourceBundle;
+    private final Settings settings;
+    private final ResourceBundle resourceBundle;
 
     private final List<File> journalFiles = new ArrayList<>();
 
@@ -54,9 +52,10 @@ public class BlocksJournalView extends ApplicationWindow {
 
     private static DBBlocksJournalProcessSerializer serializer = new DBBlocksJournalProcessSerializer();
 
-    public BlocksJournalView(ResourceBundle resourceBundle) {
+    public BlocksJournalView(Settings settings) {
         super(null);
-        this.resourceBundle = resourceBundle;
+        this.settings = settings;
+        this.resourceBundle = settings.getResourceBundle();
     }
 
     @Override
@@ -110,7 +109,7 @@ public class BlocksJournalView extends ApplicationWindow {
         processesView.getTreeViewer().setDataSource(new DBBlocksJournalViewDataSource(resourceBundle));
         processesView.getTreeViewer().addSelectionChangedListener(this::processesViewSelectionChanged);
 
-        processInfoView = new DBProcessInfoView(processesView, SWT.NONE);
+        processInfoView = new DBProcessInfoView(resourceBundle, processesView, SWT.NONE);
         processInfoView.hideToolBar();
         processInfoView.hide();
 

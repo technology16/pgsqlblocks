@@ -12,7 +12,7 @@ import java.util.ResourceBundle;
 
 public class DBBlocksJournalViewDataSource extends TMTreeViewerDataSource<DBBlocksJournalProcess> {
 
-    private ResourceBundle resourceBundle;
+    private final ResourceBundle resourceBundle;
 
     public DBBlocksJournalViewDataSource(ResourceBundle resourceBundle) {
         this.resourceBundle = resourceBundle;

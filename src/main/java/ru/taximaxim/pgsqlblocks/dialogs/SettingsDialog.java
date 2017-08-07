@@ -12,7 +12,8 @@ import java.util.ResourceBundle;
 public class SettingsDialog extends Dialog {
 
     private final Settings settings;
-    private final ResourceBundle resources;
+    private final ResourceBundle resourceBundle;
+
     private Spinner updatePeriod;
     private Button showIdleButton;
     private Button showToolTip;
@@ -20,10 +21,10 @@ public class SettingsDialog extends Dialog {
     private Button confirmExitButton;
     private Combo languageCombo;
 
-    public SettingsDialog(Shell shell, Settings settings) {
+    public SettingsDialog(Settings settings, Shell shell) {
         super(shell);
         this.settings = settings;
-        this.resources = settings.getResourceBundle();
+        this.resourceBundle = settings.getResourceBundle();
     }
 
     @Override
@@ -43,12 +44,12 @@ public class SettingsDialog extends Dialog {
 
     private void populateGeneralGroup(Composite container) {
         Group generalGroup = new Group(container, SWT.SHADOW_IN);
-        generalGroup.setText(resources.getString("general"));
+        generalGroup.setText(resourceBundle.getString("general"));
         generalGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
         generalGroup.setLayout(new GridLayout(2, false));
 
         Label selectLocale = new Label(generalGroup, SWT.HORIZONTAL);
-        selectLocale.setText(resources.getString("select_ui_language"));
+        selectLocale.setText(resourceBundle.getString("select_ui_language"));
         selectLocale.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
         languageCombo = new Combo (generalGroup, SWT.READ_ONLY);
@@ -58,12 +59,12 @@ public class SettingsDialog extends Dialog {
 
     private void populateProcessGroup(Composite container) {
         Group processGroup = new Group(container, SWT.SHADOW_IN);
-        processGroup.setText(resources.getString("processes"));
+        processGroup.setText(resourceBundle.getString("processes"));
         processGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
         processGroup.setLayout(new GridLayout(3, false));
 
         Label updatePeriodLabel = new Label(processGroup, SWT.HORIZONTAL);
-        updatePeriodLabel.setText(resources.getString("auto_update_interval"));
+        updatePeriodLabel.setText(resourceBundle.getString("auto_update_interval"));
 
         GridData textGd = new GridData(GridData.FILL_HORIZONTAL);
         textGd.horizontalSpan = 2;
@@ -75,7 +76,7 @@ public class SettingsDialog extends Dialog {
         updatePeriod.setSelection(settings.getUpdatePeriod());
 
         Label idleShowLabel = new Label(processGroup, SWT.HORIZONTAL);
-        idleShowLabel.setText(resources.getString("show_idle_process"));
+        idleShowLabel.setText(resourceBundle.getString("show_idle_process"));
         GridData labelGd = new GridData(GridData.FILL_HORIZONTAL);
         labelGd.horizontalSpan = 2;
         idleShowLabel.setLayoutData(labelGd);
@@ -86,24 +87,24 @@ public class SettingsDialog extends Dialog {
 
     private void populateNotificationGroup(Composite container) {
         Group notificationGroup = new Group(container, SWT.SHADOW_IN);
-        notificationGroup.setText(resources.getString("notifications"));
+        notificationGroup.setText(resourceBundle.getString("notifications"));
         notificationGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
         notificationGroup.setLayout(new GridLayout(2, false));
 
         Label idleShowToolTip = new Label(notificationGroup, SWT.HORIZONTAL);
-        idleShowToolTip.setText(resources.getString("show_tray_notifications"));
+        idleShowToolTip.setText(resourceBundle.getString("show_tray_notifications"));
         idleShowToolTip.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
         showToolTip = new Button(notificationGroup, SWT.CHECK);
         showToolTip.setSelection(settings.getShowToolTip());
 
         Label confirmRequiredLabel = new Label(notificationGroup, SWT.HORIZONTAL);
-        confirmRequiredLabel.setText(resources.getString("prompt_confirmation_on_process_kill"));
+        confirmRequiredLabel.setText(resourceBundle.getString("prompt_confirmation_on_process_kill"));
         confirmRequiredLabel.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
         confirmRequiredButton = new Button(notificationGroup, SWT.CHECK);
         confirmRequiredButton.setSelection(settings.isConfirmRequired());
 
         Label confirmExitLabel = new Label(notificationGroup, SWT.HORIZONTAL);
-        confirmExitLabel.setText(resources.getString("prompt_confirmation_on_program_close"));
+        confirmExitLabel.setText(resourceBundle.getString("prompt_confirmation_on_program_close"));
         confirmExitLabel.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
         confirmExitButton = new Button(notificationGroup, SWT.CHECK);
         confirmExitButton.setSelection(settings.isConfirmExit());
@@ -112,7 +113,7 @@ public class SettingsDialog extends Dialog {
     @Override
     protected void configureShell(Shell newShell) {
         super.configureShell(newShell);
-        newShell.setText(resources.getString("settings"));
+        newShell.setText(resourceBundle.getString("settings"));
     }
 
     @Override

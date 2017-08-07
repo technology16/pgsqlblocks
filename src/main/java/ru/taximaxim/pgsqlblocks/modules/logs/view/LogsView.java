@@ -12,10 +12,11 @@ import ru.taximaxim.pgsqlblocks.utils.Settings;
 
 public class LogsView extends Composite {
 
-    private final Settings settings = Settings.getInstance();
+    private final Settings settings;
 
-    public LogsView(Composite parent, int style) {
+    public LogsView(Composite parent, Settings settings, int style) {
         super(parent, style);
+        this.settings = settings;
         GridLayout layout = new GridLayout();
         layout.marginTop = 0;
         GridData layoutData = new GridData(SWT.FILL, SWT.FILL, true, true);
