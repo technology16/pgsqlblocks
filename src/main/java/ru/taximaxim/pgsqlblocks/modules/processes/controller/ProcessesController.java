@@ -375,6 +375,11 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
     }
 
     public void setProcessesFilterViewVisibility(boolean isVisible) {
+        if (dbModelsView.getTableViewer().getStructuredSelection().getFirstElement() == null) {
+            return;
+        }
+        DBController selectedController = (DBController) dbModelsView.getTableViewer().getStructuredSelection().getFirstElement();
+        selectedController.getProcessesFilters().setEnabled(isVisible);
         if (isVisible) {
             dbProcessesFiltersView.show();
         } else {
@@ -423,7 +428,7 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
 
     @Override
     public void dbControllerStatusChanged(DBController controller, DBStatus newStatus) {
-        dbModelsView.getTableViewer().refresh(controller, true, true);
+        view.getDisplay().asyncExec(() -> dbModelsView.getTableViewer().refresh(controller, true, true));
     }
 
     @Override
@@ -507,6 +512,14 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
         dbBlocksJournalView.getTreeViewer().setInput(controller.getBlocksJournal().getProcesses());
         changeToolItemsStateForController(controller);
         dbProcessesFiltersView.fillViewForController(controller);
+        boolean controllerFiltersEnabled = controller.getProcessesFilters().isEnabled();
+        if (controllerFiltersEnabled) {
+            dbProcessesFiltersView.show();
+        } else {
+            dbProcessesFiltersView.hide();
+        }
+        toggleVisibilityProcessesFilterPanelToolItem.setSelection(controllerFiltersEnabled);
+
     }
 
     @Override
@@ -697,15 +710,6 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
         }
         DBController selectedController = (DBController) dbModelsView.getTableViewer().getStructuredSelection().getFirstElement();
         selectedController.getProcessesFilters().getClientFilter().setValue(value);
-    }
-
-    @Override
-    public void processesFiltersViewIncludeBlockedValueChanged(boolean includeBlocked) {
-        if (dbModelsView.getTableViewer().getStructuredSelection().getFirstElement() == null) {
-            return;
-        }
-        DBController selectedController = (DBController) dbModelsView.getTableViewer().getStructuredSelection().getFirstElement();
-        selectedController.getProcessesFilters().setIncludeBlockedProcessesWhenFiltering(includeBlocked);
     }
 
     @Override

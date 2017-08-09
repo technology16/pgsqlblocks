@@ -28,6 +28,4 @@ public interface DBProcessesFiltersViewListener {
 
     void processesFiltersViewClientFilterValueChanged(String value);
 
-    void processesFiltersViewIncludeBlockedValueChanged(boolean includeBlocked);
-
 }

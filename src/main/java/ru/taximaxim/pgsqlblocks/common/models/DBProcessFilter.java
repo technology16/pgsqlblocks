@@ -10,7 +10,7 @@ import java.util.List;
 
 public class DBProcessFilter implements FilterListener {
 
-    private boolean includeBlockedProcessesWhenFiltering = false;
+    private boolean enabled;
 
     private final List<DBProcessFilterListener> listeners = new ArrayList<>();
 
@@ -36,7 +36,7 @@ public class DBProcessFilter implements FilterListener {
     }
 
     public boolean filter(DBProcess process) {
-        if (process.hasChildren() && !includeBlockedProcessesWhenFiltering) {
+        if (!enabled) {
             return true;
         }
         boolean pidFilterResult = !pidFilter.isActive() || pidFilter.filter(process.getPid());
@@ -49,14 +49,15 @@ public class DBProcessFilter implements FilterListener {
                 && userNameFilterResult && clientFilterResult;
     }
 
-    public void resetFilters() {
-        pidFilter.reset();
-        databaseFilter.reset();
-        queryFilter.reset();
-        applicationFilter.reset();
-        userNameFilter.reset();
-        clientFilter.reset();
-        listeners.forEach(DBProcessFilterListener::dbProcessFilterChanged);
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+        if (this.enabled != enabled) {
+            this.enabled = enabled;
+            listeners.forEach(DBProcessFilterListener::dbProcessFilterChanged);
+        }
     }
 
     public IntegerValueTypeFilter getPidFilter() {
@@ -81,17 +82,6 @@ public class DBProcessFilter implements FilterListener {
 
     public StringValueTypeFilter getClientFilter() {
         return clientFilter;
-    }
-
-    public boolean isIncludeBlockedProcessesWhenFiltering() {
-        return includeBlockedProcessesWhenFiltering;
-    }
-
-    public void setIncludeBlockedProcessesWhenFiltering(boolean includeBlockedProcessesWhenFiltering) {
-        if (this.includeBlockedProcessesWhenFiltering != includeBlockedProcessesWhenFiltering) {
-            this.includeBlockedProcessesWhenFiltering = includeBlockedProcessesWhenFiltering;
-            listeners.forEach(DBProcessFilterListener::dbProcessFilterChanged);
-        }
     }
 
     public void addListener(DBProcessFilterListener listener) {

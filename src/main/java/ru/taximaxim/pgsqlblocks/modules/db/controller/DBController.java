@@ -223,30 +223,32 @@ public class DBController implements DBProcessFilterListener, DBBlocksJournalLis
     }
 
     private void loadProcesses() {
-        try {
-            listeners.forEach(listener -> listener.dbControllerWillUpdateProcesses(this));
-            try(
+        listeners.forEach(listener -> listener.dbControllerWillUpdateProcesses(this));
+        try(
                 PreparedStatement preparedStatement = connection.prepareStatement(getProcessesQuery());
                 ResultSet resultSet = preparedStatement.executeQuery()
-            ) {
-                Map<Integer, DBProcess> tmpProcesses = new HashMap<>();
-                Map<Integer, Set<DBBlock>> tmpBlocks = new HashMap<>();
-                DBProcessSerializer processDeserializer = new DBProcessSerializer();
-                DBBlockDeserializer blockDeserializer = new DBBlockDeserializer();
-                while(resultSet.next()) {
-                    DBProcess process = processDeserializer.deserialize(resultSet);
-                    int blockedBy = resultSet.getInt(BLOCKED_BY);
-                    if (blockedBy != 0) {
-                        DBBlock block = blockDeserializer.deserialize(resultSet);
-                        tmpBlocks.computeIfAbsent(process.getPid(), k -> new HashSet<>()).add(block);
-                    }
-                    tmpProcesses.put(process.getPid(), process);
+        ) {
+            Map<Integer, DBProcess> tmpProcesses = new HashMap<>();
+            Map<Integer, Set<DBBlock>> tmpBlocks = new HashMap<>();
+            DBProcessSerializer processDeserializer = new DBProcessSerializer();
+            DBBlockDeserializer blockDeserializer = new DBBlockDeserializer();
+            while(resultSet.next()) {
+                DBProcess process = processDeserializer.deserialize(resultSet);
+                int blockedBy = resultSet.getInt(BLOCKED_BY);
+                if (blockedBy != 0) {
+                    DBBlock block = blockDeserializer.deserialize(resultSet);
+                    tmpBlocks.computeIfAbsent(process.getPid(), k -> new HashSet<>()).add(block);
                 }
-                proceedBlocks(tmpProcesses, tmpBlocks);
-                proceedProcesses(tmpProcesses);
-                processesLoaded(tmpProcesses.values().stream().filter(process -> !process.hasParent()).collect(Collectors.toList()));
+                tmpProcesses.put(process.getPid(), process);
             }
+            proceedBlocks(tmpProcesses, tmpBlocks);
+            proceedProcesses(tmpProcesses);
+            processesLoaded(tmpProcesses.values().stream().filter(process -> !process.hasParent()).collect(Collectors.toList()));
         } catch (SQLException e) {
+            if (!isConnected()) {
+                setStatus(DBStatus.CONNECTION_ERROR);
+                stopProcessesUpdater();
+            }
             LOG.error(String.format("Ошибка при получении процессов для %s", model.getName()), e);
         }
     }
