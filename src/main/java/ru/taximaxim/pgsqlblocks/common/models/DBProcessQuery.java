@@ -1,5 +1,6 @@
 package ru.taximaxim.pgsqlblocks.common.models;
 
+import java.time.Duration;
 import java.util.Date;
 
 public class DBProcessQuery {
@@ -36,6 +37,14 @@ public class DBProcessQuery {
 
     public Date getXactStart() {
         return xactStart;
+    }
+
+    public Duration getDuration() {
+        if (xactStart == null) {
+            return null;
+        }
+        Date now = new Date();
+        return Duration.ofMillis(now.getTime() - xactStart.getTime());
     }
 
     @Override

@@ -180,6 +180,27 @@ public class DBController implements DBProcessFilterListener, DBBlocksJournalLis
         return processes;
     }
 
+    public int getProcessesCount() {
+        int count = 0;
+        for (DBProcess process : processes) {
+            count ++;
+            count += countOfChildrenInProcess(process);
+        }
+        return count;
+    }
+
+    private int countOfChildrenInProcess(DBProcess process) {
+        int childrenProcessesCount = 0;
+        if (process.hasChildren()) {
+            childrenProcessesCount += process.getChildren().size();
+            for (DBProcess childProcess : process.getChildren()) {
+                childrenProcessesCount += countOfChildrenInProcess(childProcess);
+            }
+        }
+        return childrenProcessesCount;
+
+    }
+
     public List<DBProcess> getFilteredProcesses() {
         return filteredProcesses;
     }

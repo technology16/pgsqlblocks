@@ -7,6 +7,7 @@ import ru.taximaxim.pgsqlblocks.common.models.DBProcess;
 import ru.taximaxim.pgsqlblocks.utils.DateUtils;
 import ru.taximaxim.pgsqlblocks.utils.ImageUtils;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.ResourceBundle;
 
@@ -20,7 +21,7 @@ public class DBBlocksJournalViewDataSource extends TMTreeViewerDataSource<DBBloc
 
     @Override
     int numberOfColumns() {
-        return 18;
+        return 19;
     }
 
     @Override
@@ -49,18 +50,20 @@ public class DBBlocksJournalViewDataSource extends TMTreeViewerDataSource<DBBloc
             case 10:
                 return resourceBundle.getString("xact_start");
             case 11:
-                return resourceBundle.getString("state");
+                return resourceBundle.getString("duration");
             case 12:
-                return resourceBundle.getString("state_change");
+                return resourceBundle.getString("state");
             case 13:
-                return resourceBundle.getString("blocked_by");
+                return resourceBundle.getString("state_change");
             case 14:
-                return resourceBundle.getString("lock_type");
+                return resourceBundle.getString("blocked_by");
             case 15:
-                return resourceBundle.getString("relation");
+                return resourceBundle.getString("lock_type");
             case 16:
-                return resourceBundle.getString("slow_query");
+                return resourceBundle.getString("relation");
             case 17:
+                return resourceBundle.getString("slow_query");
+            case 18:
                 return resourceBundle.getString("query");
             default:
                 return "undefined";
@@ -88,16 +91,17 @@ public class DBBlocksJournalViewDataSource extends TMTreeViewerDataSource<DBBloc
             case 10:
                 return 150;
             case 11:
-                return 70;
             case 12:
-                return 150;
+                return 70;
             case 13:
+                return 150;
             case 14:
             case 15:
-                return 130;
             case 16:
-                return 150;
+                return 130;
             case 17:
+                return 150;
+            case 18:
                 return 100;
             default:
                 return 110;
@@ -135,18 +139,20 @@ public class DBBlocksJournalViewDataSource extends TMTreeViewerDataSource<DBBloc
             case 10:
                 return "XACT_START";
             case 11:
-                return "STATE";
+                return resourceBundle.getString("duration");
             case 12:
-                return "STATE_CHANGE";
+                return "STATE";
             case 13:
-                return "BLOCKED";
+                return "STATE_CHANGE";
             case 14:
-                return "LOCK_TYPE";
+                return "BLOCKED";
             case 15:
-                return "RELATION";
+                return "LOCK_TYPE";
             case 16:
-                return "SLOW_QUERY";
+                return "RELATION";
             case 17:
+                return "SLOW_QUERY";
+            case 18:
                 return "QUERY";
             default:
                 return "UNDEFINED";
@@ -206,18 +212,20 @@ public class DBBlocksJournalViewDataSource extends TMTreeViewerDataSource<DBBloc
             case 10:
                 return DateUtils.dateToString(process.getQuery().getXactStart());
             case 11:
-                return process.getState();
+                return DateUtils.durationToString(process.getQuery().getDuration());
             case 12:
-                return DateUtils.dateToString(process.getStateChange());
+                return process.getState();
             case 13:
-                return process.getBlocksPidsString();
+                return DateUtils.dateToString(process.getStateChange());
             case 14:
-                return process.getBlocksLocktypesString();
+                return process.getBlocksPidsString();
             case 15:
-                return process.getBlocksRelationsString();
+                return process.getBlocksLocktypesString();
             case 16:
-                return String.valueOf(process.getQuery().isSlowQuery());
+                return process.getBlocksRelationsString();
             case 17:
+                return String.valueOf(process.getQuery().isSlowQuery());
+            case 18:
                 return process.getQuery().getQueryString();
             default:
                 return "UNDEFINED";

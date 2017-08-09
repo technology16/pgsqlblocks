@@ -18,14 +18,25 @@ public class DBModelsViewLabelProvider extends TreeLabelProvider {
 
     @Override
     public Image getColumnImage(Object element, int columnIndex) {
-        DBController controller = (DBController) element;
-        return getImage(controller);
+        if (columnIndex == 0) {
+            DBController controller = (DBController) element;
+            return getImage(controller);
+        }
+        return null;
     }
 
     @Override
     public String getColumnText(Object element, int columnIndex) {
         DBController controller = (DBController) element;
-        return controller.getModel().getName();
+        switch (columnIndex) {
+            case 0:
+                return controller.getModel().getName();
+            case 1:
+                return String.valueOf(controller.getProcessesCount());
+            default:
+                return "UNDEFINED";
+        }
+
     }
     private Image getImage(DBController controller) {
         Image image = ImageUtils.getImage(controller.getStatus().getStatusImage());

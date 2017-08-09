@@ -463,6 +463,7 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
     @Override
     public void dbControllerProcessesUpdated(DBController controller) {
         view.getDisplay().asyncExec(() -> {
+            dbModelsView.getTableViewer().refresh(controller);
             if (dbModelsView.getTableViewer().getStructuredSelection().getFirstElement() != null) {
                 DBController selectedController = (DBController) dbModelsView.getTableViewer().getStructuredSelection().getFirstElement();
                 if (controller.equals(selectedController)) {

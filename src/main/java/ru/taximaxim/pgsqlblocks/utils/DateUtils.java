@@ -4,6 +4,7 @@ import org.apache.log4j.Logger;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.Duration;
 import java.util.Date;
 
 public final class DateUtils {
@@ -47,6 +48,28 @@ public final class DateUtils {
         } else {
             return d2 == null ? 1 : d1.compareTo(d2);
         }
+    }
+
+    public static int compareDurations(Duration d1, Duration d2) {
+        if (d1 == null) {
+            return d2 == null ? 0 : -1;
+        } else {
+            return d2 == null ? 1 : d1.compareTo(d2);
+        }
+    }
+
+    public static String durationToString(Duration duration) {
+        if (duration == null) {
+            return "";
+        }
+        long seconds = duration.getSeconds();
+        long absSeconds = Math.abs(seconds);
+        String positive = String.format(
+                "%02d:%02d:%02d",
+                absSeconds / 3600,
+                (absSeconds % 3600) / 60,
+                absSeconds % 60);
+        return seconds < 0 ? "-" + positive : positive;
     }
 
 }
