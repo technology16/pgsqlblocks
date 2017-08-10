@@ -21,6 +21,7 @@ import ru.taximaxim.pgsqlblocks.common.models.DBProcess;
 import ru.taximaxim.pgsqlblocks.common.ui.DBBlocksJournalViewDataSource;
 import ru.taximaxim.pgsqlblocks.common.ui.DBProcessInfoView;
 import ru.taximaxim.pgsqlblocks.common.ui.DBProcessesView;
+import ru.taximaxim.pgsqlblocks.dialogs.TMTreeViewerColumnsDialog;
 import ru.taximaxim.pgsqlblocks.utils.*;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -80,7 +81,7 @@ public class BlocksJournalView extends ApplicationWindow {
         updateFilesListToolItem.setImage(ImageUtils.getImage(Images.UPDATE));
         updateFilesListToolItem.setToolTipText(resourceBundle.getString("refresh_files_list"));
         updateFilesListToolItem.addListener(SWT.Selection, e -> getJournalFilesFromJournalsDir());
-
+/*
         ToolItem openJournalDirectoryToolItem = new ToolItem(toolBar, SWT.PUSH);
         openJournalDirectoryToolItem.setImage(ImageUtils.getImage(Images.FOLDER));
         openJournalDirectoryToolItem.setToolTipText(resourceBundle.getString("open_dir"));
@@ -91,6 +92,11 @@ public class BlocksJournalView extends ApplicationWindow {
                 LOG.error(exception.getMessage(), exception);
             }
         });
+*/
+        ToolItem showColumnsDialogToolItem = new ToolItem(toolBar, SWT.PUSH);
+        showColumnsDialogToolItem.setImage(ImageUtils.getImage(Images.TABLE));
+        showColumnsDialogToolItem.setToolTipText(resourceBundle.getString("columns"));
+        showColumnsDialogToolItem.addListener(SWT.Selection, event -> showProcessesViewColumnsDialog());
 
         SashForm sashForm = new SashForm(contentComposite, SWT.HORIZONTAL);
         sashForm.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -115,6 +121,7 @@ public class BlocksJournalView extends ApplicationWindow {
 
         sashForm.setWeights(new int[] {30, 70});
         getJournalFilesFromJournalsDir();
+
         return super.createContents(parent);
     }
 
@@ -170,6 +177,12 @@ public class BlocksJournalView extends ApplicationWindow {
             }
             processInfoView.show(process);
         }
+    }
+
+
+    private void showProcessesViewColumnsDialog() {
+        TMTreeViewerColumnsDialog dialog = new TMTreeViewerColumnsDialog(resourceBundle, processesView.getTreeViewer(), getShell());
+        dialog.open();
     }
 
 }

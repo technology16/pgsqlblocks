@@ -134,19 +134,7 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
         updateProcessesToolItem.setToolTipText(Images.UPDATE.getDescription(resourceBundle));
         updateProcessesToolItem.addListener(SWT.Selection, event -> updateProcessesInSelectedDatabase());
 
-        autoUpdateToolItem = new ToolItem(processesViewToolBar, SWT.CHECK);
-        autoUpdateToolItem.setImage(ImageUtils.getImage(Images.AUTOUPDATE));
-        autoUpdateToolItem.setToolTipText(Images.AUTOUPDATE.getDescription(resourceBundle));
-        autoUpdateToolItem.addListener(SWT.Selection, event -> setAutoUpdate(autoUpdateToolItem.getSelection()));
-        autoUpdateToolItem.setSelection(settings.isAutoUpdate());
-
         new ToolItem(processesViewToolBar, SWT.SEPARATOR);
-
-        showOnlyBlockedProcessesToolItem = new ToolItem(processesViewToolBar, SWT.CHECK);
-        showOnlyBlockedProcessesToolItem.setImage(ImageUtils.getImage(Images.VIEW_ONLY_BLOCKED));
-        showOnlyBlockedProcessesToolItem.setToolTipText(Images.VIEW_ONLY_BLOCKED.getDescription(resourceBundle));
-        showOnlyBlockedProcessesToolItem.addListener(SWT.Selection, event ->
-                dbProcessesViewDataSourceFilter.setShowOnlyBlockedProcesses(showOnlyBlockedProcessesToolItem.getSelection()));
 
         toggleVisibilityProcessesFilterPanelToolItem = new ToolItem(processesViewToolBar, SWT.CHECK);
         toggleVisibilityProcessesFilterPanelToolItem.setImage(ImageUtils.getImage(Images.FILTER));
@@ -182,6 +170,15 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
 
         Composite dbBlocksJournalViewComposite = new Composite(tabFolder, SWT.NONE);
         dbBlocksJournalViewComposite.setLayout(new GridLayout());
+
+
+        ToolBar dbBlocksJournalViewToolBar = new ToolBar(dbBlocksJournalViewComposite, SWT.HORIZONTAL);
+        dbBlocksJournalViewToolBar.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
+
+        ToolItem showColumnsDialogToolItem = new ToolItem(dbBlocksJournalViewToolBar, SWT.PUSH);
+        showColumnsDialogToolItem.setImage(ImageUtils.getImage(Images.TABLE));
+        showColumnsDialogToolItem.setToolTipText(resourceBundle.getString("columns"));
+        showColumnsDialogToolItem.addListener(SWT.Selection, event -> showDbBlocksJournalViewColumnsDialog());
 
         dbBlocksJournalView = new DBProcessesView(dbBlocksJournalViewComposite, SWT.NONE);
         dbBlocksJournalView.getTreeViewer().setDataSource(new DBBlocksJournalViewDataSource(resourceBundle));
@@ -236,6 +233,20 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
         toggleLogsPanelVisibilityToolItem.setToolTipText(Images.SHOW_LOG_PANEL.getDescription(resourceBundle));
         toggleLogsPanelVisibilityToolItem.setSelection(true);
         toggleLogsPanelVisibilityToolItem.addListener(SWT.Selection, event -> toggleLogsPanelVisibility(toggleLogsPanelVisibilityToolItem));
+
+        new ToolItem(view.getToolBar(), SWT.SEPARATOR);
+
+        autoUpdateToolItem = new ToolItem(view.getToolBar(), SWT.CHECK);
+        autoUpdateToolItem.setImage(ImageUtils.getImage(Images.AUTOUPDATE));
+        autoUpdateToolItem.setToolTipText(Images.AUTOUPDATE.getDescription(resourceBundle));
+        autoUpdateToolItem.addListener(SWT.Selection, event -> setAutoUpdate(autoUpdateToolItem.getSelection()));
+        autoUpdateToolItem.setSelection(settings.isAutoUpdate());
+
+        showOnlyBlockedProcessesToolItem = new ToolItem(view.getToolBar(), SWT.CHECK);
+        showOnlyBlockedProcessesToolItem.setImage(ImageUtils.getImage(Images.VIEW_ONLY_BLOCKED));
+        showOnlyBlockedProcessesToolItem.setToolTipText(Images.VIEW_ONLY_BLOCKED.getDescription(resourceBundle));
+        showOnlyBlockedProcessesToolItem.addListener(SWT.Selection, event ->
+                dbProcessesViewDataSourceFilter.setShowOnlyBlockedProcesses(showOnlyBlockedProcessesToolItem.getSelection()));
 
         new ToolItem(view.getToolBar(), SWT.SEPARATOR);
 
@@ -429,6 +440,11 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
 
     private void showProcessesViewColumnsDialog() {
         TMTreeViewerColumnsDialog dialog = new TMTreeViewerColumnsDialog(resourceBundle, dbProcessesView.getTreeViewer(), view.getShell());
+        dialog.open();
+    }
+
+    private void showDbBlocksJournalViewColumnsDialog() {
+        TMTreeViewerColumnsDialog dialog = new TMTreeViewerColumnsDialog(resourceBundle, dbBlocksJournalView.getTreeViewer(), view.getShell());
         dialog.open();
     }
 
