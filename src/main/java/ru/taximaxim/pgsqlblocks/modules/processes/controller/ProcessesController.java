@@ -20,6 +20,7 @@ import ru.taximaxim.pgsqlblocks.common.FilterCondition;
 import ru.taximaxim.pgsqlblocks.common.models.DBBlocksJournalProcess;
 import ru.taximaxim.pgsqlblocks.common.models.DBModel;
 import ru.taximaxim.pgsqlblocks.common.models.DBProcess;
+import ru.taximaxim.pgsqlblocks.common.models.DBProcessFilter;
 import ru.taximaxim.pgsqlblocks.common.ui.*;
 import ru.taximaxim.pgsqlblocks.dialogs.AddDatabaseDialog;
 import ru.taximaxim.pgsqlblocks.dialogs.EditDatabaseDialog;
@@ -63,6 +64,8 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
     private DBProcessesView dbBlocksJournalView;
 
     private DBProcessInfoView dbBlocksJournalProcessInfoView;
+    private DBProcessesFiltersView dbBlocksJournalProcessesFiltersView;
+
 
     private final DBProcessesViewDataSourceFilter dbProcessesViewDataSourceFilter = new DBProcessesViewDataSourceFilter();
 
@@ -77,6 +80,8 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
     private ToolItem autoUpdateToolItem;
     private ToolItem showOnlyBlockedProcessesToolItem;
     private ToolItem toggleVisibilityProcessesFilterPanelToolItem;
+
+    private ToolItem toggleVisibilityBlocksJournalProcessesFilterPanelToolItem;
 
     private DBModelsProvider dbModelsProvider;
 
@@ -141,6 +146,7 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
         toggleVisibilityProcessesFilterPanelToolItem.setToolTipText(Images.FILTER.getDescription(resourceBundle));
         toggleVisibilityProcessesFilterPanelToolItem.addListener(SWT.Selection, event ->
                 setProcessesFilterViewVisibility(toggleVisibilityProcessesFilterPanelToolItem.getSelection()));
+        toggleVisibilityProcessesFilterPanelToolItem.setEnabled(false);
 
         ToolItem showColumnsDialogToolItem = new ToolItem(processesViewToolBar, SWT.PUSH);
         showColumnsDialogToolItem.setImage(ImageUtils.getImage(Images.TABLE));
@@ -175,10 +181,21 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
         ToolBar dbBlocksJournalViewToolBar = new ToolBar(dbBlocksJournalViewComposite, SWT.HORIZONTAL);
         dbBlocksJournalViewToolBar.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
 
+        toggleVisibilityBlocksJournalProcessesFilterPanelToolItem = new ToolItem(dbBlocksJournalViewToolBar, SWT.CHECK);
+        toggleVisibilityBlocksJournalProcessesFilterPanelToolItem.setImage(ImageUtils.getImage(Images.FILTER));
+        toggleVisibilityBlocksJournalProcessesFilterPanelToolItem.setToolTipText(Images.FILTER.getDescription(resourceBundle));
+        toggleVisibilityBlocksJournalProcessesFilterPanelToolItem.addListener(SWT.Selection, event ->
+                setBlocksJournalProcessesFilterViewVisibility(toggleVisibilityBlocksJournalProcessesFilterPanelToolItem.getSelection()));
+        toggleVisibilityBlocksJournalProcessesFilterPanelToolItem.setEnabled(false);
+
         ToolItem showColumnsDialogToolItem = new ToolItem(dbBlocksJournalViewToolBar, SWT.PUSH);
         showColumnsDialogToolItem.setImage(ImageUtils.getImage(Images.TABLE));
         showColumnsDialogToolItem.setToolTipText(resourceBundle.getString("columns"));
         showColumnsDialogToolItem.addListener(SWT.Selection, event -> showDbBlocksJournalViewColumnsDialog());
+
+        dbBlocksJournalProcessesFiltersView = new DBProcessesFiltersView(resourceBundle, dbBlocksJournalViewComposite, SWT.NONE);
+        dbBlocksJournalProcessesFiltersView.addListener(this);
+        dbBlocksJournalProcessesFiltersView.hide();
 
         dbBlocksJournalView = new DBProcessesView(dbBlocksJournalViewComposite, SWT.NONE);
         dbBlocksJournalView.getTreeViewer().setDataSource(new DBBlocksJournalViewDataSource(resourceBundle));
@@ -264,6 +281,7 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
         boolean isEnabled = controller != null && !controller.isConnected();
         dbProcessInfoView.getToolBar().setEnabled(!isEnabled);
         toggleVisibilityProcessesFilterPanelToolItem.setEnabled(controller != null);
+        toggleVisibilityBlocksJournalProcessesFilterPanelToolItem.setEnabled(controller != null);
         deleteDatabaseToolItem.setEnabled(isEnabled);
         editDatabaseToolItem.setEnabled(isEnabled);
         connectDatabaseToolItem.setEnabled(isEnabled);
@@ -307,8 +325,11 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
         dbProcessesView.getTreeViewer().setInput(null);
         dbBlocksJournalView.getTreeViewer().setInput(null);
         toggleVisibilityProcessesFilterPanelToolItem.setSelection(false);
+        toggleVisibilityBlocksJournalProcessesFilterPanelToolItem.setSelection(false);
         dbProcessesFiltersView.hide();
-        dbProcessesFiltersView.fillViewForController(null);
+        dbProcessesFiltersView.fillView(null, "");
+        dbBlocksJournalProcessesFiltersView.hide();
+        dbBlocksJournalProcessesFiltersView.fillView(null, "");
     }
 
     private void saveDatabases() {
@@ -401,6 +422,19 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
             dbProcessesFiltersView.show();
         } else {
             dbProcessesFiltersView.hide();
+        }
+    }
+
+    public void setBlocksJournalProcessesFilterViewVisibility(boolean isVisible) {
+        if (dbModelsView.getTableViewer().getStructuredSelection().getFirstElement() == null) {
+            return;
+        }
+        DBController selectedController = (DBController) dbModelsView.getTableViewer().getStructuredSelection().getFirstElement();
+        selectedController.getBlocksJournal().getProcessesFilters().setEnabled(isVisible);
+        if (isVisible) {
+            dbBlocksJournalProcessesFiltersView.show();
+        } else {
+            dbBlocksJournalProcessesFiltersView.hide();
         }
     }
 
@@ -536,9 +570,9 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
     @Override
     public void dbModelsViewDidSelectController(DBController controller) {
         dbProcessesView.getTreeViewer().setInput(controller.getFilteredProcesses());
-        dbBlocksJournalView.getTreeViewer().setInput(controller.getBlocksJournal().getProcesses());
+        dbBlocksJournalView.getTreeViewer().setInput(controller.getBlocksJournal().getFilteredProcesses());
         changeToolItemsStateForController(controller);
-        dbProcessesFiltersView.fillViewForController(controller);
+        dbProcessesFiltersView.fillView(controller.getProcessesFilters(), controller.getModel().getDatabaseName());
         boolean controllerFiltersEnabled = controller.getProcessesFilters().isEnabled();
         if (controllerFiltersEnabled) {
             dbProcessesFiltersView.show();
@@ -547,6 +581,15 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
         }
         toggleVisibilityProcessesFilterPanelToolItem.setSelection(controllerFiltersEnabled);
 
+        dbBlocksJournalProcessesFiltersView.fillView(controller.getBlocksJournal().getProcessesFilters(),
+                controller.getModel().getDatabaseName());
+        boolean controllerBlocksJournalFiltersEnabled = controller.getBlocksJournal().getProcessesFilters().isEnabled();
+        if (controllerBlocksJournalFiltersEnabled) {
+            dbBlocksJournalProcessesFiltersView.show();
+        } else {
+            dbBlocksJournalProcessesFiltersView.hide();
+        }
+        toggleVisibilityBlocksJournalProcessesFilterPanelToolItem.setSelection(controllerBlocksJournalFiltersEnabled);
     }
 
     @Override
@@ -631,112 +674,108 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
 
 
     @Override
-    public void processesFiltersViewPidFilterConditionChanged(FilterCondition condition) {
-        if (dbModelsView.getTableViewer().getStructuredSelection().getFirstElement() == null) {
-            return;
+    public void processesFiltersViewPidFilterConditionChanged(DBProcessesFiltersView view, FilterCondition condition) {
+        DBProcessFilter filter = getFilterForFiltersView(view);
+        if (filter != null) {
+            filter.getPidFilter().setCondition(condition);
         }
-        DBController selectedController = (DBController) dbModelsView.getTableViewer().getStructuredSelection().getFirstElement();
-        selectedController.getProcessesFilters().getPidFilter().setCondition(condition);
     }
 
     @Override
-    public void processesFiltersViewPidFilterValueChanged(Integer value) {
-        if (dbModelsView.getTableViewer().getStructuredSelection().getFirstElement() == null) {
-            return;
+    public void processesFiltersViewPidFilterValueChanged(DBProcessesFiltersView view, Integer value) {
+        DBProcessFilter filter = getFilterForFiltersView(view);
+        if (filter != null) {
+            filter.getPidFilter().setValue(value);
         }
-        DBController selectedController = (DBController) dbModelsView.getTableViewer().getStructuredSelection().getFirstElement();
-        selectedController.getProcessesFilters().getPidFilter().setValue(value);
-
     }
 
     @Override
-    public void processesFiltersViewQueryFilterConditionChanged(FilterCondition condition) {
-        if (dbModelsView.getTableViewer().getStructuredSelection().getFirstElement() == null) {
-            return;
+    public void processesFiltersViewQueryFilterConditionChanged(DBProcessesFiltersView view, FilterCondition condition) {
+        DBProcessFilter filter = getFilterForFiltersView(view);
+        if (filter != null) {
+            filter.getQueryFilter().setCondition(condition);
         }
-        DBController selectedController = (DBController) dbModelsView.getTableViewer().getStructuredSelection().getFirstElement();
-        selectedController.getProcessesFilters().getQueryFilter().setCondition(condition);
     }
 
     @Override
-    public void processesFiltersViewQueryFilterValueChanged(String value) {
-        if (dbModelsView.getTableViewer().getStructuredSelection().getFirstElement() == null) {
-            return;
+    public void processesFiltersViewQueryFilterValueChanged(DBProcessesFiltersView view, String value) {
+        DBProcessFilter filter = getFilterForFiltersView(view);
+        if (filter != null) {
+            filter.getQueryFilter().setValue(value);
         }
-        DBController selectedController = (DBController) dbModelsView.getTableViewer().getStructuredSelection().getFirstElement();
-        selectedController.getProcessesFilters().getQueryFilter().setValue(value);
     }
 
     @Override
-    public void processesFiltersViewApplicationFilterConditionChanged(FilterCondition condition) {
-        if (dbModelsView.getTableViewer().getStructuredSelection().getFirstElement() == null) {
-            return;
+    public void processesFiltersViewApplicationFilterConditionChanged(DBProcessesFiltersView view, FilterCondition condition) {
+        DBProcessFilter filter = getFilterForFiltersView(view);
+        if (filter != null) {
+            filter.getApplicationFilter().setCondition(condition);
         }
-        DBController selectedController = (DBController) dbModelsView.getTableViewer().getStructuredSelection().getFirstElement();
-        selectedController.getProcessesFilters().getApplicationFilter().setCondition(condition);
     }
 
     @Override
-    public void processesFiltersViewApplicationFilterValueChanged(String value) {
-        if (dbModelsView.getTableViewer().getStructuredSelection().getFirstElement() == null) {
-            return;
+    public void processesFiltersViewApplicationFilterValueChanged(DBProcessesFiltersView view, String value) {
+        DBProcessFilter filter = getFilterForFiltersView(view);
+        if (filter != null) {
+            filter.getApplicationFilter().setValue(value);
         }
-        DBController selectedController = (DBController) dbModelsView.getTableViewer().getStructuredSelection().getFirstElement();
-        selectedController.getProcessesFilters().getApplicationFilter().setValue(value);
     }
 
     @Override
-    public void processesFiltersViewDatabaseFilterConditionChanged(FilterCondition condition) {
-        if (dbModelsView.getTableViewer().getStructuredSelection().getFirstElement() == null) {
-            return;
+    public void processesFiltersViewDatabaseFilterConditionChanged(DBProcessesFiltersView view, FilterCondition condition) {
+        DBProcessFilter filter = getFilterForFiltersView(view);
+        if (filter != null) {
+            filter.getDatabaseFilter().setCondition(condition);
         }
-        DBController selectedController = (DBController) dbModelsView.getTableViewer().getStructuredSelection().getFirstElement();
-        selectedController.getProcessesFilters().getDatabaseFilter().setCondition(condition);
     }
 
     @Override
-    public void processesFiltersViewDatabaseFilterValueChanged(String value) {
-        if (dbModelsView.getTableViewer().getStructuredSelection().getFirstElement() == null) {
-            return;
+    public void processesFiltersViewDatabaseFilterValueChanged(DBProcessesFiltersView view, String value) {
+        DBProcessFilter filter = getFilterForFiltersView(view);
+        if (filter != null) {
+            filter.getDatabaseFilter().setValue(value);
         }
-        DBController selectedController = (DBController) dbModelsView.getTableViewer().getStructuredSelection().getFirstElement();
-        selectedController.getProcessesFilters().getDatabaseFilter().setValue(value);
     }
 
     @Override
-    public void processesFiltersViewUserNameFilterConditionChanged(FilterCondition condition) {
-        if (dbModelsView.getTableViewer().getStructuredSelection().getFirstElement() == null) {
-            return;
+    public void processesFiltersViewUserNameFilterConditionChanged(DBProcessesFiltersView view, FilterCondition condition) {
+        DBProcessFilter filter = getFilterForFiltersView(view);
+        if (filter != null) {
+            filter.getUserNameFilter().setCondition(condition);
         }
-        DBController selectedController = (DBController) dbModelsView.getTableViewer().getStructuredSelection().getFirstElement();
-        selectedController.getProcessesFilters().getUserNameFilter().setCondition(condition);
     }
 
     @Override
-    public void processesFiltersViewUserNameFilterValueChanged(String value) {
-        if (dbModelsView.getTableViewer().getStructuredSelection().getFirstElement() == null) {
-            return;
+    public void processesFiltersViewUserNameFilterValueChanged(DBProcessesFiltersView view, String value) {
+        DBProcessFilter filter = getFilterForFiltersView(view);
+        if (filter != null) {
+            filter.getUserNameFilter().setValue(value);
         }
-        DBController selectedController = (DBController) dbModelsView.getTableViewer().getStructuredSelection().getFirstElement();
-        selectedController.getProcessesFilters().getUserNameFilter().setValue(value);
     }
 
     @Override
-    public void processesFiltersViewClientFilterConditionChanged(FilterCondition condition) {
-        if (dbModelsView.getTableViewer().getStructuredSelection().getFirstElement() == null) {
-            return;
+    public void processesFiltersViewClientFilterConditionChanged(DBProcessesFiltersView view, FilterCondition condition) {
+        DBProcessFilter filter = getFilterForFiltersView(view);
+        if (filter != null) {
+            filter.getClientFilter().setCondition(condition);
         }
-        DBController selectedController = (DBController) dbModelsView.getTableViewer().getStructuredSelection().getFirstElement();
-        selectedController.getProcessesFilters().getClientFilter().setCondition(condition);
     }
 
     @Override
-    public void processesFiltersViewClientFilterValueChanged(String value) {
+    public void processesFiltersViewClientFilterValueChanged(DBProcessesFiltersView view, String value) {
+        DBProcessFilter filter = getFilterForFiltersView(view);
+        if (filter != null) {
+            filter.getClientFilter().setValue(value);
+        }
+    }
+
+    private DBProcessFilter getFilterForFiltersView(DBProcessesFiltersView view) {
         if (dbModelsView.getTableViewer().getStructuredSelection().getFirstElement() == null) {
-            return;
+            return null;
         }
         DBController selectedController = (DBController) dbModelsView.getTableViewer().getStructuredSelection().getFirstElement();
-        selectedController.getProcessesFilters().getClientFilter().setValue(value);
+        boolean isCurrentProcesses = view.equals(dbProcessesFiltersView);
+        return isCurrentProcesses ? selectedController.getProcessesFilters() : selectedController.getBlocksJournal().getProcessesFilters();
     }
 
     @Override
