@@ -50,6 +50,7 @@ public enum Images {
     SHOW_LOG_PANEL,
     HIDE_LOG_PANEL,
     BLOCKS_JOURNAL_FOLDER,
+    TABLE,
     FOLDER,
     DEFAULT;
 
@@ -115,6 +116,8 @@ public enum Images {
             return "images/blocks_journal_folder_16.png";
         case FOLDER:
             return "images/folder_16.png";
+        case TABLE:
+            return "images/table_16.png";
         default:
             return "images/void_16.png";
         }

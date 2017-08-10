@@ -11,6 +11,7 @@ import org.eclipse.swt.widgets.TreeItem;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 public class TMTreeViewer extends TreeViewer {
 
@@ -88,6 +89,55 @@ public class TMTreeViewer extends TreeViewer {
                     }
                 });
             }
+        }
+    }
+
+    private Set<Integer> collapsedColumnsIndexes;
+
+    public Set<Integer> getCollapsedColumnsIndexes() {
+        return collapsedColumnsIndexes;
+    }
+
+    public void setCollapsedColumnsIndexes(Set<Integer> indexes) {
+        if (collapsedColumnsIndexes != null) {
+            if (indexes != null) {
+                collapsedColumnsIndexes.removeAll(indexes);
+            }
+            expandColumnsAtIndexes(collapsedColumnsIndexes);
+        }
+        collapsedColumnsIndexes = indexes;
+        collapseColumnsAtIndexes(collapsedColumnsIndexes);
+    }
+
+    private void expandColumnsAtIndexes(Set<Integer> indexes) {
+        if (indexes == null || indexes.isEmpty()) {
+            return;
+        }
+        TreeColumn[] columns = getTree().getColumns();
+        if (indexes != null) {
+            for (int i = 0; i < columns.length; i++) {
+                if (!indexes.contains(i)) {
+                    continue;
+                }
+                TreeColumn column = columns[i];
+                column.setWidth(dataSource.columnWidthForColumnIndex(i));
+                column.setResizable(true);
+            }
+        }
+    }
+
+    private void collapseColumnsAtIndexes(Set<Integer> indexes) {
+        if (indexes == null || indexes.isEmpty()) {
+            return;
+        }
+        TreeColumn[] columns = getTree().getColumns();
+        for (int i = 0; i < columns.length; i++) {
+            if (!indexes.contains(i)) {
+                continue;
+            }
+            TreeColumn column = columns[i];
+            column.setWidth(0);
+            column.setResizable(false);
         }
     }
 

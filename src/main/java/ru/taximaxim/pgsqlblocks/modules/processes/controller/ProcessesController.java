@@ -24,6 +24,7 @@ import ru.taximaxim.pgsqlblocks.common.ui.*;
 import ru.taximaxim.pgsqlblocks.dialogs.AddDatabaseDialog;
 import ru.taximaxim.pgsqlblocks.dialogs.EditDatabaseDialog;
 import ru.taximaxim.pgsqlblocks.dialogs.SettingsDialog;
+import ru.taximaxim.pgsqlblocks.dialogs.TMTreeViewerColumnsDialog;
 import ru.taximaxim.pgsqlblocks.modules.blocksjournal.view.BlocksJournalView;
 import ru.taximaxim.pgsqlblocks.modules.db.controller.DBController;
 import ru.taximaxim.pgsqlblocks.modules.db.controller.DBControllerListener;
@@ -152,6 +153,11 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
         toggleVisibilityProcessesFilterPanelToolItem.setToolTipText(Images.FILTER.getDescription(resourceBundle));
         toggleVisibilityProcessesFilterPanelToolItem.addListener(SWT.Selection, event ->
                 setProcessesFilterViewVisibility(toggleVisibilityProcessesFilterPanelToolItem.getSelection()));
+
+        ToolItem showColumnsDialogToolItem = new ToolItem(processesViewToolBar, SWT.PUSH);
+        showColumnsDialogToolItem.setImage(ImageUtils.getImage(Images.TABLE));
+        showColumnsDialogToolItem.setToolTipText(resourceBundle.getString("columns"));
+        showColumnsDialogToolItem.addListener(SWT.Selection, event -> showProcessesViewColumnsDialog());
 
         dbProcessesFiltersView = new DBProcessesFiltersView(resourceBundle, processesViewComposite, SWT.NONE);
         dbProcessesFiltersView.addListener(this);
@@ -419,6 +425,11 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
     private void showSettingsDialog() {
         SettingsDialog settingsDialog = new SettingsDialog(settings, view.getShell());
         settingsDialog.open();
+    }
+
+    private void showProcessesViewColumnsDialog() {
+        TMTreeViewerColumnsDialog dialog = new TMTreeViewerColumnsDialog(resourceBundle, dbProcessesView.getTreeViewer(), view.getShell());
+        dialog.open();
     }
 
     public void close() {

@@ -19,12 +19,12 @@ public class DBBlocksJournalViewDataSource extends TMTreeViewerDataSource<DBBloc
     }
 
     @Override
-    int numberOfColumns() {
+    public int numberOfColumns() {
         return 18;
     }
 
     @Override
-    String columnTitleForColumnIndex(int columnIndex) {
+    public String columnTitleForColumnIndex(int columnIndex) {
         switch (columnIndex) {
             case 0:
                 return resourceBundle.getString("pid");
@@ -68,7 +68,7 @@ public class DBBlocksJournalViewDataSource extends TMTreeViewerDataSource<DBBloc
     }
 
     @Override
-    int columnWidthForColumnIndex(int columnIndex) {
+    public int columnWidthForColumnIndex(int columnIndex) {
         switch (columnIndex) {
             case 0:
                 return 120;
@@ -105,12 +105,12 @@ public class DBBlocksJournalViewDataSource extends TMTreeViewerDataSource<DBBloc
     }
 
     @Override
-    boolean columnIsSortableAtIndex(int columnIndex) {
+    public boolean columnIsSortableAtIndex(int columnIndex) {
         return false;
     }
 
     @Override
-    String columnTooltipForColumnIndex(int columnIndex) {
+    public String columnTooltipForColumnIndex(int columnIndex) {
         switch (columnIndex) {
             case 0:
                 return "PID";

@@ -25,15 +25,15 @@ public abstract class TMTreeViewerDataSource<T> implements ITableLabelProvider, 
 
     protected List<ILabelProviderListener> listeners = new ArrayList<>();
 
-    abstract int numberOfColumns();
+    public abstract int numberOfColumns();
 
-    abstract String columnTitleForColumnIndex(int columnIndex);
+    public abstract String columnTitleForColumnIndex(int columnIndex);
 
-    abstract int columnWidthForColumnIndex(int columnIndex);
+    public abstract int columnWidthForColumnIndex(int columnIndex);
 
-    abstract boolean columnIsSortableAtIndex(int columnIndex);
+    public abstract boolean columnIsSortableAtIndex(int columnIndex);
 
-    abstract String columnTooltipForColumnIndex(int columnIndex);
+    public abstract String columnTooltipForColumnIndex(int columnIndex);
 
     @Override
     public void dispose() {

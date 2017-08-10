@@ -139,7 +139,7 @@ public class DBProcessesViewDataSource extends TMTreeViewerDataSource<DBProcess>
     }
 
     @Override
-    boolean columnIsSortableAtIndex(int columnIndex) {
+    public boolean columnIsSortableAtIndex(int columnIndex) {
         return true;
     }
 
