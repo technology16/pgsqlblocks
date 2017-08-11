@@ -64,6 +64,13 @@ public class DBBlocksJournal implements DBProcessFilterListener {
         listeners.forEach(DBBlocksJournalListener::dbBlocksJournalDidAddProcesses);
     }
 
+    public void setJournalProcesses(List<DBBlocksJournalProcess> processes) {
+        clear();
+        this.processes.addAll(processes);
+        prepareFilteredProcesses();
+        listeners.forEach(DBBlocksJournalListener::dbBlocksJournalDidAddProcesses);
+    }
+
     private void prepareFilteredProcesses() {
         filteredProcesses.clear();
         if (processesFilters.isEnabled()) {
