@@ -316,7 +316,11 @@ public class DBController implements DBProcessFilterListener, DBBlocksJournalLis
         processes.addAll(loadedProcesses);
 
         filteredProcesses.clear();
-        filteredProcesses.addAll(processes.stream().filter(processesFilters::filter).collect(Collectors.toList()));
+        if (processesFilters.isEnabled()) {
+            filteredProcesses.addAll(processes.stream().filter(processesFilters::filter).collect(Collectors.toList()));
+        } else {
+            filteredProcesses.addAll(processes);
+        }
 
         blocksJournal.add(loadedProcesses.stream().filter(DBProcess::hasChildren).collect(Collectors.toList()));
 
@@ -410,6 +414,11 @@ public class DBController implements DBProcessFilterListener, DBBlocksJournalLis
     @Override
     public void dbBlocksJournalDidCloseProcesses(List<DBBlocksJournalProcess> processes) {
         asyncSaveClosedBlockedProcessesToFile(processes);
+    }
+
+    @Override
+    public void dbBlocksJournalDidChangeFilters() {
+        listeners.forEach(listener -> listener.dbControllerBlocksJournalChanged(this));
     }
 
     private void asyncSaveClosedBlockedProcessesToFile(List<DBBlocksJournalProcess> processes) {

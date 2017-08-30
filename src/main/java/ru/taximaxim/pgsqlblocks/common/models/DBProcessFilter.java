@@ -39,14 +39,27 @@ public class DBProcessFilter implements FilterListener {
         if (!enabled) {
             return true;
         }
+        return filterProcess(process);
+    }
+
+    private boolean filterProcess(DBProcess process) {
         boolean pidFilterResult = !pidFilter.isActive() || pidFilter.filter(process.getPid());
         boolean queryFilterResult = !queryFilter.isActive() || queryFilter.filter(process.getQuery().getQueryString());
         boolean applicationFilterResult = !applicationFilter.isActive() || applicationFilter.filter(process.getQueryCaller().getApplicationName());
         boolean databaseFilterResult = !databaseFilter.isActive() || databaseFilter.filter(process.getQueryCaller().getDatabaseName());
         boolean userNameFilterResult = !userNameFilter.isActive() || userNameFilter.filter(process.getQueryCaller().getUserName());
         boolean clientFilterResult = !clientFilter.isActive() || clientFilter.filter(process.getQueryCaller().getClient());
-        return pidFilterResult && queryFilterResult && applicationFilterResult && databaseFilterResult
+        boolean result = pidFilterResult && queryFilterResult && applicationFilterResult && databaseFilterResult
                 && userNameFilterResult && clientFilterResult;
+        if (!result && process.hasChildren()) {
+            for (DBProcess childProcess : process.getChildren()) {
+                boolean childFilterResult = filterProcess(childProcess);
+                if (childFilterResult) {
+                    return true;
+                }
+            }
+        }
+        return result;
     }
 
     public boolean isEnabled() {

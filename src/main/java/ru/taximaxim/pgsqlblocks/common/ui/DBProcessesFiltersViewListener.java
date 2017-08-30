@@ -4,28 +4,28 @@ import ru.taximaxim.pgsqlblocks.common.FilterCondition;
 
 public interface DBProcessesFiltersViewListener {
 
-    void processesFiltersViewPidFilterConditionChanged(FilterCondition condition);
+    void processesFiltersViewPidFilterConditionChanged(DBProcessesFiltersView view, FilterCondition condition);
 
-    void processesFiltersViewPidFilterValueChanged(Integer value);
+    void processesFiltersViewPidFilterValueChanged(DBProcessesFiltersView view, Integer value);
 
-    void processesFiltersViewQueryFilterConditionChanged(FilterCondition condition);
+    void processesFiltersViewQueryFilterConditionChanged(DBProcessesFiltersView view, FilterCondition condition);
 
-    void processesFiltersViewQueryFilterValueChanged(String value);
+    void processesFiltersViewQueryFilterValueChanged(DBProcessesFiltersView view, String value);
 
-    void processesFiltersViewApplicationFilterConditionChanged(FilterCondition condition);
+    void processesFiltersViewApplicationFilterConditionChanged(DBProcessesFiltersView view, FilterCondition condition);
 
-    void processesFiltersViewApplicationFilterValueChanged(String value);
+    void processesFiltersViewApplicationFilterValueChanged(DBProcessesFiltersView view, String value);
 
-    void processesFiltersViewDatabaseFilterConditionChanged(FilterCondition condition);
+    void processesFiltersViewDatabaseFilterConditionChanged(DBProcessesFiltersView view, FilterCondition condition);
 
-    void processesFiltersViewDatabaseFilterValueChanged(String value);
+    void processesFiltersViewDatabaseFilterValueChanged(DBProcessesFiltersView view, String value);
 
-    void processesFiltersViewUserNameFilterConditionChanged(FilterCondition condition);
+    void processesFiltersViewUserNameFilterConditionChanged(DBProcessesFiltersView view, FilterCondition condition);
 
-    void processesFiltersViewUserNameFilterValueChanged(String value);
+    void processesFiltersViewUserNameFilterValueChanged(DBProcessesFiltersView view, String value);
 
-    void processesFiltersViewClientFilterConditionChanged(FilterCondition condition);
+    void processesFiltersViewClientFilterConditionChanged(DBProcessesFiltersView view, FilterCondition condition);
 
-    void processesFiltersViewClientFilterValueChanged(String value);
+    void processesFiltersViewClientFilterValueChanged(DBProcessesFiltersView view, String value);
 
 }

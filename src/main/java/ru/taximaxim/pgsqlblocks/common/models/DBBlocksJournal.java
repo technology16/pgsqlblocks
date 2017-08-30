@@ -4,14 +4,30 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class DBBlocksJournal {
+public class DBBlocksJournal implements DBProcessFilterListener {
 
     private final List<DBBlocksJournalListener> listeners = new ArrayList<>();
 
     private final List<DBBlocksJournalProcess> processes = new ArrayList<>();
 
+    private final List<DBBlocksJournalProcess> filteredProcesses = new ArrayList<>();
+
+    private final DBProcessFilter processesFilters = new DBProcessFilter();
+
     public List<DBBlocksJournalProcess> getProcesses() {
         return processes;
+    }
+
+    public List<DBBlocksJournalProcess> getFilteredProcesses() {
+        return filteredProcesses;
+    }
+
+    public DBProcessFilter getProcessesFilters() {
+        return processesFilters;
+    }
+
+    public DBBlocksJournal() {
+        processesFilters.addListener(this);
     }
 
     public void add(List<DBProcess> processes) {
@@ -21,7 +37,6 @@ public class DBBlocksJournal {
         }
         if (this.processes.isEmpty()) {
             this.processes.addAll(processes.stream().map(DBBlocksJournalProcess::new).collect(Collectors.toList()));
-            listeners.forEach(DBBlocksJournalListener::dbBlocksJournalDidAddProcesses);
         } else {
             List<DBBlocksJournalProcess> newProcesses = processes.stream()
                     .map(DBBlocksJournalProcess::new)
@@ -44,7 +59,24 @@ public class DBBlocksJournal {
                     this.processes.add(process);
                 }
             }
-            listeners.forEach(DBBlocksJournalListener::dbBlocksJournalDidAddProcesses);
+        }
+        prepareFilteredProcesses();
+        listeners.forEach(DBBlocksJournalListener::dbBlocksJournalDidAddProcesses);
+    }
+
+    public void setJournalProcesses(List<DBBlocksJournalProcess> processes) {
+        clear();
+        this.processes.addAll(processes);
+        prepareFilteredProcesses();
+        listeners.forEach(DBBlocksJournalListener::dbBlocksJournalDidAddProcesses);
+    }
+
+    private void prepareFilteredProcesses() {
+        filteredProcesses.clear();
+        if (processesFilters.isEnabled()) {
+            filteredProcesses.addAll(processes.stream().filter(p -> processesFilters.filter(p.getProcess())).collect(Collectors.toList()));
+        } else {
+            filteredProcesses.addAll(processes);
         }
     }
 
@@ -79,4 +111,9 @@ public class DBBlocksJournal {
         listeners.remove(listener);
     }
 
+    @Override
+    public void dbProcessFilterChanged() {
+        prepareFilteredProcesses();
+        listeners.forEach(DBBlocksJournalListener::dbBlocksJournalDidChangeFilters);
+    }
 }
