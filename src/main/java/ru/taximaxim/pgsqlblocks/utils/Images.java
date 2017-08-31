@@ -157,6 +157,8 @@ public enum Images {
             return resources.getString("hide_logs_panel");
         case BLOCKS_JOURNAL_FOLDER:
             return resources.getString("show_saved_blocks_journals");
+        case TABLE:
+            return resources.getString("columns");
         default:
             return resources.getString("default_action");
         }

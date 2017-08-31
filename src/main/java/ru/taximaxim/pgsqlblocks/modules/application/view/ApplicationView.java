@@ -6,8 +6,6 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.window.ApplicationWindow;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
-import org.eclipse.swt.events.ShellEvent;
-import org.eclipse.swt.events.ShellListener;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -23,7 +21,6 @@ import java.util.ResourceBundle;
 public class ApplicationView extends ApplicationWindow {
 
     private static final Logger LOG = Logger.getLogger(ApplicationView.class);
-
 
     private Composite composite;
     private Composite topPanelComposite;
@@ -64,15 +61,8 @@ public class ApplicationView extends ApplicationWindow {
     }
 
     @Override
-    protected void constrainShellSize() {
-        super.constrainShellSize();
-        getShell().setMaximized( true );
-    }
-
-    @Override
     protected void configureShell(Shell shell) {
         super.configureShell(shell);
-        shell.setMinimumSize(1024, 768);
         shell.setText(APP_NAME);
         shell.setImages(loadIcons());
     }
@@ -107,11 +97,12 @@ public class ApplicationView extends ApplicationWindow {
         createApplicationMenu();
 
         GridLayout layout = new GridLayout();
+        layout.marginHeight = 0;
+        layout.marginWidth = 0;
         GridData layoutData = new GridData(SWT.FILL, SWT.FILL, true, true);
         sashForm = new SashForm(mainComposite, SWT.VERTICAL);
         sashForm.setLayout(layout);
         sashForm.setLayoutData(layoutData);
-        sashForm.SASH_WIDTH = 2;
         sashForm.setBackground(composite.getDisplay().getSystemColor(SWT.COLOR_WIDGET_BACKGROUND));
 
         createTopPanel(sashForm);
@@ -174,7 +165,8 @@ public class ApplicationView extends ApplicationWindow {
 
     private void createTopPanel(SashForm sashForm) {
         GridLayout layout = new GridLayout();
-        layout.marginBottom = 0;
+        layout.marginHeight = 0;
+        layout.marginWidth = 0;
         GridData layoutData = new GridData(SWT.FILL, SWT.FILL, true, true);
         topPanelComposite = new Composite(sashForm, SWT.NONE);
         topPanelComposite.setLayout(layout);
@@ -183,7 +175,8 @@ public class ApplicationView extends ApplicationWindow {
 
     private void createBottomPanel(SashForm sashForm) {
         GridLayout layout = new GridLayout();
-        layout.marginTop = 0;
+        layout.marginHeight = 0;
+        layout.marginWidth = 0;
         GridData layoutData = new GridData(SWT.FILL, SWT.FILL, true, true);
         bottomPanelComposite = new Composite(sashForm, SWT.NONE);
         bottomPanelComposite.setLayout(layout);

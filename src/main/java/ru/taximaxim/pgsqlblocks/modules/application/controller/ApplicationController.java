@@ -9,16 +9,12 @@ import ru.taximaxim.pgsqlblocks.modules.processes.controller.ProcessesController
 import ru.taximaxim.pgsqlblocks.modules.processes.view.ProcessesView;
 import ru.taximaxim.pgsqlblocks.utils.Settings;
 
-import java.util.ResourceBundle;
-
 public class ApplicationController implements ApplicationViewListener {
 
     private final ApplicationView applicationView;
 
     private final Settings settings = Settings.getInstance();
 
-    private LogsView logsView;
-    // submodules
     private ProcessesController processesController;
 
     public ApplicationController() {
@@ -32,9 +28,7 @@ public class ApplicationController implements ApplicationViewListener {
 
     @Override
     public void applicationViewDidLoad() {
-
-        logsView = new LogsView(applicationView.getBottomPanelComposite(), settings, SWT.NONE);
-
+        new LogsView(applicationView.getBottomPanelComposite(), settings, SWT.NONE);
         processesController = new ProcessesController(settings, new DBModelsLocalProvider());
         ProcessesView processesView = new ProcessesView(applicationView.getTopPanelComposite(), SWT.NONE);
         processesController.setView(processesView);
@@ -49,6 +43,4 @@ public class ApplicationController implements ApplicationViewListener {
     public void applicationViewWillDisappear() {
         processesController.close();
     }
-
-
 }

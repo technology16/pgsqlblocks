@@ -2,11 +2,9 @@ package ru.taximaxim.pgsqlblocks.modules.processes.view;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
-import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.ToolBar;
 
 public class ProcessesView extends Composite {
@@ -19,7 +17,8 @@ public class ProcessesView extends Composite {
     public ProcessesView(Composite parentComposite, int style) {
         super(parentComposite, style);
         GridLayout layout = new GridLayout();
-        layout.marginBottom = 0;
+        layout.marginHeight = 0;
+        layout.marginWidth = 0;
         GridData layoutData = new GridData(SWT.FILL, SWT.FILL, true, true);
         setLayout(layout);
         setLayoutData(layoutData);
@@ -52,6 +51,7 @@ public class ProcessesView extends Composite {
         GridLayout layout = new GridLayout();
         layout.marginHeight = 0;
         layout.marginWidth = 0;
+        layout.marginLeft = 5;
         GridData layoutData = new GridData(SWT.FILL, SWT.FILL, true, true);
         leftPanelComposite = new Composite(sashForm, SWT.NONE);
         leftPanelComposite.setLayout(layout);
@@ -60,7 +60,7 @@ public class ProcessesView extends Composite {
 
     private void createRightPanel(SashForm sashForm) {
         GridLayout layout = new GridLayout();
-        layout.marginWidth = 0;
+        layout.marginLeft = 0;
         layout.marginHeight = 0;
         GridData layoutData = new GridData(SWT.FILL, SWT.FILL, true, true);
         rightPanelComposite = new Composite(sashForm, SWT.NONE);
@@ -75,5 +75,4 @@ public class ProcessesView extends Composite {
     public Composite getRightPanelComposite() {
         return rightPanelComposite;
     }
-
 }

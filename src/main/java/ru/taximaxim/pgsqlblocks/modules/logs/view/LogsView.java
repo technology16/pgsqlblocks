@@ -1,6 +1,5 @@
 package ru.taximaxim.pgsqlblocks.modules.logs.view;
 
-
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.eclipse.swt.SWT;

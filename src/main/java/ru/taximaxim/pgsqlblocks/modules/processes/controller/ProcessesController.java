@@ -129,7 +129,10 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
         processesTabItem.setText(resourceBundle.getString("current_activity"));
 
         Composite processesViewComposite = new Composite(tabFolder, SWT.NONE);
-        processesViewComposite.setLayout(new GridLayout());
+        GridLayout gl = new GridLayout();
+        gl.marginWidth = 0;
+        gl.marginHeight = 0;
+        processesViewComposite.setLayout(gl);
 
         ToolBar processesViewToolBar = new ToolBar(processesViewComposite, SWT.HORIZONTAL);
         processesViewToolBar.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
@@ -150,7 +153,7 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
 
         ToolItem showColumnsDialogToolItem = new ToolItem(processesViewToolBar, SWT.PUSH);
         showColumnsDialogToolItem.setImage(ImageUtils.getImage(Images.TABLE));
-        showColumnsDialogToolItem.setToolTipText(resourceBundle.getString("columns"));
+        showColumnsDialogToolItem.setToolTipText(Images.TABLE.getDescription(resourceBundle));
         showColumnsDialogToolItem.addListener(SWT.Selection, event -> showProcessesViewColumnsDialog());
 
         dbProcessesFiltersView = new DBProcessesFiltersView(resourceBundle, processesViewComposite, SWT.NONE);
@@ -175,8 +178,11 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
         blocksJournalTabItem.setText(resourceBundle.getString("blocks_journal"));
 
         Composite dbBlocksJournalViewComposite = new Composite(tabFolder, SWT.NONE);
-        dbBlocksJournalViewComposite.setLayout(new GridLayout());
+        GridLayout gl = new GridLayout();
+        gl.marginWidth= 0;
+        gl.marginHeight = 0;
 
+        dbBlocksJournalViewComposite.setLayout(gl);
 
         ToolBar dbBlocksJournalViewToolBar = new ToolBar(dbBlocksJournalViewComposite, SWT.HORIZONTAL);
         dbBlocksJournalViewToolBar.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
