@@ -8,10 +8,7 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 import ru.taximaxim.pgsqlblocks.common.models.DBProcess;
-import ru.taximaxim.pgsqlblocks.utils.DateUtils;
-import ru.taximaxim.pgsqlblocks.utils.Settings;
 
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -121,5 +118,4 @@ public class DBProcessInfoView extends Composite {
     public void removeListener(DBProcessInfoViewListener listener) {
         listeners.remove(listener);
     }
-
 }

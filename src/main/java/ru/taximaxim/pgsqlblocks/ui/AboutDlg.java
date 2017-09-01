@@ -19,6 +19,7 @@
  */
 package ru.taximaxim.pgsqlblocks.ui;
 
+import org.eclipse.jface.layout.PixelConverter;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -27,7 +28,6 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.program.Program;
 import org.eclipse.swt.widgets.*;
-import org.eclipse.jface.layout.PixelConverter;
 
 public class AboutDlg extends Dialog {
 
@@ -35,7 +35,6 @@ public class AboutDlg extends Dialog {
     private static final String HOMEPAGE = "http://pgcodekeeper.ru/pgsqlblocks.html";
     private static final String TELEGRAM_LINK = "https://telegram.me/joinchat/Bxn1Zwh02WM96O-55GAryA";
     private static final int OK_BUTTON_HEIGHT_IN_CHARS = 15;
-
 
     public AboutDlg(Shell parentShell) {
         super(parentShell, SWT.DIALOG_TRIM | SWT.APPLICATION_MODAL);

@@ -18,6 +18,7 @@ public class TMTreeViewer extends TreeViewer {
     private TMTreeViewerDataSource dataSource;
 
     private List<TMTreeViewerSortColumnSelectionListener> sortColumnSelectionListeners = new ArrayList<>();
+    private Set<Integer> collapsedColumnsIndexes;
 
     public TMTreeViewer(Composite parent) {
         super(parent);
@@ -85,14 +86,12 @@ public class TMTreeViewer extends TreeViewer {
                     }
                     @Override
                     public void widgetDefaultSelected(SelectionEvent e) {
-
+                        selectSortColumn(swtColumn, columnIndex);
                     }
                 });
             }
         }
     }
-
-    private Set<Integer> collapsedColumnsIndexes;
 
     public Set<Integer> getCollapsedColumnsIndexes() {
         return collapsedColumnsIndexes;
@@ -110,11 +109,8 @@ public class TMTreeViewer extends TreeViewer {
     }
 
     private void expandColumnsAtIndexes(Set<Integer> indexes) {
-        if (indexes == null || indexes.isEmpty()) {
-            return;
-        }
-        TreeColumn[] columns = getTree().getColumns();
-        if (indexes != null) {
+        if (indexes != null && !indexes.isEmpty()) {
+            TreeColumn[] columns = getTree().getColumns();
             for (int i = 0; i < columns.length; i++) {
                 if (!indexes.contains(i)) {
                     continue;

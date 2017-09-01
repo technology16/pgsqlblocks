@@ -1,6 +1,5 @@
 package ru.taximaxim.pgsqlblocks.modules.blocksjournal.view;
 
-
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 
@@ -11,7 +10,6 @@ public class BlocksJournalFilesContentProvider implements IStructuredContentProv
     public Object[] getElements(Object inputElement) {
         return ((List<?>) inputElement).toArray();
     }
-
 
     @Override
     public void dispose() {

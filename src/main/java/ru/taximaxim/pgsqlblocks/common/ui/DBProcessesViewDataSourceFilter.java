@@ -11,15 +11,12 @@ public class DBProcessesViewDataSourceFilter implements TMTreeViewerDataSourceFi
 
     @Override
     public boolean filter(DBProcess process) {
-        if (isShowOnlyBlockedProcesses()) {
-            return process.hasChildren();
-        }
-        return true;
+        return !isShowOnlyBlockedProcesses() || process.hasChildren();
     }
 
     private boolean showOnlyBlockedProcesses = false;
 
-    public boolean isShowOnlyBlockedProcesses() {
+    private boolean isShowOnlyBlockedProcesses() {
         return showOnlyBlockedProcesses;
     }
 
@@ -35,6 +32,4 @@ public class DBProcessesViewDataSourceFilter implements TMTreeViewerDataSourceFi
     public void removeListener(DBProcessesViewDataSourceFilterListener listener) {
         listeners.remove(listener);
     }
-
-
 }

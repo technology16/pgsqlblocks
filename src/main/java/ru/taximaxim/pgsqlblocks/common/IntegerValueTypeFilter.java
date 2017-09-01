@@ -30,5 +30,4 @@ public class IntegerValueTypeFilter extends Filter<Integer> {
                 return true;
         }
     }
-
 }

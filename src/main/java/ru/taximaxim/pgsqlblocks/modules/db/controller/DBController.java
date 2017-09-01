@@ -6,7 +6,6 @@ import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 import ru.taximaxim.pgpass.PgPass;
 import ru.taximaxim.pgpass.PgPassException;
-import ru.taximaxim.pgsqlblocks.common.models.DBProcessFilter;
 import ru.taximaxim.pgsqlblocks.common.DBQueries;
 import ru.taximaxim.pgsqlblocks.common.models.*;
 import ru.taximaxim.pgsqlblocks.modules.db.model.DBStatus;
@@ -84,8 +83,9 @@ public class DBController implements DBProcessFilterListener, DBBlocksJournalLis
         this.model = model;
     }
 
-    public String getConnectionUrl() {
-        return String.format("jdbc:postgresql://%1$s:%2$s/%3$s?ApplicationName=pgSqlBlocks", model.getHost(), model.getPort(), model.getDatabaseName());
+    private String getConnectionUrl() {
+        return String.format("jdbc:postgresql://%1$s:%2$s/%3$s?ApplicationName=pgSqlBlocks",
+                                model.getHost(), model.getPort(), model.getDatabaseName());
     }
 
     public boolean isEnabledAutoConnection() {
@@ -281,18 +281,18 @@ public class DBController implements DBProcessFilterListener, DBBlocksJournalLis
         }
     }
 
-    private void proceedBlocksWithCycle(Map<Integer, DBProcess> tmpProcesses, int blockedPid, int blockingPid, DBBlock b,
-                                        DBBlock reversedBlock) {
+    private void proceedBlocksWithCycle(Map<Integer, DBProcess> tmpProcesses,
+                                        int blockedPid, int blockingPid, DBBlock b, DBBlock reversedBlock) {
+        DBProcess blockedProcess = tmpProcesses.get(blockedPid);
+        DBProcess blockingProcess = tmpProcesses.get(blockingPid);
         if (b.isGranted()) {
-            DBProcess blockedProcess = tmpProcesses.values().stream().filter(p-> p.getPid() == blockedPid).findFirst().get();
-            DBProcess blockingProcess = tmpProcesses.values().stream().filter(p-> p.getPid() == blockedPid).findFirst().get();
             if ((blockingProcess.getQuery().getQueryStart()).compareTo(blockedProcess.getQuery().getQueryStart()) <= 0) {
                 blockedProcess.addBlock(new DBBlock(blockingPid, b.getRelation(), b.getLocktype(), b.isGranted()));
             } else {
                 blockingProcess.addBlock(new DBBlock(blockedPid, b.getRelation(), b.getLocktype(), b.isGranted()));
             }
         } else {
-            tmpProcesses.get(blockingPid).addBlock(reversedBlock);
+            blockingProcess.addBlock(reversedBlock);
         }
     }
 
@@ -345,7 +345,6 @@ public class DBController implements DBProcessFilterListener, DBBlocksJournalLis
         listeners.remove(listener);
     }
 
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -370,33 +369,25 @@ public class DBController implements DBProcessFilterListener, DBBlocksJournalLis
 
     public boolean terminateProcessWithPid(int processPid) throws SQLException {
         boolean processTerminated = false;
-        try {
-            PreparedStatement preparedStatement = connection.prepareStatement(DBQueries.PG_TERMINATE_BACKEND_QUERY);
+        try (PreparedStatement preparedStatement = connection.prepareStatement(DBQueries.PG_TERMINATE_BACKEND_QUERY)) {
             preparedStatement.setInt(1, processPid);
-            ResultSet resultSet = preparedStatement.executeQuery(); {
-                if (resultSet.next()) {
-                    processTerminated = resultSet.getBoolean(1);
-                }
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            if (resultSet.next()) {
+                processTerminated = resultSet.getBoolean(1);
             }
-        } catch (SQLException e) {
-            throw e;
         }
         return processTerminated;
     }
 
-
     public boolean cancelProcessWithPid(int processPid) throws SQLException {
         boolean processCanceled = false;
-        try {
-            PreparedStatement preparedStatement = connection.prepareStatement(DBQueries.PG_CANCEL_BACKEND_QUERY);
+        try (PreparedStatement preparedStatement = connection.prepareStatement(DBQueries.PG_CANCEL_BACKEND_QUERY)) {
             preparedStatement.setInt(1, processPid);
-            ResultSet resultSet = preparedStatement.executeQuery(); {
-                if (resultSet.next()) {
-                    processCanceled = resultSet.getBoolean(1);
-                }
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                processCanceled = resultSet.getBoolean(1);
             }
-        } catch (SQLException exception) {
-            throw exception;
         }
         return processCanceled;
     }
@@ -431,7 +422,7 @@ public class DBController implements DBProcessFilterListener, DBBlocksJournalLis
         });
     }
 
-    public void saveBlockedProcessesToFile(List<DBBlocksJournalProcess> processes) throws ParserConfigurationException, IOException, SAXException {
+    private void saveBlockedProcessesToFile(List<DBBlocksJournalProcess> processes) throws ParserConfigurationException, IOException, SAXException {
 
         String fileName = String.format("%s-%s.xml", this.model.getName(), DateUtils.dateToString(blocksJournalCreateDate));
         Path blocksJournalsDirPath = PathBuilder.getInstance().getBlocksJournalsDir();
@@ -463,7 +454,7 @@ public class DBController implements DBProcessFilterListener, DBBlocksJournalLis
         documentWorker.save(document, currentJournalFile);
     }
 
-    public void saveUnclosedBlockedProcessesToFile() {
+    private void saveUnclosedBlockedProcessesToFile() {
         if (blocksJournal.isEmpty()) {
             return;
         }

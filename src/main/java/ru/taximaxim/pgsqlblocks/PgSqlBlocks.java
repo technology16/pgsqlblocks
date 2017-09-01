@@ -1,6 +1,5 @@
 package ru.taximaxim.pgsqlblocks;
 
-
 import ru.taximaxim.pgsqlblocks.modules.application.controller.ApplicationController;
 
 public class PgSqlBlocks {
@@ -27,8 +26,7 @@ public class PgSqlBlocks {
         return applicationController;
     }
 
-    public void launchWithArgs(String[] args) {
+    private void launchWithArgs(String[] args) {
         applicationController.launchWithArgs(args);
     }
-
 }

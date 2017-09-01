@@ -6,7 +6,6 @@ import ru.taximaxim.pgsqlblocks.utils.DateUtils;
 
 import java.util.Date;
 
-
 public class DBBlocksJournalProcessSerializer {
 
     public static final String JOURNAL_PROCESS_ROOT_ELEMENT_TAG_NAME = "journalProcess";
@@ -44,6 +43,4 @@ public class DBBlocksJournalProcessSerializer {
         Date closeDate = DateUtils.dateFromString(closeDateString);
         return new DBBlocksJournalProcess(createDate, closeDate, process);
     }
-
-
 }

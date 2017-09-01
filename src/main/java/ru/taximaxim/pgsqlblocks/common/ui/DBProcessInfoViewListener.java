@@ -5,5 +5,4 @@ public interface DBProcessInfoViewListener {
     void dbProcessInfoViewTerminateProcessToolItemClicked();
 
     void dbProcessInfoViewCancelProcessToolItemClicked();
-
 }

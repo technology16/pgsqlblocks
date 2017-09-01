@@ -127,5 +127,4 @@ public class SettingsDialog extends Dialog {
 
         super.okPressed();
     }
-
 }

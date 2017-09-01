@@ -9,21 +9,20 @@ public abstract class Filter<T> {
 
     protected T value;
 
-    protected final List<FilterCondition> supportedConditions;
+    private final List<FilterCondition> supportedConditions;
 
-    protected final FilterValueType valueType;
+    private final FilterValueType valueType;
 
-    protected boolean isActive = false;
+    private boolean isActive = false;
 
-    protected Filter(FilterValueType valueType) {
+    Filter(FilterValueType valueType) {
         this.valueType = valueType;
         this.supportedConditions = FilterCondition.getConditionsForValueType(this.valueType);
     }
 
-    protected FilterCondition condition = FilterCondition.NONE;
+    FilterCondition condition = FilterCondition.NONE;
 
-
-    public List<FilterCondition> getSupportedConditions() {
+    private List<FilterCondition> getSupportedConditions() {
         return supportedConditions;
     }
 
@@ -67,7 +66,7 @@ public abstract class Filter<T> {
         setActive(isActiveAfterSetValue);
     }
 
-    protected void setActive(boolean isActive) {
+    private void setActive(boolean isActive) {
         if (this.isActive != isActive) {
             this.isActive = isActive;
             if (this.isActive) {
@@ -88,13 +87,7 @@ public abstract class Filter<T> {
     }
 
     public boolean isActive() {
-        if (condition == FilterCondition.NONE) {
-            return false;
-        }
-        if (value == null) {
-            return false;
-        }
-        return true;
+        return condition != FilterCondition.NONE && value != null;
     }
 
     public void addListener(FilterListener listener) {
@@ -104,6 +97,4 @@ public abstract class Filter<T> {
     public void removeListener(FilterListener listener) {
         listeners.remove(listener);
     }
-
 }
-

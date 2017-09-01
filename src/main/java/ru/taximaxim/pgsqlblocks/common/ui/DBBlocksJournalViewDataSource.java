@@ -1,6 +1,5 @@
 package ru.taximaxim.pgsqlblocks.common.ui;
 
-
 import org.eclipse.swt.graphics.Image;
 import ru.taximaxim.pgsqlblocks.common.models.DBBlocksJournalProcess;
 import ru.taximaxim.pgsqlblocks.common.models.DBProcess;
@@ -12,10 +11,8 @@ import java.util.ResourceBundle;
 
 public class DBBlocksJournalViewDataSource extends TMTreeViewerDataSource<DBBlocksJournalProcess> {
 
-    private final ResourceBundle resourceBundle;
-
     public DBBlocksJournalViewDataSource(ResourceBundle resourceBundle) {
-        this.resourceBundle = resourceBundle;
+        super(resourceBundle);
     }
 
     @Override
@@ -169,7 +166,7 @@ public class DBBlocksJournalViewDataSource extends TMTreeViewerDataSource<DBBloc
 
     @Override
     public String getColumnText(Object element, int columnIndex) {
-        DBProcess process = null;
+        DBProcess process;
         if (element instanceof DBBlocksJournalProcess) {
             DBBlocksJournalProcess parentProcess = (DBBlocksJournalProcess)element;
             process = parentProcess.getProcess();
@@ -178,6 +175,8 @@ public class DBBlocksJournalViewDataSource extends TMTreeViewerDataSource<DBBloc
                     return DateUtils.dateToString(parentProcess.getCreateDate());
                 case 2:
                     return DateUtils.dateToString(parentProcess.getCloseDate());
+                default:
+                    // no-op
             }
         } else {
             process = (DBProcess)element;
@@ -246,9 +245,10 @@ public class DBBlocksJournalViewDataSource extends TMTreeViewerDataSource<DBBloc
 
     @Override
     public boolean hasChildren(Object element) {
-        if (element instanceof DBBlocksJournalProcess) {
-            return true;
+        if (element instanceof DBProcess) {
+            return ((DBProcess) element).hasChildren();
+        } else {
+            return element instanceof DBBlocksJournalProcess;
         }
-        return ((DBProcess)element).hasChildren();
     }
 }

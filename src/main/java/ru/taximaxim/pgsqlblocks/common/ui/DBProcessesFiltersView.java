@@ -7,8 +7,6 @@ import org.eclipse.swt.widgets.*;
 import ru.taximaxim.pgsqlblocks.common.FilterCondition;
 import ru.taximaxim.pgsqlblocks.common.FilterValueType;
 import ru.taximaxim.pgsqlblocks.common.models.DBProcessFilter;
-import ru.taximaxim.pgsqlblocks.modules.db.controller.DBController;
-import ru.taximaxim.pgsqlblocks.utils.Settings;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -218,10 +216,11 @@ public class DBProcessesFiltersView extends Composite {
     }
 
     private Integer convertTextToInteger(String text) {
-        if (text.isEmpty())
+        if (text.isEmpty()) {
             return null;
-        Integer result = Integer.valueOf(text);
-        return result;
+        } else {
+            return Integer.valueOf(text);
+        }
     }
 
     private void fillCombo(Combo combo, FilterValueType valueType) {
@@ -235,8 +234,8 @@ public class DBProcessesFiltersView extends Composite {
             String string = event.text;
             char[] chars = new char[string.length()];
             string.getChars(0, chars.length, chars, 0);
-            for (int i = 0; i < chars.length; i++) {
-                if (!('0' <= chars[i] && chars[i] <= '9')) {
+            for (char aChar : chars) {
+                if (!('0' <= aChar && aChar <= '9')) {
                     event.doit = false;
                     return;
                 }
@@ -327,5 +326,4 @@ public class DBProcessesFiltersView extends Composite {
     public void removeListener(DBProcessesFiltersViewListener listener) {
         listeners.remove(listener);
     }
-
 }

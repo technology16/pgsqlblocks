@@ -38,5 +38,4 @@ public class DBModelsListSerializer {
         document.appendChild(rootElement);
         return document;
     }
-
 }

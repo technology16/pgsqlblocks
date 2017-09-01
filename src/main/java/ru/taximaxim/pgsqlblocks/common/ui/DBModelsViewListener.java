@@ -10,5 +10,4 @@ public interface DBModelsViewListener {
     void dbModelsViewDidCallActionToController(DBController controller);
 
     void dbModelsViewDidShowMenu(IMenuManager menuManager);
-
 }

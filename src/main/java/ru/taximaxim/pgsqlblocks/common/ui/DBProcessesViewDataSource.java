@@ -1,6 +1,5 @@
 package ru.taximaxim.pgsqlblocks.common.ui;
 
-
 import org.eclipse.swt.graphics.Image;
 import ru.taximaxim.pgsqlblocks.common.models.DBProcess;
 import ru.taximaxim.pgsqlblocks.utils.DateUtils;
@@ -12,11 +11,8 @@ import java.util.stream.Collectors;
 
 public class DBProcessesViewDataSource extends TMTreeViewerDataSource<DBProcess> {
 
-    private final ResourceBundle resourceBundle;
-
-    public DBProcessesViewDataSource(ResourceBundle resourceBundle, TMTreeViewerDataSourceFilter dataFilter) {
-        super(dataFilter);
-        this.resourceBundle = resourceBundle;
+    public DBProcessesViewDataSource(ResourceBundle resourceBundle, TMTreeViewerDataSourceFilter<DBProcess> dataFilter) {
+        super(resourceBundle, dataFilter);
     }
 
     @Override
@@ -223,5 +219,4 @@ public class DBProcessesViewDataSource extends TMTreeViewerDataSource<DBProcess>
         DBProcess process = (DBProcess)element;
         return process.hasChildren();
     }
-
 }

@@ -6,20 +6,23 @@ import org.eclipse.jface.viewers.ITreeContentProvider;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.ResourceBundle;
 
 public abstract class TMTreeViewerDataSource<T> implements ITableLabelProvider, ITreeContentProvider {
 
     protected TMTreeViewerDataSourceFilter<T> dataFilter;
+    protected final ResourceBundle resourceBundle;
 
-    public TMTreeViewerDataSource() {
-
+    public TMTreeViewerDataSource(ResourceBundle resourceBundle) {
+        this.resourceBundle = resourceBundle;
     }
 
-    public TMTreeViewerDataSource(TMTreeViewerDataSourceFilter dataFilter) {
+    public TMTreeViewerDataSource(ResourceBundle resourceBundle, TMTreeViewerDataSourceFilter<T> dataFilter) {
+        this.resourceBundle = resourceBundle;
         this.dataFilter = dataFilter;
     }
 
-    public void setDataFilter(TMTreeViewerDataSourceFilter dataFilter) {
+    public void setDataFilter(TMTreeViewerDataSourceFilter<T> dataFilter) {
         this.dataFilter = dataFilter;
     }
 
@@ -54,5 +57,4 @@ public abstract class TMTreeViewerDataSource<T> implements ITableLabelProvider, 
     public void removeListener(ILabelProviderListener listener) {
         listeners.remove(listener);
     }
-
 }

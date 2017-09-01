@@ -1,12 +1,11 @@
 package ru.taximaxim.pgsqlblocks.common;
 
 import org.w3c.dom.Document;
-import ru.taximaxim.pgsqlblocks.common.models.DBModelsListSerializer;
 import ru.taximaxim.pgsqlblocks.common.models.DBModel;
+import ru.taximaxim.pgsqlblocks.common.models.DBModelsListSerializer;
 import ru.taximaxim.pgsqlblocks.utils.PathBuilder;
 import ru.taximaxim.pgsqlblocks.utils.XmlDocumentWorker;
 
-import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
@@ -31,15 +30,13 @@ public class DBModelsLocalProvider implements DBModelsProvider {
 
     @Override
     public void save(List<DBModel> models) {
-        DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
         try {
+            DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
             Document document = documentBuilderFactory.newDocumentBuilder().newDocument();
             serializer.serialize(document, models);
             documentWorker.save(document, file);
         } catch (ParserConfigurationException e) {
-
+            // FIXME
         }
     }
-
-
 }

@@ -18,15 +18,13 @@ public class StringValueTypeFilter extends Filter<String> {
                 return actualValue.equals(value);
             case CONTAINS:
                 return actualValue.toLowerCase().contains(value.toLowerCase());
+            default:
+                return true;
         }
-        return true;
     }
 
     @Override
     public boolean isActive() {
-        boolean isActive = super.isActive();
-        if (!isActive)
-            return isActive;
-        return isActive && !value.isEmpty();
+        return super.isActive() && !value.isEmpty();
     }
 }

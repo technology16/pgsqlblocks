@@ -11,17 +11,14 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Menu;
 import ru.taximaxim.pgsqlblocks.modules.db.controller.DBController;
-import ru.taximaxim.pgsqlblocks.utils.Settings;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
 
-
 public class DBModelsView extends Composite {
 
     private final ResourceBundle resourceBundle;
-
 
     private static int DATABASE_TABLE_WIDTH = 200;
 
@@ -91,5 +88,4 @@ public class DBModelsView extends Composite {
     public void removeListener(DBModelsViewListener listener) {
         listeners.remove(listener);
     }
-
 }

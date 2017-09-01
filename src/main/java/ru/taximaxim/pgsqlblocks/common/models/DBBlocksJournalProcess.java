@@ -1,6 +1,5 @@
 package ru.taximaxim.pgsqlblocks.common.models;
 
-
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
@@ -60,14 +59,10 @@ public class DBBlocksJournalProcess {
         Date xactStart = process.getQuery().getXactStart();
         Date otherXactStart = other.getProcess().getQuery().getXactStart();
 
-        if (!(xactStart != null ? xactStart.equals(otherXactStart) : otherXactStart == null)) {
-            return false;
-        }
+        boolean isSameXactStart = xactStart == null ? otherXactStart == null : xactStart.equals(otherXactStart);
+        boolean isSamePid = process.getPid() == other.getProcess().getPid();
 
-        if (process.getPid() != other.getProcess().getPid()) {
-            return false;
-        }
-        return childrenEquals(process.getChildren(), other.getProcess().getChildren());
+        return isSameXactStart && isSamePid && childrenEquals(process.getChildren(), other.getProcess().getChildren());
     }
 
     private boolean childrenEquals(List<DBProcess> processes, List<DBProcess> other) {

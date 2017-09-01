@@ -1,6 +1,5 @@
 package ru.taximaxim.pgsqlblocks.dialogs;
 
-
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridLayout;

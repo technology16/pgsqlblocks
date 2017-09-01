@@ -18,5 +18,4 @@ public class DBBlockDeserializer {
         boolean granted = GRANTED_FLAG.equals(resultSet.getString(GRANTED));
         return new DBBlock(blockedBy, relation, lockType, granted);
     }
-
 }

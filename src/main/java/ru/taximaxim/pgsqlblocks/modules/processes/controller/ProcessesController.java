@@ -1,6 +1,5 @@
 package ru.taximaxim.pgsqlblocks.modules.processes.controller;
 
-
 import org.apache.log4j.Logger;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuManager;
@@ -66,7 +65,6 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
     private DBProcessInfoView dbBlocksJournalProcessInfoView;
     private DBProcessesFiltersView dbBlocksJournalProcessesFiltersView;
 
-
     private final DBProcessesViewDataSourceFilter dbProcessesViewDataSourceFilter = new DBProcessesViewDataSourceFilter();
 
     private TabFolder tabFolder;
@@ -106,7 +104,6 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
         dbModelsView = new DBModelsView(resourceBundle, view.getLeftPanelComposite(), SWT.NONE);
         dbModelsView.getTableViewer().setInput(dbControllers);
         dbModelsView.addListener(this);
-
 
         dbProcessesViewDataSourceFilter.addListener(this);
 
@@ -418,7 +415,7 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
         settings.setAutoUpdate(autoUpdate);
     }
 
-    public void setProcessesFilterViewVisibility(boolean isVisible) {
+    private void setProcessesFilterViewVisibility(boolean isVisible) {
         if (dbModelsView.getTableViewer().getStructuredSelection().getFirstElement() == null) {
             return;
         }
@@ -431,7 +428,7 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
         }
     }
 
-    public void setBlocksJournalProcessesFilterViewVisibility(boolean isVisible) {
+    private void setBlocksJournalProcessesFilterViewVisibility(boolean isVisible) {
         if (dbModelsView.getTableViewer().getStructuredSelection().getFirstElement() == null) {
             return;
         }
@@ -462,7 +459,7 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
     private void hideTrayMessageIfAllDatabasesUnblocked() {
         view.getDisplay().asyncExec(() -> {
             if (PgSqlBlocks.getInstance().getApplicationController().getApplicationView().trayIsAvailable()) {
-                if (!dbControllers.stream().anyMatch(DBController::isBlocked)) {
+                if (dbControllers.stream().noneMatch(DBController::isBlocked)) {
                     Tray tray = PgSqlBlocks.getInstance().getApplicationController().getApplicationView().getTray();
                     TrayItem trayItem = tray.getItem(0);
                     trayItem.setImage(ImageUtils.getImage(Images.UNBLOCKED));
@@ -678,7 +675,6 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
         dbProcessesView.getTreeViewer().refresh();
     }
 
-
     @Override
     public void processesFiltersViewPidFilterConditionChanged(DBProcessesFiltersView view, FilterCondition condition) {
         DBProcessFilter filter = getFilterForFiltersView(view);
@@ -807,7 +803,7 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
         if (selection.isEmpty()) {
             dbBlocksJournalProcessInfoView.hide();
         } else {
-            DBProcess process = null;
+            DBProcess process;
             IStructuredSelection structuredSelection = (IStructuredSelection)selection;
             Object element = structuredSelection.getFirstElement();
             if (element instanceof DBBlocksJournalProcess) {

@@ -9,7 +9,6 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.*;
-import org.eclipse.swt.widgets.Composite;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -22,10 +21,10 @@ import ru.taximaxim.pgsqlblocks.dialogs.TMTreeViewerColumnsDialog;
 import ru.taximaxim.pgsqlblocks.utils.*;
 
 import javax.xml.parsers.ParserConfigurationException;
-import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -181,8 +180,10 @@ public class BlocksJournalView extends ApplicationWindow implements DBBlocksJour
     private void getJournalFilesFromJournalsDir() {
         this.journalFiles.clear();
         Path blocksJournalsDirPath = PathBuilder.getInstance().getBlocksJournalsDir();
-        List<File> journalFiles = Arrays.asList(blocksJournalsDirPath.toFile().listFiles());
-        this.journalFiles.addAll(journalFiles);
+        File[] files = blocksJournalsDirPath.toFile().listFiles();
+        if (files != null) {
+            this.journalFiles.addAll(Arrays.asList(files));
+        }
         filesTable.refresh();
     }
 
@@ -191,7 +192,7 @@ public class BlocksJournalView extends ApplicationWindow implements DBBlocksJour
         if (selection.isEmpty()) {
             processInfoView.hide();
         } else {
-            DBProcess process = null;
+            DBProcess process;
             IStructuredSelection structuredSelection = (IStructuredSelection)selection;
             Object element = structuredSelection.getFirstElement();
             if (element instanceof DBBlocksJournalProcess) {
@@ -203,7 +204,6 @@ public class BlocksJournalView extends ApplicationWindow implements DBBlocksJour
             processInfoView.show(process);
         }
     }
-
 
     private void showProcessesViewColumnsDialog() {
         TMTreeViewerColumnsDialog dialog = new TMTreeViewerColumnsDialog(resourceBundle, processesView.getTreeViewer(), getShell());

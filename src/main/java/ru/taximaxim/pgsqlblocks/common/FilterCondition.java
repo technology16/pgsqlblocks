@@ -51,10 +51,6 @@ public enum FilterCondition {
         Optional<FilterCondition> filterCondition = Arrays.stream(FilterCondition.values())
                 .filter(fc -> fc.conditionText.equals(conditionText))
                 .findFirst();
-        if (filterCondition.isPresent()) {
-            return filterCondition.get();
-        }
-        return FilterCondition.NONE;
+        return filterCondition.orElse(FilterCondition.NONE);
     }
-
 }

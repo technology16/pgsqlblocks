@@ -17,5 +17,4 @@ public class BlocksJournalFilesLabelProvider  extends TreeLabelProvider {
         File file = (File)element;
         return file.getName();
     }
-
 }

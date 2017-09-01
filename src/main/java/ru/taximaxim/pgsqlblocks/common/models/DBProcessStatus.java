@@ -44,5 +44,4 @@ public enum DBProcessStatus {
                 return Images.DEFAULT;
         }
     }
-
 }

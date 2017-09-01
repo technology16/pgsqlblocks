@@ -32,7 +32,6 @@ public class DBProcessSerializer {
     private static final String USE_NAME = "usename";
     private static final String CLIENT = "client";
 
-
     public DBProcess deserialize(ResultSet resultSet) throws SQLException {
         int pid = resultSet.getInt(PID);
         String state = resultSet.getString(STATE);
@@ -56,7 +55,7 @@ public class DBProcessSerializer {
     }
 
     public DBProcess deserialize(Element xmlElement, boolean elementIsRoot) {
-        Element rootElement = null;
+        Element rootElement;
         if (elementIsRoot) {
             rootElement = xmlElement;
         } else {
@@ -68,7 +67,6 @@ public class DBProcessSerializer {
         String userName = rootElement.getElementsByTagName(USE_NAME).item(0).getTextContent();
         String client = rootElement.getElementsByTagName(CLIENT).item(0).getTextContent();
         DBProcessQueryCaller caller = new DBProcessQueryCaller(appName, databaseName, userName, client);
-
 
         String queryString = rootElement.getElementsByTagName(QUERY_SQL).item(0).getTextContent();
         boolean slowQuery = Boolean.valueOf(rootElement.getElementsByTagName(SLOW_QUERY).item(0).getTextContent());
@@ -125,5 +123,4 @@ public class DBProcessSerializer {
         element.setTextContent(elementContent);
         parentElement.appendChild(element);
     }
-
 }

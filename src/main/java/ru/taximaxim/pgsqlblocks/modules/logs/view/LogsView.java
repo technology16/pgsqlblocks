@@ -29,5 +29,4 @@ public class LogsView extends Composite {
         uiAppender.setThreshold(Level.INFO);
         Logger.getRootLogger().addAppender(uiAppender);
     }
-
 }

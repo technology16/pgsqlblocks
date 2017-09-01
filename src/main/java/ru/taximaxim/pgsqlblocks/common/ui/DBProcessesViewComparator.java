@@ -81,6 +81,8 @@ public class DBProcessesViewComparator extends ViewerComparator {
             case 15:
                 compareResult = compareBooleans(process1.getQuery().isSlowQuery(), process2.getQuery().isSlowQuery());
                 break;
+            default:
+                break;
 
         }
         return sortDirection == SWT.DOWN ? compareResult : -compareResult;
@@ -99,5 +101,4 @@ public class DBProcessesViewComparator extends ViewerComparator {
     private int compareBooleans(boolean b1, boolean b2) {
         return b1 == b2 ? 0 : b1 ? 1 : -1;
     }
-
 }

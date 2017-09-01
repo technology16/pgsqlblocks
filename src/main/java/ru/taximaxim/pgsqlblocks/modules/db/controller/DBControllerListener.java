@@ -1,6 +1,5 @@
 package ru.taximaxim.pgsqlblocks.modules.db.controller;
 
-import ru.taximaxim.pgsqlblocks.common.models.DBProcess;
 import ru.taximaxim.pgsqlblocks.modules.db.model.DBStatus;
 
 import java.sql.SQLException;
