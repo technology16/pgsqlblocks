@@ -10,11 +10,10 @@ public final class DateUtils {
 
     private static final Logger LOG = Logger.getLogger(DateUtils.class);
 
-    private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ssX");
+    private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ssX");
+    private final SimpleDateFormat dateFormatWithoutTimeZone = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
-    private static final SimpleDateFormat dateFormatWithoutTimeZone = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-
-    public static Date dateFromString(String dateString) {
+    public synchronized Date dateFromString(String dateString) {
         if (dateString == null || dateString.isEmpty()) {
             return null;
         }
@@ -27,14 +26,14 @@ public final class DateUtils {
         return result;
     }
 
-    public static String dateToString(Date date) {
+    public synchronized String dateToString(Date date) {
         if (date == null) {
             return "";
         }
         return dateFormatWithoutTimeZone.format(date);
     }
 
-    public static String dateToStringWithTz(Date date) {
+    public synchronized String dateToStringWithTz(Date date) {
         if (date == null) {
             return "";
         }
