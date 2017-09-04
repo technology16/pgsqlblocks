@@ -20,7 +20,7 @@ public class DBModelsView extends Composite {
 
     private final ResourceBundle resourceBundle;
 
-    private static int DATABASE_TABLE_WIDTH = 200;
+    private static final int DATABASE_TABLE_WIDTH = 200;
 
     private TableViewer tableViewer;
 

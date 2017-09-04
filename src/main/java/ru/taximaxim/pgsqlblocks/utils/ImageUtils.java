@@ -9,15 +9,11 @@ import java.util.concurrent.ConcurrentMap;
 
 public final class ImageUtils {
 
-    private final static ImageUtils instance = new ImageUtils();
-
-    private ImageUtils() {}
-
     private static final ConcurrentMap<String, Image> imagesMap = new ConcurrentHashMap<>();
 
     public static Image getImage(Images type) {
         return imagesMap.computeIfAbsent(type.toString(),
-                k -> new Image(null, instance.getClass().getClassLoader().getResourceAsStream(type.getImageAddr())));
+                k -> new Image(null, ImageUtils.class.getClassLoader().getResourceAsStream(type.getImageAddr())));
     }
 
     public static Image decorateImage(Image image, ImageDescriptor imageDescriptor, int iconQuadrant) {

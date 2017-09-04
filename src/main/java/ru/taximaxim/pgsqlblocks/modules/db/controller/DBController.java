@@ -65,6 +65,7 @@ public class DBController implements DBProcessFilterListener, DBBlocksJournalLis
     private final DBBlocksJournal blocksJournal = new DBBlocksJournal();
 
     private Date blocksJournalCreateDate;
+    private final DateUtils dateUtils = new DateUtils();
 
     public DBController(Settings settings, DBModel model) {
         this.settings = settings;
@@ -424,7 +425,7 @@ public class DBController implements DBProcessFilterListener, DBBlocksJournalLis
 
     private void saveBlockedProcessesToFile(List<DBBlocksJournalProcess> processes) throws ParserConfigurationException, IOException, SAXException {
 
-        String fileName = String.format("%s-%s.xml", this.model.getName(), DateUtils.dateToString(blocksJournalCreateDate));
+        String fileName = String.format("%s-%s.xml", this.model.getName(), dateUtils.dateToString(blocksJournalCreateDate));
         Path blocksJournalsDirPath = PathBuilder.getInstance().getBlocksJournalsDir();
         Path currentJournalPath = Paths.get(blocksJournalsDirPath.toString(), fileName);
         File currentJournalFile = currentJournalPath.toFile();

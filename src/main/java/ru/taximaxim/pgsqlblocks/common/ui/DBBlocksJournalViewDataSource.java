@@ -11,6 +11,8 @@ import java.util.ResourceBundle;
 
 public class DBBlocksJournalViewDataSource extends TMTreeViewerDataSource<DBBlocksJournalProcess> {
 
+    private final DateUtils dateUtils = new DateUtils();
+
     public DBBlocksJournalViewDataSource(ResourceBundle resourceBundle) {
         super(resourceBundle);
     }
@@ -172,9 +174,9 @@ public class DBBlocksJournalViewDataSource extends TMTreeViewerDataSource<DBBloc
             process = parentProcess.getProcess();
             switch (columnIndex) {
                 case 1:
-                    return DateUtils.dateToString(parentProcess.getCreateDate());
+                    return dateUtils.dateToString(parentProcess.getCreateDate());
                 case 2:
-                    return DateUtils.dateToString(parentProcess.getCloseDate());
+                    return dateUtils.dateToString(parentProcess.getCloseDate());
                 default:
                     // no-op
             }
@@ -199,15 +201,15 @@ public class DBBlocksJournalViewDataSource extends TMTreeViewerDataSource<DBBloc
             case 7:
                 return process.getQueryCaller().getClient();
             case 8:
-                return DateUtils.dateToString(process.getQuery().getBackendStart());
+                return dateUtils.dateToString(process.getQuery().getBackendStart());
             case 9:
-                return DateUtils.dateToString(process.getQuery().getQueryStart());
+                return dateUtils.dateToString(process.getQuery().getQueryStart());
             case 10:
-                return DateUtils.dateToString(process.getQuery().getXactStart());
+                return dateUtils.dateToString(process.getQuery().getXactStart());
             case 11:
                 return process.getState();
             case 12:
-                return DateUtils.dateToString(process.getStateChange());
+                return dateUtils.dateToString(process.getStateChange());
             case 13:
                 return process.getBlocksPidsString();
             case 14:

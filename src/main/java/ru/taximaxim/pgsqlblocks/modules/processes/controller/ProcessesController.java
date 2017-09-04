@@ -457,17 +457,16 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
     }
 
     private void hideTrayMessageIfAllDatabasesUnblocked() {
-        view.getDisplay().asyncExec(() -> {
-            if (PgSqlBlocks.getInstance().getApplicationController().getApplicationView().trayIsAvailable()) {
-                if (dbControllers.stream().noneMatch(DBController::isBlocked)) {
-                    Tray tray = PgSqlBlocks.getInstance().getApplicationController().getApplicationView().getTray();
-                    TrayItem trayItem = tray.getItem(0);
-                    trayItem.setImage(ImageUtils.getImage(Images.UNBLOCKED));
-                    ToolTip toolTip = trayItem.getToolTip();
-                    toolTip.setVisible(false);
-                }
-            }
-        });
+        if (PgSqlBlocks.getInstance().getApplicationController().getApplicationView().trayIsAvailable() 
+                && dbControllers.stream().noneMatch(DBController::isBlocked)) {
+            view.getDisplay().asyncExec(() -> {
+                Tray tray = PgSqlBlocks.getInstance().getApplicationController().getApplicationView().getTray();
+                TrayItem trayItem = tray.getItem(0);
+                trayItem.setImage(ImageUtils.getImage(Images.UNBLOCKED));
+                ToolTip toolTip = trayItem.getToolTip();
+                toolTip.setVisible(false);
+            });
+        }
     }
 
     private void showSettingsDialog() {

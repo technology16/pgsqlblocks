@@ -13,7 +13,7 @@ public class PgSqlBlocks {
     }
 
     public static void main(String[] args) {
-        PgSqlBlocks.getInstance().launchWithArgs(args);
+        PgSqlBlocks.getInstance().launch();
     }
 
     public static PgSqlBlocks getInstance() {
@@ -26,7 +26,7 @@ public class PgSqlBlocks {
         return applicationController;
     }
 
-    private void launchWithArgs(String[] args) {
-        applicationController.launchWithArgs(args);
+    private void launch() {
+        applicationController.launch();
     }
 }

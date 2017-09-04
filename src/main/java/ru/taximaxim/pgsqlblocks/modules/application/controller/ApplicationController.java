@@ -22,7 +22,7 @@ public class ApplicationController implements ApplicationViewListener {
         applicationView.setListener(this);
     }
 
-    public void launchWithArgs(String[] args) {
+    public void launch() {
         applicationView.show();
     }
 

@@ -11,6 +11,8 @@ import java.util.stream.Collectors;
 
 public class DBProcessesViewDataSource extends TMTreeViewerDataSource<DBProcess> {
 
+    private final DateUtils dateUtils = new DateUtils();
+
     public DBProcessesViewDataSource(ResourceBundle resourceBundle, TMTreeViewerDataSourceFilter<DBProcess> dataFilter) {
         super(resourceBundle, dataFilter);
     }
@@ -165,15 +167,15 @@ public class DBProcessesViewDataSource extends TMTreeViewerDataSource<DBProcess>
             case 5:
                 return process.getQueryCaller().getClient();
             case 6:
-                return DateUtils.dateToString(process.getQuery().getBackendStart());
+                return dateUtils.dateToString(process.getQuery().getBackendStart());
             case 7:
-                return DateUtils.dateToString(process.getQuery().getQueryStart());
+                return dateUtils.dateToString(process.getQuery().getQueryStart());
             case 8:
-                return DateUtils.dateToString(process.getQuery().getXactStart());
+                return dateUtils.dateToString(process.getQuery().getXactStart());
             case 9:
                 return process.getState();
             case 10:
-                return DateUtils.dateToString(process.getStateChange());
+                return dateUtils.dateToString(process.getStateChange());
             case 11:
                 return process.getBlocksPidsString();
             case 12:

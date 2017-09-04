@@ -24,7 +24,6 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -44,7 +43,6 @@ public class BlocksJournalView extends ApplicationWindow implements DBBlocksJour
 
     private DBProcessesFiltersView filtersView;
 
-    private final Settings settings;
     private final ResourceBundle resourceBundle;
 
     private final List<File> journalFiles = new ArrayList<>();
@@ -57,7 +55,6 @@ public class BlocksJournalView extends ApplicationWindow implements DBBlocksJour
 
     public BlocksJournalView(Settings settings) {
         super(null);
-        this.settings = settings;
         this.resourceBundle = settings.getResourceBundle();
         blocksJournal.addListener(this);
     }
@@ -173,7 +170,7 @@ public class BlocksJournalView extends ApplicationWindow implements DBBlocksJour
             }
             blocksJournal.setJournalProcesses(processes);
         } catch (ParserConfigurationException | IOException | SAXException e) {
-            e.printStackTrace();
+            LOG.warn("Ошибка открытия файла журнала: " + e.getMessage());
         }
     }
 

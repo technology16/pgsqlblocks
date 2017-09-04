@@ -212,11 +212,6 @@ public class ApplicationView extends ApplicationWindow {
     }
 
     @Override
-    protected void handleShellCloseEvent() {
-        super.handleShellCloseEvent();
-    }
-
-    @Override
     protected boolean canHandleShellCloseEvent() {
         if (settings.isConfirmExit() && !MessageDialog.openQuestion(getShell(), resourceBundle.getString("confirm_action"),
                 resourceBundle.getString("exit_confirm_message"))) {

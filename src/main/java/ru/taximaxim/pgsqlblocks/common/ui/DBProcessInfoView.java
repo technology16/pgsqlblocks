@@ -20,8 +20,6 @@ public class DBProcessInfoView extends Composite {
     private final List<DBProcessInfoViewListener> listeners = new ArrayList<>();
 
     private ToolBar toolBar;
-    private ToolItem cancelProcessToolItem;
-    private ToolItem terminateProcessToolItem;
     private Text processInfoText;
 
     public DBProcessInfoView(ResourceBundle resourceBundle, Composite parent, int style) {
@@ -44,13 +42,13 @@ public class DBProcessInfoView extends Composite {
         toolBar.setLayout(layout);
         toolBar.setLayoutData(layoutData);
 
-        cancelProcessToolItem = new ToolItem(toolBar, SWT.PUSH);
+        ToolItem cancelProcessToolItem = new ToolItem(toolBar, SWT.PUSH);
         cancelProcessToolItem.setText(resourceBundle.getString("cancel_process"));
         cancelProcessToolItem.addListener(SWT.Selection, event -> {
             listeners.forEach(DBProcessInfoViewListener::dbProcessInfoViewCancelProcessToolItemClicked);
         });
 
-        terminateProcessToolItem = new ToolItem(toolBar, SWT.PUSH);
+        ToolItem terminateProcessToolItem = new ToolItem(toolBar, SWT.PUSH);
         terminateProcessToolItem.setText(resourceBundle.getString("kill_process"));
         terminateProcessToolItem.addListener(SWT.Selection, event -> {
             listeners.forEach(DBProcessInfoViewListener::dbProcessInfoViewTerminateProcessToolItemClicked);
