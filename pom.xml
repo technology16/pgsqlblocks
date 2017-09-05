@@ -16,7 +16,7 @@
         <swt.artifactId>org.eclipse.swt.gtk.linux.x86_64</swt.artifactId>
         <swt.id>Linux-x86_64</swt.id>
         <swt.version>3.105.3</swt.version>
-        <mainClass>ru.taximaxim.pgsqlblocks.MainForm</mainClass>
+        <mainClass>ru.taximaxim.pgsqlblocks.PgSqlBlocks</mainClass>
         <license.licenseName>apache_v2</license.licenseName>
     </properties>
 

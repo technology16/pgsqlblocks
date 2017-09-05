@@ -50,6 +50,8 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import static ru.taximaxim.pgsqlblocks.PgSqlBlocks.APP_NAME;
+
 public class DBController implements DBProcessFilterListener, DBBlocksJournalListener {
 
     private DBModel model;
@@ -104,8 +106,8 @@ public class DBController implements DBProcessFilterListener, DBBlocksJournalLis
     }
 
     private String getConnectionUrl() {
-        return String.format("jdbc:postgresql://%1$s:%2$s/%3$s?ApplicationName=pgSqlBlocks",
-                                model.getHost(), model.getPort(), model.getDatabaseName());
+        return String.format("jdbc:postgresql://%1$s:%2$s/%3$s?ApplicationName=%4$s",
+                                model.getHost(), model.getPort(), model.getDatabaseName(), APP_NAME);
     }
 
     public boolean isEnabledAutoConnection() {

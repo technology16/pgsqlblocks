@@ -37,6 +37,8 @@ import ru.taximaxim.pgsqlblocks.utils.Settings;
 import java.text.MessageFormat;
 import java.util.ResourceBundle;
 
+import static ru.taximaxim.pgsqlblocks.PgSqlBlocks.APP_NAME;
+
 public class ApplicationView extends ApplicationWindow {
 
     private static final Logger LOG = Logger.getLogger(ApplicationView.class);
@@ -55,7 +57,6 @@ public class ApplicationView extends ApplicationWindow {
 
     private ApplicationViewListener viewListener;
 
-    private static final String APP_NAME = "pgSqlBlocks";
     private static final int[] ICON_SIZES = { 32, 48, 256/*, 512*/ };
 
     private final Settings settings;

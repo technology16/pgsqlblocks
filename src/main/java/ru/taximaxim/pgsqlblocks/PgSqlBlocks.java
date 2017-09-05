@@ -22,7 +22,7 @@ package ru.taximaxim.pgsqlblocks;
 import ru.taximaxim.pgsqlblocks.modules.application.controller.ApplicationController;
 
 public class PgSqlBlocks {
-
+    public static final String APP_NAME = "pgSqlBlocks " + PgSqlBlocks.class.getPackage().getImplementationVersion();
     private static PgSqlBlocks instance;
 
     private final ApplicationController applicationController;
