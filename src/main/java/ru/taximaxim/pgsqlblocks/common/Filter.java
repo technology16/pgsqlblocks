@@ -39,7 +39,7 @@ public abstract class Filter<T> {
         this.supportedConditions = FilterCondition.getConditionsForValueType(this.valueType);
     }
 
-    FilterCondition condition = FilterCondition.NONE;
+    FilterCondition condition = FilterCondition.CONTAINS;
 
     private List<FilterCondition> getSupportedConditions() {
         return supportedConditions;

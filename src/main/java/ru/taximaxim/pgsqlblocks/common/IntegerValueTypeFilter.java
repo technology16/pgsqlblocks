@@ -45,6 +45,8 @@ public class IntegerValueTypeFilter extends Filter<Integer> {
                 return actualValue < value;
             case LESS_OR_EQUAL:
                 return actualValue <= value;
+            case CONTAINS:
+                return String.valueOf(actualValue).toLowerCase().contains(String.valueOf(value).toLowerCase());
             default:
                 return true;
         }

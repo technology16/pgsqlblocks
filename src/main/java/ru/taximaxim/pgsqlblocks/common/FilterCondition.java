@@ -51,6 +51,7 @@ public enum FilterCondition {
         result.add(NONE);
         switch (valueType) {
             case INTEGER:
+                result.add(CONTAINS);
                 result.add(EQUALS);
                 result.add(NOT_EQUALS);
                 result.add(GREATER);
@@ -59,8 +60,8 @@ public enum FilterCondition {
                 result.add(LESS_OR_EQUAL);
                 break;
             case STRING:
-                result.add(EQUALS);
                 result.add(CONTAINS);
+                result.add(EQUALS);
                 break;
         }
         return result;
