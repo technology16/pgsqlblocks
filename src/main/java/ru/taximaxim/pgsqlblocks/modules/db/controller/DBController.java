@@ -338,6 +338,10 @@ public class DBController implements DBProcessFilterListener, DBBlocksJournalLis
         }
     }
 
+    Connection getConnection() {
+        return connection;
+    }
+
     public void addListener(DBControllerListener listener) {
         listeners.add(listener);
     }
