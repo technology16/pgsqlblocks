@@ -72,6 +72,18 @@ public final class PathBuilder {
         return blocksHistoryDir;
     }
 
+    public Path getBlocksJournalsDir() {
+        Path blocksJournalsDir = Paths.get(path.toString(), "blocksJournals");
+        if (!blocksJournalsDir.toFile().exists()) {
+            try {
+                Files.createDirectory(blocksJournalsDir);
+            } catch (IOException e) {
+                LOG.error(String.format("Ошибка создания директории %s: %s", blocksJournalsDir, e.getMessage()));
+            }
+        }
+        return blocksJournalsDir;
+    }
+
     public Path getBlockHistoryPath() {
         Path blocksHistoryDir = getBlockHistoryDir();
         SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy HH-mm-ss");

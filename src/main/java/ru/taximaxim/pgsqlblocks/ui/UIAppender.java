@@ -27,6 +27,7 @@ import org.eclipse.swt.custom.StyledTextContent;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 
@@ -34,7 +35,7 @@ import java.text.DateFormat;
 import java.util.Date;
 import java.util.Locale;
 
-public class UIAppender extends WriterAppender{
+public class UIAppender extends WriterAppender {
 
     private static final int TEXT_LIMIT = 20000;
     private Composite parent;
@@ -62,7 +63,10 @@ public class UIAppender extends WriterAppender{
     }
 
     private void createControl() {
+        GridLayout layout = new GridLayout();
+        layout.marginTop = 0;
         text = new StyledText(parent, SWT.MULTI | SWT.READ_ONLY | SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER);
+        text.setLayout(layout);
         text.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
         text.setMargins(3, 3, 3, 3);
         text.layout(true);

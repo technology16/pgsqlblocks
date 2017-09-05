@@ -36,7 +36,6 @@ import javax.xml.transform.stream.StreamResult;
 import java.io.File;
 import java.io.IOException;
 
-
 public class XmlDocumentWorker {
     
     private static final Logger LOG = Logger.getLogger(XmlDocumentWorker.class);
@@ -75,6 +74,12 @@ public class XmlDocumentWorker {
         }
         
         return doc;
+    }
+
+    public Document openJournalFile(File file) throws ParserConfigurationException, IOException, SAXException {
+        DocumentBuilderFactory df = DocumentBuilderFactory.newInstance();
+        DocumentBuilder db = df.newDocumentBuilder();
+        return db.parse(file);
     }
     
     private void createConfFile(File xmlFile) {
