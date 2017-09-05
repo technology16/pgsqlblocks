@@ -54,7 +54,6 @@ import ru.taximaxim.pgsqlblocks.utils.Images;
 import ru.taximaxim.pgsqlblocks.utils.Settings;
 import ru.taximaxim.pgsqlblocks.utils.SettingsListener;
 
-import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -136,8 +135,6 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
         loadDatabases();
 
         dbControllers.stream().filter(DBController::isEnabledAutoConnection).forEach(DBController::connect);
-
-        DriverManager.setLoginTimeout(settings.getLoginTimeout());
     }
 
     private void createProcessesTab() {

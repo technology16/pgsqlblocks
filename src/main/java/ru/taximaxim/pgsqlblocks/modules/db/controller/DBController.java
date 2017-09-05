@@ -112,18 +112,26 @@ public class DBController implements DBProcessFilterListener, DBBlocksJournalLis
         return model.isEnabled();
     }
 
-    public void connect() {
-        String password = getPassword();
-        try {
-            listeners.forEach(listener -> listener.dbControllerWillConnect(this));
-            connection = DriverManager.getConnection(getConnectionUrl(), model.getUser(), password);
-            setBackendPid(getPgBackendPid());
-            setStatus(DBStatus.CONNECTED);
-            listeners.forEach(listener -> listener.dbControllerDidConnect(this));
-        } catch (SQLException e) {
-            setStatus(DBStatus.CONNECTION_ERROR);
-            listeners.forEach(listener -> listener.dbControllerConnectionFailed(this, e));
-        }
+    public synchronized void connect() {
+        executor.execute(() -> {
+            String password = getPassword();
+            try {
+                listeners.forEach(listener -> listener.dbControllerWillConnect(this));
+
+                Properties info = new Properties();
+                info.put("user", model.getUser());
+                info.put("password", password);
+                info.put("loginTimeout", String.valueOf(settings.getLoginTimeout()));
+
+                connection = DriverManager.getConnection(getConnectionUrl(), info);
+                setBackendPid(getPgBackendPid());
+                setStatus(DBStatus.CONNECTED);
+                listeners.forEach(listener -> listener.dbControllerDidConnect(this));
+            } catch (SQLException e) {
+                setStatus(DBStatus.CONNECTION_ERROR);
+                listeners.forEach(listener -> listener.dbControllerConnectionFailed(this, e));
+            }
+        });
     }
 
     private String getPassword() {
@@ -132,7 +140,8 @@ public class DBController implements DBProcessFilterListener, DBBlocksJournalLis
         }
         String password = "";
         try {
-            password = PgPass.get(model.getHost(), model.getPort(), model.getDatabaseName(), model.getUser());
+            String pgPass = PgPass.get(model.getHost(), model.getPort(), model.getDatabaseName(), model.getUser());
+            password = pgPass == null ? password : pgPass;
         } catch (PgPassException e) {
             LOG.error("Ошибка получения пароля из pgpass файла " + e.getMessage(), e);
         }
