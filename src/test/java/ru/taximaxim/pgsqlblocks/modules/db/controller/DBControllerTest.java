@@ -61,10 +61,10 @@ public class DBControllerTest {
         public void dbControllerConnectionFailed(DBController controller, SQLException exception) {}
 
         @Override
-        public void dbControllerDisconnectFailed(DBController controller, SQLException exception) {}
+        public void dbControllerDisconnectFailed(DBController controller, boolean forcedByUser, SQLException exception) {}
 
         @Override
-        public void dbControllerDidDisconnect(DBController controller) {}
+        public void dbControllerDidDisconnect(DBController controller, boolean forcedByUser) {}
 
         @Override
         public void dbControllerWillUpdateProcesses(DBController controller) {}
@@ -113,7 +113,7 @@ public class DBControllerTest {
 
     @AfterClass
     public static void terminate() throws SQLException {
-        testDbc.disconnect();
+        testDbc.disconnect(true);
     }
 
     @Before

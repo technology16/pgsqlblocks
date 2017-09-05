@@ -33,9 +33,9 @@ public interface DBControllerListener {
 
     void dbControllerConnectionFailed(DBController controller, SQLException exception);
 
-    void dbControllerDisconnectFailed(DBController controller, SQLException exception);
+    void dbControllerDisconnectFailed(DBController controller, boolean forcedByUser, SQLException exception);
 
-    void dbControllerDidDisconnect(DBController controller);
+    void dbControllerDidDisconnect(DBController controller, boolean forcedByUser);
 
     void dbControllerWillUpdateProcesses(DBController controller);
 

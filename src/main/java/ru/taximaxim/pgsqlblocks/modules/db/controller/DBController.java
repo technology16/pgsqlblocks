@@ -148,18 +148,16 @@ public class DBController implements DBProcessFilterListener, DBBlocksJournalLis
         return password;
     }
 
-    public void disconnect() {
-        if (isConnected()) {
-            setBackendPid(0);
-            stopProcessesUpdater();
-            try {
-                connection.close();
-                setStatus(DBStatus.DISABLED);
-                listeners.forEach(listener -> listener.dbControllerDidDisconnect(this));
-            } catch (SQLException exception) {
-                setStatus(DBStatus.CONNECTION_ERROR);
-                listeners.forEach(listener -> listener.dbControllerDisconnectFailed(this, exception));
-            }
+    public void disconnect(boolean forcedByUser) {
+        setBackendPid(0);
+        stopProcessesUpdater();
+        try {
+            connection.close();
+            setStatus(forcedByUser ? DBStatus.DISABLED : DBStatus.CONNECTION_ERROR);
+            listeners.forEach(listener -> listener.dbControllerDidDisconnect(this, forcedByUser));
+        } catch (SQLException exception) {
+            setStatus(DBStatus.CONNECTION_ERROR);
+            listeners.forEach(listener -> listener.dbControllerDisconnectFailed(this, forcedByUser, exception));
         }
     }
 
@@ -226,9 +224,14 @@ public class DBController implements DBProcessFilterListener, DBBlocksJournalLis
         listeners.forEach(listener -> listener.dbControllerStatusChanged(this, this.status));
     }
 
-    public void startProcessesUpdater(long delay) {
+    public void startProcessesUpdater(long initDelay) {
         stopProcessesUpdater();
-        updater = executor.scheduleWithFixedDelay(this::loadProcesses, 0, delay, TimeUnit.SECONDS);
+        updater = executor.scheduleWithFixedDelay(this::updateProcesses,
+                                                    initDelay, settings.getUpdatePeriod(), TimeUnit.SECONDS);
+    }
+
+    public void startProcessesUpdater() {
+        startProcessesUpdater(0);
     }
 
     public void stopProcessesUpdater() {
@@ -240,8 +243,9 @@ public class DBController implements DBProcessFilterListener, DBBlocksJournalLis
     public void updateProcesses() {
         if (!isConnected()) {
             connect();
+        } else {
+            executor.execute(this::loadProcesses);
         }
-        executor.execute(this::loadProcesses);
     }
 
     public void shutdown() {
@@ -274,11 +278,8 @@ public class DBController implements DBProcessFilterListener, DBBlocksJournalLis
             proceedProcesses(tmpProcesses);
             processesLoaded(tmpProcesses.values().stream().filter(process -> !process.hasParent()).collect(Collectors.toList()));
         } catch (SQLException e) {
-            if (!isConnected()) {
-                setStatus(DBStatus.CONNECTION_ERROR);
-                stopProcessesUpdater();
-            }
             LOG.error(String.format("Ошибка при получении процессов для %s", model.getName()), e);
+            disconnect(false);
         }
     }
 

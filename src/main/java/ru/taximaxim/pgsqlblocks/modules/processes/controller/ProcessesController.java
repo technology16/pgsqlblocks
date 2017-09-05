@@ -416,7 +416,7 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
     private void disconnectSelectedDatabase() {
         if (dbModelsView.getTableViewer().getStructuredSelection().getFirstElement() != null) {
             DBController selectedController = (DBController) dbModelsView.getTableViewer().getStructuredSelection().getFirstElement();
-            selectedController.disconnect();
+            selectedController.disconnect(true);
         }
     }
 
@@ -513,7 +513,9 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
     @Override
     public void dbControllerDidConnect(DBController controller) {
         if (settings.isAutoUpdate()) {
-            controller.startProcessesUpdater(settings.getUpdatePeriod());
+            controller.startProcessesUpdater();
+        } else {
+            controller.updateProcesses();
         }
         changeToolItemsStateForController(controller);
     }
@@ -529,13 +531,27 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
     }
 
     @Override
-    public void dbControllerDisconnectFailed(DBController controller, SQLException exception) {
-        LOG.error(controller.getModel().getName() + " " + exception.getMessage(), exception);
+    public void dbControllerDisconnectFailed(DBController controller, boolean forcedByUser, SQLException exception) {
+        if (!forcedByUser && settings.isAutoUpdate()) {
+            LOG.info(MessageFormat.format(resourceBundle.getString("db_disconnected_will_reconnect"),
+                    controller.getModel().getName(), settings.getUpdatePeriod()));
+            controller.startProcessesUpdater(settings.getUpdatePeriod());
+        } else {
+            LOG.error(controller.getModel().getName() + " " + exception.getMessage(), exception);
+        }
+        changeToolItemsStateForController(controller);
     }
 
     @Override
-    public void dbControllerDidDisconnect(DBController controller) {
-        LOG.info(MessageFormat.format(resourceBundle.getString("db_disconnected"),controller.getModel().getName()));
+    public void dbControllerDidDisconnect(DBController controller, boolean forcedByUser) {
+        if (!forcedByUser && settings.isAutoUpdate()) {
+            LOG.info(MessageFormat.format(resourceBundle.getString("db_disconnected_will_reconnect"),
+                    controller.getModel().getName(), settings.getUpdatePeriod()));
+            controller.startProcessesUpdater(settings.getUpdatePeriod());
+        } else {
+            LOG.info(MessageFormat.format(resourceBundle.getString("db_disconnected"),
+                    controller.getModel().getName()));
+        }
         changeToolItemsStateForController(controller);
     }
 
@@ -615,7 +631,7 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
         if (!controller.isConnected()) {
             controller.connect();
         } else {
-            controller.disconnect();
+            controller.disconnect(true);
         }
     }
 
@@ -665,21 +681,21 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
     @Override
     public void settingsUpdatePeriodChanged(int updatePeriod) {
         if (settings.isAutoUpdate()) {
-            dbControllers.stream().filter(DBController::isConnected).forEach(dbc -> dbc.startProcessesUpdater(settings.getUpdatePeriod()));
+            dbControllers.stream().filter(DBController::isConnected).forEach(DBController::startProcessesUpdater);
         }
     }
 
     @Override
     public void settingsShowIdleChanged(boolean isShowIdle) {
         if (settings.isAutoUpdate()) {
-            dbControllers.stream().filter(DBController::isConnected).forEach(dbc -> dbc.startProcessesUpdater(settings.getUpdatePeriod()));
+            dbControllers.stream().filter(DBController::isConnected).forEach(DBController::startProcessesUpdater);
         }
     }
 
     @Override
     public void settingsAutoUpdateChanged(boolean isAutoUpdate) {
         if (isAutoUpdate) {
-            dbControllers.stream().filter(DBController::isConnected).forEach(dbc -> dbc.startProcessesUpdater(settings.getUpdatePeriod()));
+            dbControllers.stream().filter(DBController::isConnected).forEach(DBController::startProcessesUpdater);
         } else {
             dbControllers.stream().filter(DBController::isConnected).forEach(DBController::stopProcessesUpdater);
         }
@@ -847,13 +863,14 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
                 boolean result = selectedController.terminateProcessWithPid(processPid);
                 if (result) {
                     LOG.info(MessageFormat.format(resourceBundle.getString("process_terminated"), selectedController.getModel().getName(), processPid));
-                    selectedController.updateProcesses();
                 } else {
                     LOG.info(MessageFormat.format(resourceBundle.getString("process_not_terminated"), selectedController.getModel().getName(), processPid));
                 }
             } catch (SQLException exception) {
                 LOG.error(selectedController.getModel().getName() + " " + exception.getMessage(), exception);
                 LOG.info(MessageFormat.format(resourceBundle.getString("process_not_terminated"), selectedController.getModel().getName(), processPid));
+            } finally {
+                selectedController.updateProcesses();
             }
         }
     }
@@ -874,13 +891,14 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
                 boolean result = selectedController.cancelProcessWithPid(processPid);
                 if (result) {
                     LOG.info(MessageFormat.format(resourceBundle.getString("process_cancelled"), selectedController.getModel().getName(), processPid));
-                    selectedController.updateProcesses();
                 } else {
                     LOG.info(MessageFormat.format(resourceBundle.getString("process_not_cancelled"), selectedController.getModel().getName(), processPid));
                 }
             } catch (SQLException exception) {
                 LOG.error(selectedController.getModel().getName() + " " + exception.getMessage(), exception);
                 LOG.info(MessageFormat.format(resourceBundle.getString("process_not_cancelled"), selectedController.getModel().getName(), processPid));
+            } finally {
+                selectedController.updateProcesses();
             }
         }
     }

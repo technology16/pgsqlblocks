@@ -55,6 +55,7 @@ public class PgSqlBlocks_en extends ListResourceBundle {
                 {"db_connecting", "Connecting {0}..."},
                 {"db_connected", "{0} Connection created."},
                 {"db_disconnected", "{0} is disconnected."},
+                {"db_disconnected_will_reconnect", "{0} is disconnected. Will reconnect in {1} seconds"},
                 {"error_on_check_is_connected", "An error occurred while trying to get the value of \"isConnected \": {0}"},
                 {"db_exists_in_conf_file", "This database already exists in the configuration file"},
                 {"db_update_error", "Error on DbcData: {0}."},

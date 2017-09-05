@@ -55,6 +55,7 @@ public class PgSqlBlocks_ru extends ListResourceBundle {
                 {"db_connecting", "Соединение {0}..."},
                 {"db_connected", "{0} Соединение создано."},
                 {"db_disconnected", "{0} Соединение закрыто."},
+                {"db_disconnected_will_reconnect", "{0} Соединение закрыто. Переподключение произойдет через {1} секунд"},
                 {"error_on_check_is_connected", "Ошибка при попытке получения значения \"isConnected\": {0}"},
                 {"db_exists_in_conf_file", "Данное БД уже есть в конфигурационном файле"},
                 {"db_update_error", "Ошибка в DbcData: {0}."},
