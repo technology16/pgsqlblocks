@@ -1,16 +1,15 @@
 package ru.taximaxim.pgsqlblocks.common.ui;
 
-
 import org.eclipse.swt.graphics.Image;
 import ru.taximaxim.pgsqlblocks.common.models.DBBlocksJournalProcess;
 import ru.taximaxim.pgsqlblocks.common.models.DBProcess;
 import ru.taximaxim.pgsqlblocks.utils.DateUtils;
 import ru.taximaxim.pgsqlblocks.utils.ImageUtils;
 
-import java.time.Duration;
 import java.util.List;
 import java.util.ResourceBundle;
 
+// FIXME use enum for columns
 public class DBBlocksJournalViewDataSource extends TMTreeViewerDataSource<DBBlocksJournalProcess> {
 
     private final ResourceBundle resourceBundle;

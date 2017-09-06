@@ -11,7 +11,6 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Menu;
 import ru.taximaxim.pgsqlblocks.modules.db.controller.DBController;
-import ru.taximaxim.pgsqlblocks.utils.Settings;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,14 +45,14 @@ public class DBModelsView extends Composite {
 
         TableViewerColumn nameColumn = new TableViewerColumn(tableViewer, SWT.NONE);
         nameColumn.getColumn().setText(resourceBundle.getString("database"));
-        nameColumn.getColumn().setWidth(130);
+        nameColumn.getColumn().setWidth(130); // TODO magic number
 
         TableViewerColumn processesCountColumn = new TableViewerColumn(tableViewer, SWT.NONE);
         processesCountColumn.getColumn().setText(resourceBundle.getString("processes"));
-        processesCountColumn.getColumn().setWidth(70);
+        processesCountColumn.getColumn().setWidth(70); // TODO magic number
 
         tableViewer.setContentProvider(new DBModelsViewContentProvider());
-        tableViewer.setLabelProvider(new DBModelsViewLabelProvider());
+        tableViewer.setLabelProvider(new DBModelsViewLabelProvider(resourceBundle));
         tableViewer.addSelectionChangedListener(event -> {
             if (!event.getSelection().isEmpty()) {
                 IStructuredSelection selection = (IStructuredSelection) event.getSelection();

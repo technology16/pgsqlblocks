@@ -40,11 +40,7 @@ public class DBProcessQuery {
     }
 
     public Duration getDuration() {
-        if (xactStart == null) {
-            return null;
-        }
-        Date now = new Date();
-        return Duration.ofMillis(now.getTime() - xactStart.getTime());
+        return xactStart == null ? null : Duration.ofMillis(new Date().getTime() - xactStart.getTime());
     }
 
     @Override
