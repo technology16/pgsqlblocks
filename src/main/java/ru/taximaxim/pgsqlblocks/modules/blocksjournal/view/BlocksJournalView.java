@@ -43,10 +43,8 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.*;
 import java.util.List;
-import java.util.ResourceBundle;
 
 public class BlocksJournalView extends ApplicationWindow implements DBBlocksJournalListener, DBProcessesFiltersViewListener {
 
@@ -198,7 +196,9 @@ public class BlocksJournalView extends ApplicationWindow implements DBBlocksJour
         Path blocksJournalsDirPath = PathBuilder.getInstance().getBlocksJournalsDir();
         File[] files = blocksJournalsDirPath.toFile().listFiles();
         if (files != null) {
-            this.journalFiles.addAll(Arrays.asList(files));
+            List<File> filesList = Arrays.asList(files);
+            filesList.sort(Comparator.comparingLong(File::lastModified));
+            this.journalFiles.addAll(filesList);
         }
         filesTable.refresh();
     }
