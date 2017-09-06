@@ -204,7 +204,10 @@ public class DBProcessesViewDataSource extends TMTreeViewerDataSource<DBProcess>
             case 14:
                 return String.valueOf(process.getQuery().isSlowQuery());
             case 15:
-                return process.getQuery().getQueryString();
+                String query = process.getQuery().getQueryString();
+                int indexOfNewLine = query.indexOf("\n");
+                String substring = query.substring(0, query.indexOf("\n") >= 0 ? indexOfNewLine : query.length());
+                return query.indexOf("\n") >= 0 ? substring + " ..." : substring;
             default:
                 return "UNDEFINED";
         }

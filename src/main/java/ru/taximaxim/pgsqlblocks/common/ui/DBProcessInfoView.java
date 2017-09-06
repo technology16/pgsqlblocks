@@ -86,32 +86,20 @@ public class DBProcessInfoView extends Composite {
         this.layout();
     }
 
-    public void showToolBar() {
-        this.toolBar.setVisible(true);
-        GridData layoutData = (GridData) this.toolBar.getLayoutData();
-        layoutData.exclude = false;
-        this.layout();
-    }
-
-    public void setTextContent(String content) {
-        processInfoText.setText(content);
-    }
-
     public ToolBar getToolBar() {
         return toolBar;
     }
 
     public void show(DBProcess process) {
         StringBuilder stringBuilder = new StringBuilder();
-        DBProcessesViewDataSource dataSource = new DBProcessesViewDataSource(resourceBundle, null);
-        for (int i = 0; i< dataSource.numberOfColumns(); i++) {
-            String title = dataSource.columnTitleForColumnIndex(i);
-            String content = dataSource.getColumnText(process, i);
-            stringBuilder.append(title);
-            stringBuilder.append(": ");
-            stringBuilder.append(content);
-            stringBuilder.append("\n");
-        }
+        stringBuilder.append(String.format("%s = %d\n",
+                resourceBundle.getString("pid"), process.getPid()));
+        stringBuilder.append(String.format("%s = %s\n",
+                resourceBundle.getString("user_name"), process.getQueryCaller().getUserName()));
+        stringBuilder.append(String.format("%s = %s\n",
+                resourceBundle.getString("db_name"), process.getQueryCaller().getDatabaseName()));
+        stringBuilder.append(String.format("\n%s:\n%s\n",
+                resourceBundle.getString("query"), process.getQuery().getQueryString()));
 
         processInfoText.setText(stringBuilder.toString());
         this.setVisible(true);

@@ -37,7 +37,7 @@ public class PgSqlBlocks_ru extends ListResourceBundle {
                 {"blocks_journal", "Журнал блокировок"},
                 {"database", "Базы данных"},
                 {"kill_process", "Уничтожить процесс"},
-                {"cancel_process", "Послать сигнал отмены процесса"},
+                {"cancel_process", "Отменить процесс"},
                 {"lock_history", "История блокировок"},
                 {"lock_saved", "Блокировка сохранена..."},
                 {"no_locks", "Не найдено блокировок для сохранения"},
