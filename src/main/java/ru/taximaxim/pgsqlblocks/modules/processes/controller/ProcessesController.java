@@ -297,13 +297,15 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
     }
 
     private void changeToolItemsStateForController(DBController controller) {
-        boolean isEnabled = controller != null && !controller.isConnected();
-        toggleVisibilityProcessesFilterPanelToolItem.setEnabled(controller != null);
-        toggleVisibilityBlocksJournalProcessesFilterPanelToolItem.setEnabled(controller != null);
-        connectDatabaseToolItem.setEnabled(isEnabled);
-        disconnectDatabaseToolItem.setEnabled(!isEnabled);
-        deleteDatabaseToolItem.setEnabled(isEnabled);
-        editDatabaseToolItem.setEnabled(isEnabled);
+        Display.getDefault().syncExec( () -> {
+            boolean isDisconnected = controller != null && !controller.isConnected();
+            toggleVisibilityProcessesFilterPanelToolItem.setEnabled(controller != null);
+            toggleVisibilityBlocksJournalProcessesFilterPanelToolItem.setEnabled(controller != null);
+            connectDatabaseToolItem.setEnabled(isDisconnected);
+            disconnectDatabaseToolItem.setEnabled(!isDisconnected);
+            deleteDatabaseToolItem.setEnabled(isDisconnected);
+            editDatabaseToolItem.setEnabled(isDisconnected);
+        });
     }
 
     private void toggleLogsPanelVisibility(ToolItem toolItem) {
@@ -339,7 +341,7 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
         dbController.removeListener(this);
         dbController.shutdown();
         dbControllers.remove(dbController);
-        Display.getDefault().asyncExec(() -> changeToolItemsStateForController(null));
+        changeToolItemsStateForController(null);
         dbProcessesView.getTreeViewer().setInput(null);
         dbBlocksJournalView.getTreeViewer().setInput(null);
         toggleVisibilityProcessesFilterPanelToolItem.setSelection(false);
@@ -516,7 +518,7 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
         } else {
             controller.updateProcesses();
         }
-        Display.getDefault().asyncExec(() -> changeToolItemsStateForController(controller));
+        changeToolItemsStateForController(controller);
     }
 
     @Override
@@ -538,7 +540,7 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
         } else {
             LOG.error(controller.getModel().getName() + " " + exception.getMessage(), exception);
         }
-        Display.getDefault().asyncExec(() -> changeToolItemsStateForController(controller));
+        changeToolItemsStateForController(controller);
     }
 
     @Override
@@ -551,7 +553,7 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
             LOG.info(MessageFormat.format(resourceBundle.getString("db_disconnected"),
                     controller.getModel().getName()));
         }
-        Display.getDefault().asyncExec(() -> changeToolItemsStateForController(controller));
+        changeToolItemsStateForController(controller);
     }
 
     @Override
@@ -604,7 +606,7 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
     public void dbModelsViewDidSelectController(DBController controller) {
         dbProcessesView.getTreeViewer().setInput(controller.getFilteredProcesses());
         dbBlocksJournalView.getTreeViewer().setInput(controller.getBlocksJournal().getFilteredProcesses());
-        Display.getDefault().asyncExec(() -> changeToolItemsStateForController(controller));
+        changeToolItemsStateForController(controller);
         dbProcessesFiltersView.fillView(controller.getProcessesFilters(), controller.getModel().getDatabaseName());
         boolean controllerFiltersEnabled = controller.getProcessesFilters().isEnabled();
         if (controllerFiltersEnabled) {
