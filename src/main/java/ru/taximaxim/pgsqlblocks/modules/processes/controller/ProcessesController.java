@@ -103,7 +103,6 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
 
     private List<DBController> dbControllers = new ArrayList<>();
 
-    private DBProcess selectedProcess;
     private List<DBProcess> selectedProcesses = new ArrayList<>();
 
     public ProcessesController(Settings settings, DBModelsProvider dbModelsProvider) {
@@ -124,7 +123,6 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
         dbModelsView.getTableViewer().setInput(dbControllers);
         dbModelsView.addListener(this);
 
-        // TODO: 24.05.18 CHECK!!!!!!!!!!!!!!!!1
         dbProcessesViewDataSourceFilter.addListener(this);
 
         tabFolder = new TabFolder(view.getRightPanelComposite(), SWT.NONE);
@@ -605,8 +603,6 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
 
     @Override
     public void dbModelsViewDidSelectController(DBController controller) {
-        System.out.println(controller.getModel().getDatabaseName());
-        System.out.println(controller.getFilteredProcesses().size());
         dbProcessesView.getTreeViewer().setInput(controller.getFilteredProcesses());
         dbBlocksJournalView.getTreeViewer().setInput(controller.getBlocksJournal().getFilteredProcesses());
         changeToolItemsStateForController(controller);
@@ -823,7 +819,6 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
     private void dbProcessesViewSelectionChanged(SelectionChangedEvent event) {
         ISelection selection = event.getSelection();
         if (selection.isEmpty()) {
-            selectedProcess = null;
             dbProcessInfoView.hide();
         } else {
             IStructuredSelection structuredSelection = (IStructuredSelection)selection;
@@ -838,7 +833,6 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
             dbBlocksJournalProcessInfoView.hide();
         } else {
             DBProcess process;
-            // TODO: 24.05.18 change
             IStructuredSelection structuredSelection = (IStructuredSelection)selection;
             Object element = structuredSelection.getFirstElement();
             if (element instanceof DBBlocksJournalProcess) {
@@ -859,15 +853,13 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
         DBController selectedController = (DBController) dbModelsView.getTableViewer().getStructuredSelection().getFirstElement();
         if (!selectedProcesses.isEmpty()) {
             if (settings.isConfirmRequired() && !MessageDialog.openQuestion(view.getShell(), resourceBundle.getString("confirm_action"),
-                    MessageFormat.format(resourceBundle.getString("kill_process_confirm_message"), "Все"))) {
+                    resourceBundle.getString("kill_process_confirm_message"))) {
                 return;
             }
             for (DBProcess process : selectedProcesses) {
                 final int processPid = process.getPid();
                 try {
-                    System.out.println("REREEEEEEEEEEEEEEEEE");
                     boolean result = selectedController.terminateProcessWithPid(processPid);
-                    System.out.println(result);
                     if (result) {
                         LOG.info(MessageFormat.format(resourceBundle.getString("process_terminated"), selectedController.getModel().getName(), processPid));
                     } else {
@@ -891,15 +883,13 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
         DBController selectedController = (DBController) dbModelsView.getTableViewer().getStructuredSelection().getFirstElement();
         if (!selectedProcesses.isEmpty()) {
             if (settings.isConfirmRequired() && !MessageDialog.openQuestion(view.getShell(), resourceBundle.getString("confirm_action"),
-                    MessageFormat.format(resourceBundle.getString("cancel_process_confirm_message"), "все"))) {
+                    resourceBundle.getString("cancel_process_confirm_message"))) {
                 return;
             }
             for (DBProcess process : selectedProcesses) {
                 final int processPid = process.getPid();
                 try {
-                    System.out.println("REEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE");
                     boolean result = selectedController.cancelProcessWithPid(processPid);
-                    System.out.println(result);
                     if (result) {
                         LOG.info(MessageFormat.format(resourceBundle.getString("process_cancelled"), selectedController.getModel().getName(), processPid));
                     } else {

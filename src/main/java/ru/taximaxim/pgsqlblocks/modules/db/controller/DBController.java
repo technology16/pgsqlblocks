@@ -345,7 +345,6 @@ public class DBController implements DBProcessFilterListener, DBBlocksJournalLis
 
     private void processesLoaded(List<DBProcess> loadedProcesses) {
         processes.clear();
-        System.out.println(loadedProcesses.size());
         processes.addAll(loadedProcesses);
 
         filteredProcesses.clear();
