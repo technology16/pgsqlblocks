@@ -55,7 +55,6 @@ public class DBProcessInfoView extends Composite {
 
     private void createContent() {
         toolBar = new ToolBar(this, SWT.HORIZONTAL);
-        toolBar.setEnabled(false);
         GridLayout layout = new GridLayout();
         GridData layoutData = new GridData(SWT.FILL, SWT.TOP, true, false);
         toolBar.setLayout(layout);

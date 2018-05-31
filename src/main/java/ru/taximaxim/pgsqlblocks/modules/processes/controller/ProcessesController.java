@@ -297,14 +297,15 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
     }
 
     private void changeToolItemsStateForController(DBController controller) {
-        boolean isEnabled = controller != null && !controller.isConnected();
-        dbProcessInfoView.getToolBar().setEnabled(!isEnabled);
-        toggleVisibilityProcessesFilterPanelToolItem.setEnabled(controller != null);
-        toggleVisibilityBlocksJournalProcessesFilterPanelToolItem.setEnabled(controller != null);
-        deleteDatabaseToolItem.setEnabled(isEnabled);
-        editDatabaseToolItem.setEnabled(isEnabled);
-        connectDatabaseToolItem.setEnabled(isEnabled);
-        disconnectDatabaseToolItem.setEnabled(controller != null && !isEnabled);
+        Display.getDefault().syncExec( () -> {
+            boolean isDisconnected = controller != null && !controller.isConnected();
+            toggleVisibilityProcessesFilterPanelToolItem.setEnabled(controller != null);
+            toggleVisibilityBlocksJournalProcessesFilterPanelToolItem.setEnabled(controller != null);
+            connectDatabaseToolItem.setEnabled(isDisconnected);
+            disconnectDatabaseToolItem.setEnabled(!isDisconnected);
+            deleteDatabaseToolItem.setEnabled(isDisconnected);
+            editDatabaseToolItem.setEnabled(isDisconnected);
+        });
     }
 
     private void toggleLogsPanelVisibility(ToolItem toolItem) {
