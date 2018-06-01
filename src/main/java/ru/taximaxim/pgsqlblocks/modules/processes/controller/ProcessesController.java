@@ -851,13 +851,13 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
             return;
         }
         DBController selectedController = (DBController) dbModelsView.getTableViewer().getStructuredSelection().getFirstElement();
-        if (!selectedProcesses.isEmpty()) {
+        List<Integer> pidProcessesList = selectedProcesses.stream().map(DBProcess::getPid).collect(Collectors.toList());
+        if (!pidProcessesList.isEmpty()) {
             if (settings.isConfirmRequired() && !MessageDialog.openQuestion(view.getShell(), resourceBundle.getString("confirm_action"),
-                    resourceBundle.getString("kill_process_confirm_message"))) {
+                    MessageFormat.format(resourceBundle.getString("kill_process_confirm_message"), pidProcessesList))) {
                 return;
             }
-            for (DBProcess process : selectedProcesses) {
-                final int processPid = process.getPid();
+            for (Integer processPid : pidProcessesList) {
                 try {
                     boolean result = selectedController.terminateProcessWithPid(processPid);
                     if (result) {
@@ -881,13 +881,13 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
             return;
         }
         DBController selectedController = (DBController) dbModelsView.getTableViewer().getStructuredSelection().getFirstElement();
-        if (!selectedProcesses.isEmpty()) {
+        List<Integer> pidProcessesList = selectedProcesses.stream().map(DBProcess::getPid).collect(Collectors.toList());
+        if (!pidProcessesList.isEmpty()) {
             if (settings.isConfirmRequired() && !MessageDialog.openQuestion(view.getShell(), resourceBundle.getString("confirm_action"),
-                    resourceBundle.getString("cancel_process_confirm_message"))) {
+                    MessageFormat.format(resourceBundle.getString("cancel_process_confirm_message"), pidProcessesList))) {
                 return;
             }
-            for (DBProcess process : selectedProcesses) {
-                final int processPid = process.getPid();
+            for (Integer processPid : pidProcessesList) {
                 try {
                     boolean result = selectedController.cancelProcessWithPid(processPid);
                     if (result) {
