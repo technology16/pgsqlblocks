@@ -20,9 +20,12 @@
 package ru.taximaxim.pgsqlblocks.modules.processes.controller;
 
 import org.apache.log4j.Logger;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -54,6 +57,7 @@ import ru.taximaxim.pgsqlblocks.utils.Images;
 import ru.taximaxim.pgsqlblocks.utils.Settings;
 import ru.taximaxim.pgsqlblocks.utils.SettingsListener;
 
+import java.lang.reflect.InvocationTargetException;
 import java.sql.SQLException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -857,26 +861,42 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
                     MessageFormat.format(resourceBundle.getString("kill_process_confirm_message"), pidProcessesList))) {
                 return;
             }
-            for (Integer processPid : pidProcessesList) {
-                try {
-                    boolean result = selectedController.terminateProcessWithPid(processPid);
-                    if (result) {
-                        LOG.info(MessageFormat.format(resourceBundle.getString("process_terminated"), selectedController.getModel().getName(), processPid));
-                    } else {
-                        LOG.info(MessageFormat.format(resourceBundle.getString("process_not_terminated"), selectedController.getModel().getName(), processPid));
+            ProgressMonitorDialog dialog = new ProgressMonitorDialog(Display.getDefault().getActiveShell());
+            dialog.open();
+            try {
+                dialog.run(true, true, iProgressMonitor -> {
+                    iProgressMonitor.beginTask("Termination processes", pidProcessesList.size());
+                    for (Integer processPid : pidProcessesList) {
+                        if (iProgressMonitor.isCanceled()) {
+                            LOG.info(resourceBundle.getString("kill_process_dialog_message"));
+                            iProgressMonitor.done();
+                            break;
+                        }
+                        try {
+                            boolean result = selectedController.terminateProcessWithPid(processPid);
+                            if (result) {
+                                LOG.info(MessageFormat.format(resourceBundle.getString("process_terminated"), selectedController.getModel().getName(), processPid));
+                            } else {
+                                LOG.info(MessageFormat.format(resourceBundle.getString("process_not_terminated"), selectedController.getModel().getName(), processPid));
+                            }
+                        } catch (SQLException exception) {
+                            LOG.error(selectedController.getModel().getName() + " " + exception.getMessage(), exception);
+                            LOG.info(MessageFormat.format(resourceBundle.getString("process_not_terminated"), selectedController.getModel().getName(), processPid));
+                        } finally {
+                            selectedController.updateProcesses();
+                        }
                     }
-                } catch (SQLException exception) {
-                    LOG.error(selectedController.getModel().getName() + " " + exception.getMessage(), exception);
-                    LOG.info(MessageFormat.format(resourceBundle.getString("process_not_terminated"), selectedController.getModel().getName(), processPid));
-                } finally {
-                    selectedController.updateProcesses();
-                }
+
+                });
+            } catch (InvocationTargetException | InterruptedException e) {
+                LOG.error(MessageFormat.format(resourceBundle.getString("kill_process_dialog_error_message"), e.getMessage()), e);
             }
+
         }
     }
 
     @Override
-    public void dbProcessInfoViewCancelProcessToolItemClicked() {
+    public void dbProcessInfoViewCancelProcessToolItemClicked(){
         if (dbModelsView.getTableViewer().getStructuredSelection().getFirstElement() == null) {
             return;
         }
@@ -887,20 +907,35 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
                     MessageFormat.format(resourceBundle.getString("cancel_process_confirm_message"), pidProcessesList))) {
                 return;
             }
-            for (Integer processPid : pidProcessesList) {
-                try {
-                    boolean result = selectedController.cancelProcessWithPid(processPid);
-                    if (result) {
-                        LOG.info(MessageFormat.format(resourceBundle.getString("process_cancelled"), selectedController.getModel().getName(), processPid));
-                    } else {
-                        LOG.info(MessageFormat.format(resourceBundle.getString("process_not_cancelled"), selectedController.getModel().getName(), processPid));
+            ProgressMonitorDialog dialog = new ProgressMonitorDialog(Display.getDefault().getActiveShell());
+            dialog.open();
+            try {
+                dialog.run(true, true, iProgressMonitor -> {
+                    iProgressMonitor.beginTask("Cancel processes", pidProcessesList.size());
+                    for (Integer processPid : pidProcessesList) {
+                        if (iProgressMonitor.isCanceled()) {
+                            LOG.info(resourceBundle.getString("cancel_process_dialog_message"));
+                            iProgressMonitor.done();
+                            break;
+                        }
+                        try {
+                            boolean result = selectedController.cancelProcessWithPid(processPid);
+                            if (result) {
+                                LOG.info(MessageFormat.format(resourceBundle.getString("process_cancelled"), selectedController.getModel().getName(), processPid));
+                            } else {
+                                LOG.info(MessageFormat.format(resourceBundle.getString("process_not_cancelled"), selectedController.getModel().getName(), processPid));
+                            }
+                        } catch (SQLException exception) {
+                            LOG.error(selectedController.getModel().getName() + " " + exception.getMessage(), exception);
+                            LOG.info(MessageFormat.format(resourceBundle.getString("process_not_cancelled"), selectedController.getModel().getName(), processPid));
+                        } finally {
+                            selectedController.updateProcesses();
+                        }
                     }
-                } catch (SQLException exception) {
-                    LOG.error(selectedController.getModel().getName() + " " + exception.getMessage(), exception);
-                    LOG.info(MessageFormat.format(resourceBundle.getString("process_not_cancelled"), selectedController.getModel().getName(), processPid));
-                } finally {
-                    selectedController.updateProcesses();
-                }
+                    iProgressMonitor.done();
+                });
+            } catch (InvocationTargetException | InterruptedException e) {
+                LOG.error(MessageFormat.format(resourceBundle.getString("cancel_process_dialog_error_message"), e.getMessage()), e);
             }
         }
     }
