@@ -1,3 +1,22 @@
+/*
+ * ========================LICENSE_START=================================
+ * pgSqlBlocks
+ * *
+ * Copyright (C) 2017 "Technology" LLC
+ * *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * =========================LICENSE_END==================================
+ */
 package ru.taximaxim.pgsqlblocks.common;
 
 import java.util.ArrayList;
@@ -9,21 +28,20 @@ public abstract class Filter<T> {
 
     protected T value;
 
-    protected final List<FilterCondition> supportedConditions;
+    private final List<FilterCondition> supportedConditions;
 
-    protected final FilterValueType valueType;
+    private final FilterValueType valueType;
 
-    protected boolean isActive = false;
+    private boolean isActive = false;
 
-    protected Filter(FilterValueType valueType) {
+    Filter(FilterValueType valueType) {
         this.valueType = valueType;
         this.supportedConditions = FilterCondition.getConditionsForValueType(this.valueType);
     }
 
-    protected FilterCondition condition = FilterCondition.NONE;
+    FilterCondition condition = FilterCondition.CONTAINS;
 
-
-    public List<FilterCondition> getSupportedConditions() {
+    private List<FilterCondition> getSupportedConditions() {
         return supportedConditions;
     }
 
@@ -67,7 +85,7 @@ public abstract class Filter<T> {
         setActive(isActiveAfterSetValue);
     }
 
-    protected void setActive(boolean isActive) {
+    private void setActive(boolean isActive) {
         if (this.isActive != isActive) {
             this.isActive = isActive;
             if (this.isActive) {
@@ -88,13 +106,7 @@ public abstract class Filter<T> {
     }
 
     public boolean isActive() {
-        if (condition == FilterCondition.NONE) {
-            return false;
-        }
-        if (value == null) {
-            return false;
-        }
-        return true;
+        return condition != FilterCondition.NONE && value != null;
     }
 
     public void addListener(FilterListener listener) {
@@ -104,6 +116,4 @@ public abstract class Filter<T> {
     public void removeListener(FilterListener listener) {
         listeners.remove(listener);
     }
-
 }
-

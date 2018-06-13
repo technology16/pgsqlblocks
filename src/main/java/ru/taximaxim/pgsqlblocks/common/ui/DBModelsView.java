@@ -1,3 +1,22 @@
+/*
+ * ========================LICENSE_START=================================
+ * pgSqlBlocks
+ * *
+ * Copyright (C) 2017 "Technology" LLC
+ * *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * =========================LICENSE_END==================================
+ */
 package ru.taximaxim.pgsqlblocks.common.ui;
 
 import org.eclipse.jface.action.IMenuManager;
@@ -16,10 +35,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
 
-
 public class DBModelsView extends Composite {
 
     private final ResourceBundle resourceBundle;
+
+    private static final int DATABASE_TABLE_WIDTH = 200;
 
     private TableViewer tableViewer;
 
@@ -42,17 +62,11 @@ public class DBModelsView extends Composite {
         GridData layoutData = new GridData(SWT.FILL, SWT.FILL, true, true);
         tableViewer.getControl().setLayoutData(layoutData);
         tableViewer.getTable().setHeaderVisible(true);
-
-        TableViewerColumn nameColumn = new TableViewerColumn(tableViewer, SWT.NONE);
-        nameColumn.getColumn().setText(resourceBundle.getString("database"));
-        nameColumn.getColumn().setWidth(130); // TODO magic number
-
-        TableViewerColumn processesCountColumn = new TableViewerColumn(tableViewer, SWT.NONE);
-        processesCountColumn.getColumn().setText(resourceBundle.getString("processes"));
-        processesCountColumn.getColumn().setWidth(70); // TODO magic number
-
+        TableViewerColumn column = new TableViewerColumn(tableViewer, SWT.NONE);
+        column.getColumn().setText(resourceBundle.getString("database"));
+        column.getColumn().setWidth(DATABASE_TABLE_WIDTH);
         tableViewer.setContentProvider(new DBModelsViewContentProvider());
-        tableViewer.setLabelProvider(new DBModelsViewLabelProvider(resourceBundle));
+        tableViewer.setLabelProvider(new DBModelsViewLabelProvider());
         tableViewer.addSelectionChangedListener(event -> {
             if (!event.getSelection().isEmpty()) {
                 IStructuredSelection selection = (IStructuredSelection) event.getSelection();
@@ -93,5 +107,4 @@ public class DBModelsView extends Composite {
     public void removeListener(DBModelsViewListener listener) {
         listeners.remove(listener);
     }
-
 }

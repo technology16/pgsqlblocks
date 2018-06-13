@@ -1,3 +1,22 @@
+/*
+ * ========================LICENSE_START=================================
+ * pgSqlBlocks
+ * *
+ * Copyright (C) 2017 "Technology" LLC
+ * *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * =========================LICENSE_END==================================
+ */
 package ru.taximaxim.pgsqlblocks.common.ui;
 
 import org.eclipse.swt.graphics.Image;
@@ -9,19 +28,17 @@ import java.util.List;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
-// FIXME use enum for columns, merge with DBBlocksJournalViewDataSource to remove duplication
 public class DBProcessesViewDataSource extends TMTreeViewerDataSource<DBProcess> {
 
-    private final ResourceBundle resourceBundle;
+    private final DateUtils dateUtils = new DateUtils();
 
-    public DBProcessesViewDataSource(ResourceBundle resourceBundle, TMTreeViewerDataSourceFilter dataFilter) {
-        super(dataFilter);
-        this.resourceBundle = resourceBundle;
+    public DBProcessesViewDataSource(ResourceBundle resourceBundle, TMTreeViewerDataSourceFilter<DBProcess> dataFilter) {
+        super(resourceBundle, dataFilter);
     }
 
     @Override
     public int numberOfColumns() {
-        return 17;
+        return 16;
     }
 
     @Override
@@ -46,20 +63,18 @@ public class DBProcessesViewDataSource extends TMTreeViewerDataSource<DBProcess>
             case 8:
                 return resourceBundle.getString("xact_start");
             case 9:
-                return resourceBundle.getString("duration");
-            case 10:
                 return resourceBundle.getString("state");
-            case 11:
+            case 10:
                 return resourceBundle.getString("state_change");
-            case 12:
+            case 11:
                 return resourceBundle.getString("blocked_by");
-            case 13:
+            case 12:
                 return resourceBundle.getString("lock_type");
-            case 14:
+            case 13:
                 return resourceBundle.getString("relation");
-            case 15:
+            case 14:
                 return resourceBundle.getString("slow_query");
-            case 16:
+            case 15:
                 return resourceBundle.getString("query");
             default:
                 return resourceBundle.getString("undefined");
@@ -88,20 +103,18 @@ public class DBProcessesViewDataSource extends TMTreeViewerDataSource<DBProcess>
             case 8:
                 return "XACT_START";
             case 9:
-                return resourceBundle.getString("duration");
-            case 10:
                 return "STATE";
-            case 11:
+            case 10:
                 return "STATE_CHANGE";
-            case 12:
+            case 11:
                 return "BLOCKED";
-            case 13:
+            case 12:
                 return "LOCK_TYPE";
-            case 14:
+            case 13:
                 return "RELATION";
-            case 15:
+            case 14:
                 return "SLOW_QUERY";
-            case 16:
+            case 15:
                 return "QUERY";
             default:
                 return "UNDEFINED";
@@ -126,17 +139,16 @@ public class DBProcessesViewDataSource extends TMTreeViewerDataSource<DBProcess>
             case 8:
                 return 150;
             case 9:
-            case 10:
                 return 70;
-            case 11:
+            case 10:
                 return 150;
+            case 11:
             case 12:
             case 13:
-            case 14:
                 return 130;
-            case 15:
+            case 14:
                 return 150;
-            case 16:
+            case 15:
                 return 100;
             default:
                 return 110;
@@ -144,7 +156,7 @@ public class DBProcessesViewDataSource extends TMTreeViewerDataSource<DBProcess>
     }
 
     @Override
-    boolean columnIsSortableAtIndex(int columnIndex) {
+    public boolean columnIsSortableAtIndex(int columnIndex) {
         return true;
     }
 
@@ -174,27 +186,28 @@ public class DBProcessesViewDataSource extends TMTreeViewerDataSource<DBProcess>
             case 5:
                 return process.getQueryCaller().getClient();
             case 6:
-                return DateUtils.dateToString(process.getQuery().getBackendStart());
+                return dateUtils.dateToString(process.getQuery().getBackendStart());
             case 7:
-                return DateUtils.dateToString(process.getQuery().getQueryStart());
+                return dateUtils.dateToString(process.getQuery().getQueryStart());
             case 8:
-                return DateUtils.dateToString(process.getQuery().getXactStart());
+                return dateUtils.dateToString(process.getQuery().getXactStart());
             case 9:
-                return DateUtils.durationToString(process.getQuery().getDuration());
-            case 10:
                 return process.getState();
+            case 10:
+                return dateUtils.dateToString(process.getStateChange());
             case 11:
-                return DateUtils.dateToString(process.getStateChange());
-            case 12:
                 return process.getBlocksPidsString();
-            case 13:
+            case 12:
                 return process.getBlocksLocktypesString();
-            case 14:
+            case 13:
                 return process.getBlocksRelationsString();
-            case 15:
+            case 14:
                 return String.valueOf(process.getQuery().isSlowQuery());
-            case 16:
-                return process.getQuery().getQueryString();
+            case 15:
+                String query = process.getQuery().getQueryString();
+                int indexOfNewLine = query.indexOf("\n");
+                String substring = query.substring(0, query.indexOf("\n") >= 0 ? indexOfNewLine : query.length());
+                return query.indexOf("\n") >= 0 ? substring + " ..." : substring;
             default:
                 return "UNDEFINED";
         }
@@ -230,5 +243,4 @@ public class DBProcessesViewDataSource extends TMTreeViewerDataSource<DBProcess>
         DBProcess process = (DBProcess)element;
         return process.hasChildren();
     }
-
 }

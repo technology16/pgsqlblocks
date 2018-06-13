@@ -36,7 +36,6 @@ import javax.xml.transform.stream.StreamResult;
 import java.io.File;
 import java.io.IOException;
 
-
 public class XmlDocumentWorker {
     
     private static final Logger LOG = Logger.getLogger(XmlDocumentWorker.class);

@@ -1,5 +1,23 @@
+/*
+ * ========================LICENSE_START=================================
+ * pgSqlBlocks
+ * *
+ * Copyright (C) 2017 "Technology" LLC
+ * *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * =========================LICENSE_END==================================
+ */
 package ru.taximaxim.pgsqlblocks.common.models;
-
 
 import java.util.Date;
 import java.util.List;
@@ -60,14 +78,10 @@ public class DBBlocksJournalProcess {
         Date xactStart = process.getQuery().getXactStart();
         Date otherXactStart = other.getProcess().getQuery().getXactStart();
 
-        if (!(xactStart != null ? xactStart.equals(otherXactStart) : otherXactStart == null)) {
-            return false;
-        }
+        boolean isSameXactStart = xactStart == null ? otherXactStart == null : xactStart.equals(otherXactStart);
+        boolean isSamePid = process.getPid() == other.getProcess().getPid();
 
-        if (process.getPid() != other.getProcess().getPid()) {
-            return false;
-        }
-        return childrenEquals(process.getChildren(), other.getProcess().getChildren());
+        return isSameXactStart && isSamePid && childrenEquals(process.getChildren(), other.getProcess().getChildren());
     }
 
     private boolean childrenEquals(List<DBProcess> processes, List<DBProcess> other) {

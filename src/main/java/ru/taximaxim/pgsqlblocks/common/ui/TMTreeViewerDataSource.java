@@ -1,3 +1,22 @@
+/*
+ * ========================LICENSE_START=================================
+ * pgSqlBlocks
+ * *
+ * Copyright (C) 2017 "Technology" LLC
+ * *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * =========================LICENSE_END==================================
+ */
 package ru.taximaxim.pgsqlblocks.common.ui;
 
 import org.eclipse.jface.viewers.ILabelProviderListener;
@@ -6,34 +25,37 @@ import org.eclipse.jface.viewers.ITreeContentProvider;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.ResourceBundle;
 
 public abstract class TMTreeViewerDataSource<T> implements ITableLabelProvider, ITreeContentProvider {
 
     protected TMTreeViewerDataSourceFilter<T> dataFilter;
+    protected final ResourceBundle resourceBundle;
 
-    public TMTreeViewerDataSource() {
-
+    public TMTreeViewerDataSource(ResourceBundle resourceBundle) {
+        this.resourceBundle = resourceBundle;
     }
 
-    public TMTreeViewerDataSource(TMTreeViewerDataSourceFilter dataFilter) {
+    public TMTreeViewerDataSource(ResourceBundle resourceBundle, TMTreeViewerDataSourceFilter<T> dataFilter) {
+        this.resourceBundle = resourceBundle;
         this.dataFilter = dataFilter;
     }
 
-    public void setDataFilter(TMTreeViewerDataSourceFilter dataFilter) {
+    public void setDataFilter(TMTreeViewerDataSourceFilter<T> dataFilter) {
         this.dataFilter = dataFilter;
     }
 
     protected List<ILabelProviderListener> listeners = new ArrayList<>();
 
-    abstract int numberOfColumns();
+    public abstract int numberOfColumns();
 
-    abstract String columnTitleForColumnIndex(int columnIndex);
+    public abstract String columnTitleForColumnIndex(int columnIndex);
 
-    abstract int columnWidthForColumnIndex(int columnIndex);
+    public abstract int columnWidthForColumnIndex(int columnIndex);
 
-    abstract boolean columnIsSortableAtIndex(int columnIndex);
+    public abstract boolean columnIsSortableAtIndex(int columnIndex);
 
-    abstract String columnTooltipForColumnIndex(int columnIndex);
+    public abstract String columnTooltipForColumnIndex(int columnIndex);
 
     @Override
     public void dispose() {
@@ -54,5 +76,4 @@ public abstract class TMTreeViewerDataSource<T> implements ITableLabelProvider, 
     public void removeListener(ILabelProviderListener listener) {
         listeners.remove(listener);
     }
-
 }

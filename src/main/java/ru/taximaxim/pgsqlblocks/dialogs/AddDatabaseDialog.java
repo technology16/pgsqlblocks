@@ -1,14 +1,31 @@
+/*
+ * ========================LICENSE_START=================================
+ * pgSqlBlocks
+ * *
+ * Copyright (C) 2017 "Technology" LLC
+ * *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * =========================LICENSE_END==================================
+ */
 package ru.taximaxim.pgsqlblocks.dialogs;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.*;
 import ru.taximaxim.pgsqlblocks.common.models.DBModel;
-import ru.taximaxim.pgsqlblocks.utils.Settings;
 
 import java.text.MessageFormat;
 import java.util.List;
@@ -16,9 +33,11 @@ import java.util.ResourceBundle;
 
 public class AddDatabaseDialog extends Dialog {
 
+    private static final String ATTENTION = "attention";
+
     protected final ResourceBundle resourceBundle;
 
-    protected DBModel createdModel;
+    private DBModel createdModel;
 
     protected Text nameText;
     protected Text hostText;
@@ -91,7 +110,7 @@ public class AddDatabaseDialog extends Dialog {
         passwordText.addListener(SWT.FocusOut, event -> {
             if (!passwordText.getText().isEmpty()) {
                 MessageDialog.openWarning(null,
-                        resourceBundle.getString("attention"), resourceBundle.getString("use_pgpass_file"));
+                        resourceBundle.getString(ATTENTION), resourceBundle.getString("use_pgpass_file"));
             }
         });
 
@@ -117,19 +136,19 @@ public class AddDatabaseDialog extends Dialog {
         String password = passwordText.getText();
         boolean enabled = enabledButton.getSelection();
         if (name.isEmpty()) {
-            MessageDialog.openError(null, resourceBundle.getString("attention"),
+            MessageDialog.openError(null, resourceBundle.getString(ATTENTION),
                     resourceBundle.getString("missing_connection_name"));
             return;
         } else if (reservedConnectionNames.contains(name)) {
-            MessageDialog.openError(null, resourceBundle.getString("attention"),
+            MessageDialog.openError(null, resourceBundle.getString(ATTENTION),
                     MessageFormat.format(resourceBundle.getString("already_exists"), name));
             return;
         } else if (host.isEmpty() || port.isEmpty()) {
-            MessageDialog.openError(null, resourceBundle.getString("attention"),
+            MessageDialog.openError(null, resourceBundle.getString(ATTENTION),
                     resourceBundle.getString("missing_host_port"));
             return;
         } else if (databaseName.isEmpty() || user.isEmpty()) {
-            MessageDialog.openError(null, resourceBundle.getString("attention"),
+            MessageDialog.openError(null, resourceBundle.getString(ATTENTION),
                     resourceBundle.getString("missing_database_user"));
             return;
         }
@@ -138,5 +157,4 @@ public class AddDatabaseDialog extends Dialog {
 
         super.okPressed();
     }
-
 }

@@ -1,17 +1,52 @@
+/*
+ * ========================LICENSE_START=================================
+ * pgSqlBlocks
+ * *
+ * Copyright (C) 2017 "Technology" LLC
+ * *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * =========================LICENSE_END==================================
+ */
 package ru.taximaxim.pgsqlblocks.common.models;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class DBBlocksJournal {
+public class DBBlocksJournal implements DBProcessFilterListener {
 
     private final List<DBBlocksJournalListener> listeners = new ArrayList<>();
 
     private final List<DBBlocksJournalProcess> processes = new ArrayList<>();
 
+    private final List<DBBlocksJournalProcess> filteredProcesses = new ArrayList<>();
+
+    private final DBProcessFilter processesFilters = new DBProcessFilter();
+
     public List<DBBlocksJournalProcess> getProcesses() {
         return processes;
+    }
+
+    public List<DBBlocksJournalProcess> getFilteredProcesses() {
+        return filteredProcesses;
+    }
+
+    public DBProcessFilter getProcessesFilters() {
+        return processesFilters;
+    }
+
+    public DBBlocksJournal() {
+        processesFilters.addListener(this);
     }
 
     public void add(List<DBProcess> processes) {
@@ -21,7 +56,6 @@ public class DBBlocksJournal {
         }
         if (this.processes.isEmpty()) {
             this.processes.addAll(processes.stream().map(DBBlocksJournalProcess::new).collect(Collectors.toList()));
-            listeners.forEach(DBBlocksJournalListener::dbBlocksJournalDidAddProcesses);
         } else {
             List<DBBlocksJournalProcess> newProcesses = processes.stream()
                     .map(DBBlocksJournalProcess::new)
@@ -44,7 +78,24 @@ public class DBBlocksJournal {
                     this.processes.add(process);
                 }
             }
-            listeners.forEach(DBBlocksJournalListener::dbBlocksJournalDidAddProcesses);
+        }
+        prepareFilteredProcesses();
+        listeners.forEach(DBBlocksJournalListener::dbBlocksJournalDidAddProcesses);
+    }
+
+    public void setJournalProcesses(List<DBBlocksJournalProcess> processes) {
+        clear();
+        this.processes.addAll(processes);
+        prepareFilteredProcesses();
+        listeners.forEach(DBBlocksJournalListener::dbBlocksJournalDidAddProcesses);
+    }
+
+    private void prepareFilteredProcesses() {
+        filteredProcesses.clear();
+        if (processesFilters.isEnabled()) {
+            filteredProcesses.addAll(processes.stream().filter(p -> processesFilters.filter(p.getProcess())).collect(Collectors.toList()));
+        } else {
+            filteredProcesses.addAll(processes);
         }
     }
 
@@ -79,4 +130,9 @@ public class DBBlocksJournal {
         listeners.remove(listener);
     }
 
+    @Override
+    public void dbProcessFilterChanged() {
+        prepareFilteredProcesses();
+        listeners.forEach(DBBlocksJournalListener::dbBlocksJournalDidChangeFilters);
+    }
 }

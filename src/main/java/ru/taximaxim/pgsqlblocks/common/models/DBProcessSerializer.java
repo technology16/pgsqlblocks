@@ -1,3 +1,22 @@
+/*
+ * ========================LICENSE_START=================================
+ * pgSqlBlocks
+ * *
+ * Copyright (C) 2017 "Technology" LLC
+ * *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * =========================LICENSE_END==================================
+ */
 package ru.taximaxim.pgsqlblocks.common.models;
 
 import org.apache.log4j.Logger;
@@ -31,17 +50,17 @@ public class DBProcessSerializer {
     private static final String DAT_NAME = "datname";
     private static final String USE_NAME = "usename";
     private static final String CLIENT = "client";
-
+    private final DateUtils dateUtils = new DateUtils();
 
     public DBProcess deserialize(ResultSet resultSet) throws SQLException {
         int pid = resultSet.getInt(PID);
         String state = resultSet.getString(STATE);
-        Date stateChangeDate = DateUtils.dateFromString(resultSet.getString(STATE_CHANGE));
+        Date stateChangeDate = dateUtils.dateFromString(resultSet.getString(STATE_CHANGE));
 
         String queryString = resultSet.getString(QUERY_SQL);
-        Date backendStart = DateUtils.dateFromString(resultSet.getString(BACKEND_START));
-        Date queryStart = DateUtils.dateFromString(resultSet.getString(QUERY_START));
-        Date xactStart = DateUtils.dateFromString(resultSet.getString(XACT_START));
+        Date backendStart = dateUtils.dateFromString(resultSet.getString(BACKEND_START));
+        Date queryStart = dateUtils.dateFromString(resultSet.getString(QUERY_START));
+        Date xactStart = dateUtils.dateFromString(resultSet.getString(XACT_START));
 
         boolean slowQuery = resultSet.getBoolean(SLOW_QUERY);
 
@@ -56,30 +75,29 @@ public class DBProcessSerializer {
     }
 
     public DBProcess deserialize(Element xmlElement, boolean elementIsRoot) {
-        Element rootElement = null;
+        Element rootElement;
         if (elementIsRoot) {
             rootElement = xmlElement;
         } else {
             rootElement = (Element) xmlElement.getElementsByTagName(ROOT_ELEMENT_TAG_NAME).item(0);
         }
-        int pid = Integer.valueOf(rootElement.getElementsByTagName(PID).item(0).getTextContent());
+        int pid = Integer.parseInt(rootElement.getElementsByTagName(PID).item(0).getTextContent());
         String appName = rootElement.getElementsByTagName(APPLICATION_NAME).item(0).getTextContent();
         String databaseName = rootElement.getElementsByTagName(DAT_NAME).item(0).getTextContent();
         String userName = rootElement.getElementsByTagName(USE_NAME).item(0).getTextContent();
         String client = rootElement.getElementsByTagName(CLIENT).item(0).getTextContent();
         DBProcessQueryCaller caller = new DBProcessQueryCaller(appName, databaseName, userName, client);
 
-
         String queryString = rootElement.getElementsByTagName(QUERY_SQL).item(0).getTextContent();
-        boolean slowQuery = Boolean.valueOf(rootElement.getElementsByTagName(SLOW_QUERY).item(0).getTextContent());
-        Date backendStart = DateUtils.dateFromString(rootElement.getElementsByTagName(BACKEND_START).item(0).getTextContent());
-        Date queryStart = DateUtils.dateFromString(rootElement.getElementsByTagName(QUERY_START).item(0).getTextContent());
-        Date xactStart = DateUtils.dateFromString(rootElement.getElementsByTagName(XACT_START).item(0).getTextContent());
+        boolean slowQuery = Boolean.parseBoolean(rootElement.getElementsByTagName(SLOW_QUERY).item(0).getTextContent());
+        Date backendStart = dateUtils.dateFromString(rootElement.getElementsByTagName(BACKEND_START).item(0).getTextContent());
+        Date queryStart = dateUtils.dateFromString(rootElement.getElementsByTagName(QUERY_START).item(0).getTextContent());
+        Date xactStart = dateUtils.dateFromString(rootElement.getElementsByTagName(XACT_START).item(0).getTextContent());
 
         DBProcessQuery query = new DBProcessQuery(queryString, slowQuery, backendStart, queryStart, xactStart);
 
         String state = rootElement.getElementsByTagName(STATE).item(0).getTextContent();
-        Date stateChange = DateUtils.dateFromString(rootElement.getElementsByTagName(STATE_CHANGE).item(0).getTextContent());
+        Date stateChange = dateUtils.dateFromString(rootElement.getElementsByTagName(STATE_CHANGE).item(0).getTextContent());
         DBProcess process = new DBProcess(pid, caller, state, stateChange, query);
         Element childrenRootElement = (Element)rootElement.getElementsByTagName(CHILDREN_ELEMENT_TAG_NAME).item(0);
         NodeList childrenElements = childrenRootElement.getElementsByTagName(ROOT_ELEMENT_TAG_NAME);
@@ -103,12 +121,12 @@ public class DBProcessSerializer {
         Element rootElement = document.createElement(ROOT_ELEMENT_TAG_NAME);
         createAndAppendElement(document, rootElement, PID, String.valueOf(process.getPid()));
         createAndAppendElement(document, rootElement, STATE, process.getState());
-        createAndAppendElement(document, rootElement, STATE_CHANGE, DateUtils.dateToStringWithTz(process.getStateChange()));
+        createAndAppendElement(document, rootElement, STATE_CHANGE, dateUtils.dateToStringWithTz(process.getStateChange()));
         createAndAppendElement(document, rootElement, QUERY_SQL, process.getQuery().getQueryString());
-        createAndAppendElement(document, rootElement, BACKEND_START, DateUtils.dateToStringWithTz(process.getQuery().getBackendStart()));
+        createAndAppendElement(document, rootElement, BACKEND_START, dateUtils.dateToStringWithTz(process.getQuery().getBackendStart()));
         createAndAppendElement(document, rootElement, SLOW_QUERY, String.valueOf(process.getQuery().isSlowQuery()));
-        createAndAppendElement(document, rootElement, QUERY_START, DateUtils.dateToStringWithTz(process.getQuery().getQueryStart()));
-        createAndAppendElement(document, rootElement, XACT_START, DateUtils.dateToStringWithTz(process.getQuery().getXactStart()));
+        createAndAppendElement(document, rootElement, QUERY_START, dateUtils.dateToStringWithTz(process.getQuery().getQueryStart()));
+        createAndAppendElement(document, rootElement, XACT_START, dateUtils.dateToStringWithTz(process.getQuery().getXactStart()));
         createAndAppendElement(document, rootElement, APPLICATION_NAME, process.getQueryCaller().getApplicationName());
         createAndAppendElement(document, rootElement, DAT_NAME, process.getQueryCaller().getDatabaseName());
         createAndAppendElement(document, rootElement, USE_NAME, process.getQueryCaller().getUserName());
@@ -125,5 +143,4 @@ public class DBProcessSerializer {
         element.setTextContent(elementContent);
         parentElement.appendChild(element);
     }
-
 }

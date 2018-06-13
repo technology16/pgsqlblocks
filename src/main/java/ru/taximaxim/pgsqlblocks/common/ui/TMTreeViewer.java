@@ -1,3 +1,22 @@
+/*
+ * ========================LICENSE_START=================================
+ * pgSqlBlocks
+ * *
+ * Copyright (C) 2017 "Technology" LLC
+ * *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * =========================LICENSE_END==================================
+ */
 package ru.taximaxim.pgsqlblocks.common.ui;
 
 import org.eclipse.jface.viewers.*;
@@ -11,12 +30,14 @@ import org.eclipse.swt.widgets.TreeItem;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 public class TMTreeViewer extends TreeViewer {
 
     private TMTreeViewerDataSource dataSource;
 
     private List<TMTreeViewerSortColumnSelectionListener> sortColumnSelectionListeners = new ArrayList<>();
+    private Set<Integer> collapsedColumnsIndexes;
 
     public TMTreeViewer(Composite parent) {
         super(parent);
@@ -84,10 +105,54 @@ public class TMTreeViewer extends TreeViewer {
                     }
                     @Override
                     public void widgetDefaultSelected(SelectionEvent e) {
-
+                        selectSortColumn(swtColumn, columnIndex);
                     }
                 });
             }
+        }
+    }
+
+    public Set<Integer> getCollapsedColumnsIndexes() {
+        return collapsedColumnsIndexes;
+    }
+
+    public void setCollapsedColumnsIndexes(Set<Integer> indexes) {
+        if (collapsedColumnsIndexes != null) {
+            if (indexes != null) {
+                collapsedColumnsIndexes.removeAll(indexes);
+            }
+            expandColumnsAtIndexes(collapsedColumnsIndexes);
+        }
+        collapsedColumnsIndexes = indexes;
+        collapseColumnsAtIndexes(collapsedColumnsIndexes);
+    }
+
+    private void expandColumnsAtIndexes(Set<Integer> indexes) {
+        if (indexes != null && !indexes.isEmpty()) {
+            TreeColumn[] columns = getTree().getColumns();
+            for (int i = 0; i < columns.length; i++) {
+                if (!indexes.contains(i)) {
+                    continue;
+                }
+                TreeColumn column = columns[i];
+                column.setWidth(dataSource.columnWidthForColumnIndex(i));
+                column.setResizable(true);
+            }
+        }
+    }
+
+    private void collapseColumnsAtIndexes(Set<Integer> indexes) {
+        if (indexes == null || indexes.isEmpty()) {
+            return;
+        }
+        TreeColumn[] columns = getTree().getColumns();
+        for (int i = 0; i < columns.length; i++) {
+            if (!indexes.contains(i)) {
+                continue;
+            }
+            TreeColumn column = columns[i];
+            column.setWidth(0);
+            column.setResizable(false);
         }
     }
 

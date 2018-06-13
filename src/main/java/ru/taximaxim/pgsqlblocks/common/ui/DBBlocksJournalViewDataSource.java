@@ -1,3 +1,22 @@
+/*
+ * ========================LICENSE_START=================================
+ * pgSqlBlocks
+ * *
+ * Copyright (C) 2017 "Technology" LLC
+ * *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * =========================LICENSE_END==================================
+ */
 package ru.taximaxim.pgsqlblocks.common.ui;
 
 import org.eclipse.swt.graphics.Image;
@@ -9,22 +28,21 @@ import ru.taximaxim.pgsqlblocks.utils.ImageUtils;
 import java.util.List;
 import java.util.ResourceBundle;
 
-// FIXME use enum for columns
 public class DBBlocksJournalViewDataSource extends TMTreeViewerDataSource<DBBlocksJournalProcess> {
 
-    private final ResourceBundle resourceBundle;
+    private final DateUtils dateUtils = new DateUtils();
 
     public DBBlocksJournalViewDataSource(ResourceBundle resourceBundle) {
-        this.resourceBundle = resourceBundle;
+        super(resourceBundle);
     }
 
     @Override
-    int numberOfColumns() {
-        return 19;
+    public int numberOfColumns() {
+        return 18;
     }
 
     @Override
-    String columnTitleForColumnIndex(int columnIndex) {
+    public String columnTitleForColumnIndex(int columnIndex) {
         switch (columnIndex) {
             case 0:
                 return resourceBundle.getString("pid");
@@ -49,20 +67,18 @@ public class DBBlocksJournalViewDataSource extends TMTreeViewerDataSource<DBBloc
             case 10:
                 return resourceBundle.getString("xact_start");
             case 11:
-                return resourceBundle.getString("duration");
-            case 12:
                 return resourceBundle.getString("state");
-            case 13:
+            case 12:
                 return resourceBundle.getString("state_change");
-            case 14:
+            case 13:
                 return resourceBundle.getString("blocked_by");
-            case 15:
+            case 14:
                 return resourceBundle.getString("lock_type");
-            case 16:
+            case 15:
                 return resourceBundle.getString("relation");
-            case 17:
+            case 16:
                 return resourceBundle.getString("slow_query");
-            case 18:
+            case 17:
                 return resourceBundle.getString("query");
             default:
                 return "undefined";
@@ -70,7 +86,7 @@ public class DBBlocksJournalViewDataSource extends TMTreeViewerDataSource<DBBloc
     }
 
     @Override
-    int columnWidthForColumnIndex(int columnIndex) {
+    public int columnWidthForColumnIndex(int columnIndex) {
         switch (columnIndex) {
             case 0:
                 return 120;
@@ -90,17 +106,16 @@ public class DBBlocksJournalViewDataSource extends TMTreeViewerDataSource<DBBloc
             case 10:
                 return 150;
             case 11:
-            case 12:
                 return 70;
-            case 13:
+            case 12:
                 return 150;
+            case 13:
             case 14:
             case 15:
-            case 16:
                 return 130;
-            case 17:
+            case 16:
                 return 150;
-            case 18:
+            case 17:
                 return 100;
             default:
                 return 110;
@@ -108,12 +123,12 @@ public class DBBlocksJournalViewDataSource extends TMTreeViewerDataSource<DBBloc
     }
 
     @Override
-    boolean columnIsSortableAtIndex(int columnIndex) {
+    public boolean columnIsSortableAtIndex(int columnIndex) {
         return false;
     }
 
     @Override
-    String columnTooltipForColumnIndex(int columnIndex) {
+    public String columnTooltipForColumnIndex(int columnIndex) {
         switch (columnIndex) {
             case 0:
                 return "PID";
@@ -138,20 +153,18 @@ public class DBBlocksJournalViewDataSource extends TMTreeViewerDataSource<DBBloc
             case 10:
                 return "XACT_START";
             case 11:
-                return resourceBundle.getString("duration");
-            case 12:
                 return "STATE";
-            case 13:
+            case 12:
                 return "STATE_CHANGE";
-            case 14:
+            case 13:
                 return "BLOCKED";
-            case 15:
+            case 14:
                 return "LOCK_TYPE";
-            case 16:
+            case 15:
                 return "RELATION";
-            case 17:
+            case 16:
                 return "SLOW_QUERY";
-            case 18:
+            case 17:
                 return "QUERY";
             default:
                 return "UNDEFINED";
@@ -174,15 +187,17 @@ public class DBBlocksJournalViewDataSource extends TMTreeViewerDataSource<DBBloc
 
     @Override
     public String getColumnText(Object element, int columnIndex) {
-        DBProcess process = null;
+        DBProcess process;
         if (element instanceof DBBlocksJournalProcess) {
             DBBlocksJournalProcess parentProcess = (DBBlocksJournalProcess)element;
             process = parentProcess.getProcess();
             switch (columnIndex) {
                 case 1:
-                    return DateUtils.dateToString(parentProcess.getCreateDate());
+                    return dateUtils.dateToString(parentProcess.getCreateDate());
                 case 2:
-                    return DateUtils.dateToString(parentProcess.getCloseDate());
+                    return dateUtils.dateToString(parentProcess.getCloseDate());
+                default:
+                    // no-op
             }
         } else {
             process = (DBProcess)element;
@@ -205,26 +220,24 @@ public class DBBlocksJournalViewDataSource extends TMTreeViewerDataSource<DBBloc
             case 7:
                 return process.getQueryCaller().getClient();
             case 8:
-                return DateUtils.dateToString(process.getQuery().getBackendStart());
+                return dateUtils.dateToString(process.getQuery().getBackendStart());
             case 9:
-                return DateUtils.dateToString(process.getQuery().getQueryStart());
+                return dateUtils.dateToString(process.getQuery().getQueryStart());
             case 10:
-                return DateUtils.dateToString(process.getQuery().getXactStart());
+                return dateUtils.dateToString(process.getQuery().getXactStart());
             case 11:
-                return DateUtils.durationToString(process.getQuery().getDuration());
-            case 12:
                 return process.getState();
+            case 12:
+                return dateUtils.dateToString(process.getStateChange());
             case 13:
-                return DateUtils.dateToString(process.getStateChange());
-            case 14:
                 return process.getBlocksPidsString();
-            case 15:
+            case 14:
                 return process.getBlocksLocktypesString();
-            case 16:
+            case 15:
                 return process.getBlocksRelationsString();
-            case 17:
+            case 16:
                 return String.valueOf(process.getQuery().isSlowQuery());
-            case 18:
+            case 17:
                 return process.getQuery().getQueryString();
             default:
                 return "UNDEFINED";
@@ -253,9 +266,10 @@ public class DBBlocksJournalViewDataSource extends TMTreeViewerDataSource<DBBloc
 
     @Override
     public boolean hasChildren(Object element) {
-        if (element instanceof DBBlocksJournalProcess) {
-            return true;
+        if (element instanceof DBProcess) {
+            return ((DBProcess) element).hasChildren();
+        } else {
+            return element instanceof DBBlocksJournalProcess;
         }
-        return ((DBProcess)element).hasChildren();
     }
 }

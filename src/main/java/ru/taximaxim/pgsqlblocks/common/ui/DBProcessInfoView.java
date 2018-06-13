@@ -1,3 +1,22 @@
+/*
+ * ========================LICENSE_START=================================
+ * pgSqlBlocks
+ * *
+ * Copyright (C) 2017 "Technology" LLC
+ * *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * =========================LICENSE_END==================================
+ */
 package ru.taximaxim.pgsqlblocks.common.ui;
 
 import org.eclipse.swt.SWT;
@@ -8,10 +27,7 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 import ru.taximaxim.pgsqlblocks.common.models.DBProcess;
-import ru.taximaxim.pgsqlblocks.utils.DateUtils;
-import ru.taximaxim.pgsqlblocks.utils.Settings;
 
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -23,8 +39,6 @@ public class DBProcessInfoView extends Composite {
     private final List<DBProcessInfoViewListener> listeners = new ArrayList<>();
 
     private ToolBar toolBar;
-    private ToolItem cancelProcessToolItem;
-    private ToolItem terminateProcessToolItem;
     private Text processInfoText;
 
     public DBProcessInfoView(ResourceBundle resourceBundle, Composite parent, int style) {
@@ -41,19 +55,18 @@ public class DBProcessInfoView extends Composite {
 
     private void createContent() {
         toolBar = new ToolBar(this, SWT.HORIZONTAL);
-        toolBar.setEnabled(false);
         GridLayout layout = new GridLayout();
         GridData layoutData = new GridData(SWT.FILL, SWT.TOP, true, false);
         toolBar.setLayout(layout);
         toolBar.setLayoutData(layoutData);
 
-        cancelProcessToolItem = new ToolItem(toolBar, SWT.PUSH);
+        ToolItem cancelProcessToolItem = new ToolItem(toolBar, SWT.PUSH);
         cancelProcessToolItem.setText(resourceBundle.getString("cancel_process"));
         cancelProcessToolItem.addListener(SWT.Selection, event -> {
             listeners.forEach(DBProcessInfoViewListener::dbProcessInfoViewCancelProcessToolItemClicked);
         });
 
-        terminateProcessToolItem = new ToolItem(toolBar, SWT.PUSH);
+        ToolItem terminateProcessToolItem = new ToolItem(toolBar, SWT.PUSH);
         terminateProcessToolItem.setText(resourceBundle.getString("kill_process"));
         terminateProcessToolItem.addListener(SWT.Selection, event -> {
             listeners.forEach(DBProcessInfoViewListener::dbProcessInfoViewTerminateProcessToolItemClicked);
@@ -72,32 +85,20 @@ public class DBProcessInfoView extends Composite {
         this.layout();
     }
 
-    public void showToolBar() {
-        this.toolBar.setVisible(true);
-        GridData layoutData = (GridData) this.toolBar.getLayoutData();
-        layoutData.exclude = false;
-        this.layout();
-    }
-
-    public void setTextContent(String content) {
-        processInfoText.setText(content);
-    }
-
     public ToolBar getToolBar() {
         return toolBar;
     }
 
     public void show(DBProcess process) {
         StringBuilder stringBuilder = new StringBuilder();
-        DBProcessesViewDataSource dataSource = new DBProcessesViewDataSource(resourceBundle, null);
-        for (int i = 0; i< dataSource.numberOfColumns(); i++) {
-            String title = dataSource.columnTitleForColumnIndex(i);
-            String content = dataSource.getColumnText(process, i);
-            stringBuilder.append(title);
-            stringBuilder.append(": ");
-            stringBuilder.append(content);
-            stringBuilder.append("\n");
-        }
+        stringBuilder.append(String.format("%s = %d\n",
+                resourceBundle.getString("pid"), process.getPid()));
+        stringBuilder.append(String.format("%s = %s\n",
+                resourceBundle.getString("user_name"), process.getQueryCaller().getUserName()));
+        stringBuilder.append(String.format("%s = %s\n",
+                resourceBundle.getString("db_name"), process.getQueryCaller().getDatabaseName()));
+        stringBuilder.append(String.format("\n%s:\n%s\n",
+                resourceBundle.getString("query"), process.getQuery().getQueryString()));
 
         processInfoText.setText(stringBuilder.toString());
         this.setVisible(true);
@@ -121,5 +122,4 @@ public class DBProcessInfoView extends Composite {
     public void removeListener(DBProcessInfoViewListener listener) {
         listeners.remove(listener);
     }
-
 }

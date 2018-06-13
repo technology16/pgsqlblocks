@@ -1,3 +1,22 @@
+/*
+ * ========================LICENSE_START=================================
+ * pgSqlBlocks
+ * *
+ * Copyright (C) 2017 "Technology" LLC
+ * *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * =========================LICENSE_END==================================
+ */
 package ru.taximaxim.pgsqlblocks.common.ui;
 
 import org.eclipse.swt.SWT;
@@ -7,8 +26,6 @@ import org.eclipse.swt.widgets.*;
 import ru.taximaxim.pgsqlblocks.common.FilterCondition;
 import ru.taximaxim.pgsqlblocks.common.FilterValueType;
 import ru.taximaxim.pgsqlblocks.common.models.DBProcessFilter;
-import ru.taximaxim.pgsqlblocks.modules.db.controller.DBController;
-import ru.taximaxim.pgsqlblocks.utils.Settings;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,8 +54,6 @@ public class DBProcessesFiltersView extends Composite {
 
     private Combo queryFilterCombo;
     private Text queryFilterText;
-
-    private Button includeBlockedButton;
 
     private final List<DBProcessesFiltersViewListener> listeners = new ArrayList<>();
 
@@ -74,7 +89,6 @@ public class DBProcessesFiltersView extends Composite {
         createUserNameFilterView(comboLayoutData, textLayoutData);
         createClientFilterView(comboLayoutData, textLayoutData);
         createQueryFilterView(comboLayoutData, textLayoutData);
-        createIncludeBlockedProcessesView();
     }
 
     private void createPidFilterView(GridData comboLayoutData, GridData textLayoutData) {
@@ -88,7 +102,7 @@ public class DBProcessesFiltersView extends Composite {
         pidFilterCombo.select(0);
         pidFilterCombo.addModifyListener(e -> {
             FilterCondition condition = FilterCondition.getFilterConditionFromConditionText(pidFilterCombo.getText());
-            listeners.forEach(listener -> listener.processesFiltersViewPidFilterConditionChanged(condition));
+            listeners.forEach(listener -> listener.processesFiltersViewPidFilterConditionChanged(this, condition));
         });
 
         pidFilterText = new Text(group, SWT.NONE);
@@ -100,7 +114,7 @@ public class DBProcessesFiltersView extends Composite {
                 pidFilterText.setText("0");
                 pidFilterText.setSelection(1);
             } else {
-                listeners.forEach(listener -> listener.processesFiltersViewPidFilterValueChanged(convertTextToInteger(pidFilterText.getText())));
+                listeners.forEach(listener -> listener.processesFiltersViewPidFilterValueChanged(this, convertTextToInteger(pidFilterText.getText())));
             }
         });
     }
@@ -116,7 +130,7 @@ public class DBProcessesFiltersView extends Composite {
         databaseFilterCombo.select(0);
         databaseFilterCombo.addModifyListener(e -> {
             FilterCondition condition = FilterCondition.getFilterConditionFromConditionText(databaseFilterCombo.getText());
-            listeners.forEach(listener -> listener.processesFiltersViewDatabaseFilterConditionChanged(condition));
+            listeners.forEach(listener -> listener.processesFiltersViewDatabaseFilterConditionChanged(this, condition));
         });
 
         databaseFilterText = new Text(group, SWT.NONE);
@@ -124,7 +138,7 @@ public class DBProcessesFiltersView extends Composite {
         databaseFilterText.addModifyListener(e -> {
             String text = databaseFilterText.getText();
             final String result = text.isEmpty() ? null : text;
-            listeners.forEach(listener -> listener.processesFiltersViewDatabaseFilterValueChanged(result));
+            listeners.forEach(listener -> listener.processesFiltersViewDatabaseFilterValueChanged(this, result));
         });
     }
 
@@ -139,7 +153,7 @@ public class DBProcessesFiltersView extends Composite {
         applicationFilterCombo.select(0);
         applicationFilterCombo.addModifyListener(e -> {
             FilterCondition condition = FilterCondition.getFilterConditionFromConditionText(applicationFilterCombo.getText());
-            listeners.forEach(listener -> listener.processesFiltersViewApplicationFilterConditionChanged(condition));
+            listeners.forEach(listener -> listener.processesFiltersViewApplicationFilterConditionChanged(this, condition));
         });
 
         applicationFilterText = new Text(group, SWT.NONE);
@@ -147,7 +161,7 @@ public class DBProcessesFiltersView extends Composite {
         applicationFilterText.addModifyListener(e -> {
             String text = applicationFilterText.getText();
             final String result = text.isEmpty() ? null : text;
-            listeners.forEach(listener -> listener.processesFiltersViewApplicationFilterValueChanged(result));
+            listeners.forEach(listener -> listener.processesFiltersViewApplicationFilterValueChanged(this, result));
         });
     }
 
@@ -162,7 +176,7 @@ public class DBProcessesFiltersView extends Composite {
         queryFilterCombo.select(0);
         queryFilterCombo.addModifyListener(e -> {
             FilterCondition condition = FilterCondition.getFilterConditionFromConditionText(queryFilterCombo.getText());
-            listeners.forEach(listener -> listener.processesFiltersViewQueryFilterConditionChanged(condition));
+            listeners.forEach(listener -> listener.processesFiltersViewQueryFilterConditionChanged(this, condition));
         });
 
         queryFilterText = new Text(group, SWT.NONE);
@@ -170,7 +184,7 @@ public class DBProcessesFiltersView extends Composite {
         queryFilterText.addModifyListener(e -> {
             String text = queryFilterText.getText();
             final String result = text.isEmpty() ? null : text;
-            listeners.forEach(listener -> listener.processesFiltersViewQueryFilterValueChanged(result));
+            listeners.forEach(listener -> listener.processesFiltersViewQueryFilterValueChanged(this, result));
         });
     }
 
@@ -185,7 +199,7 @@ public class DBProcessesFiltersView extends Composite {
         userNameFilterCombo.select(0);
         userNameFilterCombo.addModifyListener(e -> {
             FilterCondition condition = FilterCondition.getFilterConditionFromConditionText(userNameFilterCombo.getText());
-            listeners.forEach(listener -> listener.processesFiltersViewUserNameFilterConditionChanged(condition));
+            listeners.forEach(listener -> listener.processesFiltersViewUserNameFilterConditionChanged(this, condition));
         });
 
         userNameFilterText = new Text(group, SWT.NONE);
@@ -193,7 +207,7 @@ public class DBProcessesFiltersView extends Composite {
         userNameFilterText.addModifyListener(e -> {
             String text = userNameFilterText.getText();
             final String result = text.isEmpty() ? null : text;
-            listeners.forEach(listener -> listener.processesFiltersViewUserNameFilterValueChanged(result));
+            listeners.forEach(listener -> listener.processesFiltersViewUserNameFilterValueChanged(this, result));
         });
     }
 
@@ -208,7 +222,7 @@ public class DBProcessesFiltersView extends Composite {
         clientFilterCombo.select(0);
         clientFilterCombo.addModifyListener(e -> {
             FilterCondition condition = FilterCondition.getFilterConditionFromConditionText(clientFilterCombo.getText());
-            listeners.forEach(listener -> listener.processesFiltersViewClientFilterConditionChanged(condition));
+            listeners.forEach(listener -> listener.processesFiltersViewClientFilterConditionChanged(this, condition));
         });
 
         clientFilterText = new Text(group, SWT.NONE);
@@ -216,28 +230,16 @@ public class DBProcessesFiltersView extends Composite {
         clientFilterText.addModifyListener(e -> {
             String text = clientFilterText.getText();
             final String result = text.isEmpty() ? null : text;
-            listeners.forEach(listener -> listener.processesFiltersViewClientFilterValueChanged(result));
-        });
-    }
-
-    private void createIncludeBlockedProcessesView() {
-        Composite composite = new Composite(group, SWT.NONE);
-        GridData layoutData = new GridData(SWT.FILL, SWT.FILL, false, false, 9, 1);
-        composite.setLayout(new GridLayout());
-        composite.setLayoutData(layoutData);
-
-        includeBlockedButton = new Button(composite, SWT.CHECK);
-        includeBlockedButton.setText(resourceBundle.getString("include_blocked_processes"));
-        includeBlockedButton.addListener(SWT.Selection, e -> {
-            listeners.forEach(listener -> listener.processesFiltersViewIncludeBlockedValueChanged(includeBlockedButton.getSelection()));
+            listeners.forEach(listener -> listener.processesFiltersViewClientFilterValueChanged(this, result));
         });
     }
 
     private Integer convertTextToInteger(String text) {
-        if (text.isEmpty())
+        if (text.isEmpty()) {
             return null;
-        Integer result = Integer.valueOf(text);
-        return result;
+        } else {
+            return Integer.valueOf(text);
+        }
     }
 
     private void fillCombo(Combo combo, FilterValueType valueType) {
@@ -251,8 +253,8 @@ public class DBProcessesFiltersView extends Composite {
             String string = event.text;
             char[] chars = new char[string.length()];
             string.getChars(0, chars.length, chars, 0);
-            for (int i = 0; i < chars.length; i++) {
-                if (!('0' <= chars[i] && chars[i] <= '9')) {
+            for (char aChar : chars) {
+                if (!('0' <= aChar && aChar <= '9')) {
                     event.doit = false;
                     return;
                 }
@@ -260,13 +262,11 @@ public class DBProcessesFiltersView extends Composite {
         }
     }
 
-    public void fillViewForController(DBController controller) {
-        if (controller == null) {
+    public void fillView(DBProcessFilter filter, String databaseName) {
+        if (filter == null) {
             resetFiltersContent();
             return;
         }
-
-        DBProcessFilter filter = controller.getProcessesFilters();
 
         Integer pidFilterValue = filter.getPidFilter().getValue();
         FilterCondition pidFilterCondition = filter.getPidFilter().getCondition();
@@ -276,7 +276,7 @@ public class DBProcessesFiltersView extends Composite {
         String databaseFilterValue = filter.getDatabaseFilter().getValue();
         FilterCondition databaseFilterCondition = filter.getDatabaseFilter().getCondition();
         if (databaseFilterValue == null && databaseFilterCondition == FilterCondition.NONE) {
-            databaseFilterText.setText(controller.getModel().getDatabaseName());
+            databaseFilterText.setText(databaseName);
         } else {
             databaseFilterText.setText(databaseFilterValue == null ? "" : databaseFilterValue);
         }
@@ -297,7 +297,10 @@ public class DBProcessesFiltersView extends Composite {
         queryFilterText.setText(queryFilterValue == null ? "" : queryFilterValue);
         queryFilterCombo.setText(queryFilterCondition.toString());
 
-        includeBlockedButton.setSelection(filter.isIncludeBlockedProcessesWhenFiltering());
+        String userNameFilterValue = filter.getUserNameFilter().getValue();
+        FilterCondition userNameFilterCondition = filter.getUserNameFilter().getCondition();
+        userNameFilterText.setText(userNameFilterValue == null ? "" : userNameFilterValue);
+        userNameFilterCombo.setText(userNameFilterCondition.toString());
     }
 
     public void resetFiltersContent() {
@@ -319,7 +322,6 @@ public class DBProcessesFiltersView extends Composite {
         clientFilterCombo.setText("");
         clientFilterText.setText("");
 
-        includeBlockedButton.setSelection(false);
     }
 
     public void show() {
@@ -343,5 +345,4 @@ public class DBProcessesFiltersView extends Composite {
     public void removeListener(DBProcessesFiltersViewListener listener) {
         listeners.remove(listener);
     }
-
 }

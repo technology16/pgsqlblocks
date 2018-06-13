@@ -1,3 +1,22 @@
+/*
+ * ========================LICENSE_START=================================
+ * pgSqlBlocks
+ * *
+ * Copyright (C) 2017 "Technology" LLC
+ * *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * =========================LICENSE_END==================================
+ */
 package ru.taximaxim.pgsqlblocks.modules.db.controller;
 
 import org.apache.log4j.Logger;
@@ -6,7 +25,6 @@ import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 import ru.taximaxim.pgpass.PgPass;
 import ru.taximaxim.pgpass.PgPassException;
-import ru.taximaxim.pgsqlblocks.common.models.DBProcessFilter;
 import ru.taximaxim.pgsqlblocks.common.DBQueries;
 import ru.taximaxim.pgsqlblocks.common.models.*;
 import ru.taximaxim.pgsqlblocks.modules.db.model.DBStatus;
@@ -31,6 +49,8 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+
+import static ru.taximaxim.pgsqlblocks.PgSqlBlocks.APP_NAME;
 
 public class DBController implements DBProcessFilterListener, DBBlocksJournalListener {
 
@@ -66,6 +86,7 @@ public class DBController implements DBProcessFilterListener, DBBlocksJournalLis
     private final DBBlocksJournal blocksJournal = new DBBlocksJournal();
 
     private Date blocksJournalCreateDate;
+    private final DateUtils dateUtils = new DateUtils();
 
     public DBController(Settings settings, DBModel model) {
         this.settings = settings;
@@ -84,26 +105,35 @@ public class DBController implements DBProcessFilterListener, DBBlocksJournalLis
         this.model = model;
     }
 
-    public String getConnectionUrl() {
-        return String.format("jdbc:postgresql://%1$s:%2$s/%3$s?ApplicationName=pgSqlBlocks", model.getHost(), model.getPort(), model.getDatabaseName());
+    private String getConnectionUrl() {
+        return String.format("jdbc:postgresql://%1$s:%2$s/%3$s?ApplicationName=%4$s",
+                                model.getHost(), model.getPort(), model.getDatabaseName(), APP_NAME);
     }
 
     public boolean isEnabledAutoConnection() {
         return model.isEnabled();
     }
 
-    public void connect() {
-        String password = getPassword();
-        try {
-            listeners.forEach(listener -> listener.dbControllerWillConnect(this));
-            connection = DriverManager.getConnection(getConnectionUrl(), model.getUser(), password);
-            setBackendPid(getPgBackendPid());
-            setStatus(DBStatus.CONNECTED);
-            listeners.forEach(listener -> listener.dbControllerDidConnect(this));
-        } catch (SQLException e) {
-            setStatus(DBStatus.CONNECTION_ERROR);
-            listeners.forEach(listener -> listener.dbControllerConnectionFailed(this, e));
-        }
+    public synchronized void connect() {
+        executor.execute(() -> {
+            String password = getPassword();
+            try {
+                listeners.forEach(listener -> listener.dbControllerWillConnect(this));
+
+                Properties info = new Properties();
+                info.put("user", model.getUser());
+                info.put("password", password);
+                info.put("loginTimeout", String.valueOf(settings.getLoginTimeout()));
+
+                connection = DriverManager.getConnection(getConnectionUrl(), info);
+                setBackendPid(getPgBackendPid());
+                setStatus(DBStatus.CONNECTED);
+                listeners.forEach(listener -> listener.dbControllerDidConnect(this));
+            } catch (SQLException e) {
+                setStatus(DBStatus.CONNECTION_ERROR);
+                listeners.forEach(listener -> listener.dbControllerConnectionFailed(this, e));
+            }
+        });
     }
 
     private String getPassword() {
@@ -112,25 +142,24 @@ public class DBController implements DBProcessFilterListener, DBBlocksJournalLis
         }
         String password = "";
         try {
-            password = PgPass.get(model.getHost(), model.getPort(), model.getDatabaseName(), model.getUser());
+            String pgPass = PgPass.get(model.getHost(), model.getPort(), model.getDatabaseName(), model.getUser());
+            password = pgPass == null ? password : pgPass;
         } catch (PgPassException e) {
             LOG.error("Ошибка получения пароля из pgpass файла " + e.getMessage(), e);
         }
         return password;
     }
 
-    public void disconnect() {
-        if (isConnected()) {
-            setBackendPid(0);
-            stopProcessesUpdater();
-            try {
-                connection.close();
-                setStatus(DBStatus.DISABLED);
-                listeners.forEach(listener -> listener.dbControllerDidDisconnect(this));
-            } catch (SQLException exception) {
-                setStatus(DBStatus.CONNECTION_ERROR);
-                listeners.forEach(listener -> listener.dbControllerDisconnectFailed(this, exception));
-            }
+    public void disconnect(boolean forcedByUser) {
+        setBackendPid(0);
+        stopProcessesUpdater();
+        try {
+            connection.close();
+            setStatus(forcedByUser ? DBStatus.DISABLED : DBStatus.CONNECTION_ERROR);
+            listeners.forEach(listener -> listener.dbControllerDidDisconnect(this, forcedByUser));
+        } catch (SQLException exception) {
+            setStatus(DBStatus.CONNECTION_ERROR);
+            listeners.forEach(listener -> listener.dbControllerDisconnectFailed(this, forcedByUser, exception));
         }
     }
 
@@ -206,9 +235,14 @@ public class DBController implements DBProcessFilterListener, DBBlocksJournalLis
         listeners.forEach(listener -> listener.dbControllerStatusChanged(this, this.status));
     }
 
-    public void startProcessesUpdater(long delay) {
+    public void startProcessesUpdater(long initDelay) {
         stopProcessesUpdater();
-        updater = executor.scheduleWithFixedDelay(this::loadProcesses, 0, delay, TimeUnit.SECONDS);
+        updater = executor.scheduleWithFixedDelay(this::updateProcesses,
+                                                    initDelay, settings.getUpdatePeriod(), TimeUnit.SECONDS);
+    }
+
+    public void startProcessesUpdater() {
+        startProcessesUpdater(0);
     }
 
     public void stopProcessesUpdater() {
@@ -220,8 +254,9 @@ public class DBController implements DBProcessFilterListener, DBBlocksJournalLis
     public void updateProcesses() {
         if (!isConnected()) {
             connect();
+        } else {
+            executor.execute(this::loadProcesses);
         }
-        executor.execute(this::loadProcesses);
     }
 
     public void shutdown() {
@@ -232,31 +267,30 @@ public class DBController implements DBProcessFilterListener, DBBlocksJournalLis
     }
 
     private void loadProcesses() {
-        try {
-            listeners.forEach(listener -> listener.dbControllerWillUpdateProcesses(this));
-            try(
+        listeners.forEach(listener -> listener.dbControllerWillUpdateProcesses(this));
+        try(
                 PreparedStatement preparedStatement = connection.prepareStatement(getProcessesQuery());
                 ResultSet resultSet = preparedStatement.executeQuery()
-            ) {
-                Map<Integer, DBProcess> tmpProcesses = new HashMap<>();
-                Map<Integer, Set<DBBlock>> tmpBlocks = new HashMap<>();
-                DBProcessSerializer processDeserializer = new DBProcessSerializer();
-                DBBlockDeserializer blockDeserializer = new DBBlockDeserializer();
-                while(resultSet.next()) {
-                    DBProcess process = processDeserializer.deserialize(resultSet);
-                    int blockedBy = resultSet.getInt(BLOCKED_BY);
-                    if (blockedBy != 0) {
-                        DBBlock block = blockDeserializer.deserialize(resultSet);
-                        tmpBlocks.computeIfAbsent(process.getPid(), k -> new HashSet<>()).add(block);
-                    }
-                    tmpProcesses.put(process.getPid(), process);
+        ) {
+            Map<Integer, DBProcess> tmpProcesses = new HashMap<>();
+            Map<Integer, Set<DBBlock>> tmpBlocks = new HashMap<>();
+            DBProcessSerializer processDeserializer = new DBProcessSerializer();
+            DBBlockDeserializer blockDeserializer = new DBBlockDeserializer();
+            while(resultSet.next()) {
+                DBProcess process = processDeserializer.deserialize(resultSet);
+                int blockedBy = resultSet.getInt(BLOCKED_BY);
+                if (blockedBy != 0) {
+                    DBBlock block = blockDeserializer.deserialize(resultSet);
+                    tmpBlocks.computeIfAbsent(process.getPid(), k -> new HashSet<>()).add(block);
                 }
-                proceedBlocks(tmpProcesses, tmpBlocks);
-                proceedProcesses(tmpProcesses);
-                processesLoaded(tmpProcesses.values().stream().filter(process -> !process.hasParent()).collect(Collectors.toList()));
+                tmpProcesses.put(process.getPid(), process);
             }
+            proceedBlocks(tmpProcesses, tmpBlocks);
+            proceedProcesses(tmpProcesses);
+            processesLoaded(tmpProcesses.values().stream().filter(process -> !process.hasParent()).collect(Collectors.toList()));
         } catch (SQLException e) {
             LOG.error(String.format("Ошибка при получении процессов для %s", model.getName()), e);
+            disconnect(false);
         }
     }
 
@@ -288,18 +322,18 @@ public class DBController implements DBProcessFilterListener, DBBlocksJournalLis
         }
     }
 
-    private void proceedBlocksWithCycle(Map<Integer, DBProcess> tmpProcesses, int blockedPid, int blockingPid, DBBlock b,
-                                        DBBlock reversedBlock) {
+    private void proceedBlocksWithCycle(Map<Integer, DBProcess> tmpProcesses,
+                                        int blockedPid, int blockingPid, DBBlock b, DBBlock reversedBlock) {
+        DBProcess blockedProcess = tmpProcesses.get(blockedPid);
+        DBProcess blockingProcess = tmpProcesses.get(blockingPid);
         if (b.isGranted()) {
-            DBProcess blockedProcess = tmpProcesses.values().stream().filter(p-> p.getPid() == blockedPid).findFirst().get();
-            DBProcess blockingProcess = tmpProcesses.values().stream().filter(p-> p.getPid() == blockedPid).findFirst().get();
             if ((blockingProcess.getQuery().getQueryStart()).compareTo(blockedProcess.getQuery().getQueryStart()) <= 0) {
                 blockedProcess.addBlock(new DBBlock(blockingPid, b.getRelation(), b.getLocktype(), b.isGranted()));
             } else {
                 blockingProcess.addBlock(new DBBlock(blockedPid, b.getRelation(), b.getLocktype(), b.isGranted()));
             }
         } else {
-            tmpProcesses.get(blockingPid).addBlock(reversedBlock);
+            blockingProcess.addBlock(reversedBlock);
         }
     }
 
@@ -323,7 +357,11 @@ public class DBController implements DBProcessFilterListener, DBBlocksJournalLis
         processes.addAll(loadedProcesses);
 
         filteredProcesses.clear();
-        filteredProcesses.addAll(processes.stream().filter(processesFilters::filter).collect(Collectors.toList()));
+        if (processesFilters.isEnabled()) {
+            filteredProcesses.addAll(processes.stream().filter(processesFilters::filter).collect(Collectors.toList()));
+        } else {
+            filteredProcesses.addAll(processes);
+        }
 
         blocksJournal.add(loadedProcesses.stream().filter(DBProcess::hasChildren).collect(Collectors.toList()));
 
@@ -340,6 +378,10 @@ public class DBController implements DBProcessFilterListener, DBBlocksJournalLis
         }
     }
 
+    Connection getConnection() {
+        return connection;
+    }
+
     public void addListener(DBControllerListener listener) {
         listeners.add(listener);
     }
@@ -347,7 +389,6 @@ public class DBController implements DBProcessFilterListener, DBBlocksJournalLis
     public void removeListener(DBControllerListener listener) {
         listeners.remove(listener);
     }
-
 
     @Override
     public boolean equals(Object o) {
@@ -373,33 +414,25 @@ public class DBController implements DBProcessFilterListener, DBBlocksJournalLis
 
     public boolean terminateProcessWithPid(int processPid) throws SQLException {
         boolean processTerminated = false;
-        try {
-            PreparedStatement preparedStatement = connection.prepareStatement(DBQueries.PG_TERMINATE_BACKEND_QUERY);
+        try (PreparedStatement preparedStatement = connection.prepareStatement(DBQueries.PG_TERMINATE_BACKEND_QUERY)) {
             preparedStatement.setInt(1, processPid);
-            ResultSet resultSet = preparedStatement.executeQuery(); {
-                if (resultSet.next()) {
-                    processTerminated = resultSet.getBoolean(1);
-                }
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            if (resultSet.next()) {
+                processTerminated = resultSet.getBoolean(1);
             }
-        } catch (SQLException e) {
-            throw e;
         }
         return processTerminated;
     }
 
-
     public boolean cancelProcessWithPid(int processPid) throws SQLException {
         boolean processCanceled = false;
-        try {
-            PreparedStatement preparedStatement = connection.prepareStatement(DBQueries.PG_CANCEL_BACKEND_QUERY);
+        try (PreparedStatement preparedStatement = connection.prepareStatement(DBQueries.PG_CANCEL_BACKEND_QUERY)) {
             preparedStatement.setInt(1, processPid);
-            ResultSet resultSet = preparedStatement.executeQuery(); {
-                if (resultSet.next()) {
-                    processCanceled = resultSet.getBoolean(1);
-                }
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                processCanceled = resultSet.getBoolean(1);
             }
-        } catch (SQLException exception) {
-            throw exception;
         }
         return processCanceled;
     }
@@ -419,6 +452,11 @@ public class DBController implements DBProcessFilterListener, DBBlocksJournalLis
         asyncSaveClosedBlockedProcessesToFile(processes);
     }
 
+    @Override
+    public void dbBlocksJournalDidChangeFilters() {
+        listeners.forEach(listener -> listener.dbControllerBlocksJournalChanged(this));
+    }
+
     private void asyncSaveClosedBlockedProcessesToFile(List<DBBlocksJournalProcess> processes) {
         journalsSaveExecutor.execute(() -> {
             try {
@@ -429,9 +467,9 @@ public class DBController implements DBProcessFilterListener, DBBlocksJournalLis
         });
     }
 
-    public void saveBlockedProcessesToFile(List<DBBlocksJournalProcess> processes) throws ParserConfigurationException, IOException, SAXException {
+    private void saveBlockedProcessesToFile(List<DBBlocksJournalProcess> processes) throws ParserConfigurationException, IOException, SAXException {
 
-        String fileName = String.format("%s-%s.xml", this.model.getName(), DateUtils.dateToString(blocksJournalCreateDate));
+        String fileName = String.format("%s-%s.xml", this.model.getName(), dateUtils.dateToString(blocksJournalCreateDate));
         Path blocksJournalsDirPath = PathBuilder.getInstance().getBlocksJournalsDir();
         Path currentJournalPath = Paths.get(blocksJournalsDirPath.toString(), fileName);
         File currentJournalFile = currentJournalPath.toFile();
@@ -461,7 +499,7 @@ public class DBController implements DBProcessFilterListener, DBBlocksJournalLis
         documentWorker.save(document, currentJournalFile);
     }
 
-    public void saveUnclosedBlockedProcessesToFile() {
+    private void saveUnclosedBlockedProcessesToFile() {
         if (blocksJournal.isEmpty()) {
             return;
         }

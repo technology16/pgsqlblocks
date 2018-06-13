@@ -17,13 +17,16 @@
  * limitations under the License.
  * =========================LICENSE_END==================================
  */
-package ru.taximaxim.pgsqlblocks.dbcdata;
+package ru.taximaxim.pgsqlblocks.modules.db.controller;
 
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import org.junit.*;
-import ru.taximaxim.pgsqlblocks.process.Process;
-import ru.taximaxim.pgsqlblocks.process.ProcessStatus;
+import ru.taximaxim.pgsqlblocks.common.models.DBModel;
+import ru.taximaxim.pgsqlblocks.common.models.DBProcess;
+import ru.taximaxim.pgsqlblocks.common.models.DBProcessStatus;
+import ru.taximaxim.pgsqlblocks.modules.db.model.DBStatus;
+import ru.taximaxim.pgsqlblocks.utils.Settings;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -33,12 +36,55 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.*;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-public class DbcDataTest {
+public class DBControllerTest {
+    static class Listener implements DBControllerListener {
+        CompletableFuture<DBController> lock = new CompletableFuture<>();
+
+        @Override
+        public void dbControllerStatusChanged(DBController controller, DBStatus newStatus) {}
+
+        @Override
+        public void dbControllerDidConnect(DBController controller) {}
+
+        @Override
+        public void dbControllerWillConnect(DBController controller) {}
+
+        @Override
+        public void dbControllerConnectionFailed(DBController controller, SQLException exception) {}
+
+        @Override
+        public void dbControllerDisconnectFailed(DBController controller, boolean forcedByUser, SQLException exception) {}
+
+        @Override
+        public void dbControllerDidDisconnect(DBController controller, boolean forcedByUser) {}
+
+        @Override
+        public void dbControllerWillUpdateProcesses(DBController controller) {}
+
+        @Override
+        public void dbControllerProcessesUpdated(DBController controller) {
+            lock.complete(controller);
+            lock = new CompletableFuture<>();
+        }
+
+        @Override
+        public void dbControllerBlockedChanged(DBController controller) {}
+
+        @Override
+        public void dbControllerProcessesFilterChanged(DBController controller) {}
+
+        @Override
+        public void dbControllerBlocksJournalChanged(DBController controller) {}
+    }
+
     private static final Config CONFIG = ConfigFactory.load();
     private static final long DELAY_MS = CONFIG.getLong("pgsqlblocks-test-configs.delay-ms");
     private static final String REMOTE_HOST = CONFIG.getString("pgsqlblocks-test-configs.remote-host");
@@ -52,20 +98,22 @@ public class DbcDataTest {
     private static final String TEST_SELECT_SLEEP_SQL = CONFIG.getString("pgsqlblocks-test-configs.select-sleep-sql");
     private static final String TEST_CREATE_INDEX_SQL = CONFIG.getString("pgsqlblocks-test-configs.create-index-sql");
 
-    private static DbcData testDbc;
+    private static DBController testDbc;
     private static List<ConnInfo> connectionList = new ArrayList<>();
     private static List<Thread> threadList = new ArrayList<>();
+    private static Listener listener = new Listener();
 
     @BeforeClass
     public static void initialize() throws IOException {
-        testDbc = new DbcData("TestDbc", REMOTE_HOST,  REMOTE_PORT, REMOTE_DB,
-                REMOTE_USERNAME,  REMOTE_PASSWORD,  true);
+        DBModel model = new DBModel("TestDbc", REMOTE_HOST,  REMOTE_PORT, REMOTE_DB, REMOTE_USERNAME,  REMOTE_PASSWORD,  true);
+        testDbc = new DBController(Settings.getInstance(), model);
         testDbc.connect();
+        testDbc.addListener(listener);
     }
 
     @AfterClass
     public static void terminate() throws SQLException {
-        testDbc.disconnect();
+        testDbc.disconnect(true);
     }
 
     @Before
@@ -107,30 +155,33 @@ public class DbcDataTest {
     }
 
     @Test
-    public void testMultipleLocks() throws IOException, SQLException, InterruptedException {
+    public void testMultipleLocks() throws IOException, SQLException, InterruptedException, ExecutionException {
         PreparedStatement statement1 = connectionList.get(0).getConnection().prepareStatement(loadQuery(TEST_DROP_RULE_SQL));
         PreparedStatement statement2 = connectionList.get(1).getConnection().prepareStatement(loadQuery(TEST_SELECT_1000_SQL));
         PreparedStatement statement3 = connectionList.get(2).getConnection().prepareStatement(loadQuery(TEST_SELECT_1000_SQL));
 
         runThreads(statement2, statement3, statement1);
 
-        Process rootProcess = testDbc.getProcessTree(true);
+        // wait until processes are updated
+        CompletableFuture<DBController> lock = listener.lock;
+        testDbc.updateProcesses();
+        lock.get();
 
-        List<Process> allGrandChild = rootProcess.getChildren().stream().
-                flatMap(l -> l.getChildren().stream()).
-                collect(Collectors.toList());
+        List<DBProcess> processes = testDbc.getProcesses();
 
-        Optional <Process> proc1 = allGrandChild.stream().filter(x -> x.getPid() == connectionList.get(0).getPid()).findFirst();
-        Optional <Process> proc2 = rootProcess.getChildren().stream().filter(x -> x.getPid() == connectionList.get(1).getPid()).findFirst();
-        Optional <Process> proc3 = rootProcess.getChildren().stream().filter(x -> x.getPid() == connectionList.get(2).getPid()).findFirst();
+        Stream<DBProcess> allGrandChildren = processes.stream().flatMap(l -> l.getChildren().stream());
+
+        Optional<DBProcess> proc1 = allGrandChildren.filter(x -> x.getPid() == connectionList.get(0).getPid()).findFirst();
+        Optional<DBProcess> proc2 = processes.stream().filter(x -> x.getPid() == connectionList.get(1).getPid()).findFirst();
+        Optional<DBProcess> proc3 = processes.stream().filter(x -> x.getPid() == connectionList.get(2).getPid()).findFirst();
 
         assertTrue(proc1.isPresent());
         assertTrue(proc2.isPresent());
         assertTrue(proc3.isPresent());
 
-        assertEquals(ProcessStatus.BLOCKED, proc1.get().getStatus());
-        assertEquals(ProcessStatus.BLOCKING, proc2.get().getStatus());
-        assertEquals(ProcessStatus.BLOCKING, proc3.get().getStatus());
+        assertEquals(DBProcessStatus.BLOCKED, proc1.get().getStatus());
+        assertEquals(DBProcessStatus.BLOCKING, proc2.get().getStatus());
+        assertEquals(DBProcessStatus.BLOCKING, proc3.get().getStatus());
 
         assertTrue(proc2.get().hasChildren());
         assertTrue(proc1.get().getParents().stream().anyMatch(x -> x.getPid() == proc2.get().getPid()));
@@ -139,32 +190,35 @@ public class DbcDataTest {
     }
 
     @Test
-    public void testReproWaitingLocks() throws IOException, SQLException, InterruptedException {
+    public void testReproWaitingLocks() throws IOException, SQLException, InterruptedException, ExecutionException {
         PreparedStatement statement1 = connectionList.get(0).getConnection().prepareStatement(loadQuery(TEST_SELECT_SLEEP_SQL));
         PreparedStatement statement2 = connectionList.get(1).getConnection().prepareStatement(loadQuery(TEST_CREATE_INDEX_SQL));
 
         runThreads(statement1, statement2);
 
-        Process rootProcess = testDbc.getProcessTree(true);
-        List<Process> allGrandChild = rootProcess.getChildren().stream().
-                flatMap(l -> l.getChildren().stream()).
-                collect(Collectors.toList());
+        // wait until processes are updated
+        CompletableFuture<DBController> lock = listener.lock;
+        testDbc.updateProcesses();
+        lock.get();
 
-        Optional <Process> proc1 = rootProcess.getChildren().stream().filter(x -> x.getPid() == connectionList.get(0).getPid()).findFirst();
-        Optional <Process> proc2 = allGrandChild.stream().filter(x -> x.getPid() == connectionList.get(1).getPid()).findFirst();
+        List<DBProcess> processes = testDbc.getProcesses();
+        Stream<DBProcess> allGrandChildren = processes.stream().flatMap(l -> l.getChildren().stream());
+
+        Optional <DBProcess> proc1 = processes.stream().filter(x -> x.getPid() == connectionList.get(0).getPid()).findFirst();
+        Optional <DBProcess> proc2 = allGrandChildren.filter(x -> x.getPid() == connectionList.get(1).getPid()).findFirst();
 
         assertTrue(proc1.isPresent());
         assertTrue(proc2.isPresent());
 
-        assertEquals(ProcessStatus.BLOCKING, proc1.get().getStatus());
-        assertEquals(ProcessStatus.BLOCKED, proc2.get().getStatus());
+        assertEquals(DBProcessStatus.BLOCKING, proc1.get().getStatus());
+        assertEquals(DBProcessStatus.BLOCKED, proc2.get().getStatus());
 
         assertTrue(proc1.get().hasChildren());
         assertTrue(proc2.get().getParents().stream().anyMatch(x -> x.getPid() == proc1.get().getPid()));
     }
 
     @Test
-    public void testOrderedLocks() throws IOException, SQLException, InterruptedException {
+    public void testOrderedLocks() throws IOException, SQLException, InterruptedException, ExecutionException {
         /* create rule */
         testDbc.getConnection().prepareStatement(loadQuery(CREATE_RULE_SQL)).execute();
 
@@ -175,27 +229,30 @@ public class DbcDataTest {
 
         runThreads(statement2, statement1);
 
-        Process rootProcess = testDbc.getProcessTree(true);
+        // wait until processes are updated
+        CompletableFuture<DBController> lock = listener.lock;
+        testDbc.updateProcesses();
+        lock.get();
 
-        List<Process> allGrandChild = rootProcess.getChildren().stream().
-                flatMap(l -> l.getChildren().stream()).
-                collect(Collectors.toList());
+        List<DBProcess> processes = testDbc.getProcesses();
 
-        Optional <Process> proc1 = allGrandChild.stream().filter(x -> x.getPid() == connectionList.get(0).getPid()).findFirst();
-        Optional <Process> proc2 = rootProcess.getChildren().stream().filter(x -> x.getPid() == connectionList.get(1).getPid()).findFirst();
+        Stream<DBProcess> allGrandChildren = processes.stream().flatMap(l -> l.getChildren().stream());
+
+        Optional <DBProcess> proc1 = allGrandChildren.filter(x -> x.getPid() == connectionList.get(0).getPid()).findFirst();
+        Optional <DBProcess> proc2 = processes.stream().filter(x -> x.getPid() == connectionList.get(1).getPid()).findFirst();
 
         assertTrue(proc1.isPresent());
         assertTrue(proc2.isPresent());
 
-        assertEquals(ProcessStatus.BLOCKING, proc2.get().getStatus());
-        assertEquals(ProcessStatus.BLOCKED, proc1.get().getStatus());
+        assertEquals(DBProcessStatus.BLOCKING, proc2.get().getStatus());
+        assertEquals(DBProcessStatus.BLOCKED, proc1.get().getStatus());
 
         assertTrue(proc2.get().hasChildren());
         assertTrue(proc1.get().getParents().stream().anyMatch(x -> x.getPid() == proc2.get().getPid()));
     }
 
     @Test
-    public void testTripleLocks() throws IOException, SQLException, InterruptedException {
+    public void testTripleLocks() throws IOException, SQLException, InterruptedException, ExecutionException {
         /* create rule */
         testDbc.getConnection().prepareStatement(loadQuery(CREATE_RULE_SQL)).execute();
 
@@ -205,24 +262,27 @@ public class DbcDataTest {
 
         runThreads(statement1, statement2, statement3);
 
-        Process rootProcess = testDbc.getProcessTree(true);
+        // wait until processes are updated
+        CompletableFuture<DBController> lock = listener.lock;
+        testDbc.updateProcesses();
+        lock.get();
 
-        List<Process> allGrandChild = rootProcess.getChildren().stream().
-                flatMap(l -> l.getChildren().stream()).
-                collect(Collectors.toList());
+        List<DBProcess> processes = testDbc.getProcesses();
 
-        Optional <Process> proc1 = rootProcess.getChildren().stream().filter(x -> x.getPid() == connectionList.get(0).getPid()).findFirst();
-        Optional <Process> proc2 = allGrandChild.stream().filter(x -> x.getPid() == connectionList.get(1).getPid()).findFirst();
-        Optional <Process> proc3 = allGrandChild.stream().filter(x -> x.getPid() == connectionList.get(2).getPid()).findFirst();
+        List<DBProcess> allGrandChildren = processes.stream().flatMap(l -> l.getChildren().stream()).collect(Collectors.toList());
+
+        Optional <DBProcess> proc1 = processes.stream().filter(x -> x.getPid() == connectionList.get(0).getPid()).findFirst();
+        Optional <DBProcess> proc2 = allGrandChildren.stream().filter(x -> x.getPid() == connectionList.get(1).getPid()).findFirst();
+        Optional <DBProcess> proc3 = allGrandChildren.stream().filter(x -> x.getPid() == connectionList.get(2).getPid()).findFirst();
 
 
         assertTrue(proc1.isPresent());
         assertTrue(proc2.isPresent());
         assertTrue(proc3.isPresent());
 
-        assertEquals(ProcessStatus.BLOCKING, proc1.get().getStatus());
-        assertEquals(ProcessStatus.BLOCKING, proc2.get().getStatus());
-        assertEquals(ProcessStatus.BLOCKED, proc3.get().getStatus());
+        assertEquals(DBProcessStatus.BLOCKING, proc1.get().getStatus());
+        assertEquals(DBProcessStatus.BLOCKING, proc2.get().getStatus());
+        assertEquals(DBProcessStatus.BLOCKED, proc3.get().getStatus());
 
         assertTrue(proc1.get().hasChildren());
         assertTrue(proc2.get().getParents().stream().anyMatch(x -> x.getPid() == proc1.get().getPid()));
