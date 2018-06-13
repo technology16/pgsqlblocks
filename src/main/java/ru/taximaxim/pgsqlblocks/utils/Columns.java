@@ -9,7 +9,7 @@ public enum Columns {
     APPLICATION_NAME("application", "APPLICATION_NAME", 100),
     DATABASE_NAME("db_name", "DATABASE_NAME", 110),
     USER_NAME("user_name", "USER_NAME", 110),
-    CLIENT("client", "CLIENT", 100), //5
+    CLIENT("client", "CLIENT", 100),
     BACKEND_START("backend_start", "BACKEND_START", 110),
     QUERY_START("query_start", "QUERY_START", 110),
     XACT_START("xact_start", "XACT_START", 150),
