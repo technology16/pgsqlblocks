@@ -77,31 +77,27 @@ public class DBProcessesViewComparator extends ViewerComparator {
                         process2.getQuery().getXactStart());
                 break;
             case 9:
-                compareResult = DateUtils.compareDurations(process1.getQuery().getDuration(),
-                        process2.getQuery().getDuration());
-                break;
-            case 10:
                 compareResult = compareStringValues(process1.getState(), process2.getState());
                 break;
-            case 11:
+            case 10:
                 compareResult = DateUtils.compareDates(process1.getStateChange(), process2.getStateChange());
                 break;
-            case 12:
+            case 11:
                 compareResult = compareStringValues(process1.getBlocksPidsString(), process2.getBlocksPidsString());
                 break;
-            case 13:
+            case 12:
                 compareResult = compareStringValues(process1.getBlocksLocktypesString(),
                         process2.getBlocksLocktypesString());
                 break;
-            case 14:
+            case 13:
                 compareResult = compareStringValues(process1.getBlocksRelationsString(),
                         process2.getBlocksRelationsString());
                 break;
-            case 15:
+            case 14:
                 compareResult = compareStringValues(process1.getQuery().getQueryString(),
                         process2.getQuery().getQueryString());
                 break;
-            case 16:
+            case 15:
                 compareResult = compareBooleans(process1.getQuery().isSlowQuery(), process2.getQuery().isSlowQuery());
                 break;
             default:

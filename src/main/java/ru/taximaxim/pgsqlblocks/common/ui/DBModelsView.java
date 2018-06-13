@@ -66,7 +66,7 @@ public class DBModelsView extends Composite {
         column.getColumn().setText(resourceBundle.getString("database"));
         column.getColumn().setWidth(DATABASE_TABLE_WIDTH);
         tableViewer.setContentProvider(new DBModelsViewContentProvider());
-        tableViewer.setLabelProvider(new DBModelsViewLabelProvider());
+        tableViewer.setLabelProvider(new DBModelsViewLabelProvider(resourceBundle));
         tableViewer.addSelectionChangedListener(event -> {
             if (!event.getSelection().isEmpty()) {
                 IStructuredSelection selection = (IStructuredSelection) event.getSelection();
