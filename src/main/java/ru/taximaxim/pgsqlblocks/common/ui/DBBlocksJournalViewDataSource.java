@@ -22,6 +22,7 @@ package ru.taximaxim.pgsqlblocks.common.ui;
 import org.eclipse.swt.graphics.Image;
 import ru.taximaxim.pgsqlblocks.common.models.DBBlocksJournalProcess;
 import ru.taximaxim.pgsqlblocks.common.models.DBProcess;
+import ru.taximaxim.pgsqlblocks.utils.Columns;
 import ru.taximaxim.pgsqlblocks.utils.DateUtils;
 import ru.taximaxim.pgsqlblocks.utils.ImageUtils;
 
@@ -45,43 +46,43 @@ public class DBBlocksJournalViewDataSource extends TMTreeViewerDataSource<DBBloc
     public String columnTitleForColumnIndex(int columnIndex) {
         switch (columnIndex) {
             case 0:
-                return resourceBundle.getString("pid");
+                return resourceBundle.getString(Columns.PID.getColumnName());
             case 1:
-                return resourceBundle.getString("block_start_date");
+                return resourceBundle.getString(Columns.CREATE_DATE.getColumnName());
             case 2:
-                return resourceBundle.getString("block_change_date");
+                return resourceBundle.getString(Columns.CLOSE_DATE.getColumnName());
             case 3:
-                return resourceBundle.getString("num_of_blocked_processes");
+                return resourceBundle.getString(Columns.BLOCKED_COUNT.getColumnName());
             case 4:
-                return resourceBundle.getString("application");
+                return resourceBundle.getString(Columns.APPLICATION_NAME.getColumnName());
             case 5:
-                return resourceBundle.getString("db_name");
+                return resourceBundle.getString(Columns.DATABASE_NAME.getColumnName());
             case 6:
-                return resourceBundle.getString("user_name");
+                return resourceBundle.getString(Columns.USER_NAME.getColumnName());
             case 7:
-                return resourceBundle.getString("client");
+                return resourceBundle.getString(Columns.CLIENT.getColumnName());
             case 8:
-                return resourceBundle.getString("backend_start");
+                return resourceBundle.getString(Columns.BACKEND_START.getColumnName());
             case 9:
-                return resourceBundle.getString("query_start");
+                return resourceBundle.getString(Columns.QUERY_START.getColumnName());
             case 10:
-                return resourceBundle.getString("xact_start");
+                return resourceBundle.getString(Columns.XACT_START.getColumnName());
             case 11:
-                return resourceBundle.getString("state");
+                return resourceBundle.getString(Columns.STATE.getColumnName());
             case 12:
-                return resourceBundle.getString("state_change");
+                return resourceBundle.getString(Columns.STATE_CHANGE.getColumnName());
             case 13:
-                return resourceBundle.getString("blocked_by");
+                return resourceBundle.getString(Columns.BLOCKED.getColumnName());
             case 14:
-                return resourceBundle.getString("lock_type");
+                return resourceBundle.getString(Columns.LOCK_TYPE.getColumnName());
             case 15:
-                return resourceBundle.getString("relation");
+                return resourceBundle.getString(Columns.RELATION.getColumnName());
             case 16:
-                return resourceBundle.getString("slow_query");
+                return resourceBundle.getString(Columns.SLOW_QUERY.getColumnName());
             case 17:
-                return resourceBundle.getString("query");
+                return resourceBundle.getString(Columns.QUERY.getColumnName());
             default:
-                return "undefined";
+                return Columns.UNDEFINED.getColumnName();
         }
     }
 
@@ -89,36 +90,36 @@ public class DBBlocksJournalViewDataSource extends TMTreeViewerDataSource<DBBloc
     public int columnWidthForColumnIndex(int columnIndex) {
         switch (columnIndex) {
             case 0:
-                return 120;
+                return 120; //PID Columns.PID.getColumnWidth()
             case 1:
             case 2:
-                return 150;
+                return Columns.CLOSE_DATE.getColumnWidth();
             case 3:
-                return 70;
+                return Columns.BLOCKED_COUNT.getColumnWidth();
             case 4:
-                return 100;
+                return Columns.APPLICATION_NAME.getColumnWidth();
             case 5:
             case 6:
             case 7:
-                return 100;
+                return Columns.CLIENT.getColumnWidth();
             case 8:
             case 9:
             case 10:
-                return 150;
+                return Columns.XACT_START.getColumnWidth();
             case 11:
-                return 70;
+                return Columns.STATE.getColumnWidth();
             case 12:
-                return 150;
+                return Columns.STATE_CHANGE.getColumnWidth();
             case 13:
             case 14:
             case 15:
-                return 130;
+                return Columns.RELATION.getColumnWidth();
             case 16:
-                return 150;
+                return Columns.SLOW_QUERY.getColumnWidth();
             case 17:
-                return 100;
+                return Columns.QUERY.getColumnWidth();
             default:
-                return 110;
+                return Columns.UNDEFINED.getColumnWidth();
         }
     }
 
@@ -131,43 +132,43 @@ public class DBBlocksJournalViewDataSource extends TMTreeViewerDataSource<DBBloc
     public String columnTooltipForColumnIndex(int columnIndex) {
         switch (columnIndex) {
             case 0:
-                return "PID";
+                return Columns.PID.getColumnTooltip();
             case 1:
-                return "CREATE_DATE";
+                return Columns.CREATE_DATE.getColumnTooltip();
             case 2:
-                return "CLOSE_DATE";
+                return Columns.CLOSE_DATE.getColumnTooltip();
             case 3:
-                return "BLOCKED_COUNT";
+                return Columns.BLOCKED_COUNT.getColumnTooltip();
             case 4:
-                return "APPLICATION_NAME";
+                return Columns.APPLICATION_NAME.getColumnTooltip();
             case 5:
-                return "DATABASE_NAME";
+                return Columns.DATABASE_NAME.getColumnTooltip();
             case 6:
-                return "USER_NAME";
+                return Columns.USER_NAME.getColumnTooltip();
             case 7:
-                return "CLIENT";
+                return Columns.CLIENT.getColumnTooltip();
             case 8:
-                return "BACKEND_START";
+                return Columns.BACKEND_START.getColumnTooltip();
             case 9:
-                return "QUERY_START";
+                return Columns.QUERY_START.getColumnTooltip();
             case 10:
-                return "XACT_START";
+                return Columns.XACT_START.getColumnTooltip();
             case 11:
-                return "STATE";
+                return Columns.STATE.getColumnTooltip();
             case 12:
-                return "STATE_CHANGE";
+                return Columns.STATE_CHANGE.getColumnTooltip();
             case 13:
-                return "BLOCKED";
+                return Columns.BLOCKED.getColumnTooltip();
             case 14:
-                return "LOCK_TYPE";
+                return Columns.LOCK_TYPE.getColumnTooltip();
             case 15:
-                return "RELATION";
+                return Columns.RELATION.getColumnTooltip();
             case 16:
-                return "SLOW_QUERY";
+                return Columns.SLOW_QUERY.getColumnTooltip();
             case 17:
-                return "QUERY";
+                return Columns.QUERY.getColumnTooltip();
             default:
-                return "UNDEFINED";
+                return Columns.UNDEFINED.getColumnTooltip();
         }
     }
 
