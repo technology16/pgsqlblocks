@@ -90,7 +90,7 @@ public class DBBlocksJournalViewDataSource extends TMTreeViewerDataSource<DBBloc
     public int columnWidthForColumnIndex(int columnIndex) {
         switch (columnIndex) {
             case 0:
-                return 120; //PID Columns.PID.getColumnWidth()
+                return Columns.PID.getColumnWidth();
             case 1:
             case 2:
                 return Columns.CLOSE_DATE.getColumnWidth();
