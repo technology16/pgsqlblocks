@@ -22,6 +22,7 @@ package ru.taximaxim.pgsqlblocks.common.ui;
 import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
+import ru.taximaxim.pgsqlblocks.utils.Columns;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,13 +50,11 @@ public abstract class TMTreeViewerDataSource<T> implements ITableLabelProvider, 
 
     public abstract int numberOfColumns();
 
-    public abstract String columnTitleForColumnIndex(int columnIndex);
+    public abstract boolean columnIsSortableAtIndex();
 
-    public abstract int columnWidthForColumnIndex(int columnIndex);
+    public abstract List<Columns> getColumns();
 
-    public abstract boolean columnIsSortableAtIndex(int columnIndex);
-
-    public abstract String columnTooltipForColumnIndex(int columnIndex);
+    public abstract String columnTitle(String name);
 
     @Override
     public void dispose() {

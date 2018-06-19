@@ -26,6 +26,7 @@ import ru.taximaxim.pgsqlblocks.utils.Columns;
 import ru.taximaxim.pgsqlblocks.utils.DateUtils;
 import ru.taximaxim.pgsqlblocks.utils.ImageUtils;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.ResourceBundle;
 
@@ -39,137 +40,22 @@ public class DBBlocksJournalViewDataSource extends TMTreeViewerDataSource<DBBloc
 
     @Override
     public int numberOfColumns() {
-        return 18;
+        return Columns.values().length;
     }
 
     @Override
-    public String columnTitleForColumnIndex(int columnIndex) {
-        switch (columnIndex) {
-            case 0:
-                return resourceBundle.getString(Columns.PID.getColumnName());
-            case 1:
-                return resourceBundle.getString(Columns.CREATE_DATE.getColumnName());
-            case 2:
-                return resourceBundle.getString(Columns.CLOSE_DATE.getColumnName());
-            case 3:
-                return resourceBundle.getString(Columns.BLOCKED_COUNT.getColumnName());
-            case 4:
-                return resourceBundle.getString(Columns.APPLICATION_NAME.getColumnName());
-            case 5:
-                return resourceBundle.getString(Columns.DATABASE_NAME.getColumnName());
-            case 6:
-                return resourceBundle.getString(Columns.USER_NAME.getColumnName());
-            case 7:
-                return resourceBundle.getString(Columns.CLIENT.getColumnName());
-            case 8:
-                return resourceBundle.getString(Columns.BACKEND_START.getColumnName());
-            case 9:
-                return resourceBundle.getString(Columns.QUERY_START.getColumnName());
-            case 10:
-                return resourceBundle.getString(Columns.XACT_START.getColumnName());
-            case 11:
-                return resourceBundle.getString(Columns.STATE.getColumnName());
-            case 12:
-                return resourceBundle.getString(Columns.STATE_CHANGE.getColumnName());
-            case 13:
-                return resourceBundle.getString(Columns.BLOCKED.getColumnName());
-            case 14:
-                return resourceBundle.getString(Columns.LOCK_TYPE.getColumnName());
-            case 15:
-                return resourceBundle.getString(Columns.RELATION.getColumnName());
-            case 16:
-                return resourceBundle.getString(Columns.SLOW_QUERY.getColumnName());
-            case 17:
-                return resourceBundle.getString(Columns.QUERY.getColumnName());
-            default:
-                return Columns.UNDEFINED.getColumnName();
-        }
-    }
-
-    @Override
-    public int columnWidthForColumnIndex(int columnIndex) {
-        switch (columnIndex) {
-            case 0:
-                return Columns.PID.getColumnWidth();
-            case 1:
-            case 2:
-                return Columns.CLOSE_DATE.getColumnWidth();
-            case 3:
-                return Columns.BLOCKED_COUNT.getColumnWidth();
-            case 4:
-                return Columns.APPLICATION_NAME.getColumnWidth();
-            case 5:
-            case 6:
-            case 7:
-                return Columns.CLIENT.getColumnWidth();
-            case 8:
-            case 9:
-            case 10:
-                return Columns.XACT_START.getColumnWidth();
-            case 11:
-                return Columns.STATE.getColumnWidth();
-            case 12:
-                return Columns.STATE_CHANGE.getColumnWidth();
-            case 13:
-            case 14:
-            case 15:
-                return Columns.RELATION.getColumnWidth();
-            case 16:
-                return Columns.SLOW_QUERY.getColumnWidth();
-            case 17:
-                return Columns.QUERY.getColumnWidth();
-            default:
-                return Columns.UNDEFINED.getColumnWidth();
-        }
-    }
-
-    @Override
-    public boolean columnIsSortableAtIndex(int columnIndex) {
+    public boolean columnIsSortableAtIndex() {
         return false;
     }
 
     @Override
-    public String columnTooltipForColumnIndex(int columnIndex) {
-        switch (columnIndex) {
-            case 0:
-                return Columns.PID.getColumnTooltip();
-            case 1:
-                return Columns.CREATE_DATE.getColumnTooltip();
-            case 2:
-                return Columns.CLOSE_DATE.getColumnTooltip();
-            case 3:
-                return Columns.BLOCKED_COUNT.getColumnTooltip();
-            case 4:
-                return Columns.APPLICATION_NAME.getColumnTooltip();
-            case 5:
-                return Columns.DATABASE_NAME.getColumnTooltip();
-            case 6:
-                return Columns.USER_NAME.getColumnTooltip();
-            case 7:
-                return Columns.CLIENT.getColumnTooltip();
-            case 8:
-                return Columns.BACKEND_START.getColumnTooltip();
-            case 9:
-                return Columns.QUERY_START.getColumnTooltip();
-            case 10:
-                return Columns.XACT_START.getColumnTooltip();
-            case 11:
-                return Columns.STATE.getColumnTooltip();
-            case 12:
-                return Columns.STATE_CHANGE.getColumnTooltip();
-            case 13:
-                return Columns.BLOCKED.getColumnTooltip();
-            case 14:
-                return Columns.LOCK_TYPE.getColumnTooltip();
-            case 15:
-                return Columns.RELATION.getColumnTooltip();
-            case 16:
-                return Columns.SLOW_QUERY.getColumnTooltip();
-            case 17:
-                return Columns.QUERY.getColumnTooltip();
-            default:
-                return Columns.UNDEFINED.getColumnTooltip();
-        }
+    public List<Columns> getColumns() {
+        return Arrays.asList(Columns.values());
+    }
+
+    @Override
+    public String columnTitle(String name) {
+        return resourceBundle.getString(name);
     }
 
     @Override

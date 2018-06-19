@@ -20,7 +20,7 @@ public enum Columns {
     RELATION("relation", "RELATION", 130),
     SLOW_QUERY("slow_query", "SLOW_QUERY", 150),
     QUERY("query", "QUERY", 100),
-    UNDEFINED("UNDEFINED", "UNDEFINED", 110);
+    UNDEFINED("undefined", "UNDEFINED", 110);
 
     private String columnName;
     private String columnTooltip;

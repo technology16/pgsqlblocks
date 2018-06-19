@@ -28,6 +28,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 import ru.taximaxim.pgsqlblocks.common.ui.TMTreeViewer;
 import ru.taximaxim.pgsqlblocks.common.ui.TMTreeViewerDataSource;
+import ru.taximaxim.pgsqlblocks.utils.Columns;
 
 import java.util.HashSet;
 import java.util.ResourceBundle;
@@ -72,7 +73,7 @@ public class TMTreeViewerColumnsDialog extends Dialog {
         for (int i = 0; i < columnsCount; i++) {
             final int columnIndex = i;
             Button checkBoxButton = new Button(container, SWT.CHECK);
-            checkBoxButton.setText(dataSource.columnTitleForColumnIndex(columnIndex));
+            checkBoxButton.setText(dataSource.columnTitle(((Columns) dataSource.getColumns().get(i)).getColumnName()));
             checkBoxButton.setSelection(!collapsedColumnsIndexes.contains(columnIndex));
             checkBoxButton.addListener(SWT.Selection, event -> {
                 if (collapsedColumnsIndexes.contains(columnIndex)) {

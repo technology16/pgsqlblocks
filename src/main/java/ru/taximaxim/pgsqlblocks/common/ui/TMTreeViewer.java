@@ -27,6 +27,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeColumn;
 import org.eclipse.swt.widgets.TreeItem;
+import ru.taximaxim.pgsqlblocks.utils.Columns;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -89,15 +90,16 @@ public class TMTreeViewer extends TreeViewer {
     }
 
     private void createColumns() {
-        for (int i = 0; i < dataSource.numberOfColumns(); i++) {
+        for (Object o : dataSource.getColumns()) {
+            Columns column = (Columns) o;
             TreeViewerColumn treeColumn = new TreeViewerColumn(this, SWT.NONE);
-            treeColumn.getColumn().setText(dataSource.columnTitleForColumnIndex(i));
+            treeColumn.getColumn().setText(dataSource.columnTitle(column.getColumnName()));
             treeColumn.getColumn().setMoveable(true);
-            treeColumn.getColumn().setToolTipText(dataSource.columnTooltipForColumnIndex(i));
-            treeColumn.getColumn().setWidth(dataSource.columnWidthForColumnIndex(i));
-            if (dataSource.columnIsSortableAtIndex(i)) {
+            treeColumn.getColumn().setToolTipText(column.getColumnTooltip());
+            treeColumn.getColumn().setWidth(column.getColumnWidth());
+            if (dataSource.columnIsSortableAtIndex()) {
                 TreeColumn swtColumn = treeColumn.getColumn();
-                final int columnIndex = i;
+                final int columnIndex = dataSource.getColumns().indexOf(column);
                 swtColumn.addSelectionListener(new SelectionListener() {
                     @Override
                     public void widgetSelected(SelectionEvent e) {
@@ -135,7 +137,7 @@ public class TMTreeViewer extends TreeViewer {
                     continue;
                 }
                 TreeColumn column = columns[i];
-                column.setWidth(dataSource.columnWidthForColumnIndex(i));
+                column.setWidth(((Columns) dataSource.getColumns().get(i)).getColumnWidth());
                 column.setResizable(true);
             }
         }
