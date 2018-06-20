@@ -93,7 +93,7 @@ public class TMTreeViewer extends TreeViewer {
         for (Object o : dataSource.getColumns()) {
             Columns column = (Columns) o;
             TreeViewerColumn treeColumn = new TreeViewerColumn(this, SWT.NONE);
-            treeColumn.getColumn().setText(dataSource.columnTitle(column.getColumnName()));
+            treeColumn.getColumn().setText(dataSource.getColumnTitle(column.getColumnName()));
             treeColumn.getColumn().setMoveable(true);
             treeColumn.getColumn().setToolTipText(column.getColumnTooltip());
             treeColumn.getColumn().setWidth(column.getColumnWidth());

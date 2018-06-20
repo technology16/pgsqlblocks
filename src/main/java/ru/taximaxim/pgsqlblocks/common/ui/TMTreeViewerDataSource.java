@@ -48,13 +48,11 @@ public abstract class TMTreeViewerDataSource<T> implements ITableLabelProvider, 
 
     protected List<ILabelProviderListener> listeners = new ArrayList<>();
 
-    public abstract int numberOfColumns();
-
     public abstract boolean columnIsSortableAtIndex();
 
     public abstract List<Columns> getColumns();
 
-    public abstract String columnTitle(String name);
+    public abstract String getColumnTitle(String name);
 
     @Override
     public void dispose() {

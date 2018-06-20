@@ -39,11 +39,6 @@ public class DBBlocksJournalViewDataSource extends TMTreeViewerDataSource<DBBloc
     }
 
     @Override
-    public int numberOfColumns() {
-        return Columns.values().length;
-    }
-
-    @Override
     public boolean columnIsSortableAtIndex() {
         return false;
     }
@@ -54,7 +49,7 @@ public class DBBlocksJournalViewDataSource extends TMTreeViewerDataSource<DBBloc
     }
 
     @Override
-    public String columnTitle(String name) {
+    public String getColumnTitle(String name) {
         return resourceBundle.getString(name);
     }
 

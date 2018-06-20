@@ -69,11 +69,11 @@ public class TMTreeViewerColumnsDialog extends Dialog {
 
         TMTreeViewerDataSource dataSource = treeViewer.getDataSource();
 
-        int columnsCount = dataSource.numberOfColumns();
+        int columnsCount = dataSource.getColumns().size();
         for (int i = 0; i < columnsCount; i++) {
             final int columnIndex = i;
             Button checkBoxButton = new Button(container, SWT.CHECK);
-            checkBoxButton.setText(dataSource.columnTitle(((Columns) dataSource.getColumns().get(i)).getColumnName()));
+            checkBoxButton.setText(dataSource.getColumnTitle(((Columns) dataSource.getColumns().get(i)).getColumnName()));
             checkBoxButton.setSelection(!collapsedColumnsIndexes.contains(columnIndex));
             checkBoxButton.addListener(SWT.Selection, event -> {
                 if (collapsedColumnsIndexes.contains(columnIndex)) {

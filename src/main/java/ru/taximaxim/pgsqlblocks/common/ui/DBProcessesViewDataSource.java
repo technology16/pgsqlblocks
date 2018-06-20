@@ -39,21 +39,17 @@ public class DBProcessesViewDataSource extends TMTreeViewerDataSource<DBProcess>
         super(resourceBundle, dataFilter);
     }
 
-    @Override
-    public int numberOfColumns() {
-        return getColumns().size();
-    }
 
     @Override
     public List<Columns> getColumns() {
         List<Columns> list = new ArrayList<>(Arrays.asList(Columns.values()));
-        list.remove(1);
-        list.remove(1);
+        list.remove(Columns.CREATE_DATE);
+        list.remove(Columns.CLOSE_DATE);
         return list;
     }
 
     @Override
-    public String columnTitle(String name) {
+    public String getColumnTitle(String name) {
         return resourceBundle.getString(name);
     }
 
