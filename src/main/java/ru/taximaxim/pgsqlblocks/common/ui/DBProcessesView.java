@@ -40,7 +40,7 @@ public class DBProcessesView extends Composite {
     }
 
     private void createContent() {
-        treeViewer = new TMTreeViewer(this, SWT.VIRTUAL | SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL | SWT.FULL_SELECTION);
+        treeViewer = new TMTreeViewer(this, SWT.VIRTUAL | SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL | SWT.FULL_SELECTION | SWT.MULTI);
         GridData layoutData = new GridData(SWT.FILL, SWT.FILL, true, true);
         treeViewer.getControl().setLayoutData(layoutData);
     }

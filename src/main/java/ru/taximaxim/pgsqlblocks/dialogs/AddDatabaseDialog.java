@@ -27,7 +27,6 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.*;
 import ru.taximaxim.pgsqlblocks.common.models.DBModel;
 
-import java.text.MessageFormat;
 import java.util.List;
 import java.util.ResourceBundle;
 
@@ -141,7 +140,7 @@ public class AddDatabaseDialog extends Dialog {
             return;
         } else if (reservedConnectionNames.contains(name)) {
             MessageDialog.openError(null, resourceBundle.getString(ATTENTION),
-                    MessageFormat.format(resourceBundle.getString("already_exists"), name));
+                    String.format(resourceBundle.getString("already_exists"), name));
             return;
         } else if (host.isEmpty() || port.isEmpty()) {
             MessageDialog.openError(null, resourceBundle.getString(ATTENTION),
