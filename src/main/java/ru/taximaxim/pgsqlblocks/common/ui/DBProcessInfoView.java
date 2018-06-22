@@ -63,12 +63,14 @@ public class DBProcessInfoView extends Composite {
 
         ToolItem cancelProcessToolItem = new ToolItem(toolBar, SWT.PUSH);
         cancelProcessToolItem.setText(resourceBundle.getString("cancel_process"));
+        cancelProcessToolItem.setToolTipText("pg_cancel_backend");
         cancelProcessToolItem.addListener(SWT.Selection, event -> {
             listeners.forEach(DBProcessInfoViewListener::dbProcessInfoViewCancelProcessToolItemClicked);
         });
 
         ToolItem terminateProcessToolItem = new ToolItem(toolBar, SWT.PUSH);
         terminateProcessToolItem.setText(resourceBundle.getString("kill_process"));
+        terminateProcessToolItem.setToolTipText("pg_terminate_backend");
         terminateProcessToolItem.addListener(SWT.Selection, event -> {
             listeners.forEach(DBProcessInfoViewListener::dbProcessInfoViewTerminateProcessToolItemClicked);
         });
@@ -84,10 +86,6 @@ public class DBProcessInfoView extends Composite {
         GridData layoutData = (GridData) this.toolBar.getLayoutData();
         layoutData.exclude = true;
         this.layout();
-    }
-
-    public ToolBar getToolBar() {
-        return toolBar;
     }
 
     public void show(DBProcess process) {

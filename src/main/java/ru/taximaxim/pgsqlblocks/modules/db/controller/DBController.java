@@ -41,7 +41,6 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.*;
-import java.text.MessageFormat;
 import java.util.*;
 import java.util.Date;
 import java.util.concurrent.Executors;
@@ -200,7 +199,7 @@ public class DBController implements DBProcessFilterListener, DBBlocksJournalLis
         try {
             return !(connection == null || connection.isClosed());
         } catch (SQLException e) {
-            LOG.error(MessageFormat.format(resourceBundle.getString("error_on_check_is_connected"), e.getMessage()));
+            LOG.error(String.format(resourceBundle.getString("error_on_check_is_connected"), e.getMessage()));
             return false;
         }
     }
@@ -405,6 +404,7 @@ public class DBController implements DBProcessFilterListener, DBBlocksJournalLis
 
     public boolean terminateProcessWithPid(int processPid) throws SQLException {
         boolean processTerminated = false;
+        // FIXME prepare once
         try (PreparedStatement preparedStatement = connection.prepareStatement(DBQueries.PG_TERMINATE_BACKEND_QUERY)) {
             preparedStatement.setInt(1, processPid);
             ResultSet resultSet = preparedStatement.executeQuery();
@@ -418,6 +418,7 @@ public class DBController implements DBProcessFilterListener, DBBlocksJournalLis
 
     public boolean cancelProcessWithPid(int processPid) throws SQLException {
         boolean processCanceled = false;
+        // FIXME prepare once
         try (PreparedStatement preparedStatement = connection.prepareStatement(DBQueries.PG_CANCEL_BACKEND_QUERY)) {
             preparedStatement.setInt(1, processPid);
             ResultSet resultSet = preparedStatement.executeQuery();
