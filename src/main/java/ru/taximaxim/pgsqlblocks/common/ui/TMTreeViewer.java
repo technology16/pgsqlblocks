@@ -90,8 +90,7 @@ public class TMTreeViewer extends TreeViewer {
     }
 
     private void createColumns() {
-        List<Columns> columns = dataSource.getColumns();
-        for (Columns column : columns) {
+        for (Columns column : dataSource.getColumns()) {
             TreeViewerColumn treeColumn = new TreeViewerColumn(this, SWT.NONE);
             treeColumn.getColumn().setText(dataSource.getColumnTitle(column.getColumnName()));
             treeColumn.getColumn().setMoveable(true);
