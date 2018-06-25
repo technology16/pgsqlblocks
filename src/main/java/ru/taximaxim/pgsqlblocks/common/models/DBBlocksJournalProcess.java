@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class DBBlocksJournalProcess {
+public class DBBlocksJournalProcess extends DBProcess {
 
     private final DBProcess process;
 
@@ -32,11 +32,13 @@ public class DBBlocksJournalProcess {
     private Date closeDate;
 
     public DBBlocksJournalProcess(DBProcess process) {
+        super(process.getPid(), process.getQueryCaller(), process.getState(), process.getStateChange(), process.getQuery());
         this.createDate = new Date();
         this.process = process;
     }
 
     public DBBlocksJournalProcess(Date createDate, Date closeDate, DBProcess process) {
+        super(process.getPid(), process.getQueryCaller(), process.getState(), process.getStateChange(), process.getQuery());
         this.createDate = createDate;
         this.closeDate = closeDate;
         this.process = process;

@@ -30,7 +30,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.ResourceBundle;
 
-public class DBBlocksJournalViewDataSource extends TMTreeViewerDataSource<DBBlocksJournalProcess> {
+public class DBBlocksJournalViewDataSource extends TMTreeViewerDataSource {
 
     private final DateUtils dateUtils = new DateUtils();
 

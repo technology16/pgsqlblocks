@@ -31,7 +31,7 @@ import java.util.List;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
-public class DBProcessesViewDataSource extends TMTreeViewerDataSource<DBProcess> {
+public class DBProcessesViewDataSource extends TMTreeViewerDataSource {
 
     private final DateUtils dateUtils = new DateUtils();
 
