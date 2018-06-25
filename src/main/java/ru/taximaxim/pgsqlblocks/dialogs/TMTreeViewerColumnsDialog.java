@@ -31,6 +31,7 @@ import ru.taximaxim.pgsqlblocks.common.ui.TMTreeViewerDataSource;
 import ru.taximaxim.pgsqlblocks.utils.Columns;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.ResourceBundle;
 import java.util.Set;
 
@@ -45,9 +46,9 @@ public class TMTreeViewerColumnsDialog extends Dialog {
         super(shell);
         this.resourceBundle = resourceBundle;
         this.treeViewer = treeViewer;
-        Set<Integer> collapsedColumnsIndexes = this.treeViewer.getCollapsedColumnsIndexes();
-        if (collapsedColumnsIndexes != null) {
-            this.collapsedColumnsIndexes.addAll(collapsedColumnsIndexes);
+        Set<Integer> collapsedColumnsIndex = this.treeViewer.getCollapsedColumnsIndexes();
+        if (collapsedColumnsIndex != null) {
+            this.collapsedColumnsIndexes.addAll(collapsedColumnsIndex);
         }
     }
 
@@ -69,11 +70,11 @@ public class TMTreeViewerColumnsDialog extends Dialog {
 
         TMTreeViewerDataSource dataSource = treeViewer.getDataSource();
 
-        int columnsCount = dataSource.getColumns().size();
-        for (int i = 0; i < columnsCount; i++) {
-            final int columnIndex = i;
+        List<Columns> columns = dataSource.getColumns();
+        for (Columns column : columns) {
+            final int columnIndex = columns.indexOf(column);
             Button checkBoxButton = new Button(container, SWT.CHECK);
-            checkBoxButton.setText(dataSource.getColumnTitle(((Columns) dataSource.getColumns().get(i)).getColumnName()));
+            checkBoxButton.setText(dataSource.getColumnTitle(column.getColumnName()));
             checkBoxButton.setSelection(!collapsedColumnsIndexes.contains(columnIndex));
             checkBoxButton.addListener(SWT.Selection, event -> {
                 if (collapsedColumnsIndexes.contains(columnIndex)) {
