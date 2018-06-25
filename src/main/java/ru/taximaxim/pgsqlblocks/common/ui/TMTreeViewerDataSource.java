@@ -48,7 +48,7 @@ public abstract class TMTreeViewerDataSource implements ITableLabelProvider, ITr
 
     protected List<ILabelProviderListener> listeners = new ArrayList<>();
 
-    public abstract boolean columnIsSortableAtIndex();
+    public abstract boolean columnIsSortable();
 
     public abstract List<Columns> getColumns();
 

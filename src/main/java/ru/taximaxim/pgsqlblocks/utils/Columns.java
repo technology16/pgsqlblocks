@@ -22,9 +22,9 @@ public enum Columns {
     QUERY("query", "QUERY", 100),
     UNDEFINED("undefined", "UNDEFINED", 110);
 
-    private String columnName;
-    private String columnTooltip;
-    private int columnWidth;
+    private final String columnName;
+    private final String columnTooltip;
+    private final int columnWidth;
 
     Columns(String columnName, String columnTooltip, int columnWidth) {
         this.columnName = columnName;

@@ -54,7 +54,7 @@ public class DBProcessesViewDataSource extends TMTreeViewerDataSource {
     }
 
     @Override
-    public boolean columnIsSortableAtIndex() {
+    public boolean columnIsSortable() {
         return true;
     }
 
@@ -103,9 +103,9 @@ public class DBProcessesViewDataSource extends TMTreeViewerDataSource {
                 return String.valueOf(process.getQuery().isSlowQuery());
             case 15:
                 String query = process.getQuery().getQueryString();
-                int indexOfNewLine = query.indexOf("\n");
-                String substring = query.substring(0, query.indexOf("\n") >= 0 ? indexOfNewLine : query.length());
-                return query.indexOf("\n") >= 0 ? substring + " ..." : substring;
+                int indexOfNewLine = query.indexOf('\n');
+                String substring = query.substring(0, query.indexOf('\n') >= 0 ? indexOfNewLine : query.length());
+                return query.indexOf('\n') >= 0 ? substring + " ..." : substring;
             default:
                 return "UNDEFINED";
         }

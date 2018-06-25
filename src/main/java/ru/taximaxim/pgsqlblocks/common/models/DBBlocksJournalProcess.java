@@ -26,26 +26,22 @@ import java.util.stream.Collectors;
 
 public class DBBlocksJournalProcess extends DBProcess {
 
-    private final DBProcess process;
-
     private Date createDate;
     private Date closeDate;
 
     public DBBlocksJournalProcess(DBProcess process) {
         super(process.getPid(), process.getQueryCaller(), process.getState(), process.getStateChange(), process.getQuery());
         this.createDate = new Date();
-        this.process = process;
     }
 
     public DBBlocksJournalProcess(Date createDate, Date closeDate, DBProcess process) {
         super(process.getPid(), process.getQueryCaller(), process.getState(), process.getStateChange(), process.getQuery());
         this.createDate = createDate;
         this.closeDate = closeDate;
-        this.process = process;
     }
 
     public DBProcess getProcess() {
-        return process;
+        return this;
     }
 
     public boolean isClosed() {
@@ -77,13 +73,13 @@ public class DBBlocksJournalProcess extends DBProcess {
 
         DBBlocksJournalProcess other = (DBBlocksJournalProcess) o;
 
-        Date xactStart = process.getQuery().getXactStart();
+        Date xactStart = this.getQuery().getXactStart();
         Date otherXactStart = other.getProcess().getQuery().getXactStart();
 
         boolean isSameXactStart = xactStart == null ? otherXactStart == null : xactStart.equals(otherXactStart);
-        boolean isSamePid = process.getPid() == other.getProcess().getPid();
+        boolean isSamePid = this.getPid() == other.getProcess().getPid();
 
-        return isSameXactStart && isSamePid && childrenEquals(process.getChildren(), other.getProcess().getChildren());
+        return isSameXactStart && isSamePid && childrenEquals(this.getChildren(), other.getProcess().getChildren());
     }
 
     private boolean childrenEquals(List<DBProcess> processes, List<DBProcess> other) {
@@ -111,10 +107,10 @@ public class DBBlocksJournalProcess extends DBProcess {
 
     @Override
     public int hashCode() {
-        Date xactStart = process.getQuery().getXactStart();
-        int result = 31 * process.getPid();
+        Date xactStart = this.getQuery().getXactStart();
+        int result = 31 * this.getPid();
         result = 31 * result + (xactStart != null ? xactStart.hashCode() : 0);
-        result = childrenHashCode(result, process.getChildren());
+        result = childrenHashCode(result, this.getChildren());
         return result;
     }
 

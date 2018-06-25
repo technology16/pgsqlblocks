@@ -39,7 +39,7 @@ public class DBBlocksJournalViewDataSource extends TMTreeViewerDataSource {
     }
 
     @Override
-    public boolean columnIsSortableAtIndex() {
+    public boolean columnIsSortable() {
         return false;
     }
 

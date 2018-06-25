@@ -96,7 +96,7 @@ public class TMTreeViewer extends TreeViewer {
             treeColumn.getColumn().setMoveable(true);
             treeColumn.getColumn().setToolTipText(column.getColumnTooltip());
             treeColumn.getColumn().setWidth(column.getColumnWidth());
-            if (dataSource.columnIsSortableAtIndex()) {
+            if (dataSource.columnIsSortable()) {
                 TreeColumn swtColumn = treeColumn.getColumn();
                 final int columnIndex = dataSource.getColumns().indexOf(column);
                 swtColumn.addSelectionListener(new SelectionListener() {
@@ -136,7 +136,7 @@ public class TMTreeViewer extends TreeViewer {
                     continue;
                 }
                 TreeColumn column = columns[i];
-                column.setWidth(((Columns) dataSource.getColumns().get(i)).getColumnWidth());
+                column.setWidth((dataSource.getColumns().get(i)).getColumnWidth());
                 column.setResizable(true);
             }
         }
