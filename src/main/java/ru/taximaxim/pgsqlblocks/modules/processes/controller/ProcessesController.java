@@ -28,6 +28,7 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
@@ -57,8 +58,10 @@ import ru.taximaxim.pgsqlblocks.utils.SettingsListener;
 
 import java.lang.reflect.InvocationTargetException;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
 public class ProcessesController implements DBControllerListener, DBModelsViewListener, SettingsListener,
@@ -365,6 +368,9 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
         if (addDatabaseDialog.open() == Window.OK) {
             addDatabase(addDatabaseDialog.getCreatedModel());
             dbModelsView.getTableViewer().refresh();
+            DBController controller = dbControllers.get(dbControllers.size()-1);
+            dbModelsView.getTableViewer().setSelection(new StructuredSelection(controller));
+            controller.connect();
             saveDatabases();
         }
     }
