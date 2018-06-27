@@ -400,6 +400,7 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
                 new EditDatabaseDialog(resourceBundle, view.getShell(), reservedConnectionNames, selectedController.getModel());
         if (editDatabaseDialog.open() == Window.OK) {
             editDatabase(editDatabaseDialog.getEditedModel(), editDatabaseDialog.getCreatedModel());
+            selectedController.connect();
         }
     }
 
