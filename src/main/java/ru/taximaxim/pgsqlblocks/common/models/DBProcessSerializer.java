@@ -54,7 +54,7 @@ public class DBProcessSerializer {
 
     public DBProcess deserialize(ResultSet resultSet) throws SQLException {
         int pid = resultSet.getInt(PID);
-        String state = resultSet.getString(STATE);
+        String state = resultSet.getString(STATE) == null ? "" : resultSet.getString(STATE);
         Date stateChangeDate = dateUtils.dateFromString(resultSet.getString(STATE_CHANGE));
 
         String queryString = resultSet.getString(QUERY_SQL);
