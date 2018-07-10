@@ -145,11 +145,11 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>license-maven-plugin</artifactId>
-                <version>1.6</version>
+                <version>1.16</version>
 
                 <configuration>
                     <addJavaLicenseAfterPackage>false</addJavaLicenseAfterPackage>
-                    <sectionDelimiter>*</sectionDelimiter>
+                    <sectionDelimiter>%</sectionDelimiter>
                     <processStartTag>========================LICENSE_START=================================</processStartTag>
                     <processEndTag>=========================LICENSE_END==================================</processEndTag>
                     <verbose>false</verbose>
