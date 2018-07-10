@@ -57,8 +57,10 @@ import ru.taximaxim.pgsqlblocks.utils.SettingsListener;
 
 import java.lang.reflect.InvocationTargetException;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
 public class ProcessesController implements DBControllerListener, DBModelsViewListener, SettingsListener,
@@ -326,14 +328,15 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
         dbModelsView.getTableViewer().refresh();
     }
 
-    private void addDatabase(DBModel dbModel) {
-        addDatabase(dbModel, dbControllers.size());
+    private DBController addDatabase(DBModel dbModel) {
+        return addDatabase(dbModel, dbControllers.size());
     }
 
-    private void addDatabase(DBModel dbModel, int index) {
+    private DBController addDatabase(DBModel dbModel, int index) {
         DBController controller = new DBController(settings, dbModel);
         controller.addListener(this);
         dbControllers.add(index, controller);
+        return controller;
     }
 
     private void deleteDatabase(DBController dbController) {
@@ -363,8 +366,11 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
                 .collect(Collectors.toList());
         AddDatabaseDialog addDatabaseDialog = new AddDatabaseDialog(resourceBundle, view.getShell(), reservedConnectionNames);
         if (addDatabaseDialog.open() == Window.OK) {
-            addDatabase(addDatabaseDialog.getCreatedModel());
+            DBController controller = addDatabase(addDatabaseDialog.getCreatedModel());
             dbModelsView.getTableViewer().refresh();
+            if (controller.isEnabledAutoConnection()) {
+                controller.connect();
+            }
             saveDatabases();
         }
     }
