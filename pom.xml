@@ -4,7 +4,7 @@
 
     <groupId>ru.taximaxim</groupId>
     <artifactId>pgSqlBlocks</artifactId>
-    <version>1.4.0</version>
+    <version>1.5.0</version>
     <packaging>jar</packaging>
 
     <name>pgSqlBlocks</name>
@@ -230,7 +230,7 @@
          <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>[9.4.1211]</version>
+            <version>[42.2.2]</version>
         </dependency>
         <dependency>
             <groupId>com.typesafe</groupId>
