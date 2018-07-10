@@ -28,7 +28,6 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
-import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
@@ -329,14 +328,15 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
         dbModelsView.getTableViewer().refresh();
     }
 
-    private void addDatabase(DBModel dbModel) {
-        addDatabase(dbModel, dbControllers.size());
+    private DBController addDatabase(DBModel dbModel) {
+        return addDatabase(dbModel, dbControllers.size());
     }
 
-    private void addDatabase(DBModel dbModel, int index) {
+    private DBController addDatabase(DBModel dbModel, int index) {
         DBController controller = new DBController(settings, dbModel);
         controller.addListener(this);
         dbControllers.add(index, controller);
+        return controller;
     }
 
     private void deleteDatabase(DBController dbController) {
@@ -366,11 +366,11 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
                 .collect(Collectors.toList());
         AddDatabaseDialog addDatabaseDialog = new AddDatabaseDialog(resourceBundle, view.getShell(), reservedConnectionNames);
         if (addDatabaseDialog.open() == Window.OK) {
-            addDatabase(addDatabaseDialog.getCreatedModel());
+            DBController controller = addDatabase(addDatabaseDialog.getCreatedModel());
             dbModelsView.getTableViewer().refresh();
-            DBController controller = dbControllers.get(dbControllers.size()-1);
-            dbModelsView.getTableViewer().setSelection(new StructuredSelection(controller));
-            controller.connect();
+            if (controller.isEnabledAutoConnection()) {
+                controller.connect();
+            }
             saveDatabases();
         }
     }
@@ -400,7 +400,6 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
                 new EditDatabaseDialog(resourceBundle, view.getShell(), reservedConnectionNames, selectedController.getModel());
         if (editDatabaseDialog.open() == Window.OK) {
             editDatabase(editDatabaseDialog.getEditedModel(), editDatabaseDialog.getCreatedModel());
-            selectedController.connect();
         }
     }
 
