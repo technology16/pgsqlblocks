@@ -31,6 +31,7 @@ import org.eclipse.swt.widgets.*;
 
 public class AboutDlg extends Dialog {
 
+    private static final String DIALOGTITLE = "О программе";
     private static final String DISTRIB_LINK = "http://pgcodekeeper.org/pgsqlblocks/";
     private static final String HOMEPAGE = "http://pgcodekeeper.org/pgsqlblocks.html";
     private static final String TELEGRAM_LINK = "https://telegram.me/joinchat/Bxn1Zwh02WM96O-55GAryA";
@@ -38,12 +39,11 @@ public class AboutDlg extends Dialog {
 
     public AboutDlg(Shell parentShell) {
         super(parentShell, SWT.DIALOG_TRIM | SWT.APPLICATION_MODAL);
-        parentShell.setText("О приложении");
     }
 
     public String open() {
         Shell shell = new Shell(getParent(), getStyle());
-        shell.setText(getText());
+        shell.setText(DIALOGTITLE);
         createContent(shell);
         shell.pack();
         shell.open();
@@ -66,6 +66,7 @@ public class AboutDlg extends Dialog {
         Label logoLabel = new Label(container, SWT.HORIZONTAL);
         logoLabel.setImage(logo);
 
+        //FIXME localization???
         Label infoLabel = new Label(container, SWT.HORIZONTAL);
         infoLabel.setText("pgSqlBlocks - это приложение, \n"
                 + "которое позволяет легко ориентироваться среди процессов \n"
