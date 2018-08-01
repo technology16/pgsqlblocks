@@ -31,8 +31,8 @@ import org.eclipse.swt.widgets.*;
 
 public class AboutDlg extends Dialog {
 
-    private static final String DISTRIB_LINK = "http://pgcodekeeper.ru/pgsqlblocks/";
-    private static final String HOMEPAGE = "http://pgcodekeeper.ru/pgsqlblocks.html";
+    private static final String DISTRIB_LINK = "http://pgcodekeeper.org/pgsqlblocks/";
+    private static final String HOMEPAGE = "http://pgcodekeeper.org/pgsqlblocks.html";
     private static final String TELEGRAM_LINK = "https://telegram.me/joinchat/Bxn1Zwh02WM96O-55GAryA";
     private static final int OK_BUTTON_HEIGHT_IN_CHARS = 15;
 
