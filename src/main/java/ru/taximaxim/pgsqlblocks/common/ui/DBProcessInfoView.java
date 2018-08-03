@@ -22,10 +22,9 @@ package ru.taximaxim.pgsqlblocks.common.ui;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Text;
-import org.eclipse.swt.widgets.ToolBar;
-import org.eclipse.swt.widgets.ToolItem;
 import ru.taximaxim.pgsqlblocks.common.models.DBProcess;
 
 import java.util.ArrayList;
@@ -38,7 +37,7 @@ public class DBProcessInfoView extends Composite {
 
     private final List<DBProcessInfoViewListener> listeners = new ArrayList<>();
 
-    private ToolBar toolBar;
+    private Composite buttonBar;
     private Text processInfoText;
 
     public DBProcessInfoView(ResourceBundle resourceBundle, Composite parent, int style) {
@@ -54,24 +53,24 @@ public class DBProcessInfoView extends Composite {
     }
 
     private void createContent() {
-        toolBar = new ToolBar(this, SWT.HORIZONTAL);
-        GridLayout layout = new GridLayout();
+        buttonBar = new Composite(this, SWT.HORIZONTAL);
+        GridLayout layout = new GridLayout(2, false);
         GridData layoutData = new GridData(SWT.FILL, SWT.TOP, true, false);
-        toolBar.setLayout(layout);
-        toolBar.setLayoutData(layoutData);
+        buttonBar.setLayout(layout);
+        buttonBar.setLayoutData(layoutData);
 
-        ToolItem cancelProcessToolItem = new ToolItem(toolBar, SWT.PUSH);
-        cancelProcessToolItem.setText(resourceBundle.getString("cancel_process"));
-        cancelProcessToolItem.setToolTipText("pg_cancel_backend");
-        cancelProcessToolItem.addListener(SWT.Selection, event -> {
-            listeners.forEach(DBProcessInfoViewListener::dbProcessInfoViewCancelProcessToolItemClicked);
+        Button cancelProcessButton = new Button(buttonBar, SWT.PUSH);
+        cancelProcessButton.setText(resourceBundle.getString("cancel_process"));
+        cancelProcessButton.setToolTipText("pg_cancel_backend");
+        cancelProcessButton.addListener(SWT.Selection, event -> {
+            listeners.forEach(DBProcessInfoViewListener::dbProcessInfoViewCancelProcessButtonClicked);
         });
 
-        ToolItem terminateProcessToolItem = new ToolItem(toolBar, SWT.PUSH);
-        terminateProcessToolItem.setText(resourceBundle.getString("kill_process"));
-        terminateProcessToolItem.setToolTipText("pg_terminate_backend");
-        terminateProcessToolItem.addListener(SWT.Selection, event -> {
-            listeners.forEach(DBProcessInfoViewListener::dbProcessInfoViewTerminateProcessToolItemClicked);
+        Button terminateProcessButton = new Button(buttonBar, SWT.PUSH);
+        terminateProcessButton.setText(resourceBundle.getString("kill_process"));
+        terminateProcessButton.setToolTipText("pg_terminate_backend");
+        terminateProcessButton.addListener(SWT.Selection, event -> {
+            listeners.forEach(DBProcessInfoViewListener::dbProcessInfoViewTerminateProcessButtonClicked);
         });
 
         processInfoText = new Text(this, SWT.MULTI | SWT.READ_ONLY | SWT.WRAP | SWT.V_SCROLL);
@@ -81,8 +80,8 @@ public class DBProcessInfoView extends Composite {
     }
 
     public void hideToolBar() {
-        this.toolBar.setVisible(false);
-        GridData layoutData = (GridData) this.toolBar.getLayoutData();
+        this.buttonBar.setVisible(false);
+        GridData layoutData = (GridData) this.buttonBar.getLayoutData();
         layoutData.exclude = true;
         this.layout();
     }

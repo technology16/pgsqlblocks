@@ -854,7 +854,7 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
     }
 
     @Override
-    public void dbProcessInfoViewTerminateProcessToolItemClicked() {
+    public void dbProcessInfoViewTerminateProcessButtonClicked() {
         Object selectedController = dbModelsView.getTableViewer().getStructuredSelection().getFirstElement();
         if (selectedController == null || selectedProcesses.isEmpty()) {
             return;
@@ -903,7 +903,7 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
     }
 
     @Override
-    public void dbProcessInfoViewCancelProcessToolItemClicked(){
+    public void dbProcessInfoViewCancelProcessButtonClicked(){
         Object selectedController = dbModelsView.getTableViewer().getStructuredSelection().getFirstElement();
         if (selectedController == null || selectedProcesses.isEmpty()) {
             return;
