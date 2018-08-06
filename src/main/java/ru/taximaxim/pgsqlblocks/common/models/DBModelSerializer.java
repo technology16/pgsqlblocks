@@ -29,6 +29,7 @@ public class DBModelSerializer {
     private static final String ELEMENT_NAME_TAG_NAME         = "name";
     private static final String ELEMENT_HOST_TAG_NAME         = "host";
     private static final String ELEMENT_PORT_TAG_NAME         = "port";
+    private static final String ELEMENT_VERSION_TAG_NAME      = "version";
     private static final String ELEMENT_DATABASE_NAME_TAG_NAME = "dbname";
     private static final String ELEMENT_USER_TAG_NAME         = "user";
     private static final String ELEMENT_PASSWORD_TAG_NAME     = "passwd";
@@ -38,6 +39,7 @@ public class DBModelSerializer {
         Node nameNode = xmlElement.getElementsByTagName(ELEMENT_NAME_TAG_NAME).item(0);
         Node hostNode = xmlElement.getElementsByTagName(ELEMENT_HOST_TAG_NAME).item(0);
         Node portNode = xmlElement.getElementsByTagName(ELEMENT_PORT_TAG_NAME).item(0);
+        Node versionNode = xmlElement.getElementsByTagName(ELEMENT_VERSION_TAG_NAME).item(0);
         Node databaseNameNode = xmlElement.getElementsByTagName(ELEMENT_DATABASE_NAME_TAG_NAME).item(0);
         Node userNode = xmlElement.getElementsByTagName(ELEMENT_USER_TAG_NAME).item(0);
         Node passwordNode = xmlElement.getElementsByTagName(ELEMENT_PASSWORD_TAG_NAME).item(0);
@@ -46,12 +48,13 @@ public class DBModelSerializer {
         String name = getTextContentFromNode(nameNode);
         String host = getTextContentFromNode(hostNode);
         String port = getTextContentFromNode(portNode);
+        String version = getTextContentFromNode(versionNode);
         String databaseName = getTextContentFromNode(databaseNameNode);
         String user = getTextContentFromNode(userNode);
         String password = getTextContentFromNode(passwordNode);
         boolean enabled = enabledNode == null ? false : Boolean.parseBoolean(getTextContentFromNode(enabledNode));
 
-        return new DBModel(name, host, port, databaseName, user, password, enabled);
+        return new DBModel(name, host, port, version, databaseName, user, password, enabled);
     }
 
     public Element serialize(Document document, DBModel model) {
@@ -59,6 +62,7 @@ public class DBModelSerializer {
         rootElement.appendChild(createElementWithContent(document, ELEMENT_NAME_TAG_NAME, model.getName()));
         rootElement.appendChild(createElementWithContent(document, ELEMENT_HOST_TAG_NAME, model.getHost()));
         rootElement.appendChild(createElementWithContent(document, ELEMENT_PORT_TAG_NAME, model.getPort()));
+        rootElement.appendChild(createElementWithContent(document, ELEMENT_VERSION_TAG_NAME, model.getVersion()));
         rootElement.appendChild(createElementWithContent(document, ELEMENT_DATABASE_NAME_TAG_NAME, model.getDatabaseName()));
         rootElement.appendChild(createElementWithContent(document, ELEMENT_USER_TAG_NAME, model.getUser()));
         rootElement.appendChild(createElementWithContent(document, ELEMENT_PASSWORD_TAG_NAME, model.getPassword()));

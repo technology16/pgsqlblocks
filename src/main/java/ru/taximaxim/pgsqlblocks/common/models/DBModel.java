@@ -19,20 +19,24 @@
  */
 package ru.taximaxim.pgsqlblocks.common.models;
 
+import ru.taximaxim.pgsqlblocks.utils.SupportedVersion;
+
 public class DBModel implements Cloneable {
 
     private String name;
     private String host;
     private String port;
+    private String version = SupportedVersion.VERSION_9_6.getVersion();
     private String databaseName;
     private String user;
     private String password;
     private boolean enabled;
 
-    public DBModel(String name, String host, String port, String databaseName, String user, String password, boolean enabled) {
+    public DBModel(String name, String host, String port, String version, String databaseName, String user, String password, boolean enabled) {
         this.name = name;
         this.host = host;
         this.port = port;
+        this.version = version;
         this.databaseName = databaseName;
         this.user = user;
         this.password = password;
@@ -49,6 +53,10 @@ public class DBModel implements Cloneable {
 
     public String getPort() {
         return port;
+    }
+
+    public String getVersion() {
+        return version;
     }
 
     public String getDatabaseName() {
@@ -72,7 +80,7 @@ public class DBModel implements Cloneable {
     }
 
     public DBModel clone() {
-        return new DBModel(this.name, this.host, this.port, this.databaseName, this.user, this.password, this.enabled);
+        return new DBModel(this.name, this.host, this.port, this.version, this.databaseName, this.user, this.password, this.enabled);
     }
 
     @Override
@@ -81,6 +89,7 @@ public class DBModel implements Cloneable {
                 "name='" + name + '\'' +
                 ", host='" + host + '\'' +
                 ", port='" + port + '\'' +
+                ", version='" + version + '\'' +
                 ", databaseName='" + databaseName + '\'' +
                 ", user='" + user + '\'' +
                 ", password='" + password + '\'' +
@@ -88,30 +97,34 @@ public class DBModel implements Cloneable {
                 '}';
     }
 
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof DBModel)) return false;
+        if (o == null || getClass() != o.getClass()) return false;
 
         DBModel dbModel = (DBModel) o;
 
         if (enabled != dbModel.enabled) return false;
-        if (!name.equals(dbModel.name)) return false;
-        if (!host.equals(dbModel.host)) return false;
-        if (!port.equals(dbModel.port)) return false;
-        if (!databaseName.equals(dbModel.databaseName)) return false;
-        if (!user.equals(dbModel.user)) return false;
-        return password.equals(dbModel.password);
+        if (name != null ? !name.equals(dbModel.name) : dbModel.name != null) return false;
+        if (host != null ? !host.equals(dbModel.host) : dbModel.host != null) return false;
+        if (port != null ? !port.equals(dbModel.port) : dbModel.port != null) return false;
+        if (version != null ? !version.equals(dbModel.version) : dbModel.version != null) return false;
+        if (databaseName != null ? !databaseName.equals(dbModel.databaseName) : dbModel.databaseName != null)
+            return false;
+        if (user != null ? !user.equals(dbModel.user) : dbModel.user != null) return false;
+        return password != null ? password.equals(dbModel.password) : dbModel.password == null;
     }
 
     @Override
     public int hashCode() {
-        int result = name.hashCode();
-        result = 31 * result + host.hashCode();
-        result = 31 * result + port.hashCode();
-        result = 31 * result + databaseName.hashCode();
-        result = 31 * result + user.hashCode();
-        result = 31 * result + password.hashCode();
+        int result = name != null ? name.hashCode() : 0;
+        result = 31 * result + (host != null ? host.hashCode() : 0);
+        result = 31 * result + (port != null ? port.hashCode() : 0);
+        result = 31 * result + (version != null ? version.hashCode() : 0);
+        result = 31 * result + (databaseName != null ? databaseName.hashCode() : 0);
+        result = 31 * result + (user != null ? user.hashCode() : 0);
+        result = 31 * result + (password != null ? password.hashCode() : 0);
         result = 31 * result + (enabled ? 1 : 0);
         return result;
     }
