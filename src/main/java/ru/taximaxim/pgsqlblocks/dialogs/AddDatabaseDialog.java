@@ -21,12 +21,16 @@ package ru.taximaxim.pgsqlblocks.dialogs;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
+import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.*;
 import ru.taximaxim.pgsqlblocks.common.models.DBModel;
+import ru.taximaxim.pgsqlblocks.utils.SupportedVersion;
 
 import java.util.List;
 import java.util.ResourceBundle;
@@ -101,7 +105,28 @@ public class AddDatabaseDialog extends Dialog {
         Label versionLabel = new Label(container, SWT.HORIZONTAL);
         versionLabel.setText(resourceBundle.getString("version"));
         versionCombo = new ComboViewer(container, SWT.BORDER | SWT.DROP_DOWN | SWT.READ_ONLY);
-        // TODO: 06.08.18 Fill combo from
+        versionCombo.setContentProvider(ArrayContentProvider.getInstance());
+        versionCombo.setInput(SupportedVersion.values());
+        versionCombo.setSelection(new StructuredSelection(SupportedVersion.VERSION_10));
+        versionCombo.setLabelProvider(new LabelProvider() {
+            @Override
+            public String getText(Object element) {
+                if (element instanceof SupportedVersion) {
+                    SupportedVersion person = (SupportedVersion) element;
+                    return person.getVersion();
+                }
+                return super.getText(element);
+            }
+        });
+//        versionCombo.addSelectionChangedListener(event -> {
+//            IStructuredSelection selection = (IStructuredSelection) event
+//                    .getSelection();
+//            if (selection.size() > 0){
+//                System.out.println(((SupportedVersion) selection.getFirstElement())
+//                        .getVersion());
+//            }
+//        });
+
 
         Label userLabel = new Label(container, SWT.HORIZONTAL);
         userLabel.setText(resourceBundle.getString("user"));
@@ -137,6 +162,8 @@ public class AddDatabaseDialog extends Dialog {
         String name = nameText.getText();
         String host = hostText.getText();
         String port = portText.getText();
+        SupportedVersion selection = (SupportedVersion) versionCombo.getStructuredSelection().getFirstElement();
+        String version = selection.getVersion();
         String databaseName = databaseNameText.getText();
         String user = userText.getText();
         String password = passwordText.getText();
@@ -159,7 +186,7 @@ public class AddDatabaseDialog extends Dialog {
             return;
         }
 
-        createdModel = new DBModel(name, host, port, databaseName, user, password, enabled);
+        createdModel = new DBModel(name, host, port, version, databaseName, user, password, enabled);
 
         super.okPressed();
     }
