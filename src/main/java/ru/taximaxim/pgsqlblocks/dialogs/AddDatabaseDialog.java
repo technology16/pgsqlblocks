@@ -21,6 +21,7 @@ package ru.taximaxim.pgsqlblocks.dialogs;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -41,6 +42,7 @@ public class AddDatabaseDialog extends Dialog {
     protected Text nameText;
     protected Text hostText;
     protected Text portText;
+    protected ComboViewer versionCombo;
     protected Text userText;
     protected Text passwordText;
     protected Text databaseNameText;
@@ -95,6 +97,11 @@ public class AddDatabaseDialog extends Dialog {
         portText = new Text(container, SWT.BORDER);
         portText.setText(DEFAULT_PORT);
         portText.setLayoutData(textGd);
+
+        Label versionLabel = new Label(container, SWT.HORIZONTAL);
+        versionLabel.setText(resourceBundle.getString("version"));
+        versionCombo = new ComboViewer(container, SWT.BORDER | SWT.DROP_DOWN | SWT.READ_ONLY);
+        // TODO: 06.08.18 Fill combo from
 
         Label userLabel = new Label(container, SWT.HORIZONTAL);
         userLabel.setText(resourceBundle.getString("user"));

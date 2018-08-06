@@ -129,6 +129,7 @@ public class PgSqlBlocks_en extends ListResourceBundle {
                 {"name", "Connection name*"},
                 {"host", "Host*"},
                 {"port", "Port*"},
+                {"version", "Version*"},
                 {"user", "User*"},
                 {"password", "Password"},
                 {"use_pgpass_file", "Password will be stored in insecure storage. Use .pgpass file instead."},
