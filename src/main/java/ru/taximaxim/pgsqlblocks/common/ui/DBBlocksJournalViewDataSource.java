@@ -69,57 +69,54 @@ public class DBBlocksJournalViewDataSource extends TMTreeViewerDataSource {
 
     @Override
     public String getColumnText(Object element, int columnIndex) {
+        return getRowText(element, getColumns().get(columnIndex));
+    }
+
+    private String getRowText(Object element, Columns column) {
         DBProcess process;
+        DBBlocksJournalProcess parentProcess = null;
         if (element instanceof DBBlocksJournalProcess) {
-            DBBlocksJournalProcess parentProcess = (DBBlocksJournalProcess)element;
+            parentProcess = (DBBlocksJournalProcess)element;
             process = parentProcess.getProcess();
-            switch (columnIndex) {
-                case 1:
-                    return dateUtils.dateToString(parentProcess.getCreateDate());
-                case 2:
-                    return dateUtils.dateToString(parentProcess.getCloseDate());
-                default:
-                    // no-op
-            }
-        } else {
+        }else {
             process = (DBProcess)element;
         }
-        switch (columnIndex) {
-            case 0:
+        switch (column){
+            case PID:
                 return String.valueOf(process.getPid());
-            case 1:
-                return "";
-            case 2:
-                return "";
-            case 3:
+            case CREATE_DATE:
+                return parentProcess != null ? dateUtils.dateToString(parentProcess.getCreateDate()) : "";
+            case CLOSE_DATE:
+                return parentProcess != null ? dateUtils.dateToString(parentProcess.getCloseDate()) : "";
+            case BLOCKED_COUNT:
                 return String.valueOf(process.getChildren().size());
-            case 4:
+            case APPLICATION_NAME:
                 return process.getQueryCaller().getApplicationName();
-            case 5:
+            case DATABASE_NAME:
                 return process.getQueryCaller().getDatabaseName();
-            case 6:
+            case USER_NAME:
                 return process.getQueryCaller().getUserName();
-            case 7:
+            case CLIENT:
                 return process.getQueryCaller().getClient();
-            case 8:
+            case BACKEND_START:
                 return dateUtils.dateToString(process.getQuery().getBackendStart());
-            case 9:
+            case QUERY_START:
                 return dateUtils.dateToString(process.getQuery().getQueryStart());
-            case 10:
+            case XACT_START:
                 return dateUtils.dateToString(process.getQuery().getXactStart());
-            case 11:
+            case STATE:
                 return process.getState();
-            case 12:
+            case STATE_CHANGE:
                 return dateUtils.dateToString(process.getStateChange());
-            case 13:
+            case BLOCKED:
                 return process.getBlocksPidsString();
-            case 14:
+            case LOCK_TYPE:
                 return process.getBlocksLocktypesString();
-            case 15:
+            case RELATION:
                 return process.getBlocksRelationsString();
-            case 16:
+            case SLOW_QUERY:
                 return String.valueOf(process.getQuery().isSlowQuery());
-            case 17:
+            case QUERY:
                 return process.getQuery().getQueryString();
             default:
                 return "UNDEFINED";

@@ -19,8 +19,8 @@ public enum Columns {
     LOCK_TYPE("lock_type", "LOCK_TYPE", 110),
     RELATION("relation", "RELATION", 130),
     SLOW_QUERY("slow_query", "SLOW_QUERY", 150),
-    QUERY("query", "QUERY", 100),
-    UNDEFINED("undefined", "UNDEFINED", 110);
+    QUERY("query", "QUERY", 100);
+    //UNDEFINED("undefined", "UNDEFINED", 110);
 
     private final String columnName;
     private final String columnTooltip;

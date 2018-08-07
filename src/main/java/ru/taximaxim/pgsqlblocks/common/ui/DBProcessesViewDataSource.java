@@ -45,7 +45,6 @@ public class DBProcessesViewDataSource extends TMTreeViewerDataSource {
         List<Columns> list = new ArrayList<>(Arrays.asList(Columns.values()));
         list.remove(Columns.CREATE_DATE);
         list.remove(Columns.CLOSE_DATE);
-        list.remove(Columns.UNDEFINED);
         return list;
     }
 
@@ -74,9 +73,9 @@ public class DBProcessesViewDataSource extends TMTreeViewerDataSource {
     }
 
 
-    private String getColumnText(Object element, Columns columnIndex) {
+    private String getColumnText(Object element, Columns column) {
         DBProcess process = (DBProcess)element;
-        switch (columnIndex) {
+        switch (column) {
             case PID:
                 return String.valueOf(process.getPid());
             case BLOCKED_COUNT:
