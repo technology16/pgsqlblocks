@@ -96,8 +96,10 @@ public class TMTreeViewer extends TreeViewer {
             treeColumn.getColumn().setMoveable(true);
             treeColumn.getColumn().setToolTipText(column.getColumnTooltip());
             treeColumn.getColumn().setWidth(column.getColumnWidth());
+            treeColumn.getColumn().setData(column);
             if (dataSource.columnIsSortable()) {
                 TreeColumn swtColumn = treeColumn.getColumn();
+
                 final int columnIndex = dataSource.getColumns().indexOf(column);
                 swtColumn.addSelectionListener(new SelectionListener() {
                     @Override

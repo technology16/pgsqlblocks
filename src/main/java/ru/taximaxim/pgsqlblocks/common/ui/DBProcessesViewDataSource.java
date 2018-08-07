@@ -45,6 +45,7 @@ public class DBProcessesViewDataSource extends TMTreeViewerDataSource {
         List<Columns> list = new ArrayList<>(Arrays.asList(Columns.values()));
         list.remove(Columns.CREATE_DATE);
         list.remove(Columns.CLOSE_DATE);
+        list.remove(Columns.UNDEFINED);
         return list;
     }
 
@@ -69,39 +70,44 @@ public class DBProcessesViewDataSource extends TMTreeViewerDataSource {
 
     @Override
     public String getColumnText(Object element, int columnIndex) {
+         return getColumnText(element, getColumns().get(columnIndex));
+    }
+
+
+    private String getColumnText(Object element, Columns columnIndex) {
         DBProcess process = (DBProcess)element;
         switch (columnIndex) {
-            case 0:
+            case PID:
                 return String.valueOf(process.getPid());
-            case 1:
+            case BLOCKED_COUNT:
                 return String.valueOf(process.getChildren().size());
-            case 2:
+            case APPLICATION_NAME:
                 return process.getQueryCaller().getApplicationName();
-            case 3:
+            case DATABASE_NAME:
                 return process.getQueryCaller().getDatabaseName();
-            case 4:
+            case USER_NAME:
                 return process.getQueryCaller().getUserName();
-            case 5:
+            case CLIENT:
                 return process.getQueryCaller().getClient();
-            case 6:
+            case BACKEND_START:
                 return dateUtils.dateToString(process.getQuery().getBackendStart());
-            case 7:
+            case QUERY_START:
                 return dateUtils.dateToString(process.getQuery().getQueryStart());
-            case 8:
+            case XACT_START:
                 return dateUtils.dateToString(process.getQuery().getXactStart());
-            case 9:
+            case STATE:
                 return process.getState();
-            case 10:
+            case STATE_CHANGE:
                 return dateUtils.dateToString(process.getStateChange());
-            case 11:
+            case BLOCKED:
                 return process.getBlocksPidsString();
-            case 12:
+            case LOCK_TYPE:
                 return process.getBlocksLocktypesString();
-            case 13:
+            case RELATION:
                 return process.getBlocksRelationsString();
-            case 14:
+            case SLOW_QUERY:
                 return String.valueOf(process.getQuery().isSlowQuery());
-            case 15:
+            case QUERY:
                 String query = process.getQuery().getQueryString();
                 int indexOfNewLine = query.indexOf('\n');
                 String substring = query.substring(0, query.indexOf('\n') >= 0 ? indexOfNewLine : query.length());
