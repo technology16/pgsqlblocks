@@ -145,7 +145,7 @@ public class DBProcess {
     public String toString() {
         return "DBProcess{" +
                 "parents=" + parents +
-                ", children=" + children +
+                ", children=" + children.size() +
                 ", blocks=" + blocks +
                 ", pid=" + pid +
                 ", state='" + state + '\'' +
