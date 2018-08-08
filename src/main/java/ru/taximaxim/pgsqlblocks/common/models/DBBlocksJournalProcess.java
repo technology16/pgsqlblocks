@@ -26,9 +26,10 @@ import java.util.stream.Collectors;
 
 public class DBBlocksJournalProcess {
 
+    private final DBProcess process;
+
     private Date createDate;
     private Date closeDate;
-    private DBProcess process;
 
     public DBBlocksJournalProcess(DBProcess process) {
         this.createDate = new Date();
