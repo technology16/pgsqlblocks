@@ -49,11 +49,6 @@ public class DBBlocksJournalViewDataSource extends TMTreeViewerDataSource {
     }
 
     @Override
-    public String getColumnTitle(String name) {
-        return resourceBundle.getString(name);
-    }
-
-    @Override
     public Image getColumnImage(Object element, int columnIndex) {
         if (columnIndex != 0) {
             return null;

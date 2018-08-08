@@ -40,15 +40,15 @@ public class TMTreeViewerColumnsDialog extends Dialog {
     private TMTreeViewer treeViewer;
     private ResourceBundle resourceBundle;
 
-    private final Set<Integer> collapsedColumnsIndexes = new HashSet<>();
+    private final Set<Columns> collapsedColumnsIndexes = new HashSet<>();
 
     public TMTreeViewerColumnsDialog(ResourceBundle resourceBundle, TMTreeViewer treeViewer, Shell shell) {
         super(shell);
         this.resourceBundle = resourceBundle;
         this.treeViewer = treeViewer;
-        Set<Integer> collapsedColumnsIndex = this.treeViewer.getCollapsedColumnsIndexes();
-        if (collapsedColumnsIndex != null) {
-            this.collapsedColumnsIndexes.addAll(collapsedColumnsIndex);
+        Set<Columns> collapsedColumnsIndexes = this.treeViewer.getCollapsedColumnsIndexes();
+        if (collapsedColumnsIndexes != null) {
+            this.collapsedColumnsIndexes.addAll(collapsedColumnsIndexes);
         }
     }
 
@@ -72,15 +72,14 @@ public class TMTreeViewerColumnsDialog extends Dialog {
 
         List<Columns> columns = dataSource.getColumns();
         for (Columns column : columns) {
-            final int columnIndex = columns.indexOf(column);
             Button checkBoxButton = new Button(container, SWT.CHECK);
-            checkBoxButton.setText(dataSource.getColumnTitle(column.getColumnName()));
-            checkBoxButton.setSelection(!collapsedColumnsIndexes.contains(columnIndex));
+            checkBoxButton.setText(dataSource.localizeString(column.getColumnName()));
+            checkBoxButton.setSelection(!collapsedColumnsIndexes.contains(column));
             checkBoxButton.addListener(SWT.Selection, event -> {
-                if (collapsedColumnsIndexes.contains(columnIndex)) {
-                    collapsedColumnsIndexes.remove(columnIndex);
+                if (collapsedColumnsIndexes.contains(column)) {
+                    collapsedColumnsIndexes.remove(column);
                 } else {
-                    collapsedColumnsIndexes.add(columnIndex);
+                    collapsedColumnsIndexes.add(column);
                 }
             });
         }

@@ -811,7 +811,7 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
     }
 
     @Override
-    public void didSelectSortColumn(TreeColumn column, int columnIndex, int sortDirection) {
+    public void didSelectSortColumn(TreeColumn column, int sortDirection) {
         dbProcessesView.getTreeViewer().setComparator(new DBProcessesViewComparator((Columns) column.getData(), sortDirection));
     }
 

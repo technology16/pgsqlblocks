@@ -52,7 +52,9 @@ public abstract class TMTreeViewerDataSource implements ITableLabelProvider, ITr
 
     public abstract List<Columns> getColumns();
 
-    public abstract String getColumnTitle(String name);
+    public String localizeString(String name) {
+        return resourceBundle.getString(name);
+    }
 
     @Override
     public void dispose() {

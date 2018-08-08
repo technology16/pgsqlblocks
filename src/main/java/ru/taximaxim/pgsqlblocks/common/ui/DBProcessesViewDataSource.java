@@ -49,11 +49,6 @@ public class DBProcessesViewDataSource extends TMTreeViewerDataSource {
     }
 
     @Override
-    public String getColumnTitle(String name) {
-        return resourceBundle.getString(name);
-    }
-
-    @Override
     public boolean columnIsSortable() {
         return true;
     }
