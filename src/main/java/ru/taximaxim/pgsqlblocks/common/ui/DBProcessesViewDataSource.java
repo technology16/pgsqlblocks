@@ -39,7 +39,6 @@ public class DBProcessesViewDataSource extends TMTreeViewerDataSource {
         super(resourceBundle, dataFilter);
     }
 
-
     @Override
     public List<Columns> getColumns() {
         List<Columns> list = new ArrayList<>(Arrays.asList(Columns.values()));
@@ -66,7 +65,6 @@ public class DBProcessesViewDataSource extends TMTreeViewerDataSource {
     public String getColumnText(Object element, int columnIndex) {
          return getColumnText(element, getColumns().get(columnIndex));
     }
-
 
     private String getColumnText(Object element, Columns column) {
         DBProcess process = (DBProcess)element;
