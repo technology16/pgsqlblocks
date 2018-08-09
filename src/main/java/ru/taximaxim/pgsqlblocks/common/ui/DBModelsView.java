@@ -39,7 +39,8 @@ public class DBModelsView extends Composite {
 
     private final ResourceBundle resourceBundle;
 
-    private static final int DATABASE_TABLE_WIDTH = 200;
+    private static final int COUNT_COLUMN_WIDTH = 50;
+    private static final int NAME_COLUMN_WIDTH = 150;
 
     private TableViewer tableViewer;
 
@@ -64,7 +65,12 @@ public class DBModelsView extends Composite {
         tableViewer.getTable().setHeaderVisible(true);
         TableViewerColumn column = new TableViewerColumn(tableViewer, SWT.NONE);
         column.getColumn().setText(resourceBundle.getString("database"));
-        column.getColumn().setWidth(DATABASE_TABLE_WIDTH);
+        column.getColumn().setWidth(NAME_COLUMN_WIDTH);
+
+        TableViewerColumn processesCountColumn = new TableViewerColumn(tableViewer, SWT.NONE);
+        processesCountColumn.getColumn().setText(resourceBundle.getString("processes"));
+        processesCountColumn.getColumn().setWidth(COUNT_COLUMN_WIDTH);
+
         tableViewer.setContentProvider(new DBModelsViewContentProvider());
         tableViewer.setLabelProvider(new DBModelsViewLabelProvider(resourceBundle));
         tableViewer.addSelectionChangedListener(event -> {
