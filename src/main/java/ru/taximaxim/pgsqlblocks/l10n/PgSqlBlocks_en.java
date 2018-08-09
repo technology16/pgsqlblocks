@@ -107,7 +107,7 @@ public class PgSqlBlocks_en extends ListResourceBundle {
                 {"slow_query", "Slow query"},
                 {"undefined", "Undefined"},
                 {"block_start_date", "Block started"},
-                {"block_change_date", "Block changed"},
+                {"block_end_date", "Block ended"},
 
                 // settings dialog
                 {"processes", "Processes"},

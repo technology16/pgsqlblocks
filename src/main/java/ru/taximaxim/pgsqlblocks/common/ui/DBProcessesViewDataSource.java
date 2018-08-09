@@ -43,8 +43,8 @@ public class DBProcessesViewDataSource extends TMTreeViewerDataSource {
     @Override
     public List<Columns> getColumns() {
         List<Columns> list = new ArrayList<>(Arrays.asList(Columns.values()));
-        list.remove(Columns.CREATE_DATE);
-        list.remove(Columns.CLOSE_DATE);
+        list.remove(Columns.BLOCK_CREATE_DATE);
+        list.remove(Columns.BLOCK_END_DATE);
         return list;
     }
 
@@ -89,6 +89,8 @@ public class DBProcessesViewDataSource extends TMTreeViewerDataSource {
                 return dateUtils.dateToString(process.getQuery().getQueryStart());
             case XACT_START:
                 return dateUtils.dateToString(process.getQuery().getXactStart());
+            case DURATION:
+                return DateUtils.durationToString(process.getQuery().getDuration());
             case STATE:
                 return process.getState();
             case STATE_CHANGE:
@@ -102,10 +104,7 @@ public class DBProcessesViewDataSource extends TMTreeViewerDataSource {
             case SLOW_QUERY:
                 return String.valueOf(process.getQuery().isSlowQuery());
             case QUERY:
-                String query = process.getQuery().getQueryString();
-                int indexOfNewLine = query.indexOf('\n');
-                String substring = query.substring(0, query.indexOf('\n') >= 0 ? indexOfNewLine : query.length());
-                return query.indexOf('\n') >= 0 ? substring + " ..." : substring;
+                return process.getQuery().getQueryFirstLine();
             default:
                 return "UNDEFINED";
         }

@@ -79,9 +79,9 @@ public class DBBlocksJournalViewDataSource extends TMTreeViewerDataSource {
         switch (column){
             case PID:
                 return String.valueOf(process.getPid());
-            case CREATE_DATE:
+            case BLOCK_CREATE_DATE:
                 return parentProcess != null ? dateUtils.dateToString(parentProcess.getCreateDate()) : "";
-            case CLOSE_DATE:
+            case BLOCK_END_DATE:
                 return parentProcess != null ? dateUtils.dateToString(parentProcess.getCloseDate()) : "";
             case BLOCKED_COUNT:
                 return String.valueOf(process.getChildren().size());
@@ -99,6 +99,8 @@ public class DBBlocksJournalViewDataSource extends TMTreeViewerDataSource {
                 return dateUtils.dateToString(process.getQuery().getQueryStart());
             case XACT_START:
                 return dateUtils.dateToString(process.getQuery().getXactStart());
+            case DURATION:
+                return DateUtils.durationToString(process.getQuery().getDuration());
             case STATE:
                 return process.getState();
             case STATE_CHANGE:
@@ -112,7 +114,7 @@ public class DBBlocksJournalViewDataSource extends TMTreeViewerDataSource {
             case SLOW_QUERY:
                 return String.valueOf(process.getQuery().isSlowQuery());
             case QUERY:
-                return process.getQuery().getQueryString();
+                return process.getQuery().getQueryFirstLine();
             default:
                 return "UNDEFINED";
         }

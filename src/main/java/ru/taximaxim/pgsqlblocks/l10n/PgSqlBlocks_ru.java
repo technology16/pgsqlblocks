@@ -107,7 +107,7 @@ public class PgSqlBlocks_ru extends ListResourceBundle {
                 {"slow_query", "Долгий процесс"},
                 {"undefined", "Без имени"},
                 {"block_start_date", "Блокировка началась"},
-                {"block_change_date", "Блокировка изменена"},
+                {"block_end_date", "Блокировка завершена"},
 
                 // settings dialog
                 {"processes", "Процессы"},
