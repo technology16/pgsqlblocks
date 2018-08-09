@@ -20,7 +20,6 @@
 package ru.taximaxim.pgsqlblocks.utils;
 
 import org.apache.log4j.Logger;
-import ru.taximaxim.pgsqlblocks.SortColumn;
 
 import java.io.*;
 import java.util.*;
@@ -62,7 +61,7 @@ public final class Settings {
     private boolean showLogMessages;
     private boolean confirmExit;
 
-    private Set<SortColumn> columnsList;
+    private Set<Columns> columnsList;
 
     private Properties properties;
     private File propFile;
@@ -80,7 +79,7 @@ public final class Settings {
         defaults.put(SHOW_IDLE, "true");
         defaults.put(SHOW_TOOL_TIP, "false");
         defaults.put(SHOW_BACKEND_PID, "true");
-        defaults.put(COLUMNS_LIST, Arrays.stream(SortColumn.values()).map(Enum::name).collect(Collectors.joining(",")));
+        defaults.put(COLUMNS_LIST, Arrays.stream(Columns.values()).map(Enum::name).collect(Collectors.joining(",")));
         defaults.put(CONFIRM_REQUIRED, "true");
         defaults.put(CONFIRM_EXIT, "true");
         defaults.put(SHOW_LOG_MESSAGES, "true");
@@ -103,8 +102,12 @@ public final class Settings {
         this.showIdle = Boolean.parseBoolean(properties.getProperty(SHOW_IDLE));
         this.showToolTip = Boolean.parseBoolean(properties.getProperty(SHOW_TOOL_TIP));
         this.showBackendPid = Boolean.parseBoolean(properties.getProperty(SHOW_BACKEND_PID));
-        this.columnsList = Arrays.stream(properties.getProperty(COLUMNS_LIST).split(","))
-                                            .map(SortColumn::valueOf).collect(Collectors.toSet());
+        try {
+            this.columnsList = Arrays.stream(properties.getProperty(COLUMNS_LIST).split(","))
+                    .map(Columns::valueOf).collect(Collectors.toSet());
+        } catch (IllegalArgumentException e) {
+            this.columnsList = new HashSet<>(Arrays.asList(Columns.values()));
+        }
         this.confirmRequired = Boolean.parseBoolean(properties.getProperty(CONFIRM_REQUIRED));
         this.confirmExit = Boolean.parseBoolean(properties.getProperty(CONFIRM_EXIT));
         this.showLogMessages = Boolean.parseBoolean(properties.getProperty(SHOW_LOG_MESSAGES));
@@ -267,11 +270,11 @@ public final class Settings {
         return showToolTip;
     }
 
-    public Set<SortColumn> getColumnsList() {
+    public Set<Columns> getColumnsList() {
         return columnsList;
     }
 
-    public void setColumnsList(Set<SortColumn> columnsList) {
+    public void setColumnsList(Set<Columns> columnsList) {
         this.columnsList = columnsList;
         saveProperties(COLUMNS_LIST, columnsList.stream().map(Enum::name).collect(Collectors.joining(",")));
     }

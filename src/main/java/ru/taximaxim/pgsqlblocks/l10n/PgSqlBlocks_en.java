@@ -72,6 +72,7 @@ public class PgSqlBlocks_en extends ListResourceBundle {
                 {"show_saved_blocks_journals", "Show saved blocks journals"},
                 {"saved_blocks_journals", "Saved blocks journals"},
                 {"open_dir", "Open directory"},
+                {"duration", "Duration"},
 
                 // action icons
                 {"add_db", "Add database"},
@@ -110,7 +111,7 @@ public class PgSqlBlocks_en extends ListResourceBundle {
                 {"slow_query", "Slow query"},
                 {"undefined", "Undefined"},
                 {"block_start_date", "Block started"},
-                {"block_change_date", "Block changed"},
+                {"block_end_date", "Block ended"},
 
                 // settings dialog
                 {"processes", "Processes"},

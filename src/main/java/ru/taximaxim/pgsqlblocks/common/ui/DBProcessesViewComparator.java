@@ -23,16 +23,17 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.swt.SWT;
 import ru.taximaxim.pgsqlblocks.common.models.DBProcess;
+import ru.taximaxim.pgsqlblocks.utils.Columns;
 import ru.taximaxim.pgsqlblocks.utils.DateUtils;
 
 public class DBProcessesViewComparator extends ViewerComparator {
 
-    private final int columnIndex;
+    private final Columns column;
 
     private final int sortDirection;
 
-    public DBProcessesViewComparator(int columnIndex, int sortDirection) {
-        this.columnIndex = columnIndex;
+    public DBProcessesViewComparator(Columns column, int sortDirection) {
+        this.column = column;
         this.sortDirection = sortDirection;
     }
 
@@ -41,63 +42,67 @@ public class DBProcessesViewComparator extends ViewerComparator {
         int compareResult = 0;
         DBProcess process1 = (DBProcess) e1;
         DBProcess process2 = (DBProcess) e2;
-        switch (columnIndex) {
-            case 0:
+        switch (column) {
+            case PID:
                 compareResult = compareIntegerValues(process1.getPid(), process2.getPid());
                 break;
-            case 1:
+            case BLOCKED_COUNT:
                 compareResult = compareIntegerValues(process1.getChildren().size(), process2.getChildren().size());
                 break;
-            case 2:
+            case APPLICATION_NAME:
                 compareResult = compareStringValues(process1.getQueryCaller().getApplicationName(),
                         process2.getQueryCaller().getApplicationName());
                 break;
-            case 3:
+            case DATABASE_NAME:
                 compareResult = compareStringValues(process1.getQueryCaller().getDatabaseName(),
                         process2.getQueryCaller().getDatabaseName());
                 break;
-            case 4:
+            case USER_NAME:
                 compareResult = compareStringValues(process1.getQueryCaller().getUserName(),
                         process2.getQueryCaller().getUserName());
                 break;
-            case 5:
+            case CLIENT:
                 compareResult = compareStringValues(process1.getQueryCaller().getClient(),
                         process2.getQueryCaller().getClient());
                 break;
-            case 6:
+            case BACKEND_START:
                 compareResult = DateUtils.compareDates(process1.getQuery().getBackendStart(),
                         process2.getQuery().getBackendStart());
                 break;
-            case 7:
+            case QUERY_START:
                 compareResult = DateUtils.compareDates(process1.getQuery().getQueryStart(),
                         process2.getQuery().getQueryStart());
                 break;
-            case 8:
+            case XACT_START:
                 compareResult = DateUtils.compareDates(process1.getQuery().getXactStart(),
                         process2.getQuery().getXactStart());
                 break;
-            case 9:
+            case DURATION:
+                compareResult = DateUtils.compareDurations(process1.getQuery().getDuration(),
+                        process2.getQuery().getDuration());
+                break;
+            case STATE:
                 compareResult = compareStringValues(process1.getState(), process2.getState());
                 break;
-            case 10:
+            case STATE_CHANGE:
                 compareResult = DateUtils.compareDates(process1.getStateChange(), process2.getStateChange());
                 break;
-            case 11:
+            case BLOCKED:
                 compareResult = compareStringValues(process1.getBlocksPidsString(), process2.getBlocksPidsString());
                 break;
-            case 12:
+            case LOCK_TYPE:
                 compareResult = compareStringValues(process1.getBlocksLocktypesString(),
                         process2.getBlocksLocktypesString());
                 break;
-            case 13:
+            case RELATION:
                 compareResult = compareStringValues(process1.getBlocksRelationsString(),
                         process2.getBlocksRelationsString());
                 break;
-            case 14:
+            case QUERY:
                 compareResult = compareStringValues(process1.getQuery().getQueryString(),
                         process2.getQuery().getQueryString());
                 break;
-            case 15:
+            case SLOW_QUERY:
                 compareResult = compareBooleans(process1.getQuery().isSlowQuery(), process2.getQuery().isSlowQuery());
                 break;
             default:
