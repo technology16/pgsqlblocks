@@ -114,4 +114,4 @@ done
 rm some.md
 rm file.json
 rm file2.json
-webbrowser-app https://github.com/repos/$OWNER_OF_REPO/$PROJECT/latest
+x-www-browser https://github.com/repos/$OWNER_OF_REPO/$PROJECT/latest
