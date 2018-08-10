@@ -72,6 +72,7 @@ public class PgSqlBlocks_ru extends ListResourceBundle {
                 {"show_saved_blocks_journals", "Показать сохраненные журналы блокировок"},
                 {"saved_blocks_journals", "Сохраненные журналы блокировок"},
                 {"open_dir", "Открыть директорию"},
+                {"duration", "Длительность"},
 
                 // action icons
                 {"add_db", "Добавить БД"},
@@ -110,7 +111,7 @@ public class PgSqlBlocks_ru extends ListResourceBundle {
                 {"slow_query", "Долгий процесс"},
                 {"undefined", "Без имени"},
                 {"block_start_date", "Блокировка началась"},
-                {"block_change_date", "Блокировка изменена"},
+                {"block_end_date", "Блокировка завершена"},
 
                 // settings dialog
                 {"processes", "Процессы"},

@@ -22,40 +22,39 @@ package ru.taximaxim.pgsqlblocks.common.ui;
 import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
+import ru.taximaxim.pgsqlblocks.utils.Columns;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
 
-public abstract class TMTreeViewerDataSource<T> implements ITableLabelProvider, ITreeContentProvider {
+public abstract class TMTreeViewerDataSource implements ITableLabelProvider, ITreeContentProvider {
 
-    protected TMTreeViewerDataSourceFilter<T> dataFilter;
+    protected TMTreeViewerDataSourceFilter dataFilter;
     protected final ResourceBundle resourceBundle;
 
     public TMTreeViewerDataSource(ResourceBundle resourceBundle) {
         this.resourceBundle = resourceBundle;
     }
 
-    public TMTreeViewerDataSource(ResourceBundle resourceBundle, TMTreeViewerDataSourceFilter<T> dataFilter) {
+    public TMTreeViewerDataSource(ResourceBundle resourceBundle, TMTreeViewerDataSourceFilter dataFilter) {
         this.resourceBundle = resourceBundle;
         this.dataFilter = dataFilter;
     }
 
-    public void setDataFilter(TMTreeViewerDataSourceFilter<T> dataFilter) {
+    public void setDataFilter(TMTreeViewerDataSourceFilter dataFilter) {
         this.dataFilter = dataFilter;
     }
 
     protected List<ILabelProviderListener> listeners = new ArrayList<>();
 
-    public abstract int numberOfColumns();
+    public abstract boolean columnIsSortable();
 
-    public abstract String columnTitleForColumnIndex(int columnIndex);
+    public abstract List<Columns> getColumns();
 
-    public abstract int columnWidthForColumnIndex(int columnIndex);
-
-    public abstract boolean columnIsSortableAtIndex(int columnIndex);
-
-    public abstract String columnTooltipForColumnIndex(int columnIndex);
+    public String localizeString(String name) {
+        return resourceBundle.getString(name);
+    }
 
     @Override
     public void dispose() {

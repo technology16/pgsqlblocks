@@ -208,6 +208,15 @@ public class DBController implements DBProcessFilterListener, DBBlocksJournalLis
         return processes;
     }
 
+    // TODO possible duplicate processes with same pid
+    public int getProcessesCount() {
+        return processes.size() + processes.stream().mapToInt(this::countChildren).sum();
+    }
+
+    private int countChildren(DBProcess process) {
+        return process.getChildren().size() + process.getChildren().stream().mapToInt(this::countChildren).sum();
+    }
+
     public List<DBProcess> getFilteredProcesses() {
         return filteredProcesses;
     }

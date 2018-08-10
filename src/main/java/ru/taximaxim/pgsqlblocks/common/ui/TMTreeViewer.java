@@ -27,6 +27,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeColumn;
 import org.eclipse.swt.widgets.TreeItem;
+import ru.taximaxim.pgsqlblocks.utils.Columns;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,7 +38,7 @@ public class TMTreeViewer extends TreeViewer {
     private TMTreeViewerDataSource dataSource;
 
     private List<TMTreeViewerSortColumnSelectionListener> sortColumnSelectionListeners = new ArrayList<>();
-    private Set<Integer> collapsedColumnsIndexes;
+    private Set<Columns> collapsedColumnsIndexes;
 
     public TMTreeViewer(Composite parent) {
         super(parent);
@@ -68,7 +69,7 @@ public class TMTreeViewer extends TreeViewer {
         addDoubleClickListener(new DoubleClickListener());
     }
 
-    private void selectSortColumn(TreeColumn column, int columnIndex) {
+    private void selectSortColumn(TreeColumn column) {
         TreeColumn prevSortColumn = getTree().getSortColumn();
         int sortDirection = SWT.DOWN;
         if (prevSortColumn != null) {
@@ -85,38 +86,39 @@ public class TMTreeViewer extends TreeViewer {
             getTree().setSortDirection(SWT.DOWN);
         }
         int fSortDirection = sortDirection;
-        sortColumnSelectionListeners.forEach(listener -> listener.didSelectSortColumn(column, columnIndex, fSortDirection));
+        sortColumnSelectionListeners.forEach(listener -> listener.didSelectSortColumn(column, fSortDirection));
     }
 
     private void createColumns() {
-        for (int i = 0; i < dataSource.numberOfColumns(); i++) {
+        for (Columns column : dataSource.getColumns()) {
             TreeViewerColumn treeColumn = new TreeViewerColumn(this, SWT.NONE);
-            treeColumn.getColumn().setText(dataSource.columnTitleForColumnIndex(i));
+            treeColumn.getColumn().setText(dataSource.localizeString(column.getColumnName()));
             treeColumn.getColumn().setMoveable(true);
-            treeColumn.getColumn().setToolTipText(dataSource.columnTooltipForColumnIndex(i));
-            treeColumn.getColumn().setWidth(dataSource.columnWidthForColumnIndex(i));
-            if (dataSource.columnIsSortableAtIndex(i)) {
+            treeColumn.getColumn().setToolTipText(column.getColumnTooltip());
+            treeColumn.getColumn().setWidth(column.getColumnWidth());
+            treeColumn.getColumn().setData(column);
+            if (dataSource.columnIsSortable()) {
                 TreeColumn swtColumn = treeColumn.getColumn();
-                final int columnIndex = i;
+
                 swtColumn.addSelectionListener(new SelectionListener() {
                     @Override
                     public void widgetSelected(SelectionEvent e) {
-                        selectSortColumn(swtColumn, columnIndex);
+                        selectSortColumn(swtColumn);
                     }
                     @Override
                     public void widgetDefaultSelected(SelectionEvent e) {
-                        selectSortColumn(swtColumn, columnIndex);
+                        selectSortColumn(swtColumn);
                     }
                 });
             }
         }
     }
 
-    public Set<Integer> getCollapsedColumnsIndexes() {
+    public Set<Columns> getCollapsedColumnsIndexes() {
         return collapsedColumnsIndexes;
     }
 
-    public void setCollapsedColumnsIndexes(Set<Integer> indexes) {
+    public void setCollapsedColumnsIndexes(Set<Columns> indexes) {
         if (collapsedColumnsIndexes != null) {
             if (indexes != null) {
                 collapsedColumnsIndexes.removeAll(indexes);
@@ -127,32 +129,32 @@ public class TMTreeViewer extends TreeViewer {
         collapseColumnsAtIndexes(collapsedColumnsIndexes);
     }
 
-    private void expandColumnsAtIndexes(Set<Integer> indexes) {
+    private void expandColumnsAtIndexes(Set<Columns> indexes) {
         if (indexes != null && !indexes.isEmpty()) {
             TreeColumn[] columns = getTree().getColumns();
-            for (int i = 0; i < columns.length; i++) {
-                if (!indexes.contains(i)) {
-                    continue;
+
+            for (TreeColumn treeColumn : columns) {
+                Columns column = (Columns) treeColumn.getData();
+                if (indexes.contains(column)) {
+                    treeColumn.setWidth(column.getColumnWidth());
+                    treeColumn.setResizable(true);
                 }
-                TreeColumn column = columns[i];
-                column.setWidth(dataSource.columnWidthForColumnIndex(i));
-                column.setResizable(true);
             }
         }
     }
 
-    private void collapseColumnsAtIndexes(Set<Integer> indexes) {
+    private void collapseColumnsAtIndexes(Set<Columns> indexes) {
         if (indexes == null || indexes.isEmpty()) {
             return;
         }
         TreeColumn[] columns = getTree().getColumns();
-        for (int i = 0; i < columns.length; i++) {
-            if (!indexes.contains(i)) {
+        for (TreeColumn treeColumn : columns) {
+            Columns column = (Columns) treeColumn.getData();
+            if (!indexes.contains(column)) {
                 continue;
             }
-            TreeColumn column = columns[i];
-            column.setWidth(0);
-            column.setResizable(false);
+            treeColumn.setWidth(0);
+            treeColumn.setResizable(false);
         }
     }
 

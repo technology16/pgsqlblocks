@@ -28,8 +28,10 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 import ru.taximaxim.pgsqlblocks.common.ui.TMTreeViewer;
 import ru.taximaxim.pgsqlblocks.common.ui.TMTreeViewerDataSource;
+import ru.taximaxim.pgsqlblocks.utils.Columns;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.ResourceBundle;
 import java.util.Set;
 
@@ -38,13 +40,13 @@ public class TMTreeViewerColumnsDialog extends Dialog {
     private TMTreeViewer treeViewer;
     private ResourceBundle resourceBundle;
 
-    private final Set<Integer> collapsedColumnsIndexes = new HashSet<>();
+    private final Set<Columns> collapsedColumnsIndexes = new HashSet<>();
 
     public TMTreeViewerColumnsDialog(ResourceBundle resourceBundle, TMTreeViewer treeViewer, Shell shell) {
         super(shell);
         this.resourceBundle = resourceBundle;
         this.treeViewer = treeViewer;
-        Set<Integer> collapsedColumnsIndexes = this.treeViewer.getCollapsedColumnsIndexes();
+        Set<Columns> collapsedColumnsIndexes = this.treeViewer.getCollapsedColumnsIndexes();
         if (collapsedColumnsIndexes != null) {
             this.collapsedColumnsIndexes.addAll(collapsedColumnsIndexes);
         }
@@ -68,17 +70,16 @@ public class TMTreeViewerColumnsDialog extends Dialog {
 
         TMTreeViewerDataSource dataSource = treeViewer.getDataSource();
 
-        int columnsCount = dataSource.numberOfColumns();
-        for (int i = 0; i < columnsCount; i++) {
-            final int columnIndex = i;
+        List<Columns> columns = dataSource.getColumns();
+        for (Columns column : columns) {
             Button checkBoxButton = new Button(container, SWT.CHECK);
-            checkBoxButton.setText(dataSource.columnTitleForColumnIndex(columnIndex));
-            checkBoxButton.setSelection(!collapsedColumnsIndexes.contains(columnIndex));
+            checkBoxButton.setText(dataSource.localizeString(column.getColumnName()));
+            checkBoxButton.setSelection(!collapsedColumnsIndexes.contains(column));
             checkBoxButton.addListener(SWT.Selection, event -> {
-                if (collapsedColumnsIndexes.contains(columnIndex)) {
-                    collapsedColumnsIndexes.remove(columnIndex);
+                if (collapsedColumnsIndexes.contains(column)) {
+                    collapsedColumnsIndexes.remove(column);
                 } else {
-                    collapsedColumnsIndexes.add(columnIndex);
+                    collapsedColumnsIndexes.add(column);
                 }
             });
         }

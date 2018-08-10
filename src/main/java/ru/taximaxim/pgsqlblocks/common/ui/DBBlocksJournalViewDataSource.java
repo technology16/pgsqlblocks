@@ -22,13 +22,15 @@ package ru.taximaxim.pgsqlblocks.common.ui;
 import org.eclipse.swt.graphics.Image;
 import ru.taximaxim.pgsqlblocks.common.models.DBBlocksJournalProcess;
 import ru.taximaxim.pgsqlblocks.common.models.DBProcess;
+import ru.taximaxim.pgsqlblocks.utils.Columns;
 import ru.taximaxim.pgsqlblocks.utils.DateUtils;
 import ru.taximaxim.pgsqlblocks.utils.ImageUtils;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.ResourceBundle;
 
-public class DBBlocksJournalViewDataSource extends TMTreeViewerDataSource<DBBlocksJournalProcess> {
+public class DBBlocksJournalViewDataSource extends TMTreeViewerDataSource {
 
     private final DateUtils dateUtils = new DateUtils();
 
@@ -37,138 +39,13 @@ public class DBBlocksJournalViewDataSource extends TMTreeViewerDataSource<DBBloc
     }
 
     @Override
-    public int numberOfColumns() {
-        return 18;
-    }
-
-    @Override
-    public String columnTitleForColumnIndex(int columnIndex) {
-        switch (columnIndex) {
-            case 0:
-                return resourceBundle.getString("pid");
-            case 1:
-                return resourceBundle.getString("block_start_date");
-            case 2:
-                return resourceBundle.getString("block_change_date");
-            case 3:
-                return resourceBundle.getString("num_of_blocked_processes");
-            case 4:
-                return resourceBundle.getString("application");
-            case 5:
-                return resourceBundle.getString("db_name");
-            case 6:
-                return resourceBundle.getString("user_name");
-            case 7:
-                return resourceBundle.getString("client");
-            case 8:
-                return resourceBundle.getString("backend_start");
-            case 9:
-                return resourceBundle.getString("query_start");
-            case 10:
-                return resourceBundle.getString("xact_start");
-            case 11:
-                return resourceBundle.getString("state");
-            case 12:
-                return resourceBundle.getString("state_change");
-            case 13:
-                return resourceBundle.getString("blocked_by");
-            case 14:
-                return resourceBundle.getString("lock_type");
-            case 15:
-                return resourceBundle.getString("relation");
-            case 16:
-                return resourceBundle.getString("slow_query");
-            case 17:
-                return resourceBundle.getString("query");
-            default:
-                return "undefined";
-        }
-    }
-
-    @Override
-    public int columnWidthForColumnIndex(int columnIndex) {
-        switch (columnIndex) {
-            case 0:
-                return 120;
-            case 1:
-            case 2:
-                return 150;
-            case 3:
-                return 70;
-            case 4:
-                return 100;
-            case 5:
-            case 6:
-            case 7:
-                return 100;
-            case 8:
-            case 9:
-            case 10:
-                return 150;
-            case 11:
-                return 70;
-            case 12:
-                return 150;
-            case 13:
-            case 14:
-            case 15:
-                return 130;
-            case 16:
-                return 150;
-            case 17:
-                return 100;
-            default:
-                return 110;
-        }
-    }
-
-    @Override
-    public boolean columnIsSortableAtIndex(int columnIndex) {
+    public boolean columnIsSortable() {
         return false;
     }
 
     @Override
-    public String columnTooltipForColumnIndex(int columnIndex) {
-        switch (columnIndex) {
-            case 0:
-                return "PID";
-            case 1:
-                return "CREATE_DATE";
-            case 2:
-                return "CLOSE_DATE";
-            case 3:
-                return "BLOCKED_COUNT";
-            case 4:
-                return "APPLICATION_NAME";
-            case 5:
-                return "DATABASE_NAME";
-            case 6:
-                return "USER_NAME";
-            case 7:
-                return "CLIENT";
-            case 8:
-                return "BACKEND_START";
-            case 9:
-                return "QUERY_START";
-            case 10:
-                return "XACT_START";
-            case 11:
-                return "STATE";
-            case 12:
-                return "STATE_CHANGE";
-            case 13:
-                return "BLOCKED";
-            case 14:
-                return "LOCK_TYPE";
-            case 15:
-                return "RELATION";
-            case 16:
-                return "SLOW_QUERY";
-            case 17:
-                return "QUERY";
-            default:
-                return "UNDEFINED";
-        }
+    public List<Columns> getColumns() {
+        return Arrays.asList(Columns.values());
     }
 
     @Override
@@ -187,58 +64,57 @@ public class DBBlocksJournalViewDataSource extends TMTreeViewerDataSource<DBBloc
 
     @Override
     public String getColumnText(Object element, int columnIndex) {
+        return getRowText(element, getColumns().get(columnIndex));
+    }
+
+    private String getRowText(Object element, Columns column) {
         DBProcess process;
+        DBBlocksJournalProcess parentProcess = null;
         if (element instanceof DBBlocksJournalProcess) {
-            DBBlocksJournalProcess parentProcess = (DBBlocksJournalProcess)element;
+            parentProcess = (DBBlocksJournalProcess)element;
             process = parentProcess.getProcess();
-            switch (columnIndex) {
-                case 1:
-                    return dateUtils.dateToString(parentProcess.getCreateDate());
-                case 2:
-                    return dateUtils.dateToString(parentProcess.getCloseDate());
-                default:
-                    // no-op
-            }
-        } else {
+        }else {
             process = (DBProcess)element;
         }
-        switch (columnIndex) {
-            case 0:
+        switch (column){
+            case PID:
                 return String.valueOf(process.getPid());
-            case 1:
-                return "";
-            case 2:
-                return "";
-            case 3:
+            case BLOCK_CREATE_DATE:
+                return parentProcess != null ? dateUtils.dateToString(parentProcess.getCreateDate()) : "";
+            case BLOCK_END_DATE:
+                return parentProcess != null ? dateUtils.dateToString(parentProcess.getCloseDate()) : "";
+            case BLOCKED_COUNT:
                 return String.valueOf(process.getChildren().size());
-            case 4:
+            case APPLICATION_NAME:
                 return process.getQueryCaller().getApplicationName();
-            case 5:
+            case DATABASE_NAME:
                 return process.getQueryCaller().getDatabaseName();
-            case 6:
+            case USER_NAME:
                 return process.getQueryCaller().getUserName();
-            case 7:
+            case CLIENT:
                 return process.getQueryCaller().getClient();
-            case 8:
+            case BACKEND_START:
                 return dateUtils.dateToString(process.getQuery().getBackendStart());
-            case 9:
+            case QUERY_START:
                 return dateUtils.dateToString(process.getQuery().getQueryStart());
-            case 10:
+            case XACT_START:
                 return dateUtils.dateToString(process.getQuery().getXactStart());
-            case 11:
+            case DURATION:
+                return DateUtils.durationToString(process.getQuery().getDuration());
+            case STATE:
                 return process.getState();
-            case 12:
+            case STATE_CHANGE:
                 return dateUtils.dateToString(process.getStateChange());
-            case 13:
+            case BLOCKED:
                 return process.getBlocksPidsString();
-            case 14:
+            case LOCK_TYPE:
                 return process.getBlocksLocktypesString();
-            case 15:
+            case RELATION:
                 return process.getBlocksRelationsString();
-            case 16:
+            case SLOW_QUERY:
                 return String.valueOf(process.getQuery().isSlowQuery());
-            case 17:
-                return process.getQuery().getQueryString();
+            case QUERY:
+                return process.getQuery().getQueryFirstLine();
             default:
                 return "UNDEFINED";
         }

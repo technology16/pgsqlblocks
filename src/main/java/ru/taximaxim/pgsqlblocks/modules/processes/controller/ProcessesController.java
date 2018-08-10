@@ -50,10 +50,7 @@ import ru.taximaxim.pgsqlblocks.modules.db.controller.DBController;
 import ru.taximaxim.pgsqlblocks.modules.db.controller.DBControllerListener;
 import ru.taximaxim.pgsqlblocks.modules.db.model.DBStatus;
 import ru.taximaxim.pgsqlblocks.modules.processes.view.ProcessesView;
-import ru.taximaxim.pgsqlblocks.utils.ImageUtils;
-import ru.taximaxim.pgsqlblocks.utils.Images;
-import ru.taximaxim.pgsqlblocks.utils.Settings;
-import ru.taximaxim.pgsqlblocks.utils.SettingsListener;
+import ru.taximaxim.pgsqlblocks.utils.*;
 
 import java.lang.reflect.InvocationTargetException;
 import java.sql.SQLException;
@@ -571,6 +568,7 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
     @Override
     public void dbControllerProcessesUpdated(DBController controller) {
         view.getDisplay().asyncExec(() -> {
+            dbModelsView.getTableViewer().refresh(controller);
             if (dbModelsView.getTableViewer().getStructuredSelection().getFirstElement() != null) {
                 DBController selectedController = (DBController) dbModelsView.getTableViewer().getStructuredSelection().getFirstElement();
                 if (controller.equals(selectedController)) {
@@ -820,8 +818,8 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
     }
 
     @Override
-    public void didSelectSortColumn(TreeColumn column, int columnIndex, int sortDirection) {
-        dbProcessesView.getTreeViewer().setComparator(new DBProcessesViewComparator(columnIndex, sortDirection));
+    public void didSelectSortColumn(TreeColumn column, int sortDirection) {
+        dbProcessesView.getTreeViewer().setComparator(new DBProcessesViewComparator((Columns) column.getData(), sortDirection));
     }
 
     private void dbProcessesViewSelectionChanged(SelectionChangedEvent event) {

@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -23,6 +23,7 @@ import org.apache.log4j.Logger;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.Duration;
 import java.util.Date;
 
 public final class DateUtils {
@@ -64,6 +65,25 @@ public final class DateUtils {
             return d2 == null ? 0 : -1;
         } else {
             return d2 == null ? 1 : d1.compareTo(d2);
+        }
+    }
+
+    public static int compareDurations(Duration d1, Duration d2) {
+        if (d1 == null) {
+            return d2 == null ? 0 : -1;
+        } else {
+            return d2 == null ? 1 : d1.compareTo(d2);
+        }
+    }
+
+    public static String durationToString(Duration duration) {
+        if (duration == null) {
+            return "";
+        } else {
+            long seconds = duration.getSeconds();
+            long absSeconds = Math.abs(seconds);
+            String positive = String.format("%02d:%02d:%02d", absSeconds / 3600, (absSeconds % 3600) / 60, absSeconds % 60);
+            return seconds < 0 ? "-" + positive : positive;
         }
     }
 }
