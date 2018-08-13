@@ -26,13 +26,13 @@ public class DBModel implements Cloneable {
     private String name;
     private String host;
     private String port;
-    private String version = SupportedVersion.VERSION_9_6.getVersion();
+    private SupportedVersion version = SupportedVersion.VERSION_9_6;
     private String databaseName;
     private String user;
     private String password;
     private boolean enabled;
 
-    public DBModel(String name, String host, String port, String version, String databaseName, String user, String password, boolean enabled) {
+    public DBModel(String name, String host, String port, SupportedVersion version, String databaseName, String user, String password, boolean enabled) {
         this.name = name;
         this.host = host;
         this.port = port;
@@ -55,7 +55,7 @@ public class DBModel implements Cloneable {
         return port;
     }
 
-    public String getVersion() {
+    public SupportedVersion getVersion() {
         return version;
     }
 

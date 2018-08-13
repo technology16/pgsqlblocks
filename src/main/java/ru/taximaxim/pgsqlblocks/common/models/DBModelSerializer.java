@@ -22,6 +22,7 @@ package ru.taximaxim.pgsqlblocks.common.models;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
+import ru.taximaxim.pgsqlblocks.utils.SupportedVersion;
 
 public class DBModelSerializer {
 
@@ -48,7 +49,7 @@ public class DBModelSerializer {
         String name = getTextContentFromNode(nameNode);
         String host = getTextContentFromNode(hostNode);
         String port = getTextContentFromNode(portNode);
-        String version = getTextContentFromNode(versionNode);
+        SupportedVersion version = getVersionFromNode(versionNode);
         String databaseName = getTextContentFromNode(databaseNameNode);
         String user = getTextContentFromNode(userNode);
         String password = getTextContentFromNode(passwordNode);
@@ -62,7 +63,7 @@ public class DBModelSerializer {
         rootElement.appendChild(createElementWithContent(document, ELEMENT_NAME_TAG_NAME, model.getName()));
         rootElement.appendChild(createElementWithContent(document, ELEMENT_HOST_TAG_NAME, model.getHost()));
         rootElement.appendChild(createElementWithContent(document, ELEMENT_PORT_TAG_NAME, model.getPort()));
-        rootElement.appendChild(createElementWithContent(document, ELEMENT_VERSION_TAG_NAME, model.getVersion()));
+        rootElement.appendChild(createElementWithContent(document, ELEMENT_VERSION_TAG_NAME, model.getVersion().getVersion()));
         rootElement.appendChild(createElementWithContent(document, ELEMENT_DATABASE_NAME_TAG_NAME, model.getDatabaseName()));
         rootElement.appendChild(createElementWithContent(document, ELEMENT_USER_TAG_NAME, model.getUser()));
         rootElement.appendChild(createElementWithContent(document, ELEMENT_PASSWORD_TAG_NAME, model.getPassword()));
@@ -75,6 +76,14 @@ public class DBModelSerializer {
             return node.getTextContent();
         }
         return "";
+    }
+
+    private SupportedVersion getVersionFromNode(Node node) {
+        if (node != null) {
+            String version =  node.getTextContent();
+            return version.equals("") ? SupportedVersion.VERSION_9_6 : SupportedVersion.get(version);
+        }
+        return SupportedVersion.VERSION_9_6;
     }
 
     private Element createElementWithContent(Document document, String tagName, String content) {

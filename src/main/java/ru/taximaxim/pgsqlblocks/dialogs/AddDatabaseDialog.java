@@ -162,8 +162,7 @@ public class AddDatabaseDialog extends Dialog {
         String name = nameText.getText();
         String host = hostText.getText();
         String port = portText.getText();
-        SupportedVersion selection = (SupportedVersion) versionCombo.getStructuredSelection().getFirstElement();
-        String version = selection.getVersion();
+        SupportedVersion version = (SupportedVersion) versionCombo.getStructuredSelection().getFirstElement();
         String databaseName = databaseNameText.getText();
         String user = userText.getText();
         String password = passwordText.getText();
