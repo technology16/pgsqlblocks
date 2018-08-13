@@ -72,7 +72,7 @@ public class DBProcessesViewDataSource extends TMTreeViewerDataSource {
             case PID:
                 return String.valueOf(process.getPid());
             case BACKEND_TYPE:
-                return "TYPE";
+                return process.getBackendType();
             case BLOCKED_COUNT:
                 return String.valueOf(process.getChildren().size());
             case APPLICATION_NAME:
