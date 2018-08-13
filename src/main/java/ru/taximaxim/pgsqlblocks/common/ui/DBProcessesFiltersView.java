@@ -79,7 +79,7 @@ public class DBProcessesFiltersView extends Composite {
 
         GridData comboLayoutData = new GridData(SWT.LEFT, SWT.CENTER, false,false);
         comboLayoutData.widthHint = 60;
-        GridData textLayoutData = new GridData(SWT.LEFT, SWT.CENTER, true, true);
+        GridData textLayoutData = new GridData(SWT.FILL, SWT.CENTER, true, true);
         textLayoutData.widthHint = 150;
         textLayoutData.minimumWidth = 150;
 
