@@ -94,6 +94,7 @@ public class PgSqlBlocks_en extends ListResourceBundle {
 
                 // columns
                 {"pid", "PID"},
+                {"backend_type", "Type"},
                 {"num_of_blocked_processes", "# blocked by"},
                 {"application", "Application"},
                 {"db_name", "Database"},

@@ -2,6 +2,7 @@ package ru.taximaxim.pgsqlblocks.utils;
 
 public enum Columns {
     PID("pid", "PID", 80),
+    BACKEND_TYPE("backend_type", "BACKEND_TYPE", 150),
     BLOCK_CREATE_DATE("block_start_date", "", 110),
     BLOCK_END_DATE("block_end_date", "", 150),
     BLOCKED_COUNT("num_of_blocked_processes", "", 70),
