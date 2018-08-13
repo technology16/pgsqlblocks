@@ -19,6 +19,7 @@
  */
 package ru.taximaxim.pgsqlblocks.dialogs;
 
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
@@ -53,6 +54,7 @@ public class EditDatabaseDialog extends AddDatabaseDialog {
         nameText.setText(editedModel.getName());
         hostText.setText(editedModel.getHost());
         portText.setText(editedModel.getPort());
+        versionCombo.setSelection(new StructuredSelection(editedModel.getVersion().getVersion()));
         databaseNameText.setText(editedModel.getDatabaseName());
         userText.setText(editedModel.getUser());
         passwordText.setText(editedModel.getPassword());

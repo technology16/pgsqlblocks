@@ -118,14 +118,6 @@ public class AddDatabaseDialog extends Dialog {
                 return super.getText(element);
             }
         });
-//        versionCombo.addSelectionChangedListener(event -> {
-//            IStructuredSelection selection = (IStructuredSelection) event
-//                    .getSelection();
-//            if (selection.size() > 0){
-//                System.out.println(((SupportedVersion) selection.getFirstElement())
-//                        .getVersion());
-//            }
-//        });
 
 
         Label userLabel = new Label(container, SWT.HORIZONTAL);

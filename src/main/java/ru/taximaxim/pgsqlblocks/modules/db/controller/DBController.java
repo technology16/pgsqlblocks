@@ -371,12 +371,24 @@ public class DBController implements DBProcessFilterListener, DBBlocksJournalLis
 
     // TODO: 10.08.18 Not working don't show procceses with 9/6
     private String getProcessesQuery() {
+        System.out.println(">>>>>>>>>>>>>>>>tutut");
+        float ver = Float.parseFloat(model.getVersion().getVersion());
         if (settings.getShowIdle()) {
-            return /*Float.parseFloat(model.getVersion())>=10.0 ? DBQueries.getProcessesQueryWithIdleForTen()
-                    : */DBQueries.getProcessesQueryWithIdle();
+            if (ver>=10.0) {
+                return DBQueries.getProcessesQueryWithIdleForTen();
+            }else {
+                return DBQueries.getProcessesQueryWithIdle();
+            }
+//            return ver>=10.0 ? DBQueries.getProcessesQueryWithIdleForTen()
+//                    : DBQueries.getProcessesQueryWithIdle();
         } else {
-            return /*Float.parseFloat(model.getVersion())>=10.0 ? DBQueries.getProcessesQueryForTen()
-                    :*/ DBQueries.getProcessesQuery();
+            if (ver>=10.0) {
+                return DBQueries.getProcessesQueryForTen();
+            }else {
+                return DBQueries.getProcessesQuery();
+            }
+//            return /*Float.parseFloat(model.getVersion())>=10.0 ? DBQueries.getProcessesQueryForTen()
+//                    :*/ DBQueries.getProcessesQuery();
         }
     }
 
