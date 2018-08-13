@@ -79,6 +79,8 @@ public class DBBlocksJournalViewDataSource extends TMTreeViewerDataSource {
         switch (column){
             case PID:
                 return String.valueOf(process.getPid());
+            case BACKEND_TYPE:
+                return "TYPE";
             case BLOCK_CREATE_DATE:
                 return parentProcess != null ? dateUtils.dateToString(parentProcess.getCreateDate()) : "";
             case BLOCK_END_DATE:
