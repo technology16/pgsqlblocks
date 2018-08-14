@@ -24,7 +24,6 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Text;
 import ru.taximaxim.pgsqlblocks.common.models.DBProcess;
 
@@ -38,7 +37,7 @@ public class DBProcessInfoView extends Composite {
 
     private final List<DBProcessInfoViewListener> listeners = new ArrayList<>();
 
-    private Group buttonBar;
+    private Composite buttonBar;
     private Text processInfoText;
 
     public DBProcessInfoView(ResourceBundle resourceBundle, Composite parent, int style) {
@@ -54,7 +53,7 @@ public class DBProcessInfoView extends Composite {
     }
 
     private void createContent() {
-        buttonBar = new Group(this, SWT.HORIZONTAL);
+        buttonBar = new Composite(this, SWT.NULL);
         GridLayout layout = new GridLayout(2, false);
         GridData layoutData = new GridData(SWT.FILL, SWT.TOP, true, false);
         buttonBar.setLayout(layout);
