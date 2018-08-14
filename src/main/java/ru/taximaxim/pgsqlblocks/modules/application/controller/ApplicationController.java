@@ -48,11 +48,7 @@ public class ApplicationController implements ApplicationViewListener {
     @Override
     public void applicationViewDidLoad() {
         new LogsView(applicationView.getBottomPanelComposite(), settings, SWT.NONE);
-        DBModelsLocalProvider localProvider = new DBModelsLocalProvider();
-        if (localProvider.needUpdate()) {
-            // TODO: 14.08.18 Add dialog for answering action
-        }
-        processesController = new ProcessesController(settings, localProvider);
+        processesController = new ProcessesController(settings, new DBModelsLocalProvider());
         ProcessesView processesView = new ProcessesView(applicationView.getTopPanelComposite(), SWT.NONE);
         processesController.setView(processesView);
         processesController.load();
