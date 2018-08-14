@@ -56,7 +56,7 @@ public class DBProcessSerializer {
 
     public DBProcess deserialize(ResultSet resultSet) throws SQLException {
         int pid = resultSet.getInt(PID);
-        String backendType = "TYPE";
+        String backendType = "";
         if (hasBackendType(resultSet.getMetaData())) {
             backendType = resultSet.getString(BACKEND_TYPE);
         }
@@ -80,20 +80,6 @@ public class DBProcessSerializer {
         return new DBProcess(pid, backendType, caller, state, stateChangeDate, query);
     }
 
-    private boolean hasBackendType(ResultSetMetaData metaData) {
-        try {
-           int columns = metaData.getColumnCount();
-            for (int x = 1; x <= columns; x++) {
-                if (BACKEND_TYPE.equals(metaData.getColumnName(x))) {
-                    return true;
-                }
-            }
-        } catch (SQLException e) {
-            //
-        }
-        return false;
-    }
-
     public DBProcess deserialize(Element xmlElement, boolean elementIsRoot) {
         Element rootElement;
         if (elementIsRoot) {
@@ -102,6 +88,7 @@ public class DBProcessSerializer {
             rootElement = (Element) xmlElement.getElementsByTagName(ROOT_ELEMENT_TAG_NAME).item(0);
         }
         int pid = Integer.parseInt(rootElement.getElementsByTagName(PID).item(0).getTextContent());
+        String backendType = hasBackendType(rootElement) ? rootElement.getElementsByTagName(BACKEND_TYPE).item(0).getTextContent() : "";
         String appName = rootElement.getElementsByTagName(APPLICATION_NAME).item(0).getTextContent();
         String databaseName = rootElement.getElementsByTagName(DAT_NAME).item(0).getTextContent();
         String userName = rootElement.getElementsByTagName(USE_NAME).item(0).getTextContent();
@@ -118,8 +105,7 @@ public class DBProcessSerializer {
 
         String state = rootElement.getElementsByTagName(STATE).item(0).getTextContent();
         Date stateChange = dateUtils.dateFromString(rootElement.getElementsByTagName(STATE_CHANGE).item(0).getTextContent());
-        // TODO: 13.08.18 add backend Type
-        DBProcess process = new DBProcess(pid, "TYPE", caller, state, stateChange, query);
+        DBProcess process = new DBProcess(pid, backendType, caller, state, stateChange, query);
         Element childrenRootElement = (Element)rootElement.getElementsByTagName(CHILDREN_ELEMENT_TAG_NAME).item(0);
         NodeList childrenElements = childrenRootElement.getElementsByTagName(ROOT_ELEMENT_TAG_NAME);
         for (int i = 0; i < childrenRootElement.getChildNodes().getLength(); i++) {
@@ -163,5 +149,23 @@ public class DBProcessSerializer {
         Element element = document.createElement(elementTagName);
         element.setTextContent(elementContent);
         parentElement.appendChild(element);
+    }
+
+    private boolean hasBackendType(ResultSetMetaData metaData) {
+        try {
+            int columns = metaData.getColumnCount();
+            for (int x = 1; x <= columns; x++) {
+                if (BACKEND_TYPE.equals(metaData.getColumnName(x))) {
+                    return true;
+                }
+            }
+        } catch (SQLException e) {
+            LOG.error(e.getMessage());
+        }
+        return false;
+    }
+
+    private boolean hasBackendType(Element element) {
+        return element.getElementsByTagName(BACKEND_TYPE).getLength() > 0;
     }
 }
