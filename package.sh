@@ -1,5 +1,5 @@
 #!/bin/bash
-# Скрипт для авторелиза на guthub с обращением к gutHub APIv3
+# Скрипт для авторелиза на guthub с обращением к GitHub APIv3
 ###################################################################################################################
 #Создание авторелиза. Весь процесс создания релиза происходит в два этапа:
 # 1. Подготовка к релизу.
@@ -22,22 +22,47 @@
 # В случае некорректной сборки mvn скрипт крашится
 ####################################################################################################################
 
-# Build files for release
-mvn clean
-mvn package -P Windows-32
-mvn package -P Linux-32
-mvn package -P Windows-64
-mvn package -P Linux-64
-mvn package -P Macosx-64
-
 # Переменная получающая из pom.xml версию проекта
 version=$(mvn help:evaluate -Dexpression=project.version | grep '^[0-9][0-9A-Za-z\.\-]*$')
+
+read -p "Версия будущего релиза v$version, собрать? [y/n]" -n 1 -r
+echo    # (optional) move to a new line
+if [[ ! $REPLY =~ ^[Yy]$ ]]
+then
+    exit 1
+fi
+
+echo
+
+# Build files for release
+mvn clean -q
+echo "Идет сборка..."
+
+mvn -q test
+
+echo "Идет сборка Windows-32..."
+mvn package -P Windows-32 -q -DskipTests
+
+echo "Идет сборка Windows-64..."
+mvn package -P Windows-64 -q -DskipTests
+
+echo "Идет сборка Linux-32..."
+mvn package -P Linux-32 -q -DskipTests
+
+echo "Идет сборка Linux-64..."
+mvn package -P Linux-64 -q -DskipTests
+
+echo "Идет сборка Macosx-64..."
+mvn package -P Macosx-64 -q -DskipTests
+
+echo "Сборка завершена"
+
 # Проверка корректности сборки проекта
 if [ ! -f "./target/pgSqlBlocks-"$version"-Linux-32.jar" ]; then
     echo ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>!!!!!Что-то не так с maven package!!!!!"
     exit 1
 fi
-# Чтение аргументов
+Чтение аргументов
 for i in "$@"
 do
 case $i in
