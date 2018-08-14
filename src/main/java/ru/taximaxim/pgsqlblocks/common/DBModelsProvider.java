@@ -31,4 +31,5 @@ public interface DBModelsProvider {
 
     boolean needUpdate();
 
+    void updateVersion();
 }

@@ -321,8 +321,9 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
 
     private void loadDatabases() {
         System.out.println(">>>>>>>>>>>>>>>>>TUTA!");
-        if (dbModelsProvider.needUpdate()) {
-            openUpdateDialog();
+        if (dbModelsProvider.needUpdate() && openUpdateDialog()) {
+            System.out.println("Need updateVersion");
+            dbModelsProvider.updateVersion();
         }
         List<DBModel> dbModels = dbModelsProvider.get();
         dbModels.forEach(this::addDatabase);
@@ -360,12 +361,10 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
         dbModelsProvider.save(models);
     }
 
-    private void openUpdateDialog() {
-        // TODO: 14.08.18 Create dialog
-        UpdateDatabaseDialog updateDatabaseDialog = new UpdateDatabaseDialog(resourceBundle, view.getShell());
-        if (updateDatabaseDialog.open() == Window.OK) {
-            // TODO: 14.08.18  get dbModels check versions and save
-        }
+    private boolean openUpdateDialog() {
+        MessageDialog dialog = new MessageDialog(view.getShell(), resourceBundle.getString("warning_title"), null,
+                resourceBundle.getString("warning_text"), MessageDialog.WARNING, new String[] {"Ok", "Cancel"}, 0);
+        return dialog.open() == 0;
     }
 
     private void openAddNewDatabaseDialog() {

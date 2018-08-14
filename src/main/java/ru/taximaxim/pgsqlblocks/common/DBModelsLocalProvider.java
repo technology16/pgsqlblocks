@@ -64,4 +64,11 @@ public class DBModelsLocalProvider implements DBModelsProvider {
         Document document = documentWorker.open(file);
         return document != null && serializer.checkExistingNode(document);
     }
+
+    @Override
+    public void updateVersion() {
+        //get list dbmodels
+        //foreach get version and update
+        //save list
+    }
 }
