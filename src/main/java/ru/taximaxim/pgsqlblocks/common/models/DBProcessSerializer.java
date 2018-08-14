@@ -127,6 +127,7 @@ public class DBProcessSerializer {
     public Element serialize(Document document, DBProcess process) {
         Element rootElement = document.createElement(ROOT_ELEMENT_TAG_NAME);
         createAndAppendElement(document, rootElement, PID, String.valueOf(process.getPid()));
+        createAndAppendElement(document, rootElement, BACKEND_TYPE, process.getBackendType());
         createAndAppendElement(document, rootElement, STATE, process.getState());
         createAndAppendElement(document, rootElement, STATE_CHANGE, dateUtils.dateToStringWithTz(process.getStateChange()));
         createAndAppendElement(document, rootElement, QUERY_SQL, process.getQuery().getQueryString());
