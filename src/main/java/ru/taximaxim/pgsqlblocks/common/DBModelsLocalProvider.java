@@ -58,4 +58,10 @@ public class DBModelsLocalProvider implements DBModelsProvider {
             // FIXME
         }
     }
+
+    @Override
+    public boolean needUpdate() {
+        Document document = documentWorker.open(file);
+        return document != null && serializer.checkExistingNode(document);
+    }
 }

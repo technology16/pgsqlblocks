@@ -29,4 +29,6 @@ public interface DBModelsProvider {
 
     void save(List<DBModel> models);
 
+    boolean needUpdate();
+
 }
