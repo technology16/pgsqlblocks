@@ -106,14 +106,14 @@ public class AddDatabaseDialog extends Dialog {
         versionLabel.setText(resourceBundle.getString("version"));
         versionCombo = new ComboViewer(container, SWT.BORDER | SWT.DROP_DOWN | SWT.READ_ONLY);
         versionCombo.setContentProvider(ArrayContentProvider.getInstance());
-        versionCombo.setInput(SupportedVersion.values());
+        versionCombo.setInput(SupportedVersion.getValuesAdd());
         versionCombo.setSelection(new StructuredSelection(SupportedVersion.VERSION_10));
         versionCombo.setLabelProvider(new LabelProvider() {
             @Override
             public String getText(Object element) {
                 if (element instanceof SupportedVersion) {
-                    SupportedVersion person = (SupportedVersion) element;
-                    return person.getVersion();
+                    SupportedVersion version = (SupportedVersion) element;
+                    return version.getVersionText();
                 }
                 return super.getText(element);
             }
@@ -174,6 +174,10 @@ public class AddDatabaseDialog extends Dialog {
         } else if (databaseName.isEmpty() || user.isEmpty()) {
             MessageDialog.openError(null, resourceBundle.getString(ATTENTION),
                     resourceBundle.getString("missing_database_user"));
+            return;
+        } else if (version == SupportedVersion.VERSION_DEFAULT || version == null){
+            MessageDialog.openError(null, resourceBundle.getString(ATTENTION),
+                    resourceBundle.getString("missing_database_version"));
             return;
         }
 

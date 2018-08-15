@@ -81,9 +81,9 @@ public class DBModelSerializer {
     private SupportedVersion getVersionFromNode(Node node) {
         if (node != null) {
             String version =  node.getTextContent();
-            return version.equals("") ? SupportedVersion.VERSION_9_6 : SupportedVersion.get(version);
+            return version.equals("") ? SupportedVersion.VERSION_DEFAULT : SupportedVersion.get(version);
         }
-        return SupportedVersion.VERSION_9_6;
+        return SupportedVersion.VERSION_DEFAULT;
     }
 
     private Element createElementWithContent(Document document, String tagName, String content) {

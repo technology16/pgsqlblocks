@@ -143,6 +143,7 @@ public class PgSqlBlocks_en extends ListResourceBundle {
                 {"already_exists", "Connection %s already exists!"},
                 {"missing_host_port", "Missing required field: host and/or port!"},
                 {"missing_database_user", "Missing required field: database and/or user!"},
+                {"missing_database_version", "Missing required field: database version!"},
                 {"attention", "Attention!"},
 
                 //create update version dialog

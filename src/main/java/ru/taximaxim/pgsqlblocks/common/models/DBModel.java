@@ -26,7 +26,7 @@ public class DBModel implements Cloneable {
     private String name;
     private String host;
     private String port;
-    private SupportedVersion version = SupportedVersion.VERSION_9_6;
+    private SupportedVersion version;
     private String databaseName;
     private String user;
     private String password;

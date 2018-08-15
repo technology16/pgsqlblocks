@@ -24,6 +24,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 import ru.taximaxim.pgsqlblocks.common.models.DBModel;
+import ru.taximaxim.pgsqlblocks.utils.SupportedVersion;
 
 import java.util.List;
 import java.util.ResourceBundle;
@@ -54,7 +55,8 @@ public class EditDatabaseDialog extends AddDatabaseDialog {
         nameText.setText(editedModel.getName());
         hostText.setText(editedModel.getHost());
         portText.setText(editedModel.getPort());
-        versionCombo.setSelection(new StructuredSelection(editedModel.getVersion().getVersion()));
+        versionCombo.setInput(SupportedVersion.values());
+        versionCombo.setSelection(new StructuredSelection(editedModel.getVersion().getVersionText()));
         databaseNameText.setText(editedModel.getDatabaseName());
         userText.setText(editedModel.getUser());
         passwordText.setText(editedModel.getPassword());
