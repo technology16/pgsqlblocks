@@ -62,6 +62,6 @@ public class DBModelsLocalProvider implements DBModelsProvider {
     @Override
     public boolean needUpdate() {
         Document document = documentWorker.open(file);
-        return document != null && serializer.checkExistingNode(document);
+        return document != null && !serializer.checkExistingNode(document);
     }
 }

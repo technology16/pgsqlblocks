@@ -49,8 +49,23 @@ public enum SupportedVersion {
         return versionText;
     }
 
-    //а если в енаме значения нет????
+    //а если в енаме значения нет???? todo
     public static SupportedVersion get(String text){
         return lookup.get(text);
+    }
+
+    public static SupportedVersion get(int number){
+        List<SupportedVersion> set = SupportedVersion.getValuesAdd();
+        for (int i = set.size() - 1; i >= 0; i--) {
+            SupportedVersion verEnum = set.get(i);
+            if (verEnum.checkVersion(number)) {
+                return verEnum;
+            }
+        }
+        return SupportedVersion.VERSION_DEFAULT;
+    }
+
+    private boolean checkVersion(int number) {
+        return number >= this.versionNumber;
     }
 }

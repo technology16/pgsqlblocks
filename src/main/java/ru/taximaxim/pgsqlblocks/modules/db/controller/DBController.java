@@ -28,10 +28,7 @@ import ru.taximaxim.pgpass.PgPassException;
 import ru.taximaxim.pgsqlblocks.common.DBQueries;
 import ru.taximaxim.pgsqlblocks.common.models.*;
 import ru.taximaxim.pgsqlblocks.modules.db.model.DBStatus;
-import ru.taximaxim.pgsqlblocks.utils.DateUtils;
-import ru.taximaxim.pgsqlblocks.utils.PathBuilder;
-import ru.taximaxim.pgsqlblocks.utils.Settings;
-import ru.taximaxim.pgsqlblocks.utils.XmlDocumentWorker;
+import ru.taximaxim.pgsqlblocks.utils.*;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -43,10 +40,7 @@ import java.nio.file.Paths;
 import java.sql.*;
 import java.util.*;
 import java.util.Date;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
 import static ru.taximaxim.pgsqlblocks.PgSqlBlocks.APP_NAME;
@@ -516,5 +510,31 @@ public class DBController implements DBProcessFilterListener, DBBlocksJournalLis
         } catch (ParserConfigurationException | IOException | SAXException e) {
             LOG.error(e.getMessage(), e);
         }
+    }
+
+    public SupportedVersion getVersion() throws ExecutionException, InterruptedException {
+        SupportedVersion version;
+        CompletableFuture<SupportedVersion> future = CompletableFuture.supplyAsync(() -> {
+            SupportedVersion v = null;
+            String password = getPassword();
+            try {
+                Properties info = new Properties();
+                info.put("user", model.getUser());
+                info.put("password", password);
+                info.put("loginTimeout", String.valueOf(settings.getLoginTimeout()));
+                connection = DriverManager.getConnection(getConnectionUrl(), info);
+                PreparedStatement preparedStatement = connection.prepareStatement(DBQueries.getVersionQuery());
+                ResultSet resultSet = preparedStatement.executeQuery();
+                if (resultSet.next()) {
+                    int ver = resultSet.getInt(1);
+                    v = SupportedVersion.get(ver);
+                }
+            } catch (SQLException e) {
+                listeners.forEach(listener -> listener.dbControllerConnectionFailed(this, e));
+            }
+            return v != null ? v : SupportedVersion.VERSION_DEFAULT;
+        });
+        version = future.get();
+        return version;
     }
 }

@@ -58,6 +58,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 public class ProcessesController implements DBControllerListener, DBModelsViewListener, SettingsListener,
@@ -320,10 +321,10 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
     }
 
     private void loadDatabases() {
-        System.out.println(">>>>>>>>>>>>>>>>>TUTA!");
         if (dbModelsProvider.needUpdate() && openUpdateDialog()) {
-            System.out.println("Need updateVersion");
             updateVersion();
+            dbControllers.forEach(dbController -> dbController.disconnect(true));
+            dbControllers.clear();
         }
         List<DBModel> dbModels = dbModelsProvider.get();
         dbModels.forEach(this::addDatabase);
@@ -332,13 +333,20 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
 
     private void updateVersion() {
         List<DBModel> models = dbModelsProvider.get();
-        if (!models.isEmpty()) {
-            models.forEach(model -> {
+        models.forEach( model -> {
+            addDatabase(model);
+            Optional<DBController> opt = dbControllers.stream().filter(dbc -> dbc.getModel().equals(model)).findFirst();
+            opt.ifPresent(dbController -> {
+                SupportedVersion v = SupportedVersion.VERSION_9_2;
+                try {
+                    v = dbController.getVersion();
+                } catch (InterruptedException | ExecutionException e) {
+                    LOG.error(e.getMessage());
+                }
+                model.setVersion(v);
             });
-        }
-        //get list dbmodels
-        //foreach get version and update
-        //save list
+        });
+        dbModelsProvider.save(models);
     }
 
     private DBController addDatabase(DBModel dbModel) {

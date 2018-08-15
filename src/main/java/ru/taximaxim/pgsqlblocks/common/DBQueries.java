@@ -31,6 +31,7 @@ public final class DBQueries {
 
     public static final String PG_BACKEND_PID_QUERY = "select pg_backend_pid();";
 
+    private static String versionQuery;
     private static String processesQuery;
     private static String processesQueryForTen;
     private static String processesQueryWithIdle;
@@ -40,6 +41,7 @@ public final class DBQueries {
     private static final String PROCESSES_QUERY_10_FILE_NAME = "query_10.sql";
     private static final String PROCESSES_QUERY_WITH_IDLE_FILE_NAME = "query_with_idle.sql";
     private static final String PROCESSES_QUERY_WITH_IDLE_10_FILE_NAME = "query_with_idle_10.sql";
+    private static final String PG_SERVER_VERSION_QUERY_FILE_NAME = "version.sql";
 
     public static final String PG_TERMINATE_BACKEND_QUERY = "select pg_terminate_backend(?);";
 
@@ -71,6 +73,13 @@ public final class DBQueries {
             processesQueryWithIdleForTen = loadQuery(PROCESSES_QUERY_WITH_IDLE_10_FILE_NAME);
         }
         return processesQueryWithIdleForTen;
+    }
+
+    public static synchronized String getVersionQuery(){
+        if (versionQuery == null) {
+            versionQuery = loadQuery(PG_SERVER_VERSION_QUERY_FILE_NAME);
+        }
+        return versionQuery;
     }
 
     private static String loadQuery(String queryFile) {

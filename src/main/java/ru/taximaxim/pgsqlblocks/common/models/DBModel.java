@@ -59,6 +59,10 @@ public class DBModel implements Cloneable {
         return version;
     }
 
+    public void setVersion(SupportedVersion version){
+        this.version = version;
+    }
+
     public String getDatabaseName() {
         return databaseName;
     }
