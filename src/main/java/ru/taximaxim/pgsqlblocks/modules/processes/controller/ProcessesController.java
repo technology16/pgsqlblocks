@@ -323,11 +323,22 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
         System.out.println(">>>>>>>>>>>>>>>>>TUTA!");
         if (dbModelsProvider.needUpdate() && openUpdateDialog()) {
             System.out.println("Need updateVersion");
-            dbModelsProvider.updateVersion();
+            updateVersion();
         }
         List<DBModel> dbModels = dbModelsProvider.get();
         dbModels.forEach(this::addDatabase);
         dbModelsView.getTableViewer().refresh();
+    }
+
+    private void updateVersion() {
+        List<DBModel> models = dbModelsProvider.get();
+        if (!models.isEmpty()) {
+            models.forEach(model -> {
+            });
+        }
+        //get list dbmodels
+        //foreach get version and update
+        //save list
     }
 
     private DBController addDatabase(DBModel dbModel) {
