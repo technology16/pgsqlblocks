@@ -19,14 +19,14 @@ public class ViewerTest {
 
 
     public static void main(String[] args) {
-        List<TestObject> list = new ArrayList<>();
-        List<TestObject> childlist = new ArrayList<>();
-        TestObject testObject = new TestObject("test1");
-        TestObject testObject2 = new TestObject("test2");
-        TestObject testObject3 = new TestObject("test3");
-        TestObject childObject = new TestObject("childtest1");
-        TestObject childObject2 = new TestObject("childtest2");
-        TestObject childObject3 = new TestObject("childtest3");
+        List<Test> list = new ArrayList<>();
+        List<Test> childlist = new ArrayList<>();
+        Test testObject = new Test("test1");
+        Test testObject2 = new Test("test2");
+        Test testObject3 = new Test("test3");
+        Test childObject = new Test("childtest1");
+        Test childObject2 = new Test("childtest2");
+        Test childObject3 = new Test("childtest3");
         childlist.addAll(Arrays.asList(childObject, childObject2, childObject3));
         testObject.setChildren(childlist);
         testObject2.setChildren(childlist);

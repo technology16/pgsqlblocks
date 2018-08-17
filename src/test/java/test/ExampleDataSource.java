@@ -54,7 +54,7 @@ public class ExampleDataSource extends MyTreeViewerDataSource{
     }
 
     private String getRowText(Object element, IColumn iColumn) {
-        TestObject test = (TestObject) element;
+        Test test = (Test) element;
         switch (iColumn.getColumnName()){
             case "title":
                 return test.getName();
@@ -64,13 +64,13 @@ public class ExampleDataSource extends MyTreeViewerDataSource{
 
     @Override
     public Object[] getElements(Object inputElement) {
-        List<TestObject> list = (List<TestObject>) inputElement;
+        List<Test> list = (List<Test>) inputElement;
         return list.toArray();
     }
 
     @Override
     public Object[] getChildren(Object parentElement) {
-        TestObject testObject = (TestObject)parentElement;
+        Test testObject = (Test)parentElement;
         return testObject.getChildren().toArray();
     }
 
@@ -81,7 +81,7 @@ public class ExampleDataSource extends MyTreeViewerDataSource{
 
     @Override
     public boolean hasChildren(Object element) {
-        TestObject testObject = (TestObject) element;
+        Test testObject = (Test) element;
         return testObject.hasChildren();
     }
 
