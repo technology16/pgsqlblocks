@@ -1,22 +1,18 @@
 package test;
 
 
-import org.eclipse.jface.viewers.ArrayContentProvider;
-import org.eclipse.jface.viewers.ColumnLabelProvider;
-import org.eclipse.jface.viewers.IContentProvider;
-import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import ru.taximaxim.treeviewer.MyTreeViewer;
+import ru.taximaxim.treeviewer.filter.MyTreeViewerFilter;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 public class ViewerTest {
-
 
     public static void main(String[] args) {
         List<Test> list = new ArrayList<>();
@@ -39,6 +35,9 @@ public class ViewerTest {
         MyTreeViewer treeViewer = new MyTreeViewer(shell, SWT.VIRTUAL | SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL | SWT.FULL_SELECTION | SWT.MULTI );
         treeViewer.setDataSource(new ExampleDataSource(null));
         treeViewer.setInput(list);
+        MyTreeViewerFilter filter = new MyTreeViewerFilter(treeViewer.getDataSource().getColumns(), shell, SWT.TOP);
+
+
         shell.setSize (400, 400);
         shell.open ();
         while (!shell.isDisposed()) {

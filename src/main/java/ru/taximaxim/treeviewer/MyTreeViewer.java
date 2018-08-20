@@ -5,6 +5,7 @@ import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.TreeViewerColumn;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
+import ru.taximaxim.treeviewer.filter.MyTreeViewerFilter;
 import ru.taximaxim.treeviewer.utils.MyTreeViewerDataSource;
 import ru.taximaxim.treeviewer.utils.IColumn;
 
@@ -14,6 +15,7 @@ import ru.taximaxim.treeviewer.utils.IColumn;
 public class MyTreeViewer extends TreeViewer {
 
     private MyTreeViewerDataSource dataSource;
+    private MyTreeViewerFilter filter;
 
     public MyTreeViewer(Composite parent, int style) {
         super(parent, style);
@@ -33,6 +35,11 @@ public class MyTreeViewer extends TreeViewer {
         createColumns();
         setLabelProvider(this.dataSource);
         setContentProvider(this.dataSource);
+    }
+
+    public void setFilter(MyTreeViewerFilter filter){
+        this.filter = filter;
+
     }
 
     private void createColumns() {
