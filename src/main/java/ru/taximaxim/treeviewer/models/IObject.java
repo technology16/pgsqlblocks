@@ -1,4 +1,4 @@
-package ru.taximaxim.treeviewer.utils;
+package ru.taximaxim.treeviewer.models;
 
 import java.util.List;
 

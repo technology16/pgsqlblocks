@@ -4,17 +4,14 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.*;
-import ru.taximaxim.treeviewer.utils.IColumn;
+import ru.taximaxim.treeviewer.models.IColumn;
 
-import javax.swing.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.ResourceBundle;
-import java.util.function.Consumer;
 
 /**
- * графическое представление
+ * графическое представление фильтра
  */
 public class MyTreeViewerFilter extends Composite {
 
@@ -42,11 +39,11 @@ public class MyTreeViewerFilter extends Composite {
     private void createFilterView(IColumn filter) {
         Group group = new Group(this, SWT.HORIZONTAL);
         GridLayout layout = new GridLayout(3, false);
-        GridData layoutData = new GridData(SWT.FILL, SWT.TOP, true, false);
+        GridData layoutData = new GridData(SWT.FILL, SWT.FILL, true, false);
         group.setLayout(layout);
         group.setLayoutData(layoutData);
 
-        GridData comboLayoutData = new GridData(SWT.LEFT, SWT.CENTER, false,false);
+        GridData comboLayoutData = new GridData(SWT.CENTER, SWT.CENTER, false,false);
         comboLayoutData.widthHint = 60;
         GridData textLayoutData = new GridData(SWT.LEFT, SWT.CENTER, true, false);
         textLayoutData.widthHint = 150;
@@ -62,7 +59,7 @@ public class MyTreeViewerFilter extends Composite {
         filterValues.forEach( f -> combo.add(f.toString()));
         // TODO: 20.08.18 listener!!!
 
-        Text filterText = new Text(group, SWT.NONE);
+        Text filterText = new Text(group, SWT.FILL | SWT.BORDER);
         filterText.setLayoutData(textLayoutData);
         // TODO: 20.08.18 listener!
     }

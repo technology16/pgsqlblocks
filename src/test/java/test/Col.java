@@ -1,6 +1,6 @@
 package test;
 
-import ru.taximaxim.treeviewer.utils.IColumn;
+import ru.taximaxim.treeviewer.models.IColumn;
 
 /**
  * Created by user on 16.08.18.

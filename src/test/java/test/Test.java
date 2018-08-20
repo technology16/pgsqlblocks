@@ -1,6 +1,6 @@
 package test;
 
-import ru.taximaxim.treeviewer.utils.IObject;
+import ru.taximaxim.treeviewer.models.IObject;
 
 import java.util.ArrayList;
 import java.util.List;
