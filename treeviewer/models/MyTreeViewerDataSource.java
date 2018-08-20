@@ -1,9 +1,8 @@
-package ru.taximaxim.treeviewer.utils;
+package ru.taximaxim.treeviewer.models;
 
 import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
-import ru.taximaxim.treeviewer.utils.IColumn;
 
 import java.util.ArrayList;
 import java.util.List;
