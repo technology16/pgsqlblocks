@@ -19,15 +19,19 @@ public class MyTreeViewerFilter extends Composite {
     private List<IColumn> filterList = new ArrayList<>();
 
 
-    public MyTreeViewerFilter( List<IColumn> filterlist, Composite parent, int style) {
+    public MyTreeViewerFilter(Composite parent, int style) {
         super(parent, style);
-        filterList.addAll(filterlist);
         glayout = new GridLayout();
         glayout.marginWidth = 0;
         glayout.marginHeight = 0;
         GridData layoutData = new GridData(SWT.FILL, SWT.TOP, true, false);
         setLayout(glayout);
         setLayoutData(layoutData);
+       // createContent();
+    }
+
+    public void setFilterList(List<IColumn> filterList){
+        this.filterList = filterList;
         createContent();
     }
 
@@ -74,5 +78,19 @@ public class MyTreeViewerFilter extends Composite {
         } else {
             return 3;
         }
+    }
+
+    public void show() {
+        this.setVisible(true);
+        GridData layoutData = (GridData) this.getLayoutData();
+        layoutData.exclude = false;
+        this.getParent().layout();
+    }
+
+    public void hide() {
+        this.setVisible(false);
+        GridData layoutData = (GridData) this.getLayoutData();
+        layoutData.exclude = true;
+        this.getParent().layout();
     }
 }

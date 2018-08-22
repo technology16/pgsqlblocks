@@ -36,8 +36,10 @@ public class App {
         Shell shell = new Shell (display);
         shell.setLayout(new GridLayout());
         shell.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+        ExampleDataSource dataSource = new ExampleDataSource(null);
         MyTreeViewer treeViewer = new MyTreeViewer(shell, SWT.FILL | SWT.BORDER);
         treeViewer.setDataSource(new ExampleDataSource(null));
+        treeViewer.setFilters(dataSource.getColumns());
         treeViewer.getTree().setInput(list);
         treeViewer.setDataUpdateListener(() -> {
             list.add(new Test("update!!!!"));
