@@ -6,9 +6,12 @@ import org.eclipse.jface.viewers.TreeViewerColumn;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.TreeColumn;
 import ru.taximaxim.treeviewer.filter.MyTreeViewerFilter;
 import ru.taximaxim.treeviewer.models.MyTreeViewerDataSource;
 import ru.taximaxim.treeviewer.models.IColumn;
+
+import java.util.Set;
 
 /**
  * Основной класс, который инициализируется в UI
@@ -17,6 +20,7 @@ public class MyTreeViewerTable extends TreeViewer {
 
     private MyTreeViewerDataSource dataSource;
     private MyTreeViewerFilter filter;
+    private Set<IColumn> invisibleColumns;
 
     public MyTreeViewerTable(Composite parent, int style) {
         super(parent, style);
@@ -55,5 +59,66 @@ public class MyTreeViewerTable extends TreeViewer {
             treeColumn.getColumn().setData(column);
         }
 
+    }
+
+    public Set<IColumn> getInvisibleColumns() {
+        return invisibleColumns;
+    }
+
+    /**
+     * Список приходит из диалога конфигурации списка колонок
+     */
+    public void setInvisibleColumns(Set<IColumn> invisible) {
+        if (invisibleColumns != null) {
+            if (invisible != null) {
+                invisibleColumns.removeAll(invisible);
+            }
+            showColumns(invisibleColumns);
+        }
+        invisibleColumns = invisible;
+        hideColumns(invisibleColumns);
+    }
+
+    //FIXME а почему выпадающий и невыпадающий, если у нас показать/скрыть!!!!
+
+    /**
+     * set invisibility of columns
+     */
+    private void hideColumns(Set<IColumn> hidingColumns) {
+        if (hidingColumns == null || hidingColumns.isEmpty()) {
+            return;
+        }
+        TreeColumn[] columns = getTree().getColumns();
+        for (TreeColumn treeColumn : columns) {
+            //почему-то прощелкивает....
+            IColumn column = (IColumn) treeColumn.getData();
+            System.out.println(column);
+
+
+
+            if (!hidingColumns.contains(column)) {
+                System.out.println(hidingColumns.contains(column));
+                continue;
+            }
+            treeColumn.setWidth(0);
+            treeColumn.setResizable(false);
+        }
+    }
+
+    /**
+     * Set visibility of columns
+     */
+    private void showColumns(Set<IColumn> collapsedColumns) {
+        if (collapsedColumns != null && !collapsedColumns.isEmpty()) {
+            TreeColumn[] columns = getTree().getColumns();
+
+            for (TreeColumn treeColumn : columns) {
+                IColumn column = (IColumn) treeColumn.getData();
+                if (collapsedColumns.contains(column)) {
+                    treeColumn.setWidth(column.getColumnWidth());
+                    treeColumn.setResizable(true);
+                }
+            }
+        }
     }
 }

@@ -31,4 +31,24 @@ public class Col implements IColumn {
     public int getColumnWidth() {
         return 80;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Col col = (Col) o;
+
+        if (columnWidth != col.columnWidth) return false;
+        if (columnName != null ? !columnName.equals(col.columnName) : col.columnName != null) return false;
+        return columnTooltip != null ? columnTooltip.equals(col.columnTooltip) : col.columnTooltip == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = columnName != null ? columnName.hashCode() : 0;
+        result = 31 * result + (columnTooltip != null ? columnTooltip.hashCode() : 0);
+        result = 31 * result + columnWidth;
+        return result;
+    }
 }

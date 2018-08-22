@@ -1,6 +1,8 @@
 package ru.taximaxim.treeviewer;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.layout.RowData;
@@ -8,6 +10,7 @@ import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
+import ru.taximaxim.treeviewer.dialog.ColumnConfigDialog;
 import ru.taximaxim.treeviewer.models.IObject;
 import ru.taximaxim.treeviewer.models.MyTreeViewerDataSource;
 import ru.taximaxim.treeviewer.tree.MyTreeViewerTable;
@@ -76,5 +79,12 @@ public class MyTreeViewer extends Composite {
         configColumnToolItem = new ToolItem(toolBar, SWT.PUSH);
         configColumnToolItem.setImage(ImageUtils.getImage(Images.TABLE));
         //configColumnToolItem.setToolTipText(Images.TABLE.getDescription(resourceBundle));
+        configColumnToolItem.addListener(SWT.Selection, event -> openConfigColumnDialog());
+    }
+
+    private void openConfigColumnDialog() {
+        ColumnConfigDialog dialog = new ColumnConfigDialog(resourceBundle, tree, this.getShell());
+        dialog.open();
+
     }
 }
