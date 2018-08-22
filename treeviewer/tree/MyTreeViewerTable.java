@@ -79,25 +79,17 @@ public class MyTreeViewerTable extends TreeViewer {
         hideColumns(invisibleColumns);
     }
 
-    //FIXME а почему выпадающий и невыпадающий, если у нас показать/скрыть!!!!
-
     /**
      * set invisibility of columns
      */
-    private void hideColumns(Set<IColumn> hidingColumns) {
-        if (hidingColumns == null || hidingColumns.isEmpty()) {
+    private void hideColumns(Set<IColumn> shownColumns) {
+        if (shownColumns == null || shownColumns.isEmpty()) {
             return;
         }
         TreeColumn[] columns = getTree().getColumns();
         for (TreeColumn treeColumn : columns) {
-            //почему-то прощелкивает....
             IColumn column = (IColumn) treeColumn.getData();
-            System.out.println(column);
-
-
-
-            if (!hidingColumns.contains(column)) {
-                System.out.println(hidingColumns.contains(column));
+            if (!shownColumns.contains(column)) {
                 continue;
             }
             treeColumn.setWidth(0);
@@ -108,13 +100,13 @@ public class MyTreeViewerTable extends TreeViewer {
     /**
      * Set visibility of columns
      */
-    private void showColumns(Set<IColumn> collapsedColumns) {
-        if (collapsedColumns != null && !collapsedColumns.isEmpty()) {
+    private void showColumns(Set<IColumn> shownColumns) {
+        if (shownColumns != null && !shownColumns.isEmpty()) {
             TreeColumn[] columns = getTree().getColumns();
 
             for (TreeColumn treeColumn : columns) {
                 IColumn column = (IColumn) treeColumn.getData();
-                if (collapsedColumns.contains(column)) {
+                if (shownColumns.contains(column)) {
                     treeColumn.setWidth(column.getColumnWidth());
                     treeColumn.setResizable(true);
                 }
