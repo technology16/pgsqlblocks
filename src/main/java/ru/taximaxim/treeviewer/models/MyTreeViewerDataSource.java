@@ -55,5 +55,4 @@ public abstract class MyTreeViewerDataSource implements ITableLabelProvider, ITr
         listeners.remove(listener);
 
     }
-
 }
