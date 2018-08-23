@@ -4,12 +4,17 @@ import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.swt.widgets.TreeColumn;
 import ru.taximaxim.treeviewer.models.IColumn;
 
-
+/**
+ * Класс необходим для сортировки колонки по возрастанию/убыванию
+ * setColumn должен получает колонку treeColumn.getData()
+ * setSortDirection получает тип сортировки.
+ * ******************************************************************
+ *
+ */
 public abstract class ObjectViewComparator extends ViewerComparator {
-    private IColumn column;
-    private int sortDirection;
 
     public ObjectViewComparator() {
+        super();
     }
 
     public abstract void setColumn(TreeColumn column);
