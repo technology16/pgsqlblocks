@@ -7,9 +7,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.TreeColumn;
-import ru.taximaxim.treeviewer.filter.FilterValues;
 import ru.taximaxim.treeviewer.filter.MyTreeViewerFilter;
-import ru.taximaxim.treeviewer.listeners.FilterListener;
 import ru.taximaxim.treeviewer.models.MyTreeViewerDataSource;
 import ru.taximaxim.treeviewer.models.IColumn;
 

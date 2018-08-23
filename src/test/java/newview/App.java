@@ -5,8 +5,6 @@ import org.eclipse.swt.layout.*;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import ru.taximaxim.treeviewer.MyTreeViewer;
-import ru.taximaxim.treeviewer.filter.FilterValues;
-import ru.taximaxim.treeviewer.listeners.FilterListener;
 import ru.taximaxim.treeviewer.models.IColumn;
 import test.Test;
 
@@ -48,7 +46,6 @@ public class App {
             treeViewer.getTree().refresh();
             //treeViewer.getTree().setInput(list);
         });
-        treeViewer.setAllTextFilterListener(new TestFilter());
 //        treeViewer.setFilterListener(new FilterListener() {
 //            @Override
 //            public void textChanged(IColumn column, String text) {
