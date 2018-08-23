@@ -22,12 +22,12 @@ public class App {
     public static void main(String[] args) {
         java.util.List<Test> list = new ArrayList<>();
         java.util.List<Test> childlist = new ArrayList<>();
-        Test testObject = new Test("test1");
-        Test testObject2 = new Test("test2");
-        Test testObject3 = new Test("test3");
-        Test childObject = new Test("childtest1");
-        Test childObject2 = new Test("childtest2");
-        Test childObject3 = new Test("childtest3");
+        Test testObject = new Test("test1", "gp", "jkr", 500);
+        Test testObject2 = new Test("test2", "BC", "JL", 400);
+        Test testObject3 = new Test("test3", "SH","AKD", 200);
+        Test childObject = new Test("childtest1", "childTitle", "childAuthor", 600);
+        Test childObject2 = new Test("childtest2", "childTitle", "childAuthor", 600);
+        Test childObject3 = new Test("childtest3", "childTitle", "childAuthor", 600);
         childlist.addAll(Arrays.asList(childObject, childObject2, childObject3));
         testObject.setChildren(childlist);
         testObject2.setChildren(childlist);
@@ -46,10 +46,13 @@ public class App {
         treeViewer.setFilters(dataSource.getColumns());
         treeViewer.getTree().setInput(list);
         treeViewer.setDataUpdateListener(() -> {
-            list.add(new Test("update!!!!"));
+            list.add(new Test("update!!!!", "upgrade", "MR", 100));
             treeViewer.getTree().refresh();
             //treeViewer.getTree().setInput(list);
         });
+
+        treeViewer.setComparator(new TestComparator());
+
         treeViewer.setAllTextFilterListener(new TestFilter());
 //        treeViewer.setFilterListener(new FilterListener() {
 //            @Override

@@ -6,6 +6,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
+import org.eclipse.swt.widgets.TreeColumn;
 import ru.taximaxim.treeviewer.dialog.ColumnConfigDialog;
 import ru.taximaxim.treeviewer.filter.AllFilter;
 import ru.taximaxim.treeviewer.filter.FilterValues;
@@ -13,8 +14,10 @@ import ru.taximaxim.treeviewer.filter.MyTreeViewerFilter;
 import ru.taximaxim.treeviewer.listeners.AllTextFilterListener;
 import ru.taximaxim.treeviewer.listeners.DataUpdateListener;
 import ru.taximaxim.treeviewer.listeners.FilterListener;
+import ru.taximaxim.treeviewer.listeners.MyTreeViewerSortColumnSelectionListener;
 import ru.taximaxim.treeviewer.models.IColumn;
 import ru.taximaxim.treeviewer.models.MyTreeViewerDataSource;
+import ru.taximaxim.treeviewer.models.ObjectViewComparator;
 import ru.taximaxim.treeviewer.tree.MyTreeViewerTable;
 import ru.taximaxim.treeviewer.utils.ImageUtils;
 import ru.taximaxim.treeviewer.utils.Images;
@@ -25,7 +28,7 @@ import java.util.ResourceBundle;
 /**
  * Основная форма
  */
-public class MyTreeViewer extends Composite implements FilterListener {
+public class MyTreeViewer extends Composite implements FilterListener, MyTreeViewerSortColumnSelectionListener{
 
     // в составе таблица с данными
     //верхняя панель с кнопками
@@ -44,6 +47,7 @@ public class MyTreeViewer extends Composite implements FilterListener {
     private DataUpdateListener dataUpdateListener;
     private FilterListener filterListener;
     private AllFilter allTextFilterListener;
+    private ObjectViewComparator comparator;
 
 
     public MyTreeViewer(Composite parent, int style) {
@@ -79,6 +83,15 @@ public class MyTreeViewer extends Composite implements FilterListener {
         filter.hide();
         tree = new MyTreeViewerTable(MyTreeViewer.this, SWT.FILL | SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL | SWT.FULL_SELECTION | SWT.MULTI);
         tree.setFilter(filter);
+        tree.addSortListener(this);
+    }
+
+    public ObjectViewComparator getComparator() {
+        return comparator;
+    }
+
+    public void setComparator(ObjectViewComparator comparator) {
+        this.comparator = comparator;
     }
 
     public FilterListener getFilterListener() {
@@ -142,11 +155,20 @@ public class MyTreeViewer extends Composite implements FilterListener {
 
     @Override
     public void textChanged(IColumn column, String text) {
-
+        //rm
     }
 
     @Override
     public void comboChanged(IColumn column, FilterValues value) {
+        //rm
+    }
 
+    @Override
+    public void didSelectSortColumn(TreeColumn column, int sortDirection) {
+        if (comparator != null) {
+            comparator.setColumn(column);
+            comparator.setSortDirection(sortDirection);
+            tree.setComparator(comparator);
+        }
     }
 }

@@ -10,10 +10,17 @@ import java.util.List;
  */
 public class Test implements IObject {
     private String name;
+    private String title;
+    private String author;
+    private int price;
+
     private List<Test> children = new ArrayList<>();
 
-    public Test(String name) {
+    public Test(String name, String title, String author, int price) {
         this.name = name;
+        this.title = title;
+        this.author = author;
+        this.price = price;
     }
 
     @Override
@@ -29,6 +36,18 @@ public class Test implements IObject {
 
     public String getName() {
         return name;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public String getAuthor() {
+        return author;
+    }
+
+    public int getPrice() {
+        return price;
     }
 
     public void setChildren(List<Test> children) {
