@@ -36,7 +36,7 @@ public class ViewerTest {
         MyTreeViewerTable treeViewer = new MyTreeViewerTable(shell, SWT.VIRTUAL | SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL | SWT.FULL_SELECTION | SWT.MULTI );
         treeViewer.setDataSource(new ExampleDataSource(null));
         treeViewer.setInput(list);
-        MyTreeViewerFilter filter = new MyTreeViewerFilter( shell, SWT.TOP);
+        //wMyTreeViewerFilter filter = new MyTreeViewerFilter( shell, SWT.TOP, listener);
 
 
         shell.setSize (400, 400);
