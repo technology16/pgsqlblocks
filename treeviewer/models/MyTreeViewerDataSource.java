@@ -31,7 +31,7 @@ public abstract class MyTreeViewerDataSource implements ITableLabelProvider, ITr
 
     public abstract boolean columnIsSortable();
 
-    public abstract List<IColumn> getColumns();
+    public abstract List<? extends IColumn> getColumns();
 
     public abstract String getLocalizeString(String name);
 

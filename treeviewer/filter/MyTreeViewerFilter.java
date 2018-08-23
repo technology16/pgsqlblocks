@@ -18,7 +18,7 @@ import java.util.List;
 public class MyTreeViewerFilter extends Composite {
 
     private GridLayout glayout;
-    private List<IColumn> filterList = new ArrayList<>();
+    private List<? extends IColumn> filterList = new ArrayList<>();
     private FilterListener listener;
     //private AllTextFilterListener allTextFilterListener;
     private AllFilter allFilter;
@@ -33,7 +33,7 @@ public class MyTreeViewerFilter extends Composite {
         setLayoutData(layoutData);
     }
 
-    public void setFilterList(List<IColumn> filterList){
+    public void setFilterList(List<? extends IColumn> filterList){
         this.filterList = filterList;
         createContent();
     }

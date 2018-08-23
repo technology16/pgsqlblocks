@@ -46,7 +46,7 @@ public class MyTreeViewer extends Composite implements FilterListener {
     private AllFilter allTextFilterListener;
 
 
-    public MyTreeViewer(Composite parent, int style) {
+    public MyTreeViewer(Composite parent, int style, Object userData, MyTreeViewerDataSource dataSource) {
         super(parent, style);
         //this.resourceBundle = bundle;
         mainLayout = new GridLayout();
@@ -54,11 +54,11 @@ public class MyTreeViewer extends Composite implements FilterListener {
         setLayout(mainLayout);
         setLayoutData(data);
         createContent();
-    }
 
-    public void setDataSource(MyTreeViewerDataSource dataSource){
         this.dataSource = dataSource;
         tree.setDataSource(dataSource);
+
+        getTree().setInput(userData);
     }
 
     public MyTreeViewerTable getTree() {
@@ -135,7 +135,7 @@ public class MyTreeViewer extends Composite implements FilterListener {
 
     }
 
-    public void setFilters(List<IColumn> filters) {
+    public void setFilters(List<? extends IColumn> filters) {
         filter.setFilterList(filters);
     }
 

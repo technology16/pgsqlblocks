@@ -51,8 +51,7 @@ public class ColumnConfigDialog extends Dialog {
 
         MyTreeViewerDataSource dataSource = treeViewer.getDataSource();
 
-        List<IColumn> columns = dataSource.getColumns();
-        for (IColumn column : columns) {
+        for (IColumn column : dataSource.getColumns()) {
             Button checkBoxButton = new Button(container, SWT.CHECK);
             checkBoxButton.setText(dataSource.getLocalizeString(column.getColumnName()));
             checkBoxButton.setSelection(!invisibleColumn.contains(column));
