@@ -49,7 +49,7 @@ public enum SupportedVersion {
         return versionText;
     }
 
-    //а если в енаме значения нет???? todo
+    // TODO а если в енаме значения нет???? Логировать и возвращать дефолт
     public static SupportedVersion get(String text){
         return lookup.get(text);
     }

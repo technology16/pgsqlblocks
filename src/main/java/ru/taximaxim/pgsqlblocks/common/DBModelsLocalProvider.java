@@ -59,6 +59,7 @@ public class DBModelsLocalProvider implements DBModelsProvider {
         }
     }
 
+    // FIXME broken if at least one db has version and at least one doesn't 
     @Override
     public boolean needUpdate() {
         Document document = documentWorker.open(file);

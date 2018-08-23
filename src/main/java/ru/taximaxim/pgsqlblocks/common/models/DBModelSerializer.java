@@ -53,7 +53,7 @@ public class DBModelSerializer {
         String databaseName = getTextContentFromNode(databaseNameNode);
         String user = getTextContentFromNode(userNode);
         String password = getTextContentFromNode(passwordNode);
-        boolean enabled = enabledNode == null ? false : Boolean.parseBoolean(getTextContentFromNode(enabledNode));
+        boolean enabled = enabledNode != null && Boolean.parseBoolean(getTextContentFromNode(enabledNode));
 
         return new DBModel(name, host, port, version, databaseName, user, password, enabled);
     }
@@ -81,9 +81,10 @@ public class DBModelSerializer {
     private SupportedVersion getVersionFromNode(Node node) {
         if (node != null) {
             String version =  node.getTextContent();
-            return version.equals("") ? SupportedVersion.VERSION_DEFAULT : SupportedVersion.get(version);
+            return version.isEmpty() ? SupportedVersion.VERSION_DEFAULT : SupportedVersion.get(version);
+        } else {
+            return SupportedVersion.VERSION_DEFAULT;
         }
-        return SupportedVersion.VERSION_DEFAULT;
     }
 
     private Element createElementWithContent(Document document, String tagName, String content) {
