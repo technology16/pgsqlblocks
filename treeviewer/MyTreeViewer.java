@@ -7,12 +7,9 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 import ru.taximaxim.treeviewer.dialog.ColumnConfigDialog;
-import ru.taximaxim.treeviewer.filter.AllFilter;
 import ru.taximaxim.treeviewer.filter.FilterValues;
 import ru.taximaxim.treeviewer.filter.MyTreeViewerFilter;
-import ru.taximaxim.treeviewer.listeners.AllTextFilterListener;
 import ru.taximaxim.treeviewer.listeners.DataUpdateListener;
-import ru.taximaxim.treeviewer.listeners.FilterListener;
 import ru.taximaxim.treeviewer.models.IColumn;
 import ru.taximaxim.treeviewer.models.MyTreeViewerDataSource;
 import ru.taximaxim.treeviewer.tree.MyTreeViewerTable;
@@ -25,7 +22,7 @@ import java.util.ResourceBundle;
 /**
  * Основная форма
  */
-public class MyTreeViewer extends Composite implements FilterListener {
+public class MyTreeViewer extends Composite{
 
     // в составе таблица с данными
     //верхняя панель с кнопками
@@ -42,8 +39,8 @@ public class MyTreeViewer extends Composite implements FilterListener {
     private MyTreeViewerDataSource dataSource;
     private MyTreeViewerFilter filter;
     private DataUpdateListener dataUpdateListener;
-    private FilterListener filterListener;
-    private AllFilter allTextFilterListener;
+//    private FilterListener filterListener;
+//    private AllFilter allTextFilterListener;
 
 
     public MyTreeViewer(Composite parent, int style, Object userData, MyTreeViewerDataSource dataSource) {
@@ -81,22 +78,22 @@ public class MyTreeViewer extends Composite implements FilterListener {
         tree.setFilter(filter);
     }
 
-    public FilterListener getFilterListener() {
-        return filterListener;
-    }
-
-    public void setFilterListener(FilterListener filterListener) {
-        this.filterListener = filterListener;
-    }
-
-    public AllTextFilterListener getAllTextFilterListener() {
-        return allTextFilterListener;
-    }
-
-    public void setAllTextFilterListener(AllFilter allTextFilterListener) {
-        this.allTextFilterListener = allTextFilterListener;
-        filter.setAllFilter(allTextFilterListener);
-    }
+//    public FilterListener getFilterListener() {
+//        return filterListener;
+//    }
+//
+//    public void setFilterListener(FilterListener filterListener) {
+//        this.filterListener = filterListener;
+//    }
+//
+//    public AllTextFilterListener getAllTextFilterListener() {
+//        return allTextFilterListener;
+//    }
+//
+//    public void setAllTextFilterListener(AllFilter allTextFilterListener) {
+//        this.allTextFilterListener = allTextFilterListener;
+//        filter.setAllFilter(allTextFilterListener);
+//    }
 
     private void createToolItems() {
         toolBar = new ToolBar(this, SWT.HORIZONTAL);
@@ -139,14 +136,4 @@ public class MyTreeViewer extends Composite implements FilterListener {
         filter.setFilterList(filters);
     }
 
-
-    @Override
-    public void textChanged(IColumn column, String text) {
-
-    }
-
-    @Override
-    public void comboChanged(IColumn column, FilterValues value) {
-
-    }
 }
