@@ -22,4 +22,18 @@ public enum  FilterValues {
     public String toString() {
         return conditionText;
     }
+
+    public String getConditionText() {
+        return conditionText;
+    }
+
+    public static FilterValues find(String text) {
+        FilterValues[] list = FilterValues.values();
+        for (FilterValues filterValues : list) {
+            if (filterValues.getConditionText().equals(text)) {
+                return filterValues;
+            }
+        }
+        return FilterValues.NONE;
+    }
 }

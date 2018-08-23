@@ -7,7 +7,9 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.TreeColumn;
+import ru.taximaxim.treeviewer.filter.FilterValues;
 import ru.taximaxim.treeviewer.filter.MyTreeViewerFilter;
+import ru.taximaxim.treeviewer.listeners.FilterListener;
 import ru.taximaxim.treeviewer.models.MyTreeViewerDataSource;
 import ru.taximaxim.treeviewer.models.IColumn;
 
@@ -16,7 +18,7 @@ import java.util.Set;
 /**
  * Основной класс, который инициализируется в UI
  */
-public class MyTreeViewerTable extends TreeViewer {
+public class MyTreeViewerTable extends TreeViewer{
 
     private MyTreeViewerDataSource dataSource;
     private MyTreeViewerFilter filter;
@@ -58,7 +60,6 @@ public class MyTreeViewerTable extends TreeViewer {
             treeColumn.getColumn().setWidth(column.getColumnWidth());
             treeColumn.getColumn().setData(column);
         }
-
     }
 
     public Set<IColumn> getInvisibleColumns() {
