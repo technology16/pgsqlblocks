@@ -168,6 +168,7 @@ public class MyTreeViewer extends Composite implements FilterListener, MyTreeVie
         if (comparator != null) {
             comparator.setColumn(column);
             comparator.setSortDirection(sortDirection);
+            tree.setComparator(null);
             tree.setComparator(comparator);
         }
     }

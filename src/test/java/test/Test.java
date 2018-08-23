@@ -53,4 +53,26 @@ public class Test implements IObject {
     public void setChildren(List<Test> children) {
         this.children = children;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Test test = (Test) o;
+
+        if (price != test.price) return false;
+        if (name != null ? !name.equals(test.name) : test.name != null) return false;
+        if (title != null ? !title.equals(test.title) : test.title != null) return false;
+        return author != null ? author.equals(test.author) : test.author == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = name != null ? name.hashCode() : 0;
+        result = 31 * result + (title != null ? title.hashCode() : 0);
+        result = 31 * result + (author != null ? author.hashCode() : 0);
+        result = 31 * result + price;
+        return result;
+    }
 }

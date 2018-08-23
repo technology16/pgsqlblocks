@@ -22,9 +22,9 @@ public class App {
     public static void main(String[] args) {
         java.util.List<Test> list = new ArrayList<>();
         java.util.List<Test> childlist = new ArrayList<>();
-        Test testObject = new Test("test1", "gp", "jkr", 500);
-        Test testObject2 = new Test("test2", "BC", "JL", 400);
-        Test testObject3 = new Test("test3", "SH","AKD", 200);
+        Test testObject = new Test("test1", "gpqweewrw", "jkr", 500455);
+        Test testObject2 = new Test("test2", "BC", "JL", 4001);
+        Test testObject3 = new Test("test3", "SH","AKD", 2250);
         Test childObject = new Test("childtest1", "childTitle", "childAuthor", 600);
         Test childObject2 = new Test("childtest2", "childTitle", "childAuthor", 600);
         Test childObject3 = new Test("childtest3", "childTitle", "childAuthor", 600);
