@@ -5,8 +5,6 @@ import org.eclipse.swt.layout.*;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import ru.taximaxim.treeviewer.MyTreeViewer;
-import ru.taximaxim.treeviewer.listeners.DataUpdateListener;
-import test.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;

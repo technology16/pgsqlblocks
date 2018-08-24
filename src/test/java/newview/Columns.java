@@ -1,7 +1,6 @@
 package newview;
 
 import ru.taximaxim.treeviewer.models.IColumn;
-import test.Col;
 
 /**
  * Created by user on 23.08.18.

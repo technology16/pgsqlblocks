@@ -5,7 +5,6 @@ import ru.taximaxim.treeviewer.listeners.FilterListener;
 import ru.taximaxim.treeviewer.filter.ViewFilter;
 import ru.taximaxim.treeviewer.models.IColumn;
 import ru.taximaxim.treeviewer.models.MyTreeViewerDataSource;
-import test.Test;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,13 +31,22 @@ public class MyFilter implements FilterListener, AllTextFilterListener {
         this.filter = filter;
         //тут делаем все что угодно, но потом сохраняем в
         //tests.add(new Test("title"));
-        tests.clear();
+       // List<Test> filteredData = getFilteredList();
         //tests.addAll(getFilteredList());
         System.out.println("TUUUUUUUUUUUU");
     }
 
     @Override
     public void filterAllColumn(ViewFilter filter) {
+        List<Test> filteredList = getFilteredAllText(filter.getSearchText());
         System.out.println("All text!");
+    }
+
+    public List<Test> getFilteredAllText(String searchText) {
+        List<Test> fil = new ArrayList<>();
+        tests.forEach(test -> {
+
+        });
+        return fil;
     }
 }

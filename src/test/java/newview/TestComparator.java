@@ -4,8 +4,6 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.TreeColumn;
 import ru.taximaxim.treeviewer.models.ObjectViewComparator;
-import test.Col;
-import test.Test;
 
 
 public class TestComparator extends ObjectViewComparator{

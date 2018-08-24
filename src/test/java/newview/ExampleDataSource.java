@@ -3,10 +3,7 @@ package newview;
 import org.eclipse.swt.graphics.Image;
 import ru.taximaxim.treeviewer.models.IColumn;
 import ru.taximaxim.treeviewer.models.MyTreeViewerDataSource;
-import test.Col;
-import test.Test;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.ResourceBundle;

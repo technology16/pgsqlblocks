@@ -1,4 +1,4 @@
-package test;
+package newview;
 
 import ru.taximaxim.treeviewer.models.IObject;
 
