@@ -4,6 +4,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.*;
+import ru.taximaxim.treeviewer.listeners.AllTextFilterListener;
 import ru.taximaxim.treeviewer.listeners.DataUpdateListener;
 import ru.taximaxim.treeviewer.listeners.FilterListener;
 import ru.taximaxim.treeviewer.models.IColumn;
@@ -21,6 +22,7 @@ public class MyTreeViewerFilter extends Composite {
     private List<? extends IColumn> filterList = new ArrayList<>();
     private FilterListener filterableListeners;
     private DataUpdateListener dataUpdateListener;
+    private AllTextFilterListener allTextFilterListener;
 
     public MyTreeViewerFilter(Composite parent, int style) {
         super(parent, style);
@@ -32,21 +34,47 @@ public class MyTreeViewerFilter extends Composite {
         setLayoutData(layoutData);
     }
 
-    public void setFilterList(List<? extends IColumn> filterList, FilterListener filterableListeners, DataUpdateListener dataUpdateListener ){
+    public void setFilterList(List<? extends IColumn> filterList, FilterListener filterableListeners, DataUpdateListener dataUpdateListener,
+                              AllTextFilterListener allTextFilterListener){
         this.filterList = filterList;
         this.filterableListeners = filterableListeners;
         this.dataUpdateListener = dataUpdateListener;
+        this.allTextFilterListener = allTextFilterListener;
         createContent();
     }
 
     private void createContent() {
         glayout.numColumns = findColumnNumber();
+        createAllTextFilter();
         filterList.forEach(this::createFilterView);
+    }
+
+    private void createAllTextFilter() {
+        ViewFilter viewFilter = new ViewFilter(null, null, allTextFilterListener, dataUpdateListener);
+
+        Group group = new Group(this, SWT.HORIZONTAL);
+        GridLayout layout = new GridLayout(3, false);
+        GridData layoutData = new GridData(SWT.FILL, SWT.FILL, true, false);
+        group.setLayout(layout);
+        group.setLayoutData(layoutData);
+        Label label = new Label(group, SWT.NONE);
+        GridData data = new GridData(SWT.LEFT, SWT.CENTER, false, false);
+        data.horizontalSpan = 1;
+        label.setLayoutData(data);
+        label.setText("Filter"); //bundle??????
+        Text filterText = new Text(group, SWT.FILL | SWT.BORDER);
+        GridData textLayoutData = new GridData(SWT.LEFT, SWT.CENTER, true, false);
+        textLayoutData.horizontalSpan = 2;
+        filterText.setLayoutData(textLayoutData);
+        filterText.addModifyListener(e -> {
+            String text = filterText.getText();
+            viewFilter.onAllTextChanges(text);
+        });
     }
 
 
     private void createFilterView(IColumn filter) {
-        ViewFilter viewFilter = new ViewFilter(filter, filterableListeners, dataUpdateListener);
+        ViewFilter viewFilter = new ViewFilter(filter, filterableListeners, allTextFilterListener, dataUpdateListener);
 
         Group group = new Group(this, SWT.HORIZONTAL);
         GridLayout layout = new GridLayout(3, false);

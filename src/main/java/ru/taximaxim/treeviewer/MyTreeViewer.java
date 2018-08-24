@@ -8,6 +8,7 @@ import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 import ru.taximaxim.treeviewer.dialog.ColumnConfigDialog;
 import ru.taximaxim.treeviewer.filter.MyTreeViewerFilter;
+import ru.taximaxim.treeviewer.listeners.AllTextFilterListener;
 import ru.taximaxim.treeviewer.listeners.DataUpdateListener;
 import ru.taximaxim.treeviewer.listeners.FilterListener;
 import ru.taximaxim.treeviewer.models.IColumn;
@@ -111,8 +112,9 @@ public class MyTreeViewer extends Composite{
     /**
      * Сюда передаются все слушатели для treeviewertable treeviewerfilter
      */
-    public void setFilters(List<? extends IColumn> filters, FilterListener filterableListeners) {
-        viewerFilter.setFilterList(filters, filterableListeners, dataUpdateListener);
+    public void setFilters(List<? extends IColumn> filters, FilterListener filterableListeners,
+                           AllTextFilterListener allTextFilterListener) {
+        viewerFilter.setFilterList(filters, filterableListeners, dataUpdateListener, allTextFilterListener);
     }
 
 }

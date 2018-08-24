@@ -39,7 +39,8 @@ public class App {
         shell.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
         ExampleDataSource dataSource = new ExampleDataSource(null);
         MyTreeViewer treeViewer = new MyTreeViewer(shell, SWT.FILL | SWT.BORDER, list, dataSource);
-        treeViewer.setFilters(dataSource.getColumns(), new MyFilter(list, dataSource));
+        MyFilter myFilter = new MyFilter(list, dataSource);
+        treeViewer.setFilters(dataSource.getColumns(), myFilter, myFilter);
 
         shell.open ();
         while (!shell.isDisposed()) {

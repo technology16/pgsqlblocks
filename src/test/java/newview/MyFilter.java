@@ -1,5 +1,6 @@
 package newview;
 
+import ru.taximaxim.treeviewer.listeners.AllTextFilterListener;
 import ru.taximaxim.treeviewer.listeners.FilterListener;
 import ru.taximaxim.treeviewer.filter.ViewFilter;
 import ru.taximaxim.treeviewer.models.IColumn;
@@ -12,7 +13,7 @@ import java.util.List;
 /**
  * Created by user on 24.08.18.
  */
-public class MyFilter implements FilterListener {
+public class MyFilter implements FilterListener, AllTextFilterListener {
     private List<Test> tests = new ArrayList<>();
     private List<Test> filtered = new ArrayList<>();
     private List<IColumn> columnlist = new ArrayList<>();
@@ -36,4 +37,8 @@ public class MyFilter implements FilterListener {
         System.out.println("TUUUUUUUUUUUU");
     }
 
+    @Override
+    public void filterAllColumn(ViewFilter filter) {
+        System.out.println("All text!");
+    }
 }
