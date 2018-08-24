@@ -61,6 +61,10 @@ public class MyTreeViewer extends Composite implements MyTreeViewerSortColumnSel
         return tree;
     }
 
+    public void setComparator(ObjectViewComparator comparator) {
+        this.comparator = comparator;
+    }
+
     private void createContent() {
         createToolItems();
         viewerFilter = new MyTreeViewerFilter(this, SWT.TOP);
