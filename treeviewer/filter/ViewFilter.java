@@ -37,4 +37,16 @@ public class ViewFilter implements ViewFilterListener {
         dataUpdateListener.needUpdateData();
         System.out.println(column.getColumnName() + " " + searchText + " " + value.getConditionText());
     }
+
+    public IColumn getColumn() {
+        return column;
+    }
+
+    public String getSearchText() {
+        return searchText;
+    }
+
+    public FilterValues getValue() {
+        return value;
+    }
 }

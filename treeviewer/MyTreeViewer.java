@@ -7,9 +7,9 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 import ru.taximaxim.treeviewer.dialog.ColumnConfigDialog;
-import ru.taximaxim.treeviewer.listeners.Filterable;
 import ru.taximaxim.treeviewer.filter.MyTreeViewerFilter;
 import ru.taximaxim.treeviewer.listeners.DataUpdateListener;
+import ru.taximaxim.treeviewer.listeners.FilterListener;
 import ru.taximaxim.treeviewer.models.IColumn;
 import ru.taximaxim.treeviewer.models.MyTreeViewerDataSource;
 import ru.taximaxim.treeviewer.tree.MyTreeViewerTable;
@@ -104,7 +104,7 @@ public class MyTreeViewer extends Composite{
     /**
      * Сюда передаются все слушатели для treeviewertable treeviewerfilter
      */
-    public void setFilters(List<? extends IColumn> filters, Filterable filterableListeners, DataUpdateListener dataUpdateListener) {
+    public void setFilters(List<? extends IColumn> filters, FilterListener filterableListeners, DataUpdateListener dataUpdateListener) {
         this.dataUpdateListener = dataUpdateListener;
         viewerFilter.setFilterList(filters, filterableListeners, dataUpdateListener);
     }
