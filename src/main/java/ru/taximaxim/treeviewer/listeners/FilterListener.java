@@ -1,13 +1,12 @@
 package ru.taximaxim.treeviewer.listeners;
 
-import ru.taximaxim.treeviewer.filter.FilterValues;
-import ru.taximaxim.treeviewer.models.IColumn;
+
+import ru.taximaxim.treeviewer.filter.ViewFilter;
 
 /**
- * Listener for filter
+ * Слушатель для фильтра. Необходимо при реализации в конструктор передавать список объектов и датасурс либо лист с колонками
  */
 public interface FilterListener {
 
-    void textChanged(IColumn column, String text);
-    void comboChanged(IColumn column, FilterValues value);
+    void filter(ViewFilter filter);
 }

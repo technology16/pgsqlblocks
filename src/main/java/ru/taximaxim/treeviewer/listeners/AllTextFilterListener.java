@@ -1,8 +1,11 @@
 package ru.taximaxim.treeviewer.listeners;
 
+import ru.taximaxim.treeviewer.filter.ViewFilter;
+
 /**
- * Created by user on 23.08.18.
+ * слушатель по всему тексту всех доступных колонок
  */
 public interface AllTextFilterListener {
-    void onAllTextChanges(String text);
+
+    void filterAllColumn(ViewFilter filter);
 }

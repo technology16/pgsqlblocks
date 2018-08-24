@@ -5,14 +5,11 @@ import org.eclipse.swt.layout.*;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import ru.taximaxim.treeviewer.MyTreeViewer;
-import ru.taximaxim.treeviewer.filter.FilterValues;
-import ru.taximaxim.treeviewer.listeners.FilterListener;
-import ru.taximaxim.treeviewer.models.IColumn;
+import ru.taximaxim.treeviewer.listeners.DataUpdateListener;
 import test.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 /**
  * Created by user on 20.08.18.
@@ -41,31 +38,12 @@ public class App {
         shell.setLayout(new GridLayout());
         shell.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
         ExampleDataSource dataSource = new ExampleDataSource(null);
-        MyTreeViewer treeViewer = new MyTreeViewer(shell, SWT.FILL | SWT.BORDER);
+        MyTreeViewer treeViewer = new MyTreeViewer(shell, SWT.FILL | SWT.BORDER, dataSource);
         treeViewer.setDataSource(new ExampleDataSource(null));
-        treeViewer.setFilters(dataSource.getColumns());
         treeViewer.getTree().setInput(list);
-        treeViewer.setDataUpdateListener(() -> {
-            list.add(new Test("update!!!!", "upgrade", "MR", 100));
-            treeViewer.getTree().refresh();
-            //treeViewer.getTree().setInput(list);
-        });
-
         treeViewer.setComparator(new TestComparator());
-
-        treeViewer.setAllTextFilterListener(new TestFilter());
-//        treeViewer.setFilterListener(new FilterListener() {
-//            @Override
-//            public void textChanged(IColumn column, String text) {
-//                filterText(list, dataSource, column, text);
-//            }
-//
-//            @Override
-//            public void comboChanged(IColumn column, FilterValues value) {
-//
-//            }
-//        });
-
+        MyFilter myFilter = new MyFilter(list, dataSource);
+        treeViewer.setFilters(dataSource.getColumns(), myFilter, myFilter);
 
         shell.open ();
         while (!shell.isDisposed()) {
@@ -73,10 +51,4 @@ public class App {
         }
         display.dispose ();
     }
-
-    private static void filterText(List<Test> list, ExampleDataSource dataSource, IColumn column, String text) {
-
-        //nb[j ibathjv iehif tltn rhsif ytcgtif
-    }
-
 }
