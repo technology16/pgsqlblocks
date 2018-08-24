@@ -3,7 +3,7 @@ package ru.taximaxim.treeviewer.listeners;
 import ru.taximaxim.treeviewer.filter.FilterValues;
 
 /**
- * Created by user on 23.08.18.
+ * Слушатель для событий происходящий во вью фильтра
  */
 public interface ViewFilterListener {
 
