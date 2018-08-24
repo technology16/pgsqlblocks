@@ -4,6 +4,8 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.*;
+import ru.taximaxim.treeviewer.listeners.DataUpdateListener;
+import ru.taximaxim.treeviewer.listeners.FilterListener;
 import ru.taximaxim.treeviewer.models.IColumn;
 
 import java.util.ArrayList;
@@ -18,6 +20,8 @@ public class MyTreeViewerFilter extends Composite {
     private GridLayout glayout;
     private List<? extends IColumn> filterList = new ArrayList<>();
     private List<ViewFilter> viewFilterListeners = new ArrayList<>();
+    private Filter filterListeners;
+    private DataUpdateListener dataUpdateListener;
 
     public MyTreeViewerFilter(Composite parent, int style) {
         super(parent, style);
@@ -29,15 +33,16 @@ public class MyTreeViewerFilter extends Composite {
         setLayoutData(layoutData);
     }
 
-    public void setFilterList(List<? extends IColumn> filterList){
+    public void setFilterList(List<? extends IColumn> filterList, Filter filterListeners, DataUpdateListener dataUpdateListener ){
         this.filterList = filterList;
+        this.filterListeners = filterListeners;
+        this.dataUpdateListener = dataUpdateListener;
         createContent();
     }
 
     public List<ViewFilter> getViewFilterListeners() {
         return viewFilterListeners;
     }
-
 
     private void createContent() {
         glayout.numColumns = findColumnNumber();
@@ -63,8 +68,7 @@ public class MyTreeViewerFilter extends Composite {
 //    }
 
     private void createFilterView(IColumn filter) {
-        ViewFilter viewFilter = new ViewFilter(filter);
-
+        ViewFilter viewFilter = new ViewFilter(filter, filterListeners, dataUpdateListener);
 
         Group group = new Group(this, SWT.HORIZONTAL);
         GridLayout layout = new GridLayout(3, false);

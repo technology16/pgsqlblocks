@@ -5,6 +5,7 @@ import org.eclipse.swt.layout.*;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import ru.taximaxim.treeviewer.MyTreeViewer;
+import ru.taximaxim.treeviewer.listeners.DataUpdateListener;
 import ru.taximaxim.treeviewer.models.IColumn;
 import test.Test;
 
@@ -40,12 +41,19 @@ public class App {
         shell.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
         ExampleDataSource dataSource = new ExampleDataSource(null);
         MyTreeViewer treeViewer = new MyTreeViewer(shell, SWT.FILL | SWT.BORDER, list, dataSource);
-        treeViewer.setFilters(dataSource.getColumns());
-        treeViewer.setDataUpdateListener(() -> {
-            list.add(new Test("update!!!!"));
-            treeViewer.getTree().refresh();
-            //treeViewer.getTree().setInput(list);
-        });
+        DataUpdateListener dataUpdateListener = new DataUpdateListener() {
+            @Override
+            public void needUpdateData() {
+                treeViewer.getTree().refresh();
+                System.out.println("UPDATED!");
+            }
+        };
+        treeViewer.setFilters(dataSource.getColumns(), new MyFilter(list), dataUpdateListener);
+      //  treeViewer.setDataUpdateListener(() -> {
+//            list.add(new Test("update!!!!"));
+//            treeViewer.getTree().refresh();
+//            //treeViewer.getTree().setInput(list);
+//        });
 //        treeViewer.setFilterListener(new FilterListener() {
 //            @Override
 //            public void textChanged(IColumn column, String text) {
