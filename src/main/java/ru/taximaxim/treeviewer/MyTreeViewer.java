@@ -7,8 +7,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 import ru.taximaxim.treeviewer.dialog.ColumnConfigDialog;
-import ru.taximaxim.treeviewer.filter.AllFilter;
-import ru.taximaxim.treeviewer.filter.FilterValues;
 import ru.taximaxim.treeviewer.filter.MyTreeViewerFilter;
 import ru.taximaxim.treeviewer.listeners.AllTextFilterListener;
 import ru.taximaxim.treeviewer.listeners.DataUpdateListener;
@@ -23,9 +21,9 @@ import java.util.List;
 import java.util.ResourceBundle;
 
 /**
- * Основная форма
+ * Основной управляющий контроллер TreeViewer и верхней панели с кнопками
  */
-public class MyTreeViewer extends Composite implements FilterListener {
+public class MyTreeViewer extends Composite{
 
     // в составе таблица с данными
     //верхняя панель с кнопками
@@ -35,16 +33,10 @@ public class MyTreeViewer extends Composite implements FilterListener {
     private ToolBar toolBar;
     private ResourceBundle resourceBundle;
     private GridLayout mainLayout;
-    private ToolItem updateToolItem;
-    private ToolItem configColumnToolItem;
-    private ToolItem filterToolItem;
     private MyTreeViewerTable tree;
     private MyTreeViewerDataSource dataSource;
-    private MyTreeViewerFilter filter;
+    private MyTreeViewerFilter viewerFilter;
     private DataUpdateListener dataUpdateListener;
-    private FilterListener filterListener;
-    private AllFilter allTextFilterListener;
-
 
     public MyTreeViewer(Composite parent, int style, Object userData, MyTreeViewerDataSource dataSource) {
         super(parent, style);
@@ -65,61 +57,43 @@ public class MyTreeViewer extends Composite implements FilterListener {
         return tree;
     }
 
-    public DataUpdateListener getDataUpdateListener() {
-        return dataUpdateListener;
-    }
-
-    public void setDataUpdateListener(DataUpdateListener dataUpdateListener) {
-        this.dataUpdateListener = dataUpdateListener;
-    }
-
     private void createContent() {
         createToolItems();
-        filter = new MyTreeViewerFilter(this, SWT.TOP);
-        filter.hide();
+        viewerFilter = new MyTreeViewerFilter(this, SWT.TOP);
+        viewerFilter.hide();
         tree = new MyTreeViewerTable(MyTreeViewer.this, SWT.FILL | SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL | SWT.FULL_SELECTION | SWT.MULTI);
-        tree.setFilter(filter);
+        dataUpdateListener = new DataUpdateListener() {
+            @Override
+            public void needUpdateData() {
+                tree.refresh();
+                System.out.println("UPDATED!");
+            }
+        };
     }
 
-    public FilterListener getFilterListener() {
-        return filterListener;
-    }
-
-    public void setFilterListener(FilterListener filterListener) {
-        this.filterListener = filterListener;
-    }
-
-    public AllTextFilterListener getAllTextFilterListener() {
-        return allTextFilterListener;
-    }
-
-    public void setAllTextFilterListener(AllFilter allTextFilterListener) {
-        this.allTextFilterListener = allTextFilterListener;
-        filter.setAllFilter(allTextFilterListener);
-    }
 
     private void createToolItems() {
         toolBar = new ToolBar(this, SWT.HORIZONTAL);
-        updateToolItem = new ToolItem(toolBar, SWT.PUSH);
+        ToolItem updateToolItem = new ToolItem(toolBar, SWT.PUSH);
         updateToolItem.setImage(ImageUtils.getImage(Images.UPDATE));
         //updateToolItem.setToolTipText(Images.UPDATE.getDescription(resourceBundle));
         updateToolItem.addListener(SWT.Selection, event -> updateTreeViewerData());
 
-        filterToolItem = new ToolItem(toolBar, SWT.PUSH);
+        ToolItem filterToolItem = new ToolItem(toolBar, SWT.PUSH);
         filterToolItem.setImage(ImageUtils.getImage(Images.FILTER));
         filterToolItem.addListener(SWT.Selection, event -> openFilter());
         //filterToolItem.setToolTipText(Images.TABLE.getDescription(resourceBundle));
 
-        configColumnToolItem = new ToolItem(toolBar, SWT.PUSH);
+        ToolItem configColumnToolItem = new ToolItem(toolBar, SWT.PUSH);
         configColumnToolItem.setImage(ImageUtils.getImage(Images.TABLE));
         //configColumnToolItem.setToolTipText(Images.TABLE.getDescription(resourceBundle));
         configColumnToolItem.addListener(SWT.Selection, event -> openConfigColumnDialog());
     }
 
     private void openFilter() {
-        if (filter.isVisible()) {
-            filter.hide();
-        }else filter.show();
+        if (viewerFilter.isVisible()) {
+            viewerFilter.hide();
+        }else viewerFilter.show();
     }
 
     private void updateTreeViewerData() {
@@ -135,18 +109,12 @@ public class MyTreeViewer extends Composite implements FilterListener {
 
     }
 
-    public void setFilters(List<? extends IColumn> filters) {
-        filter.setFilterList(filters);
+    /**
+     * Сюда передаются все слушатели для treeviewertable treeviewerfilter
+     */
+    public void setFilters(List<? extends IColumn> filters, FilterListener filterableListeners,
+                           AllTextFilterListener allTextFilterListener) {
+        viewerFilter.setFilterList(filters, filterableListeners, dataUpdateListener, allTextFilterListener);
     }
 
-
-    @Override
-    public void textChanged(IColumn column, String text) {
-
-    }
-
-    @Override
-    public void comboChanged(IColumn column, FilterValues value) {
-
-    }
 }
