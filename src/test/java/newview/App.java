@@ -39,14 +39,7 @@ public class App {
         shell.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
         ExampleDataSource dataSource = new ExampleDataSource(null);
         MyTreeViewer treeViewer = new MyTreeViewer(shell, SWT.FILL | SWT.BORDER, list, dataSource);
-        DataUpdateListener dataUpdateListener = new DataUpdateListener() {
-            @Override
-            public void needUpdateData() {
-                treeViewer.getTree().refresh();
-                System.out.println("UPDATED!");
-            }
-        };
-        treeViewer.setFilters(dataSource.getColumns(), new MyFilter(list, dataSource), dataUpdateListener);
+        treeViewer.setFilters(dataSource.getColumns(), new MyFilter(list, dataSource));
 
         shell.open ();
         while (!shell.isDisposed()) {
