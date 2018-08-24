@@ -46,7 +46,7 @@ public class App {
                 System.out.println("UPDATED!");
             }
         };
-        treeViewer.setFilters(dataSource.getColumns(), new MyFilter(list), dataUpdateListener);
+        treeViewer.setFilters(dataSource.getColumns(), new MyFilter(list, dataSource), dataUpdateListener);
 
         shell.open ();
         while (!shell.isDisposed()) {

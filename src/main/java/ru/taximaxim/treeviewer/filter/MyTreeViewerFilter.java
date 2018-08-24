@@ -5,7 +5,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.*;
 import ru.taximaxim.treeviewer.listeners.DataUpdateListener;
-import ru.taximaxim.treeviewer.listeners.Filterable;
+import ru.taximaxim.treeviewer.listeners.FilterListener;
 import ru.taximaxim.treeviewer.models.IColumn;
 
 import java.util.ArrayList;
@@ -19,7 +19,7 @@ public class MyTreeViewerFilter extends Composite {
 
     private GridLayout glayout;
     private List<? extends IColumn> filterList = new ArrayList<>();
-    private Filterable filterableListeners;
+    private FilterListener filterableListeners;
     private DataUpdateListener dataUpdateListener;
 
     public MyTreeViewerFilter(Composite parent, int style) {
@@ -32,7 +32,7 @@ public class MyTreeViewerFilter extends Composite {
         setLayoutData(layoutData);
     }
 
-    public void setFilterList(List<? extends IColumn> filterList, Filterable filterableListeners, DataUpdateListener dataUpdateListener ){
+    public void setFilterList(List<? extends IColumn> filterList, FilterListener filterableListeners, DataUpdateListener dataUpdateListener ){
         this.filterList = filterList;
         this.filterableListeners = filterableListeners;
         this.dataUpdateListener = dataUpdateListener;
