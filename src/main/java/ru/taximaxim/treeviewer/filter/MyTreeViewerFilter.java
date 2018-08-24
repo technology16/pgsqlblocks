@@ -23,6 +23,7 @@ public class MyTreeViewerFilter extends Composite {
     private FilterListener filterableListeners;
     private DataUpdateListener dataUpdateListener;
     private AllTextFilterListener allTextFilterListener;
+    private int columnnumber = 1;
 
     public MyTreeViewerFilter(Composite parent, int style) {
         super(parent, style);
@@ -44,7 +45,8 @@ public class MyTreeViewerFilter extends Composite {
     }
 
     private void createContent() {
-        glayout.numColumns = findColumnNumber();
+        columnnumber = findColumnNumber();
+        glayout.numColumns = columnnumber;
         createAllTextFilter();
         filterList.forEach(this::createFilterView);
     }
@@ -52,19 +54,18 @@ public class MyTreeViewerFilter extends Composite {
     private void createAllTextFilter() {
         ViewFilter viewFilter = new ViewFilter(null, null, allTextFilterListener, dataUpdateListener);
 
-        Group group = new Group(this, SWT.HORIZONTAL);
-        GridLayout layout = new GridLayout(3, false);
-        GridData layoutData = new GridData(SWT.FILL, SWT.FILL, true, false);
+        Composite group = new Composite(this, SWT.NULL);
+        GridLayout layout = new GridLayout(2, false);
+        layout.horizontalSpacing = columnnumber;
+        GridData layoutData = new GridData(SWT.FILL, SWT.FILL, true, false, columnnumber, 1 );
         group.setLayout(layout);
         group.setLayoutData(layoutData);
         Label label = new Label(group, SWT.NONE);
-        GridData data = new GridData(SWT.LEFT, SWT.CENTER, false, false);
-        data.horizontalSpan = 1;
+        GridData data = new GridData(SWT.FILL, SWT.FILL, false, false);
         label.setLayoutData(data);
         label.setText("Filter"); //bundle??????
         Text filterText = new Text(group, SWT.FILL | SWT.BORDER);
-        GridData textLayoutData = new GridData(SWT.LEFT, SWT.CENTER, true, false);
-        textLayoutData.horizontalSpan = 2;
+        GridData textLayoutData = new GridData(SWT.FILL, SWT.FILL, true, false);
         filterText.setLayoutData(textLayoutData);
         filterText.addModifyListener(e -> {
             String text = filterText.getText();
@@ -76,7 +77,7 @@ public class MyTreeViewerFilter extends Composite {
     private void createFilterView(IColumn filter) {
         ViewFilter viewFilter = new ViewFilter(filter, filterableListeners, allTextFilterListener, dataUpdateListener);
 
-        Group group = new Group(this, SWT.HORIZONTAL);
+        Composite group = new Composite(this, SWT.NULL);
         GridLayout layout = new GridLayout(3, false);
         GridData layoutData = new GridData(SWT.FILL, SWT.FILL, true, false);
         group.setLayout(layout);
@@ -84,7 +85,7 @@ public class MyTreeViewerFilter extends Composite {
 
         GridData comboLayoutData = new GridData(SWT.CENTER, SWT.CENTER, false,false);
         comboLayoutData.widthHint = 60;
-        GridData textLayoutData = new GridData(SWT.LEFT, SWT.CENTER, true, false);
+        GridData textLayoutData = new GridData(SWT.FILL, SWT.FILL, true, false);
         textLayoutData.widthHint = 150;
         textLayoutData.minimumWidth = 150;
 
@@ -110,6 +111,9 @@ public class MyTreeViewerFilter extends Composite {
     }
 
 
+    /**
+     * Метод возвращает количество колонок в фильтре
+     */
     private int findColumnNumber() {
         int i = filterList.size();
         if (i == 1) {
