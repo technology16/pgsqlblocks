@@ -61,6 +61,13 @@ public class MyTreeViewer extends Composite{
         viewerFilter = new MyTreeViewerFilter(this, SWT.TOP);
         viewerFilter.hide();
         tree = new MyTreeViewerTable(MyTreeViewer.this, SWT.FILL | SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL | SWT.FULL_SELECTION | SWT.MULTI);
+        dataUpdateListener = new DataUpdateListener() {
+            @Override
+            public void needUpdateData() {
+                tree.refresh();
+                System.out.println("UPDATED!");
+            }
+        };
     }
 
 
@@ -104,8 +111,7 @@ public class MyTreeViewer extends Composite{
     /**
      * Сюда передаются все слушатели для treeviewertable treeviewerfilter
      */
-    public void setFilters(List<? extends IColumn> filters, FilterListener filterableListeners, DataUpdateListener dataUpdateListener) {
-        this.dataUpdateListener = dataUpdateListener;
+    public void setFilters(List<? extends IColumn> filters, FilterListener filterableListeners) {
         viewerFilter.setFilterList(filters, filterableListeners, dataUpdateListener);
     }
 
