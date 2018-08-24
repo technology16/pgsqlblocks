@@ -26,7 +26,6 @@ import java.util.Set;
 public class MyTreeViewerTable extends TreeViewer{
 
     private MyTreeViewerDataSource dataSource;
-    private MyTreeViewerFilter filter;
     private Set<IColumn> invisibleColumns;
     private List<MyTreeViewerSortColumnSelectionListener> sortColumnlisteners = new ArrayList<>();
 
@@ -50,11 +49,6 @@ public class MyTreeViewerTable extends TreeViewer{
         createColumns();
         setLabelProvider(this.dataSource);
         setContentProvider(this.dataSource);
-    }
-
-    public void setFilter(MyTreeViewerFilter filter){
-        this.filter = filter;
-
     }
 
     private void createColumns() {
