@@ -7,6 +7,7 @@ import test.Col;
 import test.Test;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.ResourceBundle;
 
@@ -25,14 +26,12 @@ public class ExampleDataSource extends MyTreeViewerDataSource{
 
     @Override
     public boolean columnIsSortable() {
-        return false;
+        return true;
     }
 
     @Override
     public List<IColumn> getColumns() {
-        List<IColumn> list = new ArrayList<>();
-        list.add(new Col("title", "tool", 80));
-        list.add(new Col("namee", "nametool", 80));
+        List<IColumn> list = Arrays.asList(Columns.values());
         return list;
     }
 
@@ -59,7 +58,13 @@ public class ExampleDataSource extends MyTreeViewerDataSource{
         Test test = (Test) element;
         switch (iColumn.getColumnName()){
             case "title":
+                return test.getTitle();
+            case "name":
                 return test.getName();
+            case "author":
+                return test.getAuthor();
+            case "price":
+                return String.valueOf(test.getPrice());
         }
         return "TEXT";
     }
