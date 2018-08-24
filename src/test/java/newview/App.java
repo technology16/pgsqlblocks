@@ -6,12 +6,10 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import ru.taximaxim.treeviewer.MyTreeViewer;
 import ru.taximaxim.treeviewer.listeners.DataUpdateListener;
-import ru.taximaxim.treeviewer.models.IColumn;
 import test.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 /**
  * Created by user on 20.08.18.
@@ -49,23 +47,6 @@ public class App {
             }
         };
         treeViewer.setFilters(dataSource.getColumns(), new MyFilter(list), dataUpdateListener);
-      //  treeViewer.setDataUpdateListener(() -> {
-//            list.add(new Test("update!!!!"));
-//            treeViewer.getTree().refresh();
-//            //treeViewer.getTree().setInput(list);
-//        });
-//        treeViewer.setFilterListener(new FilterListener() {
-//            @Override
-//            public void textChanged(IColumn column, String text) {
-//                filterText(list, dataSource, column, text);
-//            }
-//
-//            @Override
-//            public void comboChanged(IColumn column, FilterValues value) {
-//
-//            }
-//        });
-
 
         shell.open ();
         while (!shell.isDisposed()) {
@@ -73,10 +54,4 @@ public class App {
         }
         display.dispose ();
     }
-
-    private static void filterText(List<Test> list, ExampleDataSource dataSource, IColumn column, String text) {
-
-        //nb[j ibathjv iehif tltn rhsif ytcgtif
-    }
-
 }
