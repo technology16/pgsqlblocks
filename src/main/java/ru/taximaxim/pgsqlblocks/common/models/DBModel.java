@@ -32,8 +32,8 @@ public class DBModel implements Cloneable {
     private String password;
     private boolean enabled;
 
-    // TODO limit line length
-    public DBModel(String name, String host, String port, SupportedVersion version, String databaseName, String user, String password, boolean enabled) {
+    public DBModel(String name, String host, String port, SupportedVersion version, String databaseName,
+                   String user, String password, boolean enabled) {
         this.name = name;
         this.host = host;
         this.port = port;
@@ -85,7 +85,8 @@ public class DBModel implements Cloneable {
     }
 
     public DBModel clone() {
-        return new DBModel(this.name, this.host, this.port, this.version, this.databaseName, this.user, this.password, this.enabled);
+        return new DBModel(this.name, this.host, this.port, this.version, this.databaseName,
+                this.user, this.password, this.enabled);
     }
 
     @Override
@@ -102,7 +103,6 @@ public class DBModel implements Cloneable {
                 '}';
     }
 
-    // TODO WHY NEW LINE?
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

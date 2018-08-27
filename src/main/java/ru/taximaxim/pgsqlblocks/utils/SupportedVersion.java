@@ -1,6 +1,8 @@
 package ru.taximaxim.pgsqlblocks.utils;
 
 
+import org.apache.log4j.Logger;
+
 import java.util.*;
 
 public enum SupportedVersion {
@@ -12,6 +14,7 @@ public enum SupportedVersion {
     VERSION_10 (100000, "10.0", "10.0"),
     VERSION_DEFAULT(100000, "10.0", "");
 
+    private static final Logger LOG = Logger.getLogger(SupportedVersion.class);
     private static final Map<String, SupportedVersion> lookup = new HashMap<>();
     private final String version;
     private final int versionNumber;
@@ -50,8 +53,14 @@ public enum SupportedVersion {
     }
 
     // TODO а если в енаме значения нет???? Логировать и возвращать дефолт
+    // PS А это правильно будет логировать внутри enum?????
     public static SupportedVersion get(String text){
-        return lookup.get(text);
+        SupportedVersion findingVersion = lookup.get(text);
+        if (findingVersion == null) {
+            LOG.warn("Запрошена незнакомая версия postgreSQL!!!!");
+            return VERSION_DEFAULT;
+        }
+        return findingVersion;
     }
 
     public static SupportedVersion get(int number){
