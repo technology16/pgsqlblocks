@@ -39,6 +39,7 @@ public class DBProcessInfoView extends Composite {
 
     private Composite buttonBar;
     private Text processInfoText;
+    private GridData layoutData;
 
     public DBProcessInfoView(ResourceBundle resourceBundle, Composite parent, int style) {
         super(parent, style);
@@ -46,7 +47,7 @@ public class DBProcessInfoView extends Composite {
         GridLayout layout = new GridLayout();
         layout.marginWidth = 0;
         layout.marginHeight = 0;
-        GridData layoutData = new GridData(SWT.FILL, SWT.BOTTOM, true, false);
+        layoutData = new GridData(SWT.FILL, SWT.BOTTOM, true, false);
         setLayout(layout);
         setLayoutData(layoutData);
         createContent();
@@ -55,9 +56,9 @@ public class DBProcessInfoView extends Composite {
     private void createContent() {
         buttonBar = new Composite(this, SWT.NULL);
         GridLayout layout = new GridLayout(2, false);
-        GridData layoutData = new GridData(SWT.FILL, SWT.TOP, true, false);
+        GridData btnData = new GridData(SWT.FILL, SWT.TOP, true, false);
         buttonBar.setLayout(layout);
-        buttonBar.setLayoutData(layoutData);
+        buttonBar.setLayoutData(btnData);
 
         Button cancelProcessButton = new Button(buttonBar, SWT.PUSH);
         cancelProcessButton.setText(resourceBundle.getString("cancel_process"));
@@ -99,7 +100,7 @@ public class DBProcessInfoView extends Composite {
 
         processInfoText.setText(stringBuilder.toString());
         this.setVisible(true);
-        GridData layoutData = (GridData) this.getLayoutData();
+        GridData layoutData = this.layoutData;
         layoutData.exclude = false;
         this.getParent().layout();
     }
@@ -107,7 +108,7 @@ public class DBProcessInfoView extends Composite {
     public void hide() {
         processInfoText.setText("");
         this.setVisible(false);
-        GridData layoutData = (GridData) this.getLayoutData();
+        GridData layoutData = this.layoutData;
         layoutData.exclude = true;
         this.getParent().layout();
     }
