@@ -58,11 +58,20 @@ mvn package -P Macosx-64 -q -DskipTests
 echo "Сборка завершена"
 
 # Проверка корректности сборки проекта
-if [ ! -f "./target/pgSqlBlocks-"$version"-Linux-32.jar" ]; then
-    echo ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>!!!!!Что-то не так с maven package!!!!!"
-    exit 1
-fi
-Чтение аргументов
+FILENAME="pgSqlBlocks"
+TARGET="./target"
+platformArray=("Linux-32" "Linux-64" "Macosx-64" "Windows-32" "Windows-64")
+
+for platform in ${platformArray[*]}
+do
+   if [ ! -f ""$TARGET"/"$FILENAME"-"$version"-"$platform".jar" ]; then
+   echo ">>>>>>>>>>>>>!!!!!отсутствует файл под "$platform""
+   exit 1
+    fi
+done
+
+
+# Чтение аргументов
 for i in "$@"
 do
 case $i in
@@ -93,7 +102,6 @@ PRERELEASE=false
 OWNER_OF_REPO="technology16"
 # Название репозитория
 PROJECT="pgsqlblocks"
-FILENAME="pgSqlBlocks"
 
 # Функция для нахождения в CHANGELOG.md номера предыдущей версии
 # сначала игнорим (-v) текущую версию и отбираем следующее первое совпадение
@@ -124,19 +132,16 @@ response=$(curl -H "Content-Type: application/json" --data-binary ""@file2.json"
 id=$(grep -o '[[:digit:]]*' <<< "$response")
 # Construct url
 echo "Uploading assets..."
-fileArray=("./target/"$FILENAME"-"$version"-Linux-32.jar"
-"./target/"$FILENAME"-"$version"-Linux-64.jar"
-"./target/"$FILENAME"-"$version"-Macosx-64.jar"
-"./target/"$FILENAME"-"$version"-Windows-32.jar"
-"./target/"$FILENAME"-"$version"-Windows-64.jar")
 # Проходим по массиву ассетов и загружаем их на сайт
-for filename in ${fileArray[*]}
+for platform in ${platformArray[*]}
 do
-    GH_ASSET="https://uploads.github.com/repos/"$OWNER_OF_REPO"/"$PROJECT"/releases/$id/assets?name=$filename"
-    curl -H "Authorization: token $GIT_TOKEN" -H "Content-Type: application/octet-stream" --data-binary @"$filename"  $GH_ASSET
+    filename=${FILENAME}"-"${version}"-"${platform}".jar"
+    file=${TARGET}"/"${filename}
+    GH_ASSET="https://uploads.github.com/repos/"$OWNER_OF_REPO"/"$PROJECT"/releases/"$id"/assets?name="${filename}""
+    curl -H "Authorization: token $GIT_TOKEN" -H "Content-Type: application/octet-stream" --data-binary @"$file"  $GH_ASSET
 done
 # Удаление временных файлов
 rm some.md
 rm file.json
 rm file2.json
-x-www-browser https://github.com/repos/$OWNER_OF_REPO/$PROJECT/latest
+x-www-browser https://github.com/$OWNER_OF_REPO/$PROJECT/releases/latest
