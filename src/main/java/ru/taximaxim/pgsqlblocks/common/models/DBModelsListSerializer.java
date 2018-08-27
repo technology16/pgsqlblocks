@@ -60,6 +60,6 @@ public class DBModelsListSerializer {
     }
 
     public boolean checkExistingNode(Document document) {
-        return document.getElementsByTagName(VERSION).getLength() > 0;
+        return document.getElementsByTagName(VERSION).getLength() == document.getElementsByTagName(ELEMENTS_ROOT_ELEMENT_TAG_NAME).getLength();
     }
 }

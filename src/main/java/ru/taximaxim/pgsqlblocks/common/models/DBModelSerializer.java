@@ -63,7 +63,9 @@ public class DBModelSerializer {
         rootElement.appendChild(createElementWithContent(document, ELEMENT_NAME_TAG_NAME, model.getName()));
         rootElement.appendChild(createElementWithContent(document, ELEMENT_HOST_TAG_NAME, model.getHost()));
         rootElement.appendChild(createElementWithContent(document, ELEMENT_PORT_TAG_NAME, model.getPort()));
-        rootElement.appendChild(createElementWithContent(document, ELEMENT_VERSION_TAG_NAME, model.getVersion().getVersion()));
+        if (model.getVersion() != SupportedVersion.VERSION_DEFAULT) {
+            rootElement.appendChild(createElementWithContent(document, ELEMENT_VERSION_TAG_NAME, model.getVersion().getVersion()));
+        }
         rootElement.appendChild(createElementWithContent(document, ELEMENT_DATABASE_NAME_TAG_NAME, model.getDatabaseName()));
         rootElement.appendChild(createElementWithContent(document, ELEMENT_USER_TAG_NAME, model.getUser()));
         rootElement.appendChild(createElementWithContent(document, ELEMENT_PASSWORD_TAG_NAME, model.getPassword()));
