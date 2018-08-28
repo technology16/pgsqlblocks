@@ -15,7 +15,6 @@ public class ExampleDataSource extends MyTreeViewerDataSource{
 
     protected final ResourceBundle resourceBundle;
 
-
     public ExampleDataSource(ResourceBundle resourceBundle) {
         super();
         this.resourceBundle = resourceBundle;
@@ -47,11 +46,7 @@ public class ExampleDataSource extends MyTreeViewerDataSource{
     }
 
     @Override
-    public String getColumnText(Object element, int columnIndex) {
-        return getRowText(element, getColumns().get(columnIndex));
-    }
-
-    private String getRowText(Object element, IColumn iColumn) {
+    public String getRowText(Object element, IColumn iColumn) {
         Test test = (Test) element;
         switch (iColumn.getColumnName()){
             case "title":
@@ -88,6 +83,4 @@ public class ExampleDataSource extends MyTreeViewerDataSource{
         Test testObject = (Test) element;
         return testObject.hasChildren();
     }
-
-
 }

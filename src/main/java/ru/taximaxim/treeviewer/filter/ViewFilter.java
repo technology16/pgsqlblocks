@@ -7,7 +7,7 @@ import ru.taximaxim.treeviewer.listeners.ViewFilterListener;
 import ru.taximaxim.treeviewer.models.IColumn;
 
 /**
- * Класс вызывающий фильтр и затем обновление данных
+ * Class for filter's listeners. It controls filtering and update data
  */
 public class ViewFilter implements ViewFilterListener {
 
@@ -31,7 +31,6 @@ public class ViewFilter implements ViewFilterListener {
         this.searchText = text;
         filterListener.filter(ViewFilter.this);
         dataUpdateListener.needUpdateData();
-        System.out.println(column.getColumnName() + " " + searchText + " " + value.getConditionText());
     }
 
     @Override
@@ -39,7 +38,6 @@ public class ViewFilter implements ViewFilterListener {
         this.value = value;
         filterListener.filter(this);
         dataUpdateListener.needUpdateData();
-        System.out.println(column.getColumnName() + " " + searchText + " " + value.getConditionText());
     }
 
     @Override

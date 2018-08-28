@@ -1,7 +1,9 @@
 package ru.taximaxim.treeviewer.filter;
 
-
-public enum  FilterValues {
+/**
+ * Enum for types of column filters
+ */
+public enum FilterValues {
 
     NONE(""),
     EQUALS("="),

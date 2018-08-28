@@ -14,7 +14,7 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * графическое представление фильтра
+ * GUI of Filters
  */
 public class MyTreeViewerFilter extends Composite {
 
@@ -35,12 +35,11 @@ public class MyTreeViewerFilter extends Composite {
         setLayoutData(layoutData);
     }
 
-    public void setFilterList(List<? extends IColumn> filterList, FilterListener filterableListeners, DataUpdateListener dataUpdateListener,
-                              AllTextFilterListener allTextFilterListener){
+    public void setFilterList(List<? extends IColumn> filterList, DataUpdateListener dataUpdateListener, MyViewFilter myViewFilter){
         this.filterList = filterList;
-        this.filterableListeners = filterableListeners;
+        this.filterableListeners = myViewFilter;
         this.dataUpdateListener = dataUpdateListener;
-        this.allTextFilterListener = allTextFilterListener;
+        this.allTextFilterListener = myViewFilter;
         createContent();
     }
 
@@ -60,10 +59,12 @@ public class MyTreeViewerFilter extends Composite {
         GridData layoutData = new GridData(SWT.FILL, SWT.FILL, true, false, columnnumber, 1 );
         group.setLayout(layout);
         group.setLayoutData(layoutData);
+
         Label label = new Label(group, SWT.NONE);
         GridData data = new GridData(SWT.FILL, SWT.FILL, false, false);
         label.setLayoutData(data);
         label.setText("Filter"); //bundle??????
+
         Text filterText = new Text(group, SWT.FILL | SWT.BORDER);
         GridData textLayoutData = new GridData(SWT.FILL, SWT.FILL, true, false);
         filterText.setLayoutData(textLayoutData);
@@ -109,7 +110,6 @@ public class MyTreeViewerFilter extends Composite {
             viewFilter.onTextChanges(text);
         });
     }
-
 
     /**
      * Метод возвращает количество колонок в фильтре

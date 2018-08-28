@@ -29,8 +29,6 @@ public class App {
         testObject3.setChildren(childlist);
         list.addAll(Arrays.asList(testObject, testObject2, testObject3));
 
-
-
         Display display = new Display ();
         Shell shell = new Shell (display);
         shell.setLayout(new GridLayout());
@@ -39,8 +37,7 @@ public class App {
         MyTreeViewer treeViewer = new MyTreeViewer(shell, SWT.FILL | SWT.BORDER, list, dataSource);
         treeViewer.getTree().setInput(list);
         treeViewer.setComparator(new TestComparator());
-        MyFilter myFilter = new MyFilter(list, dataSource);
-        treeViewer.setFilters(dataSource.getColumns(), myFilter, myFilter);
+        treeViewer.setColumnsForFilterView(dataSource.getColumns());
 
         shell.open ();
         while (!shell.isDisposed()) {
