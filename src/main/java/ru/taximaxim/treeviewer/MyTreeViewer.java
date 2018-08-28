@@ -9,6 +9,7 @@ import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.swt.widgets.TreeColumn;
 import ru.taximaxim.treeviewer.dialog.ColumnConfigDialog;
 import ru.taximaxim.treeviewer.filter.MyTreeViewerFilter;
+import ru.taximaxim.treeviewer.filter.MyViewFilter;
 import ru.taximaxim.treeviewer.listeners.AllTextFilterListener;
 import ru.taximaxim.treeviewer.listeners.DataUpdateListener;
 import ru.taximaxim.treeviewer.listeners.FilterListener;
@@ -41,6 +42,7 @@ public class MyTreeViewer extends Composite implements MyTreeViewerSortColumnSel
     private MyTreeViewerFilter viewerFilter;
     private DataUpdateListener dataUpdateListener;
     private ObjectViewComparator comparator;
+    private MyViewFilter myViewFilter;
 
     public MyTreeViewer(Composite parent, int style, Object userData, MyTreeViewerDataSource dataSource) {
         super(parent, style);
@@ -53,7 +55,7 @@ public class MyTreeViewer extends Composite implements MyTreeViewerSortColumnSel
 
         this.dataSource = dataSource;
         tree.setDataSource(dataSource);
-
+        myViewFilter = new MyViewFilter(dataSource, tree);
         getTree().setInput(userData);
     }
 
@@ -74,10 +76,10 @@ public class MyTreeViewer extends Composite implements MyTreeViewerSortColumnSel
             @Override
             public void needUpdateData() {
                 tree.refresh();
-                System.out.println("UPDATED!");
             }
         };
         tree.addSortListener(this);
+
     }
 
     public ObjectViewComparator getComparator() {
@@ -132,10 +134,9 @@ public class MyTreeViewer extends Composite implements MyTreeViewerSortColumnSel
     }
 
     /**
-     * Сюда передаются все слушатели для treeviewertable treeviewerfilter
+     * Сюда передается список колонок, который отображается в фильтрах
      */
-    public void setFilters(List<? extends IColumn> filters, FilterListener filterableListeners,
-                           AllTextFilterListener allTextFilterListener) {
-        viewerFilter.setFilterList(filters, filterableListeners, dataUpdateListener, allTextFilterListener);
+    public void setColumnsForFilterView(List<? extends IColumn> filters) {
+        viewerFilter.setFilterList(filters, dataUpdateListener, myViewFilter);
     }
 }

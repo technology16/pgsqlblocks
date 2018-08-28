@@ -76,10 +76,10 @@ public class Test implements IObject {
         return result;
     }
 
-    /**
-     * добавить поиск по наследникам
-     */
-    public boolean isForAllFilter(String searchText) {
+
+    // TODO: 28.08.18  добавить поиск по наследникам
+    @Override
+    public boolean isForAllTextFilter(String searchText) {
         if (name.contains(searchText)) {
             return true;
         }

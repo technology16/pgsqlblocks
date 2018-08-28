@@ -39,8 +39,7 @@ public class App {
         MyTreeViewer treeViewer = new MyTreeViewer(shell, SWT.FILL | SWT.BORDER, list, dataSource);
         treeViewer.getTree().setInput(list);
         treeViewer.setComparator(new TestComparator());
-        MyFilter myFilter = new MyFilter(dataSource, treeViewer);
-        treeViewer.setFilters(dataSource.getColumns(), myFilter, myFilter);
+        treeViewer.setColumnsForFilterView(dataSource.getColumns());
 
         shell.open ();
         while (!shell.isDisposed()) {
