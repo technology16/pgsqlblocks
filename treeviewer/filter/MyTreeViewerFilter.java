@@ -1,12 +1,9 @@
 package ru.taximaxim.treeviewer.filter;
 
-import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.*;
-import ru.taximaxim.treeviewer.MyTreeViewer;
 import ru.taximaxim.treeviewer.listeners.AllTextFilterListener;
 import ru.taximaxim.treeviewer.listeners.DataUpdateListener;
 import ru.taximaxim.treeviewer.listeners.FilterListener;
@@ -17,7 +14,7 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * графическое представление фильтра
+ * GUI of Filters
  */
 public class MyTreeViewerFilter extends Composite {
 
@@ -62,10 +59,12 @@ public class MyTreeViewerFilter extends Composite {
         GridData layoutData = new GridData(SWT.FILL, SWT.FILL, true, false, columnnumber, 1 );
         group.setLayout(layout);
         group.setLayoutData(layoutData);
+
         Label label = new Label(group, SWT.NONE);
         GridData data = new GridData(SWT.FILL, SWT.FILL, false, false);
         label.setLayoutData(data);
         label.setText("Filter"); //bundle??????
+
         Text filterText = new Text(group, SWT.FILL | SWT.BORDER);
         GridData textLayoutData = new GridData(SWT.FILL, SWT.FILL, true, false);
         filterText.setLayoutData(textLayoutData);
@@ -111,7 +110,6 @@ public class MyTreeViewerFilter extends Composite {
             viewFilter.onTextChanges(text);
         });
     }
-
 
     /**
      * Метод возвращает количество колонок в фильтре

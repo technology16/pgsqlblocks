@@ -25,20 +25,12 @@ import java.util.List;
 import java.util.ResourceBundle;
 
 /**
- * Основной управляющий контроллер TreeViewer и верхней панели с кнопками
+ * Main class with toolbar, filters, table and listeners
  */
 public class MyTreeViewer extends Composite implements MyTreeViewerSortColumnSelectionListener{
 
-    // в составе таблица с данными
-    //верхняя панель с кнопками
-    //панель запускает обновление таблицы
-    //панель запускает диалог
-    //панель запускет фильтр
-    private ToolBar toolBar;
     private ResourceBundle resourceBundle;
-    private GridLayout mainLayout;
     private MyTreeViewerTable tree;
-    private MyTreeViewerDataSource dataSource;
     private MyTreeViewerFilter viewerFilter;
     private DataUpdateListener dataUpdateListener;
     private ObjectViewComparator comparator;
@@ -47,13 +39,11 @@ public class MyTreeViewer extends Composite implements MyTreeViewerSortColumnSel
     public MyTreeViewer(Composite parent, int style, Object userData, MyTreeViewerDataSource dataSource) {
         super(parent, style);
         //this.resourceBundle = bundle;
-        mainLayout = new GridLayout();
+        GridLayout mainLayout = new GridLayout();
         GridData data = new GridData(SWT.FILL, SWT.FILL, true, true);
         setLayout(mainLayout);
         setLayoutData(data);
         createContent();
-
-        this.dataSource = dataSource;
         tree.setDataSource(dataSource);
         myViewFilter = new MyViewFilter(dataSource, tree);
         getTree().setInput(userData);
@@ -87,7 +77,7 @@ public class MyTreeViewer extends Composite implements MyTreeViewerSortColumnSel
     }
 
     private void createToolItems() {
-        toolBar = new ToolBar(this, SWT.HORIZONTAL);
+        ToolBar toolBar = new ToolBar(this, SWT.HORIZONTAL);
         ToolItem updateToolItem = new ToolItem(toolBar, SWT.PUSH);
         updateToolItem.setImage(ImageUtils.getImage(Images.UPDATE));
         //updateToolItem.setToolTipText(Images.UPDATE.getDescription(resourceBundle));
@@ -134,7 +124,7 @@ public class MyTreeViewer extends Composite implements MyTreeViewerSortColumnSel
     }
 
     /**
-     * Сюда передается список колонок, который отображается в фильтрах
+     * List of columns for filter view
      */
     public void setColumnsForFilterView(List<? extends IColumn> filters) {
         viewerFilter.setFilterList(filters, dataUpdateListener, myViewFilter);

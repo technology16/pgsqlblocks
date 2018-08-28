@@ -10,7 +10,7 @@ import ru.taximaxim.treeviewer.models.MyTreeViewerDataSource;
 import ru.taximaxim.treeviewer.tree.MyTreeViewerTable;
 
 /**
- * Класс, основная задача которого фильтровать данные
+ * Class for realization of filtering process
  */
 public class MyViewFilter implements AllTextFilterListener, FilterListener{
 
@@ -18,7 +18,6 @@ public class MyViewFilter implements AllTextFilterListener, FilterListener{
     private MyTreeViewerTable tree;
     private ViewerFilter allTextFilter;
     private ViewerFilter oneColumnFilter;
-
 
     public MyViewFilter(MyTreeViewerDataSource dataSource, MyTreeViewerTable tree) {
         this.dataSource = dataSource;
