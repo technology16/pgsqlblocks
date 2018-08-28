@@ -1,9 +1,12 @@
 package ru.taximaxim.treeviewer.filter;
 
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.*;
+import ru.taximaxim.treeviewer.MyTreeViewer;
 import ru.taximaxim.treeviewer.listeners.AllTextFilterListener;
 import ru.taximaxim.treeviewer.listeners.DataUpdateListener;
 import ru.taximaxim.treeviewer.listeners.FilterListener;
@@ -24,9 +27,11 @@ public class MyTreeViewerFilter extends Composite {
     private DataUpdateListener dataUpdateListener;
     private AllTextFilterListener allTextFilterListener;
     private int columnnumber = 1;
+    private MyTreeViewer myTreeViewer;
 
     public MyTreeViewerFilter(Composite parent, int style) {
         super(parent, style);
+        myTreeViewer = (MyTreeViewer) parent;
         glayout = new GridLayout();
         glayout.marginWidth = 0;
         glayout.marginHeight = 0;

@@ -3,6 +3,7 @@ package ru.taximaxim.treeviewer.models;
 import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
+import ru.taximaxim.treeviewer.filter.FilterValues;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,6 +36,36 @@ public abstract class MyTreeViewerDataSource implements ITableLabelProvider, ITr
 
     public abstract String getLocalizeString(String name);
 
+    public abstract String getRowText(Object element, IColumn column);
+
+    public boolean resolveTypeOfComparator(FilterValues value, String objectValue, String searchValue){
+        switch (value){
+            case EQUALS:
+                return objectValue.equals(searchValue);
+            case CONTAINS:
+                return objectValue.toLowerCase().contains(searchValue.toLowerCase());
+            case NOT_EQUALS:
+                return !objectValue.equals(searchValue);
+            case LESS:
+                return getInteger(objectValue) < getInteger(searchValue);
+            case GREATER:
+                return getInteger(objectValue) > getInteger(searchValue);
+            case LESS_OR_EQUAL:
+                return getInteger(objectValue) <= getInteger(searchValue);
+            case GREATER_OR_EQUAL:
+                return getInteger(objectValue) >= getInteger(searchValue);
+            case NONE:
+                return true;
+            default:
+                    return true;
+        }
+    }
+
+    @Override
+    public String getColumnText(Object element, int columnIndex) {
+        return getRowText(element, getColumns().get(columnIndex));
+    }
+
     @Override
     public void dispose() {
 
@@ -54,5 +85,15 @@ public abstract class MyTreeViewerDataSource implements ITableLabelProvider, ITr
     public void removeListener(ILabelProviderListener listener) {
         listeners.remove(listener);
 
+    }
+
+    private Integer getInteger(String value){
+        Integer i;
+        try {
+            i = Integer.parseInt(value);
+        }catch (NumberFormatException e){
+            i = 1;
+        }
+        return i;
     }
 }

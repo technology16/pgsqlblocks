@@ -75,4 +75,23 @@ public class Test implements IObject {
         result = 31 * result + price;
         return result;
     }
+
+    /**
+     * добавить поиск по наследникам
+     */
+    public boolean isForAllFilter(String searchText) {
+        if (name.contains(searchText)) {
+            return true;
+        }
+        if (title.contains(searchText)) {
+            return true;
+        }
+        if (author.contains(searchText)) {
+            return true;
+        }
+        if (String.valueOf(price).contains(searchText)) {
+            return true;
+        }
+        return false;
+    }
 }

@@ -1,5 +1,8 @@
 package newview;
 
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerFilter;
+import ru.taximaxim.treeviewer.MyTreeViewer;
 import ru.taximaxim.treeviewer.listeners.AllTextFilterListener;
 import ru.taximaxim.treeviewer.listeners.FilterListener;
 import ru.taximaxim.treeviewer.filter.ViewFilter;
@@ -10,43 +13,53 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by user on 24.08.18.
+ * А потом просто превратить его в абстрактный класс и спрятать его внутрь
  */
 public class MyFilter implements FilterListener, AllTextFilterListener {
-    private List<Test> tests = new ArrayList<>();
-    private List<Test> filtered = new ArrayList<>();
-    private List<IColumn> columnlist = new ArrayList<>();
-    private ViewFilter filter;
+    private final MyTreeViewer treeViewer;
     private MyTreeViewerDataSource dataSource;
+    private ViewerFilter allTextFilter;
+    private ViewerFilter oneColumnFilter;
 
-    public MyFilter(List<Test> tests, MyTreeViewerDataSource dataSource) {
-        this.tests = tests;
-        this.filtered = tests;
+    public MyFilter(MyTreeViewerDataSource dataSource, MyTreeViewer treeViewer) {
+        this.treeViewer = treeViewer;
         this.dataSource = dataSource;
-        columnlist.addAll(dataSource.getColumns());
     }
 
     @Override
     public void filter(ViewFilter filter) {
-        this.filter = filter;
-        //тут делаем все что угодно, но потом сохраняем в
-        //tests.add(new Test("title"));
-       // List<Test> filteredData = getFilteredList();
-        //tests.addAll(getFilteredList());
-        System.out.println("TUUUUUUUUUUUU");
+        String searchText = filter.getSearchText();
+        IColumn column = filter.getColumn();
+        if (oneColumnFilter != null) {
+            treeViewer.getTree().removeFilter(oneColumnFilter);
+        }
+        if (!searchText.equals("")) {
+            oneColumnFilter = new ViewerFilter() {
+                @Override
+                public boolean select(Viewer viewer, Object parentElement, Object element) {
+                    String textFromObject = dataSource.getRowText(element, column);
+                    return dataSource.resolveTypeOfComparator(filter.getValue(), textFromObject, searchText);
+                }
+            };
+            treeViewer.getTree().addFilter(oneColumnFilter);
+        }
     }
 
     @Override
     public void filterAllColumn(ViewFilter filter) {
-        List<Test> filteredList = getFilteredAllText(filter.getSearchText());
-        System.out.println("All text!");
-    }
-
-    public List<Test> getFilteredAllText(String searchText) {
-        List<Test> fil = new ArrayList<>();
-        tests.forEach(test -> {
-
-        });
-        return fil;
+        String searchText = filter.getSearchText();
+        if (allTextFilter != null) {
+            treeViewer.getTree().removeFilter(allTextFilter);
+        }
+        if (!searchText.equals("")) {
+            allTextFilter = new ViewerFilter() {
+                @Override
+                public boolean select(Viewer viewer, Object parentElement, Object element) {
+                    Test test = (Test) element;
+                    return test.isForAllFilter(searchText);
+                }
+            };
+            treeViewer.getTree().addFilter(allTextFilter);
+        }
     }
 }
