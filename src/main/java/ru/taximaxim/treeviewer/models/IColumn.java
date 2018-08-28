@@ -1,7 +1,7 @@
 package ru.taximaxim.treeviewer.models;
 
 /**
- * необходим для создания колонок
+ * Methods which need to implement in column class
  */
 public interface IColumn {
     String getColumnName();

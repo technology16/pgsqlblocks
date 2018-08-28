@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Основной класс, который инициализируется в UI
+ * Class for TreeViewer
  */
 public class MyTreeViewerTable extends TreeViewer{
 
@@ -84,7 +84,6 @@ public class MyTreeViewerTable extends TreeViewer{
         sortColumnlisteners.remove(listener);
     }
 
-
     private void selectSortColumn(TreeColumn column) {
         TreeColumn prevSortColumn = getTree().getSortColumn();
         int sortDirection = SWT.DOWN;
@@ -104,7 +103,6 @@ public class MyTreeViewerTable extends TreeViewer{
         int fSortDirection = sortDirection;
         sortColumnlisteners.forEach(listener -> listener.didSelectSortColumn(column, fSortDirection));
     }
-
 
     public Set<IColumn> getInvisibleColumns() {
         return invisibleColumns;

@@ -11,10 +11,6 @@ public class TestComparator extends ObjectViewComparator{
     private Columns column;
     private int sortDirection;
 
-    public TestComparator() {
-
-    }
-
     @Override
     public void setColumn(TreeColumn column) {
         this.column = (Columns) column.getData();

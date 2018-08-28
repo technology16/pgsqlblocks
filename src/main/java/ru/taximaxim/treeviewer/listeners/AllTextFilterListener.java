@@ -3,7 +3,7 @@ package ru.taximaxim.treeviewer.listeners;
 import ru.taximaxim.treeviewer.filter.ViewFilter;
 
 /**
- * слушатель по всему тексту всех доступных колонок
+ * Listener for all filterColumns
  */
 public interface AllTextFilterListener {
 

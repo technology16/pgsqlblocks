@@ -5,7 +5,6 @@ import java.util.ResourceBundle;
 
 public enum Images {
 
-
     UPDATE,
     FILTER,
     TABLE,

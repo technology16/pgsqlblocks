@@ -8,8 +8,6 @@ import ru.taximaxim.treeviewer.models.IColumn;
  * Класс необходим для сортировки колонки по возрастанию/убыванию
  * setColumn должен получает колонку treeColumn.getData()
  * setSortDirection получает тип сортировки.
- * ******************************************************************
- *
  */
 public abstract class ObjectViewComparator extends ViewerComparator {
 

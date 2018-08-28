@@ -1,7 +1,7 @@
 package ru.taximaxim.treeviewer.listeners;
 
 /**
- * Слушатель для обновления данных в  MyTreeViewer
+ * Listener of updating data in MyTreeViewer
  */
 public interface DataUpdateListener {
     void needUpdateData();

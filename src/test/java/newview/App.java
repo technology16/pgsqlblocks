@@ -29,8 +29,6 @@ public class App {
         testObject3.setChildren(childlist);
         list.addAll(Arrays.asList(testObject, testObject2, testObject3));
 
-
-
         Display display = new Display ();
         Shell shell = new Shell (display);
         shell.setLayout(new GridLayout());

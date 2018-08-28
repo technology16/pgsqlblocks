@@ -15,7 +15,6 @@ public class ExampleDataSource extends MyTreeViewerDataSource{
 
     protected final ResourceBundle resourceBundle;
 
-
     public ExampleDataSource(ResourceBundle resourceBundle) {
         super();
         this.resourceBundle = resourceBundle;
@@ -84,6 +83,4 @@ public class ExampleDataSource extends MyTreeViewerDataSource{
         Test testObject = (Test) element;
         return testObject.hasChildren();
     }
-
-
 }

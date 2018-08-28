@@ -9,11 +9,11 @@ import java.util.List;
  * Created by user on 17.08.18.
  */
 public class Test implements IObject {
+
     private String name;
     private String title;
     private String author;
     private int price;
-
     private List<Test> children = new ArrayList<>();
 
     public Test(String name, String title, String author, int price) {
@@ -27,7 +27,6 @@ public class Test implements IObject {
     public List getChildren() {
         return children;
     }
-
 
     @Override
     public boolean hasChildren() {
