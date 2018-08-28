@@ -1,14 +1,14 @@
 package ru.taximaxim.treeviewer.tree;
 
 
-import org.eclipse.jface.viewers.TreeViewer;
-import org.eclipse.jface.viewers.TreeViewerColumn;
+import org.eclipse.jface.viewers.*;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.TreeColumn;
+import org.eclipse.swt.widgets.TreeItem;
 import ru.taximaxim.treeviewer.filter.FilterValues;
 import ru.taximaxim.treeviewer.filter.MyTreeViewerFilter;
 import ru.taximaxim.treeviewer.listeners.FilterListener;
@@ -49,6 +49,7 @@ public class MyTreeViewerTable extends TreeViewer{
         createColumns();
         setLabelProvider(this.dataSource);
         setContentProvider(this.dataSource);
+        addDoubleClickListener(new DoubleClickListener());
     }
 
     private void createColumns() {
@@ -153,6 +154,22 @@ public class MyTreeViewerTable extends TreeViewer{
                     treeColumn.setWidth(column.getColumnWidth());
                     treeColumn.setResizable(true);
                 }
+            }
+        }
+    }
+
+    private class DoubleClickListener implements IDoubleClickListener {
+        @Override
+        public void doubleClick(final DoubleClickEvent event) {
+            TreeItem[] selectedItems = getTree().getSelection();
+            if (selectedItems.length != 1) {
+                return;
+            }
+            TreeItem selectedItem = selectedItems[0];
+            if (selectedItem.getExpanded()) {
+                internalCollapseToLevel(selectedItem, AbstractTreeViewer.ALL_LEVELS);
+            } else {
+                internalExpandToLevel(selectedItem, 1);
             }
         }
     }
