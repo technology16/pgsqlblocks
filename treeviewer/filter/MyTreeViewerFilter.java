@@ -27,11 +27,9 @@ public class MyTreeViewerFilter extends Composite {
     private DataUpdateListener dataUpdateListener;
     private AllTextFilterListener allTextFilterListener;
     private int columnnumber = 1;
-    private MyTreeViewer myTreeViewer;
 
     public MyTreeViewerFilter(Composite parent, int style) {
         super(parent, style);
-        myTreeViewer = (MyTreeViewer) parent;
         glayout = new GridLayout();
         glayout.marginWidth = 0;
         glayout.marginHeight = 0;
@@ -40,12 +38,11 @@ public class MyTreeViewerFilter extends Composite {
         setLayoutData(layoutData);
     }
 
-    public void setFilterList(List<? extends IColumn> filterList, FilterListener filterableListeners, DataUpdateListener dataUpdateListener,
-                              AllTextFilterListener allTextFilterListener){
+    public void setFilterList(List<? extends IColumn> filterList, DataUpdateListener dataUpdateListener, MyViewFilter myViewFilter){
         this.filterList = filterList;
-        this.filterableListeners = filterableListeners;
+        this.filterableListeners = myViewFilter;
         this.dataUpdateListener = dataUpdateListener;
-        this.allTextFilterListener = allTextFilterListener;
+        this.allTextFilterListener = myViewFilter;
         createContent();
     }
 
