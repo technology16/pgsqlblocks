@@ -8,10 +8,12 @@ import ru.taximaxim.treeviewer.listeners.AllTextFilterListener;
 import ru.taximaxim.treeviewer.listeners.DataUpdateListener;
 import ru.taximaxim.treeviewer.listeners.FilterListener;
 import ru.taximaxim.treeviewer.models.IColumn;
+import ru.taximaxim.treeviewer.models.MyTreeViewerDataSource;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.ResourceBundle;
 
 /**
  * GUI of Filters
@@ -23,10 +25,14 @@ public class MyTreeViewerFilter extends Composite {
     private FilterListener filterableListeners;
     private DataUpdateListener dataUpdateListener;
     private AllTextFilterListener allTextFilterListener;
+    private ResourceBundle innerResourceBundle;
+    private MyTreeViewerDataSource dataSource;
     private int columnnumber = 1;
 
-    public MyTreeViewerFilter(Composite parent, int style) {
+    public MyTreeViewerFilter(Composite parent, int style, ResourceBundle innerResourceBundle, MyTreeViewerDataSource outerResourceBundle) {
         super(parent, style);
+        this.innerResourceBundle = innerResourceBundle;
+        this.dataSource = outerResourceBundle;
         glayout = new GridLayout();
         glayout.marginWidth = 0;
         glayout.marginHeight = 0;
@@ -63,7 +69,7 @@ public class MyTreeViewerFilter extends Composite {
         Label label = new Label(group, SWT.NONE);
         GridData data = new GridData(SWT.FILL, SWT.FILL, false, false);
         label.setLayoutData(data);
-        label.setText("Filter"); //bundle??????
+        label.setText(innerResourceBundle.getString("filter"));
 
         Text filterText = new Text(group, SWT.FILL | SWT.BORDER);
         GridData textLayoutData = new GridData(SWT.FILL, SWT.FILL, true, false);
@@ -92,7 +98,7 @@ public class MyTreeViewerFilter extends Composite {
 
         Label label = new Label(group, SWT.NONE);
         label.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
-        label.setText(filter.getColumnName()); //bundle??????
+        label.setText(dataSource.getLocalizeString(filter.getColumnName()));
 
         Combo combo = new Combo(group, SWT.DROP_DOWN | SWT.READ_ONLY);
         combo.setLayoutData(comboLayoutData);

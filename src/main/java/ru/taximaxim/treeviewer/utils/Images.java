@@ -26,12 +26,12 @@ public enum Images {
         }
     }
 
-    public String getDescription(ResourceBundle resources) {
+    public String getDescription(ResourceBundle resources) { // TODO: 29.08.18 Inner bundle
         switch(this) {
             case UPDATE:
                 return resources.getString("update");
             case FILTER:
-                return resources.getString("process_filter");
+                return resources.getString("filter");
             case TABLE:
                 return resources.getString("columns");
             default:

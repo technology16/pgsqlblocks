@@ -57,7 +57,7 @@ public class MyTreeViewerTable extends TreeViewer{
             TreeViewerColumn treeColumn = new TreeViewerColumn(this, SWT.NONE);
             treeColumn.getColumn().setText(dataSource.getLocalizeString(column.getColumnName()));
             treeColumn.getColumn().setMoveable(true);
-            treeColumn.getColumn().setToolTipText(column.getColumnTooltip());
+            treeColumn.getColumn().setToolTipText(dataSource.getLocalizeString(column.getColumnTooltip())); // TODO: 29.08.18 Внешний bundle
             treeColumn.getColumn().setWidth(column.getColumnWidth());
             treeColumn.getColumn().setData(column);
             if (dataSource.columnIsSortable()) {

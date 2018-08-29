@@ -8,6 +8,8 @@ import ru.taximaxim.treeviewer.MyTreeViewer;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Locale;
+import java.util.ResourceBundle;
 
 /**
  * Created by user on 20.08.18.
@@ -33,8 +35,9 @@ public class App {
         Shell shell = new Shell (display);
         shell.setLayout(new GridLayout());
         shell.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+        ResourceBundle bundle = ResourceBundle.getBundle(l10n.AppBundle.class.getName(), new Locale("en"));
         ExampleDataSource dataSource = new ExampleDataSource(null);
-        MyTreeViewer treeViewer = new MyTreeViewer(shell, SWT.FILL | SWT.BORDER, list, dataSource);
+        MyTreeViewer treeViewer = new MyTreeViewer(shell, SWT.FILL | SWT.BORDER, list, dataSource, bundle);
         treeViewer.getTree().setInput(list);
         treeViewer.setComparator(new TestComparator());
         treeViewer.setColumnsForFilterView(dataSource.getColumns());
