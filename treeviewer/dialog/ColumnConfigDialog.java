@@ -36,7 +36,7 @@ public class ColumnConfigDialog extends Dialog {
     @Override
     protected void configureShell(Shell newShell) {
         super.configureShell(newShell);
-        newShell.setText("Column visibility");
+        newShell.setText(bundle.getString("columns"));
     }
 
     @Override
@@ -63,7 +63,6 @@ public class ColumnConfigDialog extends Dialog {
                 }
             });
         }
-
         return container;
     }
 

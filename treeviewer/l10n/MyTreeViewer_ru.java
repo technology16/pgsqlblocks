@@ -26,8 +26,9 @@ public class MyTreeViewer_ru extends ListResourceBundle {
     protected Object[][] getContents() {
         return new Object[][]{
                 {"update", "Обновить"},
-                {"process_filter", "Фильтр"},
+                {"filter", "Фильтр"},
                 {"columns", "Колонки"},
+                {"default_action", "Пусто"},
         };
     }
 }
