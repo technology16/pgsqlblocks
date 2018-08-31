@@ -24,6 +24,8 @@ import ru.taximaxim.pgsqlblocks.common.models.DBProcess;
 import ru.taximaxim.pgsqlblocks.utils.Columns;
 import ru.taximaxim.pgsqlblocks.utils.DateUtils;
 import ru.taximaxim.pgsqlblocks.utils.ImageUtils;
+import ru.taximaxim.treeviewer.models.IColumn;
+import ru.taximaxim.treeviewer.models.MyTreeViewerDataSource;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,20 +33,16 @@ import java.util.List;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
-public class DBProcessesViewDataSource extends TMTreeViewerDataSource {
+public class DBProcessesViewDataSource extends MyTreeViewerDataSource {
 
     private final DateUtils dateUtils = new DateUtils();
+    private ResourceBundle bundle;
+    private TMTreeViewerDataSourceFilter<DBProcess> dataFilter;
 
-    public DBProcessesViewDataSource(ResourceBundle resourceBundle, TMTreeViewerDataSourceFilter<DBProcess> dataFilter) {
-        super(resourceBundle, dataFilter);
-    }
+    public DBProcessesViewDataSource(ResourceBundle bundle, TMTreeViewerDataSourceFilter<DBProcess> dataSourceFilter) {
+        this.bundle = bundle;
+        this.dataFilter = dataSourceFilter;
 
-    @Override
-    public List<Columns> getColumns() {
-        List<Columns> list = new ArrayList<>(Arrays.asList(Columns.values()));
-        list.remove(Columns.BLOCK_CREATE_DATE);
-        list.remove(Columns.BLOCK_END_DATE);
-        return list;
     }
 
     @Override
@@ -53,22 +51,23 @@ public class DBProcessesViewDataSource extends TMTreeViewerDataSource {
     }
 
     @Override
-    public Image getColumnImage(Object element, int columnIndex) {
-        DBProcess process = (DBProcess)element;
-        if (columnIndex == 0) {
-            return ImageUtils.getImage(process.getStatus().getStatusImage());
-        }
-        return null;
+    public List<? extends IColumn> getColumns() {
+        List<Columns> list = new ArrayList<>(Arrays.asList(Columns.values()));
+        list.remove(Columns.BLOCK_CREATE_DATE);
+        list.remove(Columns.BLOCK_END_DATE);
+        return list;
     }
 
     @Override
-    public String getColumnText(Object element, int columnIndex) {
-         return getColumnText(element, getColumns().get(columnIndex));
+    public String getLocalizeString(String s) {
+        return bundle.getString(s);
     }
 
-    private String getColumnText(Object element, Columns column) {
+    @Override
+    public String getRowText(Object element, IColumn column) {
         DBProcess process = (DBProcess)element;
-        switch (column) {
+        Columns columns = Columns.getColumn(column);
+        switch (columns) {
             case PID:
                 return String.valueOf(process.getPid());
             case BLOCKED_COUNT:
@@ -109,6 +108,15 @@ public class DBProcessesViewDataSource extends TMTreeViewerDataSource {
     }
 
     @Override
+    public Image getColumnImage(Object element, int columnIndex) {
+        DBProcess process = (DBProcess)element;
+        if (columnIndex == 0) {
+            return ImageUtils.getImage(process.getStatus().getStatusImage());
+        }
+        return null;
+    }
+
+    @Override
     public Object[] getElements(Object inputElement) {
         List<DBProcess> input = (List<DBProcess>) inputElement;
         if (dataFilter == null) {
@@ -138,4 +146,121 @@ public class DBProcessesViewDataSource extends TMTreeViewerDataSource {
         DBProcess process = (DBProcess)element;
         return process.hasChildren();
     }
+
+    /**
+     * Можно вообще по-любому передавать список колонок для фильтра.
+     * необязательно именно здесь. Можно передавать по сути в любом месте.
+     */
+    public List<? extends IColumn> getColumnsForFilter() {
+        List<IColumn> list = new ArrayList<>();
+        list.add(Columns.PID);
+        list.add(Columns.APPLICATION_NAME);
+        list.add(Columns.DATABASE_NAME);
+        list.add(Columns.QUERY);
+        list.add(Columns.USER_NAME);
+        list.add(Columns.CLIENT);
+        return list;
+    }
+
+//    public DBProcessesViewDataSource(ResourceBundle resourceBundle, TMTreeViewerDataSourceFilter<DBProcess> dataFilter) {
+//        super(resourceBundle, dataFilter);
+//    }
+//
+//    @Override
+//    public List<Columns> getColumns() {
+//        List<Columns> list = new ArrayList<>(Arrays.asList(Columns.values()));
+//        list.remove(Columns.BLOCK_CREATE_DATE);
+//        list.remove(Columns.BLOCK_END_DATE);
+//        return list;
+//    }
+//
+//    @Override
+//    public boolean columnIsSortable() {
+//        return true;
+//    }
+//
+//    @Override
+//    public Image getColumnImage(Object element, int columnIndex) {
+//        DBProcess process = (DBProcess)element;
+//        if (columnIndex == 0) {
+//            return ImageUtils.getImage(process.getStatus().getStatusImage());
+//        }
+//        return null;
+//    }
+//
+//    @Override
+//    public String getColumnText(Object element, int columnIndex) {
+//         return getColumnText(element, getColumns().get(columnIndex));
+//    }
+//
+//    private String getColumnText(Object element, Columns column) {
+//        DBProcess process = (DBProcess)element;
+//        switch (column) {
+//            case PID:
+//                return String.valueOf(process.getPid());
+//            case BLOCKED_COUNT:
+//                return String.valueOf(process.getChildren().size());
+//            case APPLICATION_NAME:
+//                return process.getQueryCaller().getApplicationName();
+//            case DATABASE_NAME:
+//                return process.getQueryCaller().getDatabaseName();
+//            case USER_NAME:
+//                return process.getQueryCaller().getUserName();
+//            case CLIENT:
+//                return process.getQueryCaller().getClient();
+//            case BACKEND_START:
+//                return dateUtils.dateToString(process.getQuery().getBackendStart());
+//            case QUERY_START:
+//                return dateUtils.dateToString(process.getQuery().getQueryStart());
+//            case XACT_START:
+//                return dateUtils.dateToString(process.getQuery().getXactStart());
+//            case DURATION:
+//                return DateUtils.durationToString(process.getQuery().getDuration());
+//            case STATE:
+//                return process.getState();
+//            case STATE_CHANGE:
+//                return dateUtils.dateToString(process.getStateChange());
+//            case BLOCKED:
+//                return process.getBlocksPidsString();
+//            case LOCK_TYPE:
+//                return process.getBlocksLocktypesString();
+//            case RELATION:
+//                return process.getBlocksRelationsString();
+//            case SLOW_QUERY:
+//                return String.valueOf(process.getQuery().isSlowQuery());
+//            case QUERY:
+//                return process.getQuery().getQueryFirstLine();
+//            default:
+//                return "UNDEFINED";
+//        }
+//    }
+//
+//    @Override
+//    public Object[] getElements(Object inputElement) {
+//        List<DBProcess> input = (List<DBProcess>) inputElement;
+//        if (dataFilter == null) {
+//            return input.toArray();
+//        } else {
+//            return filterInput(input).toArray();
+//        }
+//    }
+//
+
+//
+//    @Override
+//    public Object[] getChildren(Object parentElement) {
+//        DBProcess process = (DBProcess)parentElement;
+//        return process.getChildren().toArray();
+//    }
+//
+//    @Override
+//    public Object getParent(Object element) {
+//        return null;
+//    }
+//
+//    @Override
+//    public boolean hasChildren(Object element) {
+//        DBProcess process = (DBProcess)element;
+//        return process.hasChildren();
+//    }
 }

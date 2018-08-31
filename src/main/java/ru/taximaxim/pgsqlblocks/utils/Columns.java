@@ -1,6 +1,8 @@
 package ru.taximaxim.pgsqlblocks.utils;
 
-public enum Columns {
+import ru.taximaxim.treeviewer.models.IColumn;
+
+public enum Columns implements IColumn{
     PID("pid", "PID", 80),
     BLOCK_CREATE_DATE("block_start_date", "", 110),
     BLOCK_END_DATE("block_end_date", "", 150),
@@ -41,5 +43,14 @@ public enum Columns {
 
     public int getColumnWidth() {
         return columnWidth;
+    }
+
+    public static Columns getColumn(IColumn column) {
+        for (Columns columns : Columns.values()) {
+            if (columns.getColumnName().equals(column.getColumnName())) {
+                return columns;
+            }
+        }
+        return Columns.PID;
     }
 }
