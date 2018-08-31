@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>ru.taximaxim</groupId>
-    <artifactId>mytreeviewer</artifactId>
+    <artifactId>swttreeviewer</artifactId>
     <version>0.0.1</version>
     <packaging>jar</packaging>
 
@@ -13,23 +13,11 @@
         <swt.artifactId>org.eclipse.swt.gtk.linux.x86_64</swt.artifactId>
         <swt.id>Linux-x86_64</swt.id>
         <swt.version>3.105.3</swt.version>
-        <mainClass>ru.taximaxim.treeviewer.MyTreeViewer</mainClass>
+        <mainClass>ru.taximaxim.treeviewer.SwtTreeViewer</mainClass>
         <license.licenseName>apache_v2</license.licenseName>
+        <ftpRepository.id>taximaxim-chelny</ftpRepository.id>
+        <ftpRepository.url>ftp://ftp:ftp@storage.chelny.taximaxim.ru/mvn</ftpRepository.url>
     </properties>
-
-    <organization>
-        <name>"Technology" LLC</name>
-    </organization>
-    <inceptionYear>2018</inceptionYear>
-
-    <licenses>
-        <license>
-            <name>apache_v2</name>
-            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-            <distribution>repo</distribution>
-            <comments>A business-friendly OSS license</comments>
-        </license>
-    </licenses>
 
     <repositories>
         <repository>
@@ -107,6 +95,13 @@
                 <directory>${project.basedir}/src/test/resources</directory>
             </testResource>
         </testResources>
+        <extensions>
+            <extension>
+                <groupId>org.apache.maven.wagon</groupId>
+                <artifactId>wagon-ftp</artifactId>
+                <version>2.12</version>
+            </extension>
+        </extensions>
     </build>
 
     <dependencies>

@@ -9,21 +9,20 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 import ru.taximaxim.treeviewer.models.IColumn;
 import ru.taximaxim.treeviewer.models.MyTreeViewerDataSource;
-import ru.taximaxim.treeviewer.tree.MyTreeViewerTable;
+import ru.taximaxim.treeviewer.tree.SwtTreeViewerTable;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.ResourceBundle;
 import java.util.Set;
 
 
 public class ColumnConfigDialog extends Dialog {
 
-    private MyTreeViewerTable treeViewer;
+    private SwtTreeViewerTable treeViewer;
     private ResourceBundle bundle;
     private final Set<IColumn> invisibleColumn = new HashSet<>();
 
-    public ColumnConfigDialog(ResourceBundle resourceBundle, MyTreeViewerTable tree, Shell parent) {
+    public ColumnConfigDialog(ResourceBundle resourceBundle, SwtTreeViewerTable tree, Shell parent) {
         super(parent);
         this.treeViewer = tree;
         this.bundle = resourceBundle;

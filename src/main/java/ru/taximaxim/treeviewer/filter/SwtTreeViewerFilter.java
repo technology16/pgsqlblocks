@@ -18,7 +18,7 @@ import java.util.ResourceBundle;
 /**
  * GUI of Filters
  */
-public class MyTreeViewerFilter extends Composite {
+public class SwtTreeViewerFilter extends Composite {
 
     private GridLayout glayout;
     private List<? extends IColumn> filterList = new ArrayList<>();
@@ -29,7 +29,7 @@ public class MyTreeViewerFilter extends Composite {
     private MyTreeViewerDataSource dataSource;
     private int columnnumber = 1;
 
-    public MyTreeViewerFilter(Composite parent, int style, ResourceBundle innerResourceBundle, MyTreeViewerDataSource outerResourceBundle) {
+    public SwtTreeViewerFilter(Composite parent, int style, ResourceBundle innerResourceBundle, MyTreeViewerDataSource outerResourceBundle) {
         super(parent, style);
         this.innerResourceBundle = innerResourceBundle;
         this.dataSource = outerResourceBundle;
@@ -41,7 +41,7 @@ public class MyTreeViewerFilter extends Composite {
         setLayoutData(layoutData);
     }
 
-    public void setFilterList(List<? extends IColumn> filterList, DataUpdateListener dataUpdateListener, MyViewFilter myViewFilter){
+    public void setFilterList(List<? extends IColumn> filterList, DataUpdateListener dataUpdateListener, SwtViewFilter myViewFilter){
         this.filterList = filterList;
         this.filterableListeners = myViewFilter;
         this.dataUpdateListener = dataUpdateListener;

@@ -9,9 +9,6 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.TreeColumn;
 import org.eclipse.swt.widgets.TreeItem;
-import ru.taximaxim.treeviewer.filter.FilterValues;
-import ru.taximaxim.treeviewer.filter.MyTreeViewerFilter;
-import ru.taximaxim.treeviewer.listeners.FilterListener;
 import ru.taximaxim.treeviewer.listeners.MyTreeViewerSortColumnSelectionListener;
 import ru.taximaxim.treeviewer.models.MyTreeViewerDataSource;
 import ru.taximaxim.treeviewer.models.IColumn;
@@ -23,13 +20,13 @@ import java.util.Set;
 /**
  * Class for TreeViewer
  */
-public class MyTreeViewerTable extends TreeViewer{
+public class SwtTreeViewerTable extends TreeViewer{
 
     private MyTreeViewerDataSource dataSource;
     private Set<IColumn> invisibleColumns;
     private List<MyTreeViewerSortColumnSelectionListener> sortColumnlisteners = new ArrayList<>();
 
-    public MyTreeViewerTable(Composite parent, int style) {
+    public SwtTreeViewerTable(Composite parent, int style) {
         super(parent, style);
         getTree().setLinesVisible(true);
         getTree().setHeaderVisible(true);
@@ -43,7 +40,7 @@ public class MyTreeViewerTable extends TreeViewer{
 
     public void setDataSource(MyTreeViewerDataSource dataSource) {
         if (this.dataSource != null) {
-            throw new IllegalStateException("MyTreeViewerTable already contains data source");
+            throw new IllegalStateException("SwtTreeViewerTable already contains data source");
         }
         this.dataSource = dataSource;
         createColumns();

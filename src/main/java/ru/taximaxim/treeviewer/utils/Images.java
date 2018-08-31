@@ -26,7 +26,7 @@ public enum Images {
         }
     }
 
-    public String getDescription(ResourceBundle resources) { // TODO: 29.08.18 Inner bundle
+    public String getDescription(ResourceBundle resources) {
         switch(this) {
             case UPDATE:
                 return resources.getString("update");
