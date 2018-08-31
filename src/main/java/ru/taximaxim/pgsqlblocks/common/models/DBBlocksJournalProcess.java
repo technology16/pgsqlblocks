@@ -19,12 +19,15 @@
  */
 package ru.taximaxim.pgsqlblocks.common.models;
 
+import ru.taximaxim.treeviewer.models.IObject;
+
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class DBBlocksJournalProcess {
+public class DBBlocksJournalProcess implements IObject {
 
     private final DBProcess process;
 
@@ -123,5 +126,20 @@ public class DBBlocksJournalProcess {
             result = childrenHashCode(result, process.getChildren());
         }
         return result;
+    }
+
+    @Override
+    public List getChildren() {
+        return Collections.emptyList();
+    }
+
+    @Override
+    public boolean hasChildren() {
+        return false;
+    }
+
+    @Override
+    public boolean isForAllTextFilter(String s) {
+        return false; // TODO: 31.08.18 Add!!!!
     }
 }

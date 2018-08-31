@@ -25,17 +25,21 @@ import ru.taximaxim.pgsqlblocks.common.models.DBProcess;
 import ru.taximaxim.pgsqlblocks.utils.Columns;
 import ru.taximaxim.pgsqlblocks.utils.DateUtils;
 import ru.taximaxim.pgsqlblocks.utils.ImageUtils;
+import ru.taximaxim.treeviewer.models.IColumn;
+import ru.taximaxim.treeviewer.models.MyTreeViewerDataSource;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.ResourceBundle;
 
-public class DBBlocksJournalViewDataSource extends TMTreeViewerDataSource {
+public class DBBlocksJournalViewDataSource extends MyTreeViewerDataSource {
 
     private final DateUtils dateUtils = new DateUtils();
+    private final ResourceBundle bundle;
 
     public DBBlocksJournalViewDataSource(ResourceBundle resourceBundle) {
-        super(resourceBundle);
+        this.bundle = resourceBundle;
     }
 
     @Override
@@ -46,6 +50,11 @@ public class DBBlocksJournalViewDataSource extends TMTreeViewerDataSource {
     @Override
     public List<Columns> getColumns() {
         return Arrays.asList(Columns.values());
+    }
+
+    @Override
+    public String getLocalizeString(String s) {
+        return bundle.getString(s);
     }
 
     @Override
@@ -62,12 +71,10 @@ public class DBBlocksJournalViewDataSource extends TMTreeViewerDataSource {
         }
     }
 
-    @Override
-    public String getColumnText(Object element, int columnIndex) {
-        return getRowText(element, getColumns().get(columnIndex));
-    }
 
-    private String getRowText(Object element, Columns column) {
+    @Override
+    public String getRowText(Object element, IColumn column) {
+        Columns columns = Columns.getColumn(column);
         DBProcess process;
         DBBlocksJournalProcess parentProcess = null;
         if (element instanceof DBBlocksJournalProcess) {
@@ -76,7 +83,7 @@ public class DBBlocksJournalViewDataSource extends TMTreeViewerDataSource {
         }else {
             process = (DBProcess)element;
         }
-        switch (column){
+        switch (columns){
             case PID:
                 return String.valueOf(process.getPid());
             case BLOCK_CREATE_DATE:
@@ -147,5 +154,20 @@ public class DBBlocksJournalViewDataSource extends TMTreeViewerDataSource {
         } else {
             return element instanceof DBBlocksJournalProcess;
         }
+    }
+
+    /**
+     * Можно вообще по-любому передавать список колонок для фильтра.
+     * необязательно именно здесь. Можно передавать по сути в любом месте.
+     */
+    public List<? extends IColumn> getColumnsForFilter() {
+        List<IColumn> list = new ArrayList<>();
+        list.add(Columns.PID);
+        list.add(Columns.APPLICATION_NAME);
+        list.add(Columns.DATABASE_NAME);
+        list.add(Columns.QUERY);
+        list.add(Columns.USER_NAME);
+        list.add(Columns.CLIENT);
+        return list;
     }
 }

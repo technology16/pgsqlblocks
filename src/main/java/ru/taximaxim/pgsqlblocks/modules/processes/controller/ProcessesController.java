@@ -43,7 +43,6 @@ import ru.taximaxim.pgsqlblocks.common.ui.*;
 import ru.taximaxim.pgsqlblocks.dialogs.AddDatabaseDialog;
 import ru.taximaxim.pgsqlblocks.dialogs.EditDatabaseDialog;
 import ru.taximaxim.pgsqlblocks.dialogs.SettingsDialog;
-import ru.taximaxim.pgsqlblocks.dialogs.TMTreeViewerColumnsDialog;
 import ru.taximaxim.pgsqlblocks.modules.blocksjournal.view.BlocksJournalView;
 import ru.taximaxim.pgsqlblocks.modules.db.controller.DBController;
 import ru.taximaxim.pgsqlblocks.modules.db.controller.DBControllerListener;
@@ -77,7 +76,8 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
     private SwtTreeViewer dbProcessView;
     private DBProcessInfoView dbProcessInfoView;
 
-    private DBProcessesView dbBlocksJournalView;
+    //private DBProcessesView dbBlocksJournalView;
+    private SwtTreeViewer dbBlocksJournalView;
 
     private DBProcessInfoView dbBlocksJournalProcessInfoView;
     private DBProcessesFiltersView dbBlocksJournalProcessesFiltersView;
@@ -169,28 +169,30 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
 
         dbBlocksJournalViewComposite.setLayout(gl);
 
-        ToolBar dbBlocksJournalViewToolBar = new ToolBar(dbBlocksJournalViewComposite, SWT.HORIZONTAL);
-        dbBlocksJournalViewToolBar.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
+//        ToolBar dbBlocksJournalViewToolBar = new ToolBar(dbBlocksJournalViewComposite, SWT.HORIZONTAL);
+//        dbBlocksJournalViewToolBar.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
+//
+//        toggleVisibilityBlocksJournalProcessesFilterPanelToolItem = new ToolItem(dbBlocksJournalViewToolBar, SWT.CHECK);
+//        toggleVisibilityBlocksJournalProcessesFilterPanelToolItem.setImage(ImageUtils.getImage(Images.FILTER));
+//        toggleVisibilityBlocksJournalProcessesFilterPanelToolItem.setToolTipText(Images.FILTER.getDescription(resourceBundle));
+//        toggleVisibilityBlocksJournalProcessesFilterPanelToolItem.addListener(SWT.Selection, event ->
+//                setBlocksJournalProcessesFilterViewVisibility(toggleVisibilityBlocksJournalProcessesFilterPanelToolItem.getSelection()));
+//        toggleVisibilityBlocksJournalProcessesFilterPanelToolItem.setEnabled(false);
+//
+//        ToolItem showColumnsDialogToolItem = new ToolItem(dbBlocksJournalViewToolBar, SWT.PUSH);
+//        showColumnsDialogToolItem.setImage(ImageUtils.getImage(Images.TABLE));
+//        showColumnsDialogToolItem.setToolTipText(l10n("columns"));
+//        showColumnsDialogToolItem.addListener(SWT.Selection, event -> showDbBlocksJournalViewColumnsDialog());
+//
+//        dbBlocksJournalProcessesFiltersView = new DBProcessesFiltersView(resourceBundle, dbBlocksJournalViewComposite, SWT.NONE);
+//        dbBlocksJournalProcessesFiltersView.addListener(this);
+//        dbBlocksJournalProcessesFiltersView.hide();
 
-        toggleVisibilityBlocksJournalProcessesFilterPanelToolItem = new ToolItem(dbBlocksJournalViewToolBar, SWT.CHECK);
-        toggleVisibilityBlocksJournalProcessesFilterPanelToolItem.setImage(ImageUtils.getImage(Images.FILTER));
-        toggleVisibilityBlocksJournalProcessesFilterPanelToolItem.setToolTipText(Images.FILTER.getDescription(resourceBundle));
-        toggleVisibilityBlocksJournalProcessesFilterPanelToolItem.addListener(SWT.Selection, event ->
-                setBlocksJournalProcessesFilterViewVisibility(toggleVisibilityBlocksJournalProcessesFilterPanelToolItem.getSelection()));
-        toggleVisibilityBlocksJournalProcessesFilterPanelToolItem.setEnabled(false);
-
-        ToolItem showColumnsDialogToolItem = new ToolItem(dbBlocksJournalViewToolBar, SWT.PUSH);
-        showColumnsDialogToolItem.setImage(ImageUtils.getImage(Images.TABLE));
-        showColumnsDialogToolItem.setToolTipText(l10n("columns"));
-        showColumnsDialogToolItem.addListener(SWT.Selection, event -> showDbBlocksJournalViewColumnsDialog());
-
-        dbBlocksJournalProcessesFiltersView = new DBProcessesFiltersView(resourceBundle, dbBlocksJournalViewComposite, SWT.NONE);
-        dbBlocksJournalProcessesFiltersView.addListener(this);
-        dbBlocksJournalProcessesFiltersView.hide();
-
-        dbBlocksJournalView = new DBProcessesView(dbBlocksJournalViewComposite, SWT.NONE);
-        dbBlocksJournalView.getTreeViewer().setDataSource(new DBBlocksJournalViewDataSource(resourceBundle));
-        dbBlocksJournalView.getTreeViewer().addSelectionChangedListener(this::dbBlocksJournalViewSelectionChanged);
+        DBBlocksJournalViewDataSource dbBlocksJournalViewDataSource = new DBBlocksJournalViewDataSource(resourceBundle);
+        dbBlocksJournalView = new SwtTreeViewer(dbBlocksJournalViewComposite, SWT.NONE, null,
+                dbBlocksJournalViewDataSource, resourceBundle);
+        dbBlocksJournalView.getTree().addSelectionChangedListener(this::dbBlocksJournalViewSelectionChanged);
+        dbProcessView.setColumnsForFilterView(dbBlocksJournalViewDataSource.getColumnsForFilter());
 
         dbBlocksJournalProcessInfoView = new DBProcessInfoView(resourceBundle, dbBlocksJournalViewComposite, SWT.NONE);
         dbBlocksJournalProcessInfoView.hideToolBar();
@@ -314,7 +316,7 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
         dbControllers.remove(dbController);
         changeToolItemsStateForController(null);
         dbProcessView.getTree().setInput(null);
-        dbBlocksJournalView.getTreeViewer().setInput(null);
+        dbBlocksJournalView.getTree().setInput(null);
         toggleVisibilityBlocksJournalProcessesFilterPanelToolItem.setSelection(false);
         dbBlocksJournalProcessesFiltersView.hide();
         dbBlocksJournalProcessesFiltersView.fillView(null, "");
@@ -451,11 +453,11 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
     }
 
 
-    private void showDbBlocksJournalViewColumnsDialog() {
-        TMTreeViewerColumnsDialog dialog =
-                new TMTreeViewerColumnsDialog(resourceBundle, dbBlocksJournalView.getTreeViewer(), view.getShell());
-        dialog.open();
-    }
+//    private void showDbBlocksJournalViewColumnsDialog() {
+//        TMTreeViewerColumnsDialog dialog =
+//                new TMTreeViewerColumnsDialog(resourceBundle, dbBlocksJournalView.getTreeViewer(), view.getShell());
+//        dialog.open();
+//    }
 
     public void close() {
         dbControllers.forEach(DBController::shutdown);
@@ -552,7 +554,7 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
             if (dbModelsView.getTableViewer().getStructuredSelection().getFirstElement() != null) {
                 DBController selectedController = (DBController) dbModelsView.getTableViewer().getStructuredSelection().getFirstElement();
                 if (controller.equals(selectedController)) {
-                    dbBlocksJournalView.getTreeViewer().refresh();
+                    dbBlocksJournalView.getTree().refresh();
                 }
             }
         });
@@ -561,7 +563,7 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
     @Override
     public void dbModelsViewDidSelectController(DBController controller) {
         dbProcessView.getTree().setInput(controller.getFilteredProcesses());
-        dbBlocksJournalView.getTreeViewer().setInput(controller.getBlocksJournal().getFilteredProcesses());
+        dbBlocksJournalView.getTree().setInput(controller.getBlocksJournal().getFilteredProcesses());
         changeToolItemsStateForController(controller);
 
         dbBlocksJournalProcessesFiltersView.fillView(controller.getBlocksJournal().getProcessesFilters(),
