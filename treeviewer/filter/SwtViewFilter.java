@@ -7,19 +7,19 @@ import ru.taximaxim.treeviewer.listeners.FilterListener;
 import ru.taximaxim.treeviewer.models.IColumn;
 import ru.taximaxim.treeviewer.models.IObject;
 import ru.taximaxim.treeviewer.models.MyTreeViewerDataSource;
-import ru.taximaxim.treeviewer.tree.MyTreeViewerTable;
+import ru.taximaxim.treeviewer.tree.SwtTreeViewerTable;
 
 /**
  * Class for realization of filtering process
  */
-public class MyViewFilter implements AllTextFilterListener, FilterListener{
+public class SwtViewFilter implements AllTextFilterListener, FilterListener{
 
     private MyTreeViewerDataSource dataSource;
-    private MyTreeViewerTable tree;
+    private SwtTreeViewerTable tree;
     private ViewerFilter allTextFilter;
     private ViewerFilter oneColumnFilter;
 
-    public MyViewFilter(MyTreeViewerDataSource dataSource, MyTreeViewerTable tree) {
+    public SwtViewFilter(MyTreeViewerDataSource dataSource, SwtTreeViewerTable tree) {
         this.dataSource = dataSource;
         this.tree = tree;
     }
