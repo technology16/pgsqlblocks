@@ -35,7 +35,6 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.*;
 import ru.taximaxim.pgsqlblocks.PgSqlBlocks;
 import ru.taximaxim.pgsqlblocks.common.DBModelsProvider;
-import ru.taximaxim.pgsqlblocks.common.FilterCondition;
 import ru.taximaxim.pgsqlblocks.common.models.DBBlocksJournalProcess;
 import ru.taximaxim.pgsqlblocks.common.models.DBModel;
 import ru.taximaxim.pgsqlblocks.common.models.DBProcess;
@@ -63,7 +62,7 @@ import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
 public class ProcessesController implements DBControllerListener, DBModelsViewListener, SettingsListener,
-        DBProcessesViewDataSourceFilterListener, DBProcessesFiltersViewListener, DBProcessInfoViewListener {
+        DBProcessesViewDataSourceFilterListener, DBProcessInfoViewListener {
 
     private static final Logger LOG = Logger.getLogger(ProcessesController.class);
 
@@ -76,11 +75,9 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
     private SwtTreeViewer dbProcessView;
     private DBProcessInfoView dbProcessInfoView;
 
-    //private DBProcessesView dbBlocksJournalView;
     private SwtTreeViewer dbBlocksJournalView;
 
     private DBProcessInfoView dbBlocksJournalProcessInfoView;
-    private DBProcessesFiltersView dbBlocksJournalProcessesFiltersView;
 
     private final DBProcessesViewDataSourceFilter dbProcessesViewDataSourceFilter = new DBProcessesViewDataSourceFilter();
 
@@ -93,8 +90,6 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
     private ToolItem disconnectDatabaseToolItem;
     private ToolItem autoUpdateToolItem;
     private ToolItem showOnlyBlockedProcessesToolItem;
-
-    private ToolItem toggleVisibilityBlocksJournalProcessesFilterPanelToolItem;
 
     private DBModelsProvider dbModelsProvider;
 
@@ -168,25 +163,6 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
         gl.marginHeight = 0;
 
         dbBlocksJournalViewComposite.setLayout(gl);
-
-//        ToolBar dbBlocksJournalViewToolBar = new ToolBar(dbBlocksJournalViewComposite, SWT.HORIZONTAL);
-//        dbBlocksJournalViewToolBar.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
-//
-//        toggleVisibilityBlocksJournalProcessesFilterPanelToolItem = new ToolItem(dbBlocksJournalViewToolBar, SWT.CHECK);
-//        toggleVisibilityBlocksJournalProcessesFilterPanelToolItem.setImage(ImageUtils.getImage(Images.FILTER));
-//        toggleVisibilityBlocksJournalProcessesFilterPanelToolItem.setToolTipText(Images.FILTER.getDescription(resourceBundle));
-//        toggleVisibilityBlocksJournalProcessesFilterPanelToolItem.addListener(SWT.Selection, event ->
-//                setBlocksJournalProcessesFilterViewVisibility(toggleVisibilityBlocksJournalProcessesFilterPanelToolItem.getSelection()));
-//        toggleVisibilityBlocksJournalProcessesFilterPanelToolItem.setEnabled(false);
-//
-//        ToolItem showColumnsDialogToolItem = new ToolItem(dbBlocksJournalViewToolBar, SWT.PUSH);
-//        showColumnsDialogToolItem.setImage(ImageUtils.getImage(Images.TABLE));
-//        showColumnsDialogToolItem.setToolTipText(l10n("columns"));
-//        showColumnsDialogToolItem.addListener(SWT.Selection, event -> showDbBlocksJournalViewColumnsDialog());
-//
-//        dbBlocksJournalProcessesFiltersView = new DBProcessesFiltersView(resourceBundle, dbBlocksJournalViewComposite, SWT.NONE);
-//        dbBlocksJournalProcessesFiltersView.addListener(this);
-//        dbBlocksJournalProcessesFiltersView.hide();
 
         DBBlocksJournalViewDataSource dbBlocksJournalViewDataSource = new DBBlocksJournalViewDataSource(resourceBundle);
         dbBlocksJournalView = new SwtTreeViewer(dbBlocksJournalViewComposite, SWT.NONE, null,
@@ -317,9 +293,6 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
         changeToolItemsStateForController(null);
         dbProcessView.getTree().setInput(null);
         dbBlocksJournalView.getTree().setInput(null);
-        toggleVisibilityBlocksJournalProcessesFilterPanelToolItem.setSelection(false);
-        dbBlocksJournalProcessesFiltersView.hide();
-        dbBlocksJournalProcessesFiltersView.fillView(null, "");
     }
 
     private void saveDatabases() {
@@ -406,18 +379,6 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
         settings.setAutoUpdate(autoUpdate);
     }
 
-    private void setBlocksJournalProcessesFilterViewVisibility(boolean isVisible) {
-        if (dbModelsView.getTableViewer().getStructuredSelection().getFirstElement() == null) {
-            return;
-        }
-        DBController selectedController = (DBController) dbModelsView.getTableViewer().getStructuredSelection().getFirstElement();
-        selectedController.getBlocksJournal().getProcessesFilters().setEnabled(isVisible);
-        if (isVisible) {
-            dbBlocksJournalProcessesFiltersView.show();
-        } else {
-            dbBlocksJournalProcessesFiltersView.hide();
-        }
-    }
 
     private void showDBBlockedMessageInTray(DBController controller) {
         view.getDisplay().asyncExec(() -> {
@@ -545,7 +506,7 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
 
     @Override
     public void dbControllerProcessesFilterChanged(DBController controller) {
-        //dbProcessesView.getTreeViewer().refresh();
+        dbProcessView.getTree().refresh();
     }
 
     @Override
@@ -565,16 +526,6 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
         dbProcessView.getTree().setInput(controller.getFilteredProcesses());
         dbBlocksJournalView.getTree().setInput(controller.getBlocksJournal().getFilteredProcesses());
         changeToolItemsStateForController(controller);
-
-        dbBlocksJournalProcessesFiltersView.fillView(controller.getBlocksJournal().getProcessesFilters(),
-                controller.getModel().getDatabaseName());
-        boolean controllerBlocksJournalFiltersEnabled = controller.getBlocksJournal().getProcessesFilters().isEnabled();
-        if (controllerBlocksJournalFiltersEnabled) {
-            dbBlocksJournalProcessesFiltersView.show();
-        } else {
-            dbBlocksJournalProcessesFiltersView.hide();
-        }
-        toggleVisibilityBlocksJournalProcessesFilterPanelToolItem.setSelection(controllerBlocksJournalFiltersEnabled);
     }
 
     @Override
@@ -656,111 +607,6 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
     public void dataSourceFilterShowOnlyBlockedProcessesChanged(boolean showOnlyBlockedProcesses) {
         dbProcessView.getTree().refresh();
     }
-
-    @Override
-    public void processesFiltersViewPidFilterConditionChanged(DBProcessesFiltersView view, FilterCondition condition) {
-//        DBProcessFilter filter = getFilterForFiltersView(view);
-//        if (filter != null) {
-//            filter.getPidFilter().setCondition(condition);
-//        }
-    }
-
-    @Override
-    public void processesFiltersViewPidFilterValueChanged(DBProcessesFiltersView view, Integer value) {
-//        DBProcessFilter filter = getFilterForFiltersView(view);
-//        if (filter != null) {
-//            filter.getPidFilter().setValue(value);
-//        }
-    }
-
-    @Override
-    public void processesFiltersViewQueryFilterConditionChanged(DBProcessesFiltersView view, FilterCondition condition) {
-//        DBProcessFilter filter = getFilterForFiltersView(view);
-//        if (filter != null) {
-//            filter.getQueryFilter().setCondition(condition);
-//        }
-    }
-
-    @Override
-    public void processesFiltersViewQueryFilterValueChanged(DBProcessesFiltersView view, String value) {
-//        DBProcessFilter filter = getFilterForFiltersView(view);
-//        if (filter != null) {
-//            filter.getQueryFilter().setValue(value);
-//        }
-    }
-
-    @Override
-    public void processesFiltersViewApplicationFilterConditionChanged(DBProcessesFiltersView view, FilterCondition condition) {
-//        DBProcessFilter filter = getFilterForFiltersView(view);
-//        if (filter != null) {
-//            filter.getApplicationFilter().setCondition(condition);
-//        }
-    }
-
-    @Override
-    public void processesFiltersViewApplicationFilterValueChanged(DBProcessesFiltersView view, String value) {
-//        DBProcessFilter filter = getFilterForFiltersView(view);
-//        if (filter != null) {
-//            filter.getApplicationFilter().setValue(value);
-//        }
-    }
-
-    @Override
-    public void processesFiltersViewDatabaseFilterConditionChanged(DBProcessesFiltersView view, FilterCondition condition) {
-//        DBProcessFilter filter = getFilterForFiltersView(view);
-//        if (filter != null) {
-//            filter.getDatabaseFilter().setCondition(condition);
-//        }
-    }
-
-    @Override
-    public void processesFiltersViewDatabaseFilterValueChanged(DBProcessesFiltersView view, String value) {
-//        DBProcessFilter filter = getFilterForFiltersView(view);
-//        if (filter != null) {
-//            filter.getDatabaseFilter().setValue(value);
-//        }
-    }
-
-    @Override
-    public void processesFiltersViewUserNameFilterConditionChanged(DBProcessesFiltersView view, FilterCondition condition) {
-//        DBProcessFilter filter = getFilterForFiltersView(view);
-//        if (filter != null) {
-//            filter.getUserNameFilter().setCondition(condition);
-//        }
-    }
-
-    @Override
-    public void processesFiltersViewUserNameFilterValueChanged(DBProcessesFiltersView view, String value) {
-//        DBProcessFilter filter = getFilterForFiltersView(view);
-//        if (filter != null) {
-//            filter.getUserNameFilter().setValue(value);
-//        }
-    }
-
-    @Override
-    public void processesFiltersViewClientFilterConditionChanged(DBProcessesFiltersView view, FilterCondition condition) {
-//        DBProcessFilter filter = getFilterForFiltersView(view);
-//        if (filter != null) {
-//            filter.getClientFilter().setCondition(condition);
-//        }
-    }
-
-    @Override
-    public void processesFiltersViewClientFilterValueChanged(DBProcessesFiltersView view, String value) {
-//        DBProcessFilter filter = getFilterForFiltersView(view);
-//        if (filter != null) {
-//            filter.getClientFilter().setValue(value);
-//        }
-    }
-
-//    private DBProcessFilter getFilterForFiltersView(DBProcessesFiltersView view) {
-//        if (dbModelsView.getTableViewer().getStructuredSelection().getFirstElement() == null) {
-//            return null;
-//        }
-//        DBController selectedController = (DBController) dbModelsView.getTableViewer().getStructuredSelection().getFirstElement();
-//        boolean isCurrentProcesses = view.equals(dbProcessesFiltersView);
-//        return isCurrentProcesses ? selectedController.getProcessesFilters() : selectedController.getBlocksJournal().getProcessesFilters();
-//    }
 
     private void dbProcessesViewSelectionChanged(SelectionChangedEvent event) {
         ISelection selection = event.getSelection();

@@ -30,18 +30,14 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swt.widgets.ToolItem;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
-import ru.taximaxim.pgsqlblocks.common.FilterCondition;
 import ru.taximaxim.pgsqlblocks.common.models.*;
 import ru.taximaxim.pgsqlblocks.common.ui.DBBlocksJournalViewDataSource;
 import ru.taximaxim.pgsqlblocks.common.ui.DBProcessInfoView;
-import ru.taximaxim.pgsqlblocks.common.ui.DBProcessesFiltersView;
-import ru.taximaxim.pgsqlblocks.common.ui.DBProcessesFiltersViewListener;
 import ru.taximaxim.pgsqlblocks.utils.PathBuilder;
 import ru.taximaxim.pgsqlblocks.utils.Settings;
 import ru.taximaxim.pgsqlblocks.utils.XmlDocumentWorker;
@@ -53,20 +49,15 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.*;
 
-public class BlocksJournalView extends ApplicationWindow implements DBBlocksJournalListener, DBProcessesFiltersViewListener {
+public class BlocksJournalView extends ApplicationWindow implements DBBlocksJournalListener{
 
     private static final Logger LOG = Logger.getLogger(BlocksJournalView.class);
-
-    private ToolItem showFiltersViewToolItem;
 
     private TableViewer filesTable;
 
     private SwtTreeViewer processesView;
-    //private DBProcessesView processesView;
 
     private DBProcessInfoView processInfoView;
-
-    private DBProcessesFiltersView filtersView;
 
     private final ResourceBundle resourceBundle;
 
@@ -101,24 +92,6 @@ public class BlocksJournalView extends ApplicationWindow implements DBBlocksJour
         Composite contentComposite = new Composite(parent, SWT.NONE);
         contentComposite.setLayout(new GridLayout());
 
-//        ToolBar toolBar = new ToolBar(contentComposite, SWT.TOP | SWT.HORIZONTAL);
-//        ToolItem updateFilesListToolItem = new ToolItem(toolBar, SWT.PUSH);
-//        updateFilesListToolItem.setImage(ImageUtils.getImage(Images.UPDATE));
-//        updateFilesListToolItem.setToolTipText(resourceBundle.getString("refresh_files_list"));
-//        updateFilesListToolItem.addListener(SWT.Selection, e -> getJournalFilesFromJournalsDir());
-//
-//        showFiltersViewToolItem = new ToolItem(toolBar, SWT.CHECK);
-//        showFiltersViewToolItem.setImage(ImageUtils.getImage(Images.FILTER));
-//        showFiltersViewToolItem.setToolTipText(Images.FILTER.getDescription(resourceBundle));
-//        showFiltersViewToolItem.addListener(SWT.Selection, event ->
-//                setFiltersViewVisibility(showFiltersViewToolItem.getSelection()));
-//        showFiltersViewToolItem.setEnabled(false);
-//
-//        ToolItem showColumnsDialogToolItem = new ToolItem(toolBar, SWT.PUSH);
-//        showColumnsDialogToolItem.setImage(ImageUtils.getImage(Images.TABLE));
-//        showColumnsDialogToolItem.setToolTipText(resourceBundle.getString("columns"));
-//        showColumnsDialogToolItem.addListener(SWT.Selection, event -> showProcessesViewColumnsDialog());
-
         SashForm sashForm = new SashForm(contentComposite, SWT.HORIZONTAL);
         sashForm.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
@@ -136,17 +109,11 @@ public class BlocksJournalView extends ApplicationWindow implements DBBlocksJour
         processesContentContainer.setLayout(new GridLayout());
         processesContentContainer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
-        filtersView = new DBProcessesFiltersView(resourceBundle, processesContentContainer, SWT.NONE);
-        filtersView.addListener(this);
-        filtersView.hide();
-
         DBBlocksJournalViewDataSource dbBlocksJournalViewDataSource = new DBBlocksJournalViewDataSource(resourceBundle);
         processesView = new SwtTreeViewer(processesContentContainer, SWT.NONE, blocksJournal.getFilteredProcesses(),
                dbBlocksJournalViewDataSource , resourceBundle);
         processesView.setColumnsForFilterView(dbBlocksJournalViewDataSource.getColumnsForFilter());
-//        processesView.getTreeViewer().setDataSource(new DBBlocksJournalViewDataSource(resourceBundle));
         processesView.getTree().addSelectionChangedListener(this::processesViewSelectionChanged);
-//        processesView.getTreeViewer().setInput(blocksJournal.getFilteredProcesses());
 
         processInfoView = new DBProcessInfoView(resourceBundle, processesView, SWT.NONE);
         processInfoView.hideToolBar();
@@ -158,26 +125,11 @@ public class BlocksJournalView extends ApplicationWindow implements DBBlocksJour
         return super.createContents(parent);
     }
 
-    private void setFiltersViewVisibility(boolean isVisible) {
-        blocksJournal.getProcessesFilters().setEnabled(isVisible);
-        if (isVisible) {
-            filtersView.show();
-        } else {
-            filtersView.hide();
-        }
-    }
 
     private void filesTableSelectionChanged(SelectionChangedEvent event) {
         if (event.getSelection().isEmpty()) {
-//            showFiltersViewToolItem.setSelection(false);
-//            showFiltersViewToolItem.setEnabled(false);
             filesTable.setInput(null);
         } else {
-//            showFiltersViewToolItem.setSelection(false);
-//            showFiltersViewToolItem.setEnabled(true);
-//            filtersView.hide();
-//            filtersView.resetFiltersContent();
-
             IStructuredSelection selection = (IStructuredSelection) event.getSelection();
             File selectedFile = (File) selection.getFirstElement();
             openJournalFile(selectedFile);
@@ -232,11 +184,6 @@ public class BlocksJournalView extends ApplicationWindow implements DBBlocksJour
         }
     }
 
-//    private void showProcessesViewColumnsDialog() {
-//        TMTreeViewerColumnsDialog dialog = new TMTreeViewerColumnsDialog(resourceBundle, processesView.getTreeViewer(), getShell());
-//        dialog.open();
-//    }
-
     @Override
     public void dbBlocksJournalDidAddProcesses() {
         processesView.getTree().refresh();
@@ -251,65 +198,5 @@ public class BlocksJournalView extends ApplicationWindow implements DBBlocksJour
     @Override
     public void dbBlocksJournalDidChangeFilters() {
         processesView.getTree().refresh();
-    }
-
-    @Override
-    public void processesFiltersViewPidFilterConditionChanged(DBProcessesFiltersView view, FilterCondition condition) {
-        blocksJournal.getProcessesFilters().getPidFilter().setCondition(condition);
-    }
-
-    @Override
-    public void processesFiltersViewPidFilterValueChanged(DBProcessesFiltersView view, Integer value) {
-        blocksJournal.getProcessesFilters().getPidFilter().setValue(value);
-    }
-
-    @Override
-    public void processesFiltersViewQueryFilterConditionChanged(DBProcessesFiltersView view, FilterCondition condition) {
-        blocksJournal.getProcessesFilters().getQueryFilter().setCondition(condition);
-    }
-
-    @Override
-    public void processesFiltersViewQueryFilterValueChanged(DBProcessesFiltersView view, String value) {
-        blocksJournal.getProcessesFilters().getQueryFilter().setValue(value);
-    }
-
-    @Override
-    public void processesFiltersViewApplicationFilterConditionChanged(DBProcessesFiltersView view, FilterCondition condition) {
-        blocksJournal.getProcessesFilters().getApplicationFilter().setCondition(condition);
-    }
-
-    @Override
-    public void processesFiltersViewApplicationFilterValueChanged(DBProcessesFiltersView view, String value) {
-        blocksJournal.getProcessesFilters().getApplicationFilter().setValue(value);
-    }
-
-    @Override
-    public void processesFiltersViewDatabaseFilterConditionChanged(DBProcessesFiltersView view, FilterCondition condition) {
-        blocksJournal.getProcessesFilters().getDatabaseFilter().setCondition(condition);
-    }
-
-    @Override
-    public void processesFiltersViewDatabaseFilterValueChanged(DBProcessesFiltersView view, String value) {
-        blocksJournal.getProcessesFilters().getDatabaseFilter().setValue(value);
-    }
-
-    @Override
-    public void processesFiltersViewUserNameFilterConditionChanged(DBProcessesFiltersView view, FilterCondition condition) {
-        blocksJournal.getProcessesFilters().getUserNameFilter().setCondition(condition);
-    }
-
-    @Override
-    public void processesFiltersViewUserNameFilterValueChanged(DBProcessesFiltersView view, String value) {
-        blocksJournal.getProcessesFilters().getUserNameFilter().setValue(value);
-    }
-
-    @Override
-    public void processesFiltersViewClientFilterConditionChanged(DBProcessesFiltersView view, FilterCondition condition) {
-        blocksJournal.getProcessesFilters().getClientFilter().setCondition(condition);
-    }
-
-    @Override
-    public void processesFiltersViewClientFilterValueChanged(DBProcessesFiltersView view, String value) {
-        blocksJournal.getProcessesFilters().getClientFilter().setValue(value);
     }
 }

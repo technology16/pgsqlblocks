@@ -43,6 +43,9 @@ public interface DBControllerListener {
 
     void dbControllerBlockedChanged(DBController controller);
 
+    /**
+     * detect changes in datasource data filter (which type of processes need to load)
+     */
     void dbControllerProcessesFilterChanged(DBController controller);
 
     void dbControllerBlocksJournalChanged(DBController controller);
