@@ -17,7 +17,7 @@
  * limitations under the License.
  * =========================LICENSE_END==================================
  */
-package ru.taximaxim.pgsqlblocks.common.ui;
+/*package ru.taximaxim.pgsqlblocks.common.ui;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
@@ -345,4 +345,4 @@ public class DBProcessesFiltersView extends Composite {
     public void removeListener(DBProcessesFiltersViewListener listener) {
         listeners.remove(listener);
     }
-}
+}*/

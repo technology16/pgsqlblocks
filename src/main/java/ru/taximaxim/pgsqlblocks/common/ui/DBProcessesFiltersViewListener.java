@@ -17,7 +17,7 @@
  * limitations under the License.
  * =========================LICENSE_END==================================
  */
-package ru.taximaxim.pgsqlblocks.common.ui;
+/*package ru.taximaxim.pgsqlblocks.common.ui;
 
 import ru.taximaxim.pgsqlblocks.common.FilterCondition;
 
@@ -47,4 +47,4 @@ public interface DBProcessesFiltersViewListener {
 
     void processesFiltersViewClientFilterValueChanged(DBProcessesFiltersView view, String value);
 
-}
+}*/

@@ -17,7 +17,7 @@
  * limitations under the License.
  * =========================LICENSE_END==================================
  */
-package ru.taximaxim.pgsqlblocks.common.ui;
+/*package ru.taximaxim.pgsqlblocks.common.ui;
 
 import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.viewers.ITableLabelProvider;
@@ -75,4 +75,4 @@ public abstract class TMTreeViewerDataSource implements ITableLabelProvider, ITr
     public void removeListener(ILabelProviderListener listener) {
         listeners.remove(listener);
     }
-}
+}*/

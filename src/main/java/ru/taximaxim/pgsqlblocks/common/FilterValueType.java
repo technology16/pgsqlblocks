@@ -17,9 +17,9 @@
  * limitations under the License.
  * =========================LICENSE_END==================================
  */
-package ru.taximaxim.pgsqlblocks.common;
+/*package ru.taximaxim.pgsqlblocks.common;
 
 public enum FilterValueType {
     INTEGER,
     STRING
-}
+}*/

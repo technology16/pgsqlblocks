@@ -51,7 +51,7 @@ import java.util.stream.Collectors;
 
 import static ru.taximaxim.pgsqlblocks.PgSqlBlocks.APP_NAME;
 
-public class DBController implements DBProcessFilterListener, DBBlocksJournalListener {
+public class DBController implements /*DBProcessFilterListener,*/ DBBlocksJournalListener {
 
     private DBModel model;
 
@@ -65,7 +65,7 @@ public class DBController implements DBProcessFilterListener, DBBlocksJournalLis
 
     private List<DBControllerListener> listeners = new ArrayList<>();
 
-    private final DBProcessFilter processesFilters = new DBProcessFilter();
+    //private final DBProcessFilter processesFilters = new DBProcessFilter();
 
     private final Settings settings;
     private final ResourceBundle resourceBundle;
@@ -93,7 +93,7 @@ public class DBController implements DBProcessFilterListener, DBBlocksJournalLis
         this.model = model;
         blocksJournalCreateDate = new Date();
         blocksJournal.addListener(this);
-        processesFilters.addListener(this);
+       // processesFilters.addListener(this);
     }
 
     public DBModel getModel() {
@@ -162,9 +162,9 @@ public class DBController implements DBProcessFilterListener, DBBlocksJournalLis
         }
     }
 
-    public DBProcessFilter getProcessesFilters() {
-        return processesFilters;
-    }
+//    public DBProcessFilter getProcessesFilters() {
+//        return processesFilters;
+//    }
 
     private int getPgBackendPid() throws SQLException {
         try (Statement stBackendPid = connection.createStatement();
@@ -356,11 +356,12 @@ public class DBController implements DBProcessFilterListener, DBBlocksJournalLis
         processes.addAll(loadedProcesses);
 
         filteredProcesses.clear();
-        if (processesFilters.isEnabled()) {
-            filteredProcesses.addAll(processes.stream().filter(processesFilters::filter).collect(Collectors.toList()));
-        } else {
+        // TODO: 03.09.18 check this momment.  How it worked if filter was always hide
+//        if (processesFilters.isEnabled()) {
+//            filteredProcesses.addAll(processes.stream().filter(processesFilters::filter).collect(Collectors.toList()));
+//        } else {
             filteredProcesses.addAll(processes);
-        }
+//        }
 
         blocksJournal.add(loadedProcesses.stream().filter(DBProcess::hasChildren).collect(Collectors.toList()));
 
@@ -404,12 +405,12 @@ public class DBController implements DBProcessFilterListener, DBBlocksJournalLis
         return model.hashCode();
     }
 
-    @Override
-    public void dbProcessFilterChanged() {
-        filteredProcesses.clear();
-        filteredProcesses.addAll(processes.stream().filter(processesFilters::filter).collect(Collectors.toList()));
-        listeners.forEach(listener -> listener.dbControllerProcessesFilterChanged(this));
-    }
+//    @Override
+//    public void dbProcessFilterChanged() {
+//        filteredProcesses.clear();
+//        filteredProcesses.addAll(processes.stream().filter(processesFilters::filter).collect(Collectors.toList()));
+//        listeners.forEach(listener -> listener.dbControllerProcessesFilterChanged(this));
+//    }
 
     public boolean terminateProcessWithPid(int processPid) throws SQLException {
         boolean processTerminated = false;

@@ -24,6 +24,9 @@ import ru.taximaxim.pgsqlblocks.common.models.DBProcess;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Listener for changes in "show only blocked processes"
+ */
 public class DBProcessesViewDataSourceFilter implements TMTreeViewerDataSourceFilter<DBProcess> {
 
     private final List<DBProcessesViewDataSourceFilterListener> listeners = new ArrayList<>();

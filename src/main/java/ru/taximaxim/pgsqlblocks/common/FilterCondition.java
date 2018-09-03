@@ -17,7 +17,7 @@
  * limitations under the License.
  * =========================LICENSE_END==================================
  */
-package ru.taximaxim.pgsqlblocks.common;
+/*package ru.taximaxim.pgsqlblocks.common;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -73,4 +73,4 @@ public enum FilterCondition {
                 .findFirst();
         return filterCondition.orElse(FilterCondition.NONE);
     }
-}
+}*/

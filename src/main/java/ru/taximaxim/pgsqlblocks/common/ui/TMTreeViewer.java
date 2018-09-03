@@ -17,7 +17,7 @@
  * limitations under the License.
  * =========================LICENSE_END==================================
  */
-package ru.taximaxim.pgsqlblocks.common.ui;
+/*package ru.taximaxim.pgsqlblocks.common.ui;
 
 import org.eclipse.jface.viewers.*;
 import org.eclipse.swt.SWT;
@@ -181,4 +181,4 @@ public class TMTreeViewer extends TreeViewer {
             }
         }
     }
-}
+}*/

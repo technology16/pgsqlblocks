@@ -17,7 +17,7 @@
  * limitations under the License.
  * =========================LICENSE_END==================================
  */
-package ru.taximaxim.pgsqlblocks.common;
+/*package ru.taximaxim.pgsqlblocks.common;
 
 public class StringValueTypeFilter extends Filter<String> {
 
@@ -46,4 +46,4 @@ public class StringValueTypeFilter extends Filter<String> {
     public boolean isActive() {
         return super.isActive() && !value.isEmpty();
     }
-}
+}*/

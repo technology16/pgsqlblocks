@@ -17,7 +17,7 @@
  * limitations under the License.
  * =========================LICENSE_END==================================
  */
-package ru.taximaxim.pgsqlblocks.common;
+/*package ru.taximaxim.pgsqlblocks.common;
 
 public interface FilterListener {
 
@@ -29,4 +29,4 @@ public interface FilterListener {
 
     void filterConditionChanged(Filter filter);
 
-}
+}*/

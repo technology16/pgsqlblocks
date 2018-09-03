@@ -17,7 +17,7 @@
  * limitations under the License.
  * =========================LICENSE_END==================================
  */
-package ru.taximaxim.pgsqlblocks.common;
+/*package ru.taximaxim.pgsqlblocks.common;
 
 public class IntegerValueTypeFilter extends Filter<Integer> {
 
@@ -51,4 +51,4 @@ public class IntegerValueTypeFilter extends Filter<Integer> {
                 return true;
         }
     }
-}
+}*/

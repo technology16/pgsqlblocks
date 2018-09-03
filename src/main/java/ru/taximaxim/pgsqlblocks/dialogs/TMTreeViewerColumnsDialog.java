@@ -17,7 +17,7 @@
  * limitations under the License.
  * =========================LICENSE_END==================================
  */
-package ru.taximaxim.pgsqlblocks.dialogs;
+/*package ru.taximaxim.pgsqlblocks.dialogs;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.swt.SWT;
@@ -92,4 +92,4 @@ public class TMTreeViewerColumnsDialog extends Dialog {
         this.treeViewer.setCollapsedColumnsIndexes(collapsedColumnsIndexes);
         super.okPressed();
     }
-}
+}*/

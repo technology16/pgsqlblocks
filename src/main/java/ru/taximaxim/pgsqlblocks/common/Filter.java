@@ -17,7 +17,7 @@
  * limitations under the License.
  * =========================LICENSE_END==================================
  */
-package ru.taximaxim.pgsqlblocks.common;
+/*package ru.taximaxim.pgsqlblocks.common;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -116,4 +116,4 @@ public abstract class Filter<T> {
     public void removeListener(FilterListener listener) {
         listeners.remove(listener);
     }
-}
+}*/

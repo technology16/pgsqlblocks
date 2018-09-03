@@ -17,7 +17,7 @@
  * limitations under the License.
  * =========================LICENSE_END==================================
  */
-package ru.taximaxim.pgsqlblocks.common.models;
+/*package ru.taximaxim.pgsqlblocks.common.models;
 
 import ru.taximaxim.pgsqlblocks.common.Filter;
 import ru.taximaxim.pgsqlblocks.common.FilterListener;
@@ -148,3 +148,4 @@ public class DBProcessFilter implements FilterListener {
         }
     }
 }
+*/

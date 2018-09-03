@@ -19,6 +19,9 @@
  */
 package ru.taximaxim.pgsqlblocks.common.ui;
 
+/**
+ * For DBProcessesViewDataSourceFilter
+ */
 public interface DBProcessesViewDataSourceFilterListener {
 
     void dataSourceFilterShowOnlyBlockedProcessesChanged(boolean showOnlyBlockedProcesses);

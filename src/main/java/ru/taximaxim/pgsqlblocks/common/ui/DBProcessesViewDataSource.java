@@ -42,7 +42,6 @@ public class DBProcessesViewDataSource extends MyTreeViewerDataSource {
     public DBProcessesViewDataSource(ResourceBundle bundle, TMTreeViewerDataSourceFilter<DBProcess> dataSourceFilter) {
         this.bundle = bundle;
         this.dataFilter = dataSourceFilter;
-
     }
 
     @Override
