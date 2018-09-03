@@ -28,7 +28,4 @@ public interface DBBlocksJournalListener {
     void dbBlocksJournalDidCloseAllProcesses();
 
     void dbBlocksJournalDidCloseProcesses(List<DBBlocksJournalProcess> processes);
-
-    void dbBlocksJournalDidChangeFilters();
-
 }

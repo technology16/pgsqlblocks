@@ -413,13 +413,6 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
         settingsDialog.open();
     }
 
-
-//    private void showDbBlocksJournalViewColumnsDialog() {
-//        TMTreeViewerColumnsDialog dialog =
-//                new TMTreeViewerColumnsDialog(resourceBundle, dbBlocksJournalView.getTreeViewer(), view.getShell());
-//        dialog.open();
-//    }
-
     public void close() {
         dbControllers.forEach(DBController::shutdown);
         settings.removeListener(this);

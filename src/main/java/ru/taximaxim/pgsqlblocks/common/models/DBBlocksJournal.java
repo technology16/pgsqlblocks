@@ -23,7 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class DBBlocksJournal implements DBProcessFilterListener {
+public class DBBlocksJournal{
 
     private final List<DBBlocksJournalListener> listeners = new ArrayList<>();
 
@@ -31,7 +31,6 @@ public class DBBlocksJournal implements DBProcessFilterListener {
 
     private final List<DBBlocksJournalProcess> filteredProcesses = new ArrayList<>();
 
-//    private final DBProcessFilter processesFilters = new DBProcessFilter();
 
     public List<DBBlocksJournalProcess> getProcesses() {
         return processes;
@@ -41,12 +40,7 @@ public class DBBlocksJournal implements DBProcessFilterListener {
         return filteredProcesses;
     }
 
-//    public DBProcessFilter getProcessesFilters() {
-//        return processesFilters;
-//    }
-
     public DBBlocksJournal() {
-       // processesFilters.addListener(this);
     }
 
     public void add(List<DBProcess> processes) {
@@ -92,11 +86,7 @@ public class DBBlocksJournal implements DBProcessFilterListener {
 
     private void prepareFilteredProcesses() {
         filteredProcesses.clear();
-//        if (processesFilters.isEnabled()) {
-//            filteredProcesses.addAll(processes.stream().filter(p -> processesFilters.filter(p.getProcess())).collect(Collectors.toList()));
-//        } else {
-            filteredProcesses.addAll(processes);
-//        }
+        filteredProcesses.addAll(processes);
     }
 
     private void closeProcesses() {
@@ -128,11 +118,5 @@ public class DBBlocksJournal implements DBProcessFilterListener {
 
     public void removeListener(DBBlocksJournalListener listener) {
         listeners.remove(listener);
-    }
-
-    @Override
-    public void dbProcessFilterChanged() {
-        prepareFilteredProcesses();
-        listeners.forEach(DBBlocksJournalListener::dbBlocksJournalDidChangeFilters);
     }
 }
