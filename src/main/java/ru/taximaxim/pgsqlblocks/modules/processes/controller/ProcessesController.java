@@ -168,7 +168,7 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
         dbBlocksJournalView = new SwtTreeViewer(dbBlocksJournalViewComposite, SWT.NONE, null,
                 dbBlocksJournalViewDataSource, resourceBundle);
         dbBlocksJournalView.getTree().addSelectionChangedListener(this::dbBlocksJournalViewSelectionChanged);
-        dbProcessView.setColumnsForFilterView(dbBlocksJournalViewDataSource.getColumnsForFilter());
+        dbBlocksJournalView.setColumnsForFilterView(dbBlocksJournalViewDataSource.getColumnsForFilter());
 
         dbBlocksJournalProcessInfoView = new DBProcessInfoView(resourceBundle, dbBlocksJournalViewComposite, SWT.NONE);
         dbBlocksJournalProcessInfoView.hideToolBar();
