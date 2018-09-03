@@ -135,7 +135,7 @@ public class DBController implements DBProcessFilterListener, DBBlocksJournalLis
         });
     }
 
-    private String getPassword() {
+    public String getPassword() {
         if (model.hasPassword()) {
             return model.getPassword();
         }
@@ -252,6 +252,7 @@ public class DBController implements DBProcessFilterListener, DBBlocksJournalLis
 
     public void updateProcesses() {
         if (!isConnected()) {
+            // TODO: 03.09.18 tuta
             connect();
         } else {
             executor.execute(this::loadProcesses);

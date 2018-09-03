@@ -41,10 +41,7 @@ import ru.taximaxim.pgsqlblocks.common.models.DBModel;
 import ru.taximaxim.pgsqlblocks.common.models.DBProcess;
 import ru.taximaxim.pgsqlblocks.common.models.DBProcessFilter;
 import ru.taximaxim.pgsqlblocks.common.ui.*;
-import ru.taximaxim.pgsqlblocks.dialogs.AddDatabaseDialog;
-import ru.taximaxim.pgsqlblocks.dialogs.EditDatabaseDialog;
-import ru.taximaxim.pgsqlblocks.dialogs.SettingsDialog;
-import ru.taximaxim.pgsqlblocks.dialogs.TMTreeViewerColumnsDialog;
+import ru.taximaxim.pgsqlblocks.dialogs.*;
 import ru.taximaxim.pgsqlblocks.modules.blocksjournal.view.BlocksJournalView;
 import ru.taximaxim.pgsqlblocks.modules.db.controller.DBController;
 import ru.taximaxim.pgsqlblocks.modules.db.controller.DBControllerListener;
@@ -132,8 +129,18 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
 
         loadDatabases();
 
+        //load controllers and foreach? set password? or getPassword twice???
         dbControllers.stream().filter(DBController::isEnabledAutoConnection).forEach(DBController::connect);
     }
+
+    private String openPasswordDialog(String name, String user) {
+        PasswordDialog passwordDialog = new PasswordDialog(resourceBundle, view.getShell(), name, user);
+        if (passwordDialog.open() == Window.OK) {
+            return passwordDialog.getPassword();
+        }
+        return "";
+    }
+
 
     private void createProcessesTab() {
         TabItem processesTabItem = new TabItem(tabFolder, SWT.BORDER);
@@ -319,6 +326,7 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
         }
     }
 
+    // TODO: 03.09.18
     private void loadDatabases() {
         List<DBModel> dbModels = dbModelsProvider.get();
         dbModels.forEach(this::addDatabase);
