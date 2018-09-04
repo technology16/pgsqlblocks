@@ -35,7 +35,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
@@ -83,6 +85,9 @@ public class DBControllerTest {
 
         @Override
         public void dbControllerBlocksJournalChanged(DBController controller) {}
+
+        @Override
+        public void dbControllerPasswordEmpty(DBController controller) {}
     }
 
     private static final Config CONFIG = ConfigFactory.load();

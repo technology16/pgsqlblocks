@@ -47,4 +47,6 @@ public interface DBControllerListener {
 
     void dbControllerBlocksJournalChanged(DBController controller);
 
+    void dbControllerPasswordEmpty(DBController controller);
+
 }

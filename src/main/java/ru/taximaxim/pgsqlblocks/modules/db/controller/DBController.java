@@ -86,6 +86,7 @@ public class DBController implements DBProcessFilterListener, DBBlocksJournalLis
 
     private Date blocksJournalCreateDate;
     private final DateUtils dateUtils = new DateUtils();
+    private String temporaryPassword;
 
     public DBController(Settings settings, DBModel model) {
         this.settings = settings;
@@ -135,7 +136,7 @@ public class DBController implements DBProcessFilterListener, DBBlocksJournalLis
         });
     }
 
-    public String getPassword() {
+    private String getPassword() {
         if (model.hasPassword()) {
             return model.getPassword();
         }
@@ -145,6 +146,10 @@ public class DBController implements DBProcessFilterListener, DBBlocksJournalLis
             password = pgPass == null ? password : pgPass;
         } catch (PgPassException e) {
             LOG.error("Ошибка получения пароля из pgpass файла " + e.getMessage(), e);
+        }
+        if (password.equals("")) {
+            listeners.forEach(listener -> listener.dbControllerPasswordEmpty(this));
+            password = temporaryPassword;
         }
         return password;
     }
@@ -252,7 +257,6 @@ public class DBController implements DBProcessFilterListener, DBBlocksJournalLis
 
     public void updateProcesses() {
         if (!isConnected()) {
-            // TODO: 03.09.18 tuta
             connect();
         } else {
             executor.execute(this::loadProcesses);
@@ -437,6 +441,10 @@ public class DBController implements DBProcessFilterListener, DBBlocksJournalLis
             }
         }
         return processCanceled;
+    }
+
+    public void setTemporaryPassword(String temporaryPassword) {
+        this.temporaryPassword = temporaryPassword;
     }
 
     @Override

@@ -5,7 +5,9 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.*;
+import ru.taximaxim.pgsqlblocks.common.models.DBModel;
 
+import java.text.MessageFormat;
 import java.util.ResourceBundle;
 
 /**
@@ -13,16 +15,14 @@ import java.util.ResourceBundle;
  */
 public class PasswordDialog extends Dialog {
     private ResourceBundle resourceBundle;
-    private String name;
-    private String user;
     private String password;
     private Text passwordText;
+    private DBModel model;
 
-    public PasswordDialog(ResourceBundle resourceBundle, Shell shell, String name, String user) {
+    public PasswordDialog(ResourceBundle resourceBundle, Shell shell, DBModel model) {
         super(shell);
         this.resourceBundle = resourceBundle;
-        this.name = name;
-        this.user = user;
+        this.model = model;
     }
 
     @Override
@@ -42,13 +42,12 @@ public class PasswordDialog extends Dialog {
         container.setLayout(layout);
         container.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 
-
-        Label answerLabel = new Label(container, SWT.HORIZONTAL );
-        answerLabel.setText(resourceBundle.getString("type_password_for")
-                + name +
-                resourceBundle.getString("and_user") +  user);
-        passwordText = new Text(container, SWT.BORDER );
-        passwordText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false ));
+        String builder = MessageFormat.format("{0} \nName = {1} Database = {2} User = {3}", resourceBundle.getString("type_password_for"),
+                model.getName(), model.getDatabaseName(), model.getUser());
+        Label answerLabel = new Label(container, SWT.HORIZONTAL);
+        answerLabel.setText(builder);
+        passwordText = new Text(container, SWT.BORDER);
+        passwordText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
         passwordText.setEchoChar('•');
         return container;
     }

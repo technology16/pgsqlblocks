@@ -129,12 +129,11 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
 
         loadDatabases();
 
-        //load controllers and foreach? set password? or getPassword twice???
         dbControllers.stream().filter(DBController::isEnabledAutoConnection).forEach(DBController::connect);
     }
 
-    private String openPasswordDialog(String name, String user) {
-        PasswordDialog passwordDialog = new PasswordDialog(resourceBundle, view.getShell(), name, user);
+    private String openPasswordDialog(DBController controller) {
+        PasswordDialog passwordDialog = new PasswordDialog(resourceBundle, view.getShell(), controller.getModel());
         if (passwordDialog.open() == Window.OK) {
             return passwordDialog.getPassword();
         }
@@ -326,7 +325,6 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
         }
     }
 
-    // TODO: 03.09.18
     private void loadDatabases() {
         List<DBModel> dbModels = dbModelsProvider.get();
         dbModels.forEach(this::addDatabase);
@@ -613,6 +611,13 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
                 }
             }
         });
+    }
+
+    @Override
+    public void dbControllerPasswordEmpty(DBController controller) {
+        final String[] pass = {""};
+        Display.getDefault().syncExec( () -> pass[0] = openPasswordDialog(controller));
+        controller.setTemporaryPassword(pass[0]);
     }
 
     @Override
