@@ -27,6 +27,7 @@ import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.ITreeSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
@@ -41,10 +42,7 @@ import ru.taximaxim.pgsqlblocks.common.models.DBModel;
 import ru.taximaxim.pgsqlblocks.common.models.DBProcess;
 import ru.taximaxim.pgsqlblocks.common.models.DBProcessFilter;
 import ru.taximaxim.pgsqlblocks.common.ui.*;
-import ru.taximaxim.pgsqlblocks.dialogs.AddDatabaseDialog;
-import ru.taximaxim.pgsqlblocks.dialogs.EditDatabaseDialog;
-import ru.taximaxim.pgsqlblocks.dialogs.SettingsDialog;
-import ru.taximaxim.pgsqlblocks.dialogs.TMTreeViewerColumnsDialog;
+import ru.taximaxim.pgsqlblocks.dialogs.*;
 import ru.taximaxim.pgsqlblocks.modules.blocksjournal.view.BlocksJournalView;
 import ru.taximaxim.pgsqlblocks.modules.db.controller.DBController;
 import ru.taximaxim.pgsqlblocks.modules.db.controller.DBControllerListener;
@@ -176,12 +174,26 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
         dbProcessesView.getTreeViewer().setDataSource(dbProcessesViewDataSource);
         dbProcessesView.getTreeViewer().addSortColumnSelectionListener(this);
         dbProcessesView.getTreeViewer().addSelectionChangedListener(this::dbProcessesViewSelectionChanged);
+        dbProcessesView.getTreeViewer().getTree().addTraverseListener(e -> {
+            if (e.detail == SWT.TRAVERSE_RETURN) {
+                System.out.println("ENTER!!!!!!!!!!!!!!!!!!!");
+                ITreeSelection element = dbProcessesView.getTreeViewer().getStructuredSelection();
+                IStructuredSelection structuredSelection = (IStructuredSelection)element;
+                selectedProcesses = (List<DBProcess>) structuredSelection.toList();
+                openProccessDialogInfo(selectedProcesses.get(0));
+            }
+        });
 
         dbProcessInfoView = new DBProcessInfoView(resourceBundle, processesViewComposite, SWT.NONE);
         dbProcessInfoView.addListener(this);
         dbProcessInfoView.hide();
 
         processesTabItem.setControl(processesViewComposite);
+    }
+
+    private void openProccessDialogInfo(DBProcess dbProcess){
+        DBProcessInfoDialog dbProcessInfoView = new DBProcessInfoDialog(resourceBundle, view.getShell(), dbProcess);
+        dbProcessInfoView.open();
     }
 
     private void createBlocksJournalTab() {

@@ -141,7 +141,8 @@ public class PgSqlBlocks_ru extends ListResourceBundle {
                 {"already_exists", "Сервер с таким именем %s уже существует!"},
                 {"missing_host_port", "Не заполнены обязательные поля: Хост и/или Порт!"},
                 {"missing_database_user", "Не заполнены обязательные поля: Имя БД и/или Имя пользователя!"},
-                {"attention", "Внимание!"}
+                {"attention", "Внимание!"},
+                {"process_info", "Информация о процессе"}
         };
     }
 }
