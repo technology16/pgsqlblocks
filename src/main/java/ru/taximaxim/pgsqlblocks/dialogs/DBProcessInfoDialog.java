@@ -36,12 +36,11 @@ public class DBProcessInfoDialog extends Dialog{
         Composite container = (Composite) super.createDialogArea(parent);
 
         GridLayout layout = new GridLayout(2, false);
-//        layout.marginRight = 5;
-//        layout.marginLeft = 10;
-//        layout.marginTop = 10;
+        layout.marginRight = 5;
+        layout.marginLeft = 10;
+        layout.marginTop = 10;
         layout.horizontalSpacing = 2;
         container.setLayout(layout);
-       // container.setLayoutData(new GridData(SWT.NONE, SWT.NONE, false, false));
 
         GridData textGd = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1);
         textGd.widthHint = TEXT_WIDTH;
@@ -68,8 +67,7 @@ public class DBProcessInfoDialog extends Dialog{
             //createProcessArea(container, textGd, "status", dbProcess.getStatus().getDescr());
             //System.out.println(dbProcess.getStatus().getDescr());
             //dbProcess.getQuery().getQueryString() query
-            createQueryArea(container, textGd, "query", dbProcess.getQuery().getQueryString());
-
+            createQueryArea(container, dbProcess.getQuery().getQueryString());
         return container;
     }
 
@@ -85,17 +83,24 @@ public class DBProcessInfoDialog extends Dialog{
         pid.setLayoutData(gridData);
     }
 
-    private void createQueryArea(Composite container, GridData gridData, String type, String data) {
-        Label pidLabel = new Label(container, SWT.HORIZONTAL);
-        pidLabel.setText(resourceBundle.getString(type));
-        StyledText pid = new StyledText(container,  SWT.BORDER | SWT.FULL_SELECTION | SWT.V_SCROLL);
+    private void createQueryArea(Composite container, String data) {
+        Composite composite = new Composite(container, SWT.NONE);
+        GridLayout gridLayout = new GridLayout(1, false);
+        composite.setLayout(gridLayout);
+        composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 2, 20));
+        Label pidLabel = new Label(composite, SWT.HORIZONTAL);
+        pidLabel.setText(resourceBundle.getString("query"));
+
+        StyledText pid = new StyledText(composite,  SWT.BORDER | SWT.FULL_SELECTION | SWT.V_SCROLL);
         if (data != null) {
             pid.setText(data);
         }else {
             pid.setText("");
         }
         pid.setWordWrap(true);
-        pid.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 1, 7));
+        GridData grid = new GridData(SWT.FILL, SWT.FILL, false, true);
+        grid.widthHint = 500;
+        pid.setLayoutData(grid);
     }
 
     @Override
