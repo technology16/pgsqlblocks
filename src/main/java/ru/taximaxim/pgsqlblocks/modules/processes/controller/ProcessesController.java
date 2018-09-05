@@ -176,11 +176,10 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
         dbProcessesView.getTreeViewer().addSelectionChangedListener(this::dbProcessesViewSelectionChanged);
         dbProcessesView.getTreeViewer().getTree().addTraverseListener(e -> {
             if (e.detail == SWT.TRAVERSE_RETURN) {
-                System.out.println("ENTER!!!!!!!!!!!!!!!!!!!");
                 ITreeSelection element = dbProcessesView.getTreeViewer().getStructuredSelection();
-                IStructuredSelection structuredSelection = (IStructuredSelection)element;
+                IStructuredSelection structuredSelection = element;
                 selectedProcesses = (List<DBProcess>) structuredSelection.toList();
-                openProccessDialogInfo(selectedProcesses.get(0));
+                openProcessDialogInfo(selectedProcesses.get(0));
             }
         });
 
@@ -191,9 +190,22 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
         processesTabItem.setControl(processesViewComposite);
     }
 
-    private void openProccessDialogInfo(DBProcess dbProcess){
-        DBProcessInfoDialog dbProcessInfoView = new DBProcessInfoDialog(resourceBundle, view.getShell(), dbProcess);
-        dbProcessInfoView.open();
+    private void openProcessDialogInfo(DBProcess dbProcess){
+        DBProcessInfoDialog dbProcessInfoDialog = new DBProcessInfoDialog(resourceBundle, view.getShell(), dbProcess,
+                new DBProcessInfoDialog.ProcessInfoListener() {
+                    @Override
+                    public void terminateButtonClick() {
+                        dbProcessInfoViewTerminateProcessToolItemClicked();
+                        close();
+                    }
+
+                    @Override
+                    public void cancelButtonClick() {
+                        dbProcessInfoViewCancelProcessToolItemClicked();
+                        close();
+                    }
+                });
+        dbProcessInfoDialog.open();
     }
 
     private void createBlocksJournalTab() {

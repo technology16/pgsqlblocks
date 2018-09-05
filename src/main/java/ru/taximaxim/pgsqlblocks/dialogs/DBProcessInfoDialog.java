@@ -22,13 +22,15 @@ public class DBProcessInfoDialog extends Dialog{
     private DBProcess dbProcess;
     private DBBlocksJournalProcess dbBlocksProcess;
     private static final int TEXT_WIDTH = 200;
+    private ProcessInfoListener processInfoListener;
 
 
-    public DBProcessInfoDialog(ResourceBundle resourceBundle, Shell parentShell, Object process) {
+    public DBProcessInfoDialog(ResourceBundle resourceBundle, Shell parentShell, Object process, ProcessInfoListener listener) {
         super(parentShell);
         this.dbProcess = process instanceof DBProcess ? ((DBProcess) process) : null;
         this.dbBlocksProcess = process instanceof DBBlocksJournalProcess ? ((DBBlocksJournalProcess) process) : null;
         this.resourceBundle = resourceBundle;
+        this.processInfoListener = listener;
     }
 
     @Override
@@ -68,7 +70,12 @@ public class DBProcessInfoDialog extends Dialog{
             //System.out.println(dbProcess.getStatus().getDescr());
             //dbProcess.getQuery().getQueryString() query
             createQueryArea(container, dbProcess.getQuery().getQueryString());
+            //createButtonArea(container);
         return container;
+    }
+
+    private void createButtonArea(Composite container) {
+
     }
 
     private void createProcessArea(Composite container, GridData gridData, String type, String data) {
@@ -107,5 +114,16 @@ public class DBProcessInfoDialog extends Dialog{
     protected void configureShell(Shell newShell) {
         super.configureShell(newShell);
         newShell.setText(resourceBundle.getString("process_info"));
+    }
+
+    @Override
+    protected void createButtonsForButtonBar(Composite parent) {
+        GridLayout layout = (GridLayout)parent.getLayout();
+        layout.marginHeight = 0;
+    }
+
+    public interface ProcessInfoListener {
+        void terminateButtonClick();
+        void cancelButtonClick();
     }
 }
