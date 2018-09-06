@@ -191,20 +191,21 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
     }
 
     private void openProcessDialogInfo(DBProcess dbProcess){
-        DBProcessInfoDialog dbProcessInfoDialog = new DBProcessInfoDialog(resourceBundle, view.getShell(), dbProcess,
-                new DBProcessInfoDialog.ProcessInfoListener() {
-                    @Override
-                    public void terminateButtonClick() {
-                        dbProcessInfoViewTerminateProcessToolItemClicked();
-                        close();
-                    }
+        DBProcessInfoDialog dbProcessInfoDialog = new DBProcessInfoDialog(resourceBundle, view.getShell(), dbProcess, false);
+        dbProcessInfoDialog.setProcessInfoListener(new DBProcessInfoDialog.ProcessInfoListener() {
+            @Override
+            public void terminateButtonClick() {
+                dbProcessInfoViewTerminateProcessToolItemClicked();
+                dbProcessInfoDialog.close();
 
-                    @Override
-                    public void cancelButtonClick() {
-                        dbProcessInfoViewCancelProcessToolItemClicked();
-                        close();
-                    }
-                });
+            }
+
+            @Override
+            public void cancelButtonClick() {
+                dbProcessInfoViewCancelProcessToolItemClicked();
+                dbProcessInfoDialog.close();
+            }
+        });
         dbProcessInfoDialog.open();
     }
 

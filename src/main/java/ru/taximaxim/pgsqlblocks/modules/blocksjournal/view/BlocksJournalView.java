@@ -156,7 +156,7 @@ public class BlocksJournalView extends ApplicationWindow implements DBBlocksJour
     }
 
     private void openProcessDialogInfo(Object dbProcess){
-        DBProcessInfoDialog dbProcessInfoView = new DBProcessInfoDialog(resourceBundle, this.getShell(), dbProcess);
+        DBProcessInfoDialog dbProcessInfoView = new DBProcessInfoDialog(resourceBundle, this.getShell(), dbProcess, true);
         dbProcessInfoView.open();
     }
 

@@ -22,33 +22,27 @@ public class DBProcessInfoDialog extends Dialog{
     private DBProcess dbProcess;
     private DBBlocksJournalProcess dbBlocksProcess;
     private ProcessInfoListener processInfoListener;
-    private Button cancelButton;
-    private Button terminateButton;
     private boolean disabledButton;
     private static final int TEXT_WIDTH = 200;
 
-
-
-    public DBProcessInfoDialog(ResourceBundle resourceBundle, Shell parentShell, Object process, ProcessInfoListener listener) {
-        super(parentShell);
-        this.dbProcess = process instanceof DBProcess ? ((DBProcess) process) : null;
-        this.dbBlocksProcess = process instanceof DBBlocksJournalProcess ? ((DBBlocksJournalProcess) process) : null;
-        this.resourceBundle = resourceBundle;
-        this.processInfoListener = listener;
-    }
-
-    public DBProcessInfoDialog(ResourceBundle resourceBundle, Shell parentShell, Object process) {
+    public DBProcessInfoDialog(ResourceBundle resourceBundle, Shell parentShell, Object process, boolean disabledButton) {
         super(parentShell);
         this.dbProcess = process instanceof DBProcess ? ((DBProcess) process) : null;
         this.dbBlocksProcess = process instanceof DBBlocksJournalProcess ? ((DBBlocksJournalProcess) process) : null;
         this.resourceBundle = resourceBundle;
         this.processInfoListener = null;
-        this.disabledButton = true;
+        this.disabledButton = disabledButton;
     }
 
-    private void disableButtons() {
-        cancelButton.setEnabled(false);
-        terminateButton.setEnabled(false);
+    @Override
+    protected void configureShell(Shell newShell) {
+        super.configureShell(newShell);
+        newShell.setText(resourceBundle.getString("process_info"));
+    }
+
+    @Override
+    protected void createButtonsForButtonBar(Composite parent) {
+        //Need to override to hide OK/Cancel button
     }
 
     @Override
@@ -80,8 +74,8 @@ public class DBProcessInfoDialog extends Dialog{
     }
 
     private void createButtonArea(Composite container) {
-        cancelButton = new Button(container, SWT.PUSH);
-        cancelButton.setText("CANCEL");
+        Button cancelButton = new Button(container, SWT.PUSH);
+        cancelButton.setText(resourceBundle.getString("cancel_process"));
         cancelButton.addSelectionListener(new SelectionListener() {
             @Override
             public void widgetSelected(SelectionEvent e) {
@@ -95,8 +89,8 @@ public class DBProcessInfoDialog extends Dialog{
             }
         });
 
-        terminateButton = new Button(container, SWT.PUSH);
-        terminateButton.setText("TERMINATE");
+        Button terminateButton = new Button(container, SWT.PUSH);
+        terminateButton.setText(resourceBundle.getString("kill_process"));
         terminateButton.addSelectionListener(new SelectionListener() {
             @Override
             public void widgetSelected(SelectionEvent e) {
@@ -109,7 +103,8 @@ public class DBProcessInfoDialog extends Dialog{
             public void widgetDefaultSelected(SelectionEvent e) {}
         });
         if (disabledButton) {
-            disableButtons();
+            cancelButton.setEnabled(false);
+            terminateButton.setEnabled(false);
         }
     }
 
@@ -145,15 +140,8 @@ public class DBProcessInfoDialog extends Dialog{
         pid.setLayoutData(grid);
     }
 
-    @Override
-    protected void configureShell(Shell newShell) {
-        super.configureShell(newShell);
-        newShell.setText(resourceBundle.getString("process_info"));
-    }
-
-    @Override
-    protected void createButtonsForButtonBar(Composite parent) {
-        //Need to override to hide OK/Cancel button
+    public void setProcessInfoListener(ProcessInfoListener processInfoListener) {
+        this.processInfoListener = processInfoListener;
     }
 
     public interface ProcessInfoListener {
