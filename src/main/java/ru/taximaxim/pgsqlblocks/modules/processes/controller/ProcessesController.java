@@ -241,6 +241,13 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
         dbBlocksJournalView = new DBProcessesView(dbBlocksJournalViewComposite, SWT.NONE);
         dbBlocksJournalView.getTreeViewer().setDataSource(new DBBlocksJournalViewDataSource(resourceBundle));
         dbBlocksJournalView.getTreeViewer().addSelectionChangedListener(this::dbBlocksJournalViewSelectionChanged);
+        dbBlocksJournalView.getTreeViewer().getTree().addTraverseListener(e -> {
+            if (e.detail == SWT.TRAVERSE_RETURN) {
+                IStructuredSelection structuredSelection = dbProcessesView.getTreeViewer().getStructuredSelection();
+                selectedProcesses = (List<DBProcess>) structuredSelection.toList();
+                openProcessDialogInfo(selectedProcesses.get(0));
+            }
+        });
 
         dbBlocksJournalProcessInfoView = new DBProcessInfoView(resourceBundle, dbBlocksJournalViewComposite, SWT.NONE);
         dbBlocksJournalProcessInfoView.hideToolBar();

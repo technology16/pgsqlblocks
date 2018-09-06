@@ -17,11 +17,16 @@ import java.util.ResourceBundle;
  * Dialog for current process info
  */
 public class DBProcessInfoDialog extends Dialog{
+
     private ResourceBundle resourceBundle;
     private DBProcess dbProcess;
     private DBBlocksJournalProcess dbBlocksProcess;
-    private static final int TEXT_WIDTH = 200;
     private ProcessInfoListener processInfoListener;
+    private Button cancelButton;
+    private Button terminateButton;
+    private boolean disabledButton;
+    private static final int TEXT_WIDTH = 200;
+
 
 
     public DBProcessInfoDialog(ResourceBundle resourceBundle, Shell parentShell, Object process, ProcessInfoListener listener) {
@@ -32,10 +37,23 @@ public class DBProcessInfoDialog extends Dialog{
         this.processInfoListener = listener;
     }
 
+    public DBProcessInfoDialog(ResourceBundle resourceBundle, Shell parentShell, Object process) {
+        super(parentShell);
+        this.dbProcess = process instanceof DBProcess ? ((DBProcess) process) : null;
+        this.dbBlocksProcess = process instanceof DBBlocksJournalProcess ? ((DBBlocksJournalProcess) process) : null;
+        this.resourceBundle = resourceBundle;
+        this.processInfoListener = null;
+        this.disabledButton = true;
+    }
+
+    private void disableButtons() {
+        cancelButton.setEnabled(false);
+        terminateButton.setEnabled(false);
+    }
+
     @Override
     protected Control createDialogArea(Composite parent) {
         Composite container = (Composite) super.createDialogArea(parent);
-
         GridLayout layout = new GridLayout(2, false);
         layout.marginRight = 5;
         layout.marginLeft = 10;
@@ -48,35 +66,28 @@ public class DBProcessInfoDialog extends Dialog{
         if (dbBlocksProcess != null) {
             dbProcess = dbBlocksProcess.getProcess();
         }
-            //dbProcess.getPid() pid
-            createProcessArea(container, textGd, "pid", String.valueOf(dbProcess.getPid()));
-            //dbProcess.getChildren().size() num_of_blocked_processes
-            createProcessArea(container, textGd, "num_of_blocked_processes", String.valueOf(dbProcess.getChildren().size()));
-            //dbProcess.getQueryCaller().getDatabaseName() db_name
-            createProcessArea(container, textGd, "db_name", dbProcess.getQueryCaller().getDatabaseName());
-            //dbProcess.getQueryCaller().getApplicationName() application
-            createProcessArea(container, textGd, "application", dbProcess.getQueryCaller().getApplicationName());
-            //dbProcess.getQueryCaller().getUserName() user_name
-            createProcessArea(container, textGd, "user_name", dbProcess.getQueryCaller().getUserName());
-            //dbProcess.getQuery().getQueryStart() query_start
-            // System.out.println("START "+ DateUtils.dateToString(dbProcess.getQuery().getQueryStart())); //FIXME null need DateUtils but not static
-            //createProcessArea(container, textGd, "query_start", dbProcess.getQuery().getQueryStart().toString());
-            //dbProcess.getState() state
-            createProcessArea(container, textGd, "state", dbProcess.getState());
-            //dbProcess.getStatus() status
-            //dbProcess.getQuery().getQueryString() query
-            createQueryArea(container, dbProcess.getQuery().getQueryString());
-            createButtonArea(container);
+        createProcessArea(container, textGd, "pid", String.valueOf(dbProcess.getPid()));
+        createProcessArea(container, textGd, "num_of_blocked_processes", String.valueOf(dbProcess.getChildren().size()));
+        createProcessArea(container, textGd, "db_name", dbProcess.getQueryCaller().getDatabaseName());
+        createProcessArea(container, textGd, "application", dbProcess.getQueryCaller().getApplicationName());
+        createProcessArea(container, textGd, "user_name", dbProcess.getQueryCaller().getUserName());
+        // System.out.println("START "+ DateUtils.dateToString(dbProcess.getQuery().getQueryStart())); //FIXME null need DateUtils but not static
+        //createProcessArea(container, textGd, "query_start", dbProcess.getQuery().getQueryStart().toString());
+        createProcessArea(container, textGd, "state", dbProcess.getState());
+        createQueryArea(container, dbProcess.getQuery().getQueryString());
+        createButtonArea(container);
         return container;
     }
 
     private void createButtonArea(Composite container) {
-        Button cancelButton = new Button(container, SWT.PUSH);
+        cancelButton = new Button(container, SWT.PUSH);
         cancelButton.setText("CANCEL");
         cancelButton.addSelectionListener(new SelectionListener() {
             @Override
             public void widgetSelected(SelectionEvent e) {
-                processInfoListener.cancelButtonClick();
+                if (processInfoListener != null) {
+                    processInfoListener.cancelButtonClick();
+                }
             }
 
             @Override
@@ -84,18 +95,22 @@ public class DBProcessInfoDialog extends Dialog{
             }
         });
 
-        Button terminateButton = new Button(container, SWT.PUSH);
+        terminateButton = new Button(container, SWT.PUSH);
         terminateButton.setText("TERMINATE");
         terminateButton.addSelectionListener(new SelectionListener() {
             @Override
             public void widgetSelected(SelectionEvent e) {
-                processInfoListener.terminateButtonClick();
+                if (processInfoListener != null) {
+                    processInfoListener.terminateButtonClick();
+                }
             }
 
             @Override
-            public void widgetDefaultSelected(SelectionEvent e) {
-            }
+            public void widgetDefaultSelected(SelectionEvent e) {}
         });
+        if (disabledButton) {
+            disableButtons();
+        }
     }
 
     private void createProcessArea(Composite container, GridData gridData, String type, String data) {
@@ -136,11 +151,9 @@ public class DBProcessInfoDialog extends Dialog{
         newShell.setText(resourceBundle.getString("process_info"));
     }
 
-    /**
-     * Need to override to hide OK/Cancel button
-     */
     @Override
     protected void createButtonsForButtonBar(Composite parent) {
+        //Need to override to hide OK/Cancel button
     }
 
     public interface ProcessInfoListener {

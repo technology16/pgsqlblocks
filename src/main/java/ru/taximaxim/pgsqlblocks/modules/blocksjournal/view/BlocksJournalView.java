@@ -36,6 +36,7 @@ import org.xml.sax.SAXException;
 import ru.taximaxim.pgsqlblocks.common.FilterCondition;
 import ru.taximaxim.pgsqlblocks.common.models.*;
 import ru.taximaxim.pgsqlblocks.common.ui.*;
+import ru.taximaxim.pgsqlblocks.dialogs.DBProcessInfoDialog;
 import ru.taximaxim.pgsqlblocks.dialogs.TMTreeViewerColumnsDialog;
 import ru.taximaxim.pgsqlblocks.utils.*;
 
@@ -136,15 +137,13 @@ public class BlocksJournalView extends ApplicationWindow implements DBBlocksJour
         processesView.getTreeViewer().setDataSource(new DBBlocksJournalViewDataSource(resourceBundle));
         processesView.getTreeViewer().addSelectionChangedListener(this::processesViewSelectionChanged);
         processesView.getTreeViewer().setInput(blocksJournal.getFilteredProcesses());
-        /*processesView.getTreeViewer().getTree().addTraverseListener(e -> {
+        processesView.getTreeViewer().getTree().addTraverseListener(e -> {
             if (e.detail == SWT.TRAVERSE_RETURN) {
-                System.out.println("ENTER!!!!!!!!!!!!!!!!!!!");
-                ITreeSelection element = processesView.getTreeViewer().getStructuredSelection();
-                IStructuredSelection structuredSelection = (IStructuredSelection)element;
+                IStructuredSelection structuredSelection = processesView.getTreeViewer().getStructuredSelection();
                 List<DBBlocksJournalProcess> selectedProcesses = (List<DBBlocksJournalProcess>) structuredSelection.toList();
-                openProccessDialogInfo(selectedProcesses.get(0));
+                openProcessDialogInfo(selectedProcesses.get(0));
             }
-        });*/
+        });
 
         processInfoView = new DBProcessInfoView(resourceBundle, processesView, SWT.NONE);
         processInfoView.hideToolBar();
@@ -156,9 +155,9 @@ public class BlocksJournalView extends ApplicationWindow implements DBBlocksJour
         return super.createContents(parent);
     }
 
-    private void openProccessDialogInfo(DBProcess dbProcess){
-//        DBProcessInfoDialog dbProcessInfoView = new DBProcessInfoDialog(resourceBundle, this.getShell(), dbProcess);
-//        dbProcessInfoView.open();
+    private void openProcessDialogInfo(Object dbProcess){
+        DBProcessInfoDialog dbProcessInfoView = new DBProcessInfoDialog(resourceBundle, this.getShell(), dbProcess);
+        dbProcessInfoView.open();
     }
 
     private void setFiltersViewVisibility(boolean isVisible) {
