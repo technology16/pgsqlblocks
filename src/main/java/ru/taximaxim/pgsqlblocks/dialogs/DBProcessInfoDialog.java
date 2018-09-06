@@ -3,12 +3,11 @@ package ru.taximaxim.pgsqlblocks.dialogs;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.*;
 import ru.taximaxim.pgsqlblocks.common.models.DBBlocksJournalProcess;
 import ru.taximaxim.pgsqlblocks.common.models.DBProcess;
 
@@ -65,17 +64,38 @@ public class DBProcessInfoDialog extends Dialog{
             //dbProcess.getState() state
             createProcessArea(container, textGd, "state", dbProcess.getState());
             //dbProcess.getStatus() status
-            //FIXME netu
-            //createProcessArea(container, textGd, "status", dbProcess.getStatus().getDescr());
-            //System.out.println(dbProcess.getStatus().getDescr());
             //dbProcess.getQuery().getQueryString() query
             createQueryArea(container, dbProcess.getQuery().getQueryString());
-            //createButtonArea(container);
+            createButtonArea(container);
         return container;
     }
 
     private void createButtonArea(Composite container) {
+        Button cancelButton = new Button(container, SWT.PUSH);
+        cancelButton.setText("CANCEL");
+        cancelButton.addSelectionListener(new SelectionListener() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                processInfoListener.cancelButtonClick();
+            }
 
+            @Override
+            public void widgetDefaultSelected(SelectionEvent e) {
+            }
+        });
+
+        Button terminateButton = new Button(container, SWT.PUSH);
+        terminateButton.setText("TERMINATE");
+        terminateButton.addSelectionListener(new SelectionListener() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                processInfoListener.terminateButtonClick();
+            }
+
+            @Override
+            public void widgetDefaultSelected(SelectionEvent e) {
+            }
+        });
     }
 
     private void createProcessArea(Composite container, GridData gridData, String type, String data) {
@@ -116,10 +136,11 @@ public class DBProcessInfoDialog extends Dialog{
         newShell.setText(resourceBundle.getString("process_info"));
     }
 
+    /**
+     * Need to override to hide OK/Cancel button
+     */
     @Override
     protected void createButtonsForButtonBar(Composite parent) {
-        GridLayout layout = (GridLayout)parent.getLayout();
-        layout.marginHeight = 0;
     }
 
     public interface ProcessInfoListener {

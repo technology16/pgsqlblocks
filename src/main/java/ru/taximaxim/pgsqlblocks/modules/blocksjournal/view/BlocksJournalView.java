@@ -36,7 +36,6 @@ import org.xml.sax.SAXException;
 import ru.taximaxim.pgsqlblocks.common.FilterCondition;
 import ru.taximaxim.pgsqlblocks.common.models.*;
 import ru.taximaxim.pgsqlblocks.common.ui.*;
-import ru.taximaxim.pgsqlblocks.dialogs.DBProcessInfoDialog;
 import ru.taximaxim.pgsqlblocks.dialogs.TMTreeViewerColumnsDialog;
 import ru.taximaxim.pgsqlblocks.utils.*;
 
@@ -158,8 +157,8 @@ public class BlocksJournalView extends ApplicationWindow implements DBBlocksJour
     }
 
     private void openProccessDialogInfo(DBProcess dbProcess){
-        DBProcessInfoDialog dbProcessInfoView = new DBProcessInfoDialog(resourceBundle, this.getShell(), dbProcess);
-        dbProcessInfoView.open();
+//        DBProcessInfoDialog dbProcessInfoView = new DBProcessInfoDialog(resourceBundle, this.getShell(), dbProcess);
+//        dbProcessInfoView.open();
     }
 
     private void setFiltersViewVisibility(boolean isVisible) {
