@@ -85,9 +85,6 @@ public class DBControllerTest {
 
         @Override
         public void dbControllerBlocksJournalChanged(DBController controller) {}
-
-        @Override
-        public void dbControllerPasswordEmpty(DBController controller) {}
     }
 
     private static final Config CONFIG = ConfigFactory.load();
@@ -111,7 +108,7 @@ public class DBControllerTest {
     @BeforeClass
     public static void initialize() throws IOException {
         DBModel model = new DBModel("TestDbc", REMOTE_HOST,  REMOTE_PORT, REMOTE_DB, REMOTE_USERNAME,  REMOTE_PASSWORD,  true);
-        testDbc = new DBController(Settings.getInstance(), model);
+        testDbc = new DBController(Settings.getInstance(), model, null);
         testDbc.connect();
         testDbc.addListener(listener);
     }

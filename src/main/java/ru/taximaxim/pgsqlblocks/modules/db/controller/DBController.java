@@ -54,6 +54,7 @@ import static ru.taximaxim.pgsqlblocks.PgSqlBlocks.APP_NAME;
 public class DBController implements DBProcessFilterListener, DBBlocksJournalListener {
 
     private DBModel model;
+    private final UserInputPasswordProvider userInputPasswordProvider;
 
     private final List<DBProcess> processes = new ArrayList<>();
     private final List<DBProcess> filteredProcesses = new ArrayList<>();
@@ -86,12 +87,12 @@ public class DBController implements DBProcessFilterListener, DBBlocksJournalLis
 
     private Date blocksJournalCreateDate;
     private final DateUtils dateUtils = new DateUtils();
-    private String temporaryPassword;
 
-    public DBController(Settings settings, DBModel model) {
+    public DBController(Settings settings, DBModel model, UserInputPasswordProvider userInputPasswordProvider) {
         this.settings = settings;
         this.resourceBundle = settings.getResourceBundle();
         this.model = model;
+        this.userInputPasswordProvider = userInputPasswordProvider;
         blocksJournalCreateDate = new Date();
         blocksJournal.addListener(this);
         processesFilters.addListener(this);
@@ -137,21 +138,23 @@ public class DBController implements DBProcessFilterListener, DBBlocksJournalLis
     }
 
     private String getPassword() {
+        String password = null;
         if (model.hasPassword()) {
-            return model.getPassword();
+            password = model.getPassword();
         }
-        String password = "";
-        try {
-            String pgPass = PgPass.get(model.getHost(), model.getPort(), model.getDatabaseName(), model.getUser());
-            password = pgPass == null ? password : pgPass;
-        } catch (PgPassException e) {
-            LOG.error("Ошибка получения пароля из pgpass файла " + e.getMessage(), e);
+
+        if (password == null) {
+            try {
+                password = PgPass.get(model.getHost(), model.getPort(), model.getDatabaseName(), model.getUser());
+            } catch (PgPassException e) {
+                LOG.warn("Ошибка получения пароля из pgpass файла " + e.getMessage(), e);
+            }
         }
-        if (password.equals("")) {
-            listeners.forEach(listener -> listener.dbControllerPasswordEmpty(this));
-            password = temporaryPassword;
+
+        if (password == null) {
+            password = userInputPasswordProvider.getPasswordFromUser(this);
         }
-        return password;
+        return password == null ? "" : password;
     }
 
     public void disconnect(boolean forcedByUser) {
@@ -441,10 +444,6 @@ public class DBController implements DBProcessFilterListener, DBBlocksJournalLis
             }
         }
         return processCanceled;
-    }
-
-    public void setTemporaryPassword(String temporaryPassword) {
-        this.temporaryPassword = temporaryPassword;
     }
 
     @Override

@@ -42,8 +42,8 @@ public class PasswordDialog extends Dialog {
         container.setLayout(layout);
         container.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 
-        String builder = MessageFormat.format("{0} \nName = {1} Database = {2} User = {3}", resourceBundle.getString("type_password_for"),
-                model.getName(), model.getDatabaseName(), model.getUser());
+        String builder = MessageFormat.format("{0} {1}\n {2}:{3}/{4}?user={5}", resourceBundle.getString("type_password_for"),
+                model.getName(), model.getHost(), model.getPort(), model.getDatabaseName(), model.getUser());
         Label answerLabel = new Label(container, SWT.HORIZONTAL);
         answerLabel.setText(builder);
         passwordText = new Text(container, SWT.BORDER);
