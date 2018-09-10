@@ -75,7 +75,7 @@ public class DBProcessInfoView extends Composite {
         });
 
         processInfoText = new Text(this, SWT.MULTI | SWT.READ_ONLY | SWT.WRAP | SWT.V_SCROLL);
-        GridData textLayoutData = new GridData(SWT.FILL, SWT.BOTTOM, true, false);
+        GridData textLayoutData = new GridData(SWT.FILL, SWT.FILL, true, true);
         textLayoutData.heightHint = 200;
         processInfoText.setLayoutData(textLayoutData);
     }
