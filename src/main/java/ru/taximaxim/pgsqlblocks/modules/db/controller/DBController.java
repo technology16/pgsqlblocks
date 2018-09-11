@@ -28,10 +28,7 @@ import ru.taximaxim.pgpass.PgPassException;
 import ru.taximaxim.pgsqlblocks.common.DBQueries;
 import ru.taximaxim.pgsqlblocks.common.models.*;
 import ru.taximaxim.pgsqlblocks.modules.db.model.DBStatus;
-import ru.taximaxim.pgsqlblocks.utils.DateUtils;
-import ru.taximaxim.pgsqlblocks.utils.PathBuilder;
-import ru.taximaxim.pgsqlblocks.utils.Settings;
-import ru.taximaxim.pgsqlblocks.utils.XmlDocumentWorker;
+import ru.taximaxim.pgsqlblocks.utils.*;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -115,9 +112,21 @@ public class DBController implements DBProcessFilterListener, DBBlocksJournalLis
         return model.isEnabled();
     }
 
+    /**
+     * Connect to database. If getting password fails connection is not started
+     */
     public synchronized void connect() {
         executor.execute(() -> {
-            String password = getPassword();
+            String password;
+            try {
+                password = getPassword();
+            } catch (PgPassException e) {
+                LOG.warn("Ошибка получения пароля из pgpass файла " + e.getMessage(), e);
+                return;
+            } catch (UserCancelException e) {
+                LOG.warn("Пользователь отменил ввод пароля и подключение к " + model.getName() + " не состоялось");
+                return;
+            }
             try {
                 listeners.forEach(listener -> listener.dbControllerWillConnect(this));
 
@@ -137,24 +146,23 @@ public class DBController implements DBProcessFilterListener, DBBlocksJournalLis
         });
     }
 
-    private String getPassword() {
+    /**
+     * Get password from model or pgpass or user input
+     */
+    private String getPassword() throws PgPassException, UserCancelException {
         String password = null;
         if (model.hasPassword()) {
             password = model.getPassword();
         }
 
         if (password == null) {
-            try {
-                password = PgPass.get(model.getHost(), model.getPort(), model.getDatabaseName(), model.getUser());
-            } catch (PgPassException e) {
-                LOG.warn("Ошибка получения пароля из pgpass файла " + e.getMessage(), e);
-            }
+            password = PgPass.get(model.getHost(), model.getPort(), model.getDatabaseName(), model.getUser());
         }
 
         if (password == null) {
             password = userInputPasswordProvider.getPasswordFromUser(this);
         }
-        return password == null ? "" : password;
+        return password;
     }
 
     public void disconnect(boolean forcedByUser) {

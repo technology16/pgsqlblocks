@@ -606,15 +606,19 @@ public class ProcessesController implements DBControllerListener, UserInputPassw
     }
 
     @Override
-    public String getPasswordFromUser(DBController controller) {
+    public String getPasswordFromUser(DBController controller) throws UserCancelException {
         final String[] pass = new String[1];
+
         Display.getDefault().syncExec(() -> {
             PasswordDialog passwordDialog = new PasswordDialog(resourceBundle, view.getShell(), controller.getModel());
             if (passwordDialog.open() == Window.OK) {
                 pass[0] = passwordDialog.getPassword();
-            }
+            }else pass[0] = null;
         });
-        return pass[0];
+
+        if (pass[0] != null) {
+            return pass[0];
+        }else throw new UserCancelException();
     }
 
     @Override

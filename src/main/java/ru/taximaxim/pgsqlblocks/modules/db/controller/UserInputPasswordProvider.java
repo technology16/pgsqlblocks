@@ -1,5 +1,8 @@
 package ru.taximaxim.pgsqlblocks.modules.db.controller;
 
+import ru.taximaxim.pgsqlblocks.utils.UserCancelException;
+
 public interface UserInputPasswordProvider {
-    String getPasswordFromUser(DBController controller); // TODO не пытаться подключиться если пользователь нажал Cancel
+
+    String getPasswordFromUser(DBController controller) throws UserCancelException;
 }
