@@ -79,7 +79,7 @@ public class DBProcessesFiltersView extends Composite {
 
         GridData comboLayoutData = new GridData(SWT.LEFT, SWT.CENTER, false,false);
         comboLayoutData.widthHint = 60;
-        GridData textLayoutData = new GridData(SWT.LEFT, SWT.CENTER, true, true);
+        GridData textLayoutData = new GridData(SWT.FILL, SWT.CENTER, true, true);
         textLayoutData.widthHint = 150;
         textLayoutData.minimumWidth = 150;
 
@@ -105,7 +105,7 @@ public class DBProcessesFiltersView extends Composite {
             listeners.forEach(listener -> listener.processesFiltersViewPidFilterConditionChanged(this, condition));
         });
 
-        pidFilterText = new Text(group, SWT.NONE);
+        pidFilterText = new Text(group, SWT.BORDER);
         pidFilterText.setLayoutData(textLayoutData);
         pidFilterText.addListener(SWT.Verify, new IntegerValueTypeVerifyListener());
         pidFilterText.addModifyListener(e -> {
@@ -133,7 +133,7 @@ public class DBProcessesFiltersView extends Composite {
             listeners.forEach(listener -> listener.processesFiltersViewDatabaseFilterConditionChanged(this, condition));
         });
 
-        databaseFilterText = new Text(group, SWT.NONE);
+        databaseFilterText = new Text(group, SWT.BORDER);
         databaseFilterText.setLayoutData(textLayoutData);
         databaseFilterText.addModifyListener(e -> {
             String text = databaseFilterText.getText();
@@ -156,7 +156,7 @@ public class DBProcessesFiltersView extends Composite {
             listeners.forEach(listener -> listener.processesFiltersViewApplicationFilterConditionChanged(this, condition));
         });
 
-        applicationFilterText = new Text(group, SWT.NONE);
+        applicationFilterText = new Text(group, SWT.BORDER);
         applicationFilterText.setLayoutData(textLayoutData);
         applicationFilterText.addModifyListener(e -> {
             String text = applicationFilterText.getText();
@@ -179,7 +179,7 @@ public class DBProcessesFiltersView extends Composite {
             listeners.forEach(listener -> listener.processesFiltersViewQueryFilterConditionChanged(this, condition));
         });
 
-        queryFilterText = new Text(group, SWT.NONE);
+        queryFilterText = new Text(group, SWT.BORDER);
         queryFilterText.setLayoutData(textLayoutData);
         queryFilterText.addModifyListener(e -> {
             String text = queryFilterText.getText();
@@ -202,7 +202,7 @@ public class DBProcessesFiltersView extends Composite {
             listeners.forEach(listener -> listener.processesFiltersViewUserNameFilterConditionChanged(this, condition));
         });
 
-        userNameFilterText = new Text(group, SWT.NONE);
+        userNameFilterText = new Text(group, SWT.BORDER);
         userNameFilterText.setLayoutData(textLayoutData);
         userNameFilterText.addModifyListener(e -> {
             String text = userNameFilterText.getText();
@@ -225,7 +225,7 @@ public class DBProcessesFiltersView extends Composite {
             listeners.forEach(listener -> listener.processesFiltersViewClientFilterConditionChanged(this, condition));
         });
 
-        clientFilterText = new Text(group, SWT.NONE);
+        clientFilterText = new Text(group, SWT.BORDER);
         clientFilterText.setLayoutData(textLayoutData);
         clientFilterText.addModifyListener(e -> {
             String text = clientFilterText.getText();

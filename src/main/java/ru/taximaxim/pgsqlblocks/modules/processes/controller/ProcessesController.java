@@ -30,6 +30,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.*;
@@ -139,11 +140,14 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
         TabItem processesTabItem = new TabItem(tabFolder, SWT.BORDER);
         processesTabItem.setText(l10n("current_activity"));
 
-        Composite processesViewComposite = new Composite(tabFolder, SWT.NONE);
+        SashForm processesViewSash = new SashForm(tabFolder, SWT.VERTICAL);
+        Composite processesViewComposite = new Composite(processesViewSash, SWT.NONE);
         GridLayout gl = new GridLayout();
         gl.marginWidth = 0;
         gl.marginHeight = 0;
         processesViewComposite.setLayout(gl);
+        processesViewSash.setLayout(gl);
+        processesViewSash.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
 
         ToolBar processesViewToolBar = new ToolBar(processesViewComposite, SWT.HORIZONTAL);
         processesViewToolBar.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
@@ -177,21 +181,24 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
         dbProcessesView.getTreeViewer().addSortColumnSelectionListener(this);
         dbProcessesView.getTreeViewer().addSelectionChangedListener(this::dbProcessesViewSelectionChanged);
 
-        dbProcessInfoView = new DBProcessInfoView(resourceBundle, processesViewComposite, SWT.NONE);
+        dbProcessInfoView = new DBProcessInfoView(resourceBundle, processesViewSash, SWT.NONE);
         dbProcessInfoView.addListener(this);
         dbProcessInfoView.hide();
 
-        processesTabItem.setControl(processesViewComposite);
+        processesTabItem.setControl(processesViewSash);
     }
 
     private void createBlocksJournalTab() {
         TabItem blocksJournalTabItem = new TabItem(tabFolder, SWT.NONE);
         blocksJournalTabItem.setText(l10n("blocks_journal"));
 
-        Composite dbBlocksJournalViewComposite = new Composite(tabFolder, SWT.NONE);
+        SashForm dbBlocksJournalViewSash = new SashForm(tabFolder, SWT.VERTICAL);
+        Composite dbBlocksJournalViewComposite = new Composite(dbBlocksJournalViewSash, SWT.NONE);
         GridLayout gl = new GridLayout();
         gl.marginWidth= 0;
         gl.marginHeight = 0;
+        dbBlocksJournalViewSash.setLayout(gl);
+        dbBlocksJournalViewSash.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
 
         dbBlocksJournalViewComposite.setLayout(gl);
 
@@ -218,11 +225,11 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
         dbBlocksJournalView.getTreeViewer().setDataSource(new DBBlocksJournalViewDataSource(resourceBundle));
         dbBlocksJournalView.getTreeViewer().addSelectionChangedListener(this::dbBlocksJournalViewSelectionChanged);
 
-        dbBlocksJournalProcessInfoView = new DBProcessInfoView(resourceBundle, dbBlocksJournalViewComposite, SWT.NONE);
+        dbBlocksJournalProcessInfoView = new DBProcessInfoView(resourceBundle, dbBlocksJournalViewSash, SWT.NONE);
         dbBlocksJournalProcessInfoView.hideToolBar();
         dbBlocksJournalProcessInfoView.hide();
 
-        blocksJournalTabItem.setControl(dbBlocksJournalViewComposite);
+        blocksJournalTabItem.setControl(dbBlocksJournalViewSash);
     }
 
     private void createToolItems() {
@@ -852,7 +859,7 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
     }
 
     @Override
-    public void dbProcessInfoViewTerminateProcessToolItemClicked() {
+    public void dbProcessInfoViewTerminateProcessButtonClicked() {
         Object selectedController = dbModelsView.getTableViewer().getStructuredSelection().getFirstElement();
         if (selectedController == null || selectedProcesses.isEmpty()) {
             return;
@@ -901,7 +908,7 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
     }
 
     @Override
-    public void dbProcessInfoViewCancelProcessToolItemClicked(){
+    public void dbProcessInfoViewCancelProcessButtonClicked(){
         Object selectedController = dbModelsView.getTableViewer().getStructuredSelection().getFirstElement();
         if (selectedController == null || selectedProcesses.isEmpty()) {
             return;
