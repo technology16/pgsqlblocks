@@ -25,8 +25,7 @@ import java.util.ResourceBundle;
  */
 public class SwtTreeViewer extends Composite implements MyTreeViewerSortColumnSelectionListener{
 
-    private ResourceBundle outerResourceBundle;
-    private ResourceBundle innerResourceBundle;
+    private ResourceBundle resourceBundle;
     private SwtTreeViewerTable tree;
     private SwtTreeViewerFilter viewerFilter;
     private DataUpdateListener dataUpdateListener;
@@ -35,11 +34,10 @@ public class SwtTreeViewer extends Composite implements MyTreeViewerSortColumnSe
     private MyTreeViewerDataSource dataSource;
 
     public SwtTreeViewer(Composite parent, int style, Object userData, MyTreeViewerDataSource dataSource,
-                         ResourceBundle resourceBundle) {
+                         Locale locale) {
         super(parent, style);
-        this.outerResourceBundle = resourceBundle;
         this.dataSource = dataSource;
-        initResourceBundle(outerResourceBundle);
+        initResourceBundle(locale);
         GridLayout mainLayout = new GridLayout();
         GridData data = new GridData(SWT.FILL, SWT.FILL, true, true);
         setLayout(mainLayout);
@@ -50,12 +48,9 @@ public class SwtTreeViewer extends Composite implements MyTreeViewerSortColumnSe
         getTree().setInput(userData);
     }
 
-    private void initResourceBundle(ResourceBundle outerResourceBundle) {
-        Locale locale =  new Locale("ru");
-        if (outerResourceBundle != null) {
-            locale = outerResourceBundle.getLocale();
-        }
-        innerResourceBundle = ResourceBundle.getBundle(ru.taximaxim.treeviewer.l10n.MyTreeViewer.class.getName(), locale);
+    private void initResourceBundle(Locale locale) {
+        resourceBundle = ResourceBundle.getBundle(ru.taximaxim.treeviewer.l10n.MyTreeViewer.class.getName(),
+                locale == null ? new Locale("ru") : locale);
     }
 
     public SwtTreeViewerTable getTree() {
@@ -68,7 +63,7 @@ public class SwtTreeViewer extends Composite implements MyTreeViewerSortColumnSe
 
     private void createContent() {
         createToolItems();
-        viewerFilter = new SwtTreeViewerFilter(this, SWT.TOP, innerResourceBundle, dataSource);
+        viewerFilter = new SwtTreeViewerFilter(this, SWT.TOP, resourceBundle, dataSource);
         viewerFilter.hide();
         tree = new SwtTreeViewerTable(SwtTreeViewer.this, SWT.FILL | SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL | SWT.FULL_SELECTION | SWT.MULTI);
         dataUpdateListener = new DataUpdateListener() {
@@ -89,17 +84,17 @@ public class SwtTreeViewer extends Composite implements MyTreeViewerSortColumnSe
         ToolBar toolBar = new ToolBar(this, SWT.HORIZONTAL);
         ToolItem updateToolItem = new ToolItem(toolBar, SWT.PUSH);
         updateToolItem.setImage(ImageUtils.getImage(Images.UPDATE));
-        updateToolItem.setToolTipText(Images.UPDATE.getDescription(innerResourceBundle));
+        updateToolItem.setToolTipText(Images.UPDATE.getDescription(resourceBundle));
         updateToolItem.addListener(SWT.Selection, event -> updateTreeViewerData());
 
         ToolItem filterToolItem = new ToolItem(toolBar, SWT.PUSH);
         filterToolItem.setImage(ImageUtils.getImage(Images.FILTER));
         filterToolItem.addListener(SWT.Selection, event -> openFilter());
-        filterToolItem.setToolTipText(Images.FILTER.getDescription(innerResourceBundle));
+        filterToolItem.setToolTipText(Images.FILTER.getDescription(resourceBundle));
 
         ToolItem configColumnToolItem = new ToolItem(toolBar, SWT.PUSH);
         configColumnToolItem.setImage(ImageUtils.getImage(Images.TABLE));
-        configColumnToolItem.setToolTipText(Images.TABLE.getDescription(innerResourceBundle));
+        configColumnToolItem.setToolTipText(Images.TABLE.getDescription(resourceBundle));
         configColumnToolItem.addListener(SWT.Selection, event -> openConfigColumnDialog());
     }
 
@@ -117,7 +112,7 @@ public class SwtTreeViewer extends Composite implements MyTreeViewerSortColumnSe
     }
 
     private void openConfigColumnDialog() {
-        ColumnConfigDialog dialog = new ColumnConfigDialog(innerResourceBundle, tree, this.getShell());
+        ColumnConfigDialog dialog = new ColumnConfigDialog(resourceBundle, tree, this.getShell());
         dialog.open();
 
     }

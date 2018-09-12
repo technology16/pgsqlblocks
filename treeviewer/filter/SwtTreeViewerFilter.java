@@ -94,7 +94,6 @@ public class SwtTreeViewerFilter extends Composite {
         comboLayoutData.widthHint = 60;
         GridData textLayoutData = new GridData(SWT.FILL, SWT.FILL, true, false);
         textLayoutData.widthHint = 150;
-        textLayoutData.minimumWidth = 150;
 
         Label label = new Label(group, SWT.NONE);
         label.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
@@ -104,6 +103,7 @@ public class SwtTreeViewerFilter extends Composite {
         combo.setLayoutData(comboLayoutData);
         List<FilterValues> filterValues = Arrays.asList(FilterValues.values());
         filterValues.forEach( f -> combo.add(f.toString()));
+        combo.select(7);
         combo.addModifyListener(e -> {
             FilterValues value = FilterValues.find(combo.getText());
             viewFilter.onComboChanges(value);
