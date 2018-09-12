@@ -31,13 +31,9 @@ public class ExampleDataSource extends MyTreeViewerDataSource{
         return list;
     }
 
-
     @Override
-    public String getLocalizeString(String name) {
-        if (resourceBundle != null) {
-            return resourceBundle.getString(name);
-        }
-        return name;
+    public ResourceBundle getResourceBundle() {
+        return resourceBundle;
     }
 
     @Override

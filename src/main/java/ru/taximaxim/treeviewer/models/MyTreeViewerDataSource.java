@@ -7,6 +7,7 @@ import ru.taximaxim.treeviewer.filter.FilterValues;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.ResourceBundle;
 
 /**
  * Класс выполняющий работу с формированием таблиц и данных.
@@ -34,7 +35,11 @@ public abstract class MyTreeViewerDataSource implements ITableLabelProvider, ITr
 
     public abstract List<? extends IColumn> getColumns();
 
-    public abstract String getLocalizeString(String name);
+    public String getLocalizeString(String name) {
+        return getResourceBundle() == null ? name : getResourceBundle().getString(name);
+    }
+
+    public abstract ResourceBundle getResourceBundle();
 
     public abstract String getRowText(Object element, IColumn column);
 
