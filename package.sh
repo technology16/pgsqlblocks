@@ -15,6 +15,7 @@
 #
 # Параметры:
 # -t=ТУТТОКЕНКГИТХАБУ     Access token пользователя (https://github.com/settings/tokens)
+# -tf Флаг о том, чтобы использовать токен, находящийся в файле github.token
 # -rn="НАЗВАНИЕ РЕЛИЗА"   Название релиза, его краткое описание (НЕ название тэга)
 ####################################################################################################################
 # Возможные обязательные/необязательные изменения в файле
@@ -30,6 +31,7 @@
 version=$(mvn help:evaluate -Dexpression=project.version | grep '^[0-9][0-9A-Za-z\.\-]*$')
 
 # Чтение аргументов
+echo "ARGUMENTS"
 for i in "$@"
 do
 case $i in
@@ -37,8 +39,13 @@ case $i in
     TOKEN="${i#*=}"
     shift
     ;;
+    -tf|--token-file)
+    TOKEN=`cat github.token`
+    shift
+    ;;
     -rn=*|--releasename=*)
     RELEASE_NAME="${i#*=}"
+    echo "RELEASE NAME"
     shift
     ;;
 esac
@@ -46,8 +53,10 @@ done
 # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 # Перечень переменных от которых зависит корректная отправка релиза
 # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-# Токен доступа, генерируется в настройках профиля
-GIT_TOKEN="$TOKEN"
+# Токен доступа, генерируется в настройках профиля. Достаточно права repo
+# Записывается в файл в виде 165434643515пиввапв
+
+GIT_TOKEN=${TOKEN}
 # Здесь ветка, либо SHA
 TARGET_COMMITISH="master"
 # Название релиза
@@ -57,7 +66,8 @@ DRAFT=false
 # Если true, то это пререлиз
 PRERELEASE=false
 # Владелец репозитория
-OWNER_OF_REPO="technology16"
+OWNER_OF_REPO="Nataly-Sagel"
+#OWNER_OF_REPO="technology16"
 # Название репозитория
 PROJECT="pgsqlblocks"
 
