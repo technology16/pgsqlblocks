@@ -12,6 +12,10 @@
 ####################################################################################################################
 # Как использовать:
 # ./package.sh -t=ТУТТОКЕНКГИТХАБУ -rn="НАЗВАНИЕ РЕЛИЗА"
+#
+# Параметры:
+# -t=ТУТТОКЕНКГИТХАБУ     Access token пользователя (https://github.com/settings/tokens)
+# -rn="НАЗВАНИЕ РЕЛИЗА"   Название релиза, его краткое описание (НЕ название тэга)
 ####################################################################################################################
 # Возможные обязательные/необязательные изменения в файле
 # TARGET_COMMITISH, DRAFT, PRERELEASE
@@ -24,52 +28,6 @@
 
 # Переменная получающая из pom.xml версию проекта
 version=$(mvn help:evaluate -Dexpression=project.version | grep '^[0-9][0-9A-Za-z\.\-]*$')
-
-read -p "Версия будущего релиза v$version, собрать? [y/n]" -n 1 -r
-echo    # (optional) move to a new line
-if [[ ! $REPLY =~ ^[Yy]$ ]]
-then
-    exit 1
-fi
-
-echo
-
-# Build files for release
-mvn clean -q
-echo "Идет сборка..."
-
-mvn -q test
-
-echo "Идет сборка Windows-32..."
-mvn package -P Windows-32 -q -DskipTests
-
-echo "Идет сборка Windows-64..."
-mvn package -P Windows-64 -q -DskipTests
-
-echo "Идет сборка Linux-32..."
-mvn package -P Linux-32 -q -DskipTests
-
-echo "Идет сборка Linux-64..."
-mvn package -P Linux-64 -q -DskipTests
-
-echo "Идет сборка Macosx-64..."
-mvn package -P Macosx-64 -q -DskipTests
-
-echo "Сборка завершена"
-
-# Проверка корректности сборки проекта
-FILENAME="pgSqlBlocks"
-TARGET="./target"
-platformArray=("Linux-32" "Linux-64" "Macosx-64" "Windows-32" "Windows-64")
-
-for platform in ${platformArray[*]}
-do
-   if [ ! -f ""$TARGET"/"$FILENAME"-"$version"-"$platform".jar" ]; then
-   echo ">>>>>>>>>>>>>!!!!!отсутствует файл под "$platform""
-   exit 1
-    fi
-done
-
 
 # Чтение аргументов
 for i in "$@"
@@ -103,6 +61,13 @@ OWNER_OF_REPO="technology16"
 # Название репозитория
 PROJECT="pgsqlblocks"
 
+clean_tmp_files(){
+    rm some.md;
+    rm file.json;
+    rm file2.json;
+    rm description.md;
+}
+
 # Функция для нахождения в CHANGELOG.md номера предыдущей версии
 # сначала игнорим (-v) текущую версию и отбираем следующее первое совпадение
 get_last_version(){
@@ -115,15 +80,72 @@ LAST=$(get_last_version)
 # так как в файл пишется вместе с ненужными номерами версий, грепаем эти строки и пишем в переменную
 get_descr(){
 sed -n  "/"$version"/,/"$LAST"/p" CHANGELOG.md > some.md
-grep -v  "^[0-9]*\.[0-9]*" some.md
+grep -v  "^[0-9]*\.[0-9]*" some.md > description.md
 }
-description=$(get_descr)
+$(get_descr)
+
+description=`cat description.md`
 
 # Тело запроса на создание тега релиза
 API_JSON='{"tag_name": "v'$version'","target_commitish": "'$TARGET_COMMITISH'","name": "'$NAME_OF_RELEASE'","body": "'$description'","draft": '$DRAFT',"prerelease": '$PRERELEASE'}'
 echo "$API_JSON" > file.json
 # Так как описание содержит в себе явные переносы, а парсер апи их распознает некорректно заменяем их на "\n"
 sed -E ':a;N;$!ba;s/\r{0,1}\n/\\n/g' file.json > file2.json
+
+echo Описание релиза
+echo Тэг v$version
+echo Название релиза $RELEASE_NAME
+echo Changelog:
+echo ==============================
+cat description.md
+echo ==============================
+
+read -p "Собрать релиз? [y/n]" -n 1 -r
+echo
+if [[ ! $REPLY =~ ^[Yy]$ ]]
+then
+    $(clean_tmp_files);
+    exit 1;
+fi
+
+echo
+
+# Build files for release
+mvn clean -q
+
+echo "Выполняются тесты..."
+mvn test -q || { echo; echo 'Ошибка в тестах, деплой отменен!' ; $(clean_tmp_files); exit 1;}
+
+echo "Идет сборка Windows-32..."
+mvn package -P Windows-32 -q -DskipTests
+
+echo "Идет сборка Windows-64..."
+mvn package -P Windows-64 -q -DskipTests
+
+echo "Идет сборка Linux-32..."
+mvn package -P Linux-32 -q -DskipTests
+
+echo "Идет сборка Linux-64..."
+mvn package -P Linux-64 -q -DskipTests
+
+echo "Идет сборка Macosx-64..."
+mvn package -P Macosx-64 -q -DskipTests
+
+echo "Сборка завершена"
+
+# Проверка корректности сборки проекта
+FILENAME="pgSqlBlocks"
+TARGET="./target"
+platformArray=("Linux-32" "Linux-64" "Macosx-64" "Windows-32" "Windows-64")
+
+for platform in ${platformArray[*]}
+do
+   if [ ! -f ""$TARGET"/"$FILENAME"-"$version"-"$platform".jar" ]; then
+       echo ">>>>>>>>>>>>>!!!!!отсутствует файл под "$platform""
+       $(clean_tmp_files)
+       exit 1;
+   fi
+done
 
 GH_URL="https://api.github.com/repos/$OWNER_OF_REPO/$PROJECT/releases?access_token=$GIT_TOKEN"
 # Отправляем запрос, в ответ приходит JSON с полным описанием релиза. Из него получаем id релиза.
@@ -136,12 +158,14 @@ echo "Uploading assets..."
 for platform in ${platformArray[*]}
 do
     filename=${FILENAME}"-"${version}"-"${platform}".jar"
+    echo Uploading $filename
     file=${TARGET}"/"${filename}
     GH_ASSET="https://uploads.github.com/repos/"$OWNER_OF_REPO"/"$PROJECT"/releases/"$id"/assets?name="${filename}""
-    curl -H "Authorization: token $GIT_TOKEN" -H "Content-Type: application/octet-stream" --data-binary @"$file"  $GH_ASSET
+    curl -sS -H "Authorization: token $GIT_TOKEN" -H "Content-Type: application/octet-stream" --data-binary @"$file"  $GH_ASSET > /dev/null
 done
-# Удаление временных файлов
-rm some.md
-rm file.json
-rm file2.json
+
+$(clean_tmp_files);
+
+git fetch --tags
+
 x-www-browser https://github.com/$OWNER_OF_REPO/$PROJECT/releases/latest
