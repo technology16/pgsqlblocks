@@ -613,12 +613,16 @@ public class ProcessesController implements DBControllerListener, UserInputPassw
             PasswordDialog passwordDialog = new PasswordDialog(resourceBundle, view.getShell(), controller.getModel());
             if (passwordDialog.open() == Window.OK) {
                 pass[0] = passwordDialog.getPassword();
-            }else pass[0] = null;
+            }else {
+                pass[0] = null;
+            }
         });
 
         if (pass[0] != null) {
             return pass[0];
-        }else throw new UserCancelException();
+        }else {
+            throw new UserCancelException();
+        }
     }
 
     @Override

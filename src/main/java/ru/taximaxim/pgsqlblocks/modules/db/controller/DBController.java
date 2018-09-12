@@ -120,11 +120,8 @@ public class DBController implements DBProcessFilterListener, DBBlocksJournalLis
             String password;
             try {
                 password = getPassword();
-            } catch (PgPassException e) {
-                LOG.warn("Ошибка получения пароля из pgpass файла " + e.getMessage(), e);
-                return;
             } catch (UserCancelException e) {
-                LOG.warn("Пользователь отменил ввод пароля и подключение к " + model.getName() + " не состоялось");
+                LOG.info("Пользователь отменил ввод пароля и подключение к " + model.getName() + " не состоялось");
                 return;
             }
             try {
@@ -149,14 +146,18 @@ public class DBController implements DBProcessFilterListener, DBBlocksJournalLis
     /**
      * Get password from model or pgpass or user input
      */
-    private String getPassword() throws PgPassException, UserCancelException {
+    private String getPassword() throws UserCancelException {
         String password = null;
         if (model.hasPassword()) {
             password = model.getPassword();
         }
 
         if (password == null) {
-            password = PgPass.get(model.getHost(), model.getPort(), model.getDatabaseName(), model.getUser());
+            try {
+                password = PgPass.get(model.getHost(), model.getPort(), model.getDatabaseName(), model.getUser());
+            } catch (PgPassException e) {
+                LOG.warn("Ошибка получения пароля из pgpass файла " + e.getMessage(), e);
+            }
         }
 
         if (password == null) {
