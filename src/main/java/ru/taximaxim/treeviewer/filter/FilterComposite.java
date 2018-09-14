@@ -3,14 +3,14 @@ package ru.taximaxim.treeviewer.filter;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.*;
-import ru.taximaxim.treeviewer.listeners.AllTextFilterListener;
-import ru.taximaxim.treeviewer.listeners.DataUpdateListener;
-import ru.taximaxim.treeviewer.listeners.FilterListener;
+import org.eclipse.swt.widgets.Combo;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Text;
 import ru.taximaxim.treeviewer.models.IColumn;
-import ru.taximaxim.treeviewer.models.MyTreeViewerDataSource;
+import ru.taximaxim.treeviewer.models.IObject;
+import ru.taximaxim.treeviewer.models.SwtTreeViewerDataSource;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -18,51 +18,44 @@ import java.util.ResourceBundle;
 /**
  * GUI of Filters
  */
-public class SwtTreeViewerFilter extends Composite {
+public class FilterComposite extends Composite {
 
     private GridLayout glayout;
-    private List<? extends IColumn> filterList = new ArrayList<>();
-    private FilterListener filterableListeners;
-    private DataUpdateListener dataUpdateListener;
-    private AllTextFilterListener allTextFilterListener;
+    private List<? extends IColumn> filterList;
     private ResourceBundle innerResourceBundle;
-    private MyTreeViewerDataSource dataSource;
-    private int columnnumber = 1;
+    private SwtTreeViewerDataSource<? extends IObject> dataSource;
+    private int numberOfColumns = 1;
+    private FilterChangeHandler filterChangeHandler;
 
-    public SwtTreeViewerFilter(Composite parent, int style, ResourceBundle innerResourceBundle, MyTreeViewerDataSource outerResourceBundle) {
+    public FilterComposite(Composite parent, int style, ResourceBundle innerResourceBundle,
+                           SwtTreeViewerDataSource<? extends IObject> dataSource, FilterChangeHandler filterChangeHandler) {
         super(parent, style);
         this.innerResourceBundle = innerResourceBundle;
-        this.dataSource = outerResourceBundle;
+        this.dataSource = dataSource;
         glayout = new GridLayout();
         glayout.marginWidth = 0;
         glayout.marginHeight = 0;
         GridData layoutData = new GridData(SWT.FILL, SWT.TOP, true, false);
         setLayout(glayout);
         setLayoutData(layoutData);
-    }
+        this.filterList = dataSource.getColumnsToFilter();
+        this.filterChangeHandler = filterChangeHandler;
 
-    public void setFilterList(List<? extends IColumn> filterList, DataUpdateListener dataUpdateListener, SwtViewFilter myViewFilter){
-        this.filterList = filterList;
-        this.filterableListeners = myViewFilter;
-        this.dataUpdateListener = dataUpdateListener;
-        this.allTextFilterListener = myViewFilter;
         createContent();
     }
 
     private void createContent() {
-        columnnumber = findColumnNumber();
-        glayout.numColumns = columnnumber;
+        numberOfColumns = findColumnNumber();
+        glayout.numColumns = numberOfColumns;
         createAllTextFilter();
         filterList.forEach(this::createFilterView);
     }
 
     private void createAllTextFilter() {
-        ViewFilter viewFilter = new ViewFilter(null, null, allTextFilterListener, dataUpdateListener);
-
         Composite group = new Composite(this, SWT.NULL);
         GridLayout layout = new GridLayout(2, false);
-        layout.horizontalSpacing = columnnumber;
-        GridData layoutData = new GridData(SWT.FILL, SWT.FILL, true, false, columnnumber, 1 );
+        layout.horizontalSpacing = numberOfColumns;
+        GridData layoutData = new GridData(SWT.FILL, SWT.FILL, true, false, numberOfColumns, 1 );
         group.setLayout(layout);
         group.setLayoutData(layoutData);
 
@@ -74,16 +67,10 @@ public class SwtTreeViewerFilter extends Composite {
         Text filterText = new Text(group, SWT.FILL | SWT.BORDER);
         GridData textLayoutData = new GridData(SWT.FILL, SWT.FILL, true, false);
         filterText.setLayoutData(textLayoutData);
-        filterText.addModifyListener(e -> {
-            String text = filterText.getText();
-            viewFilter.onAllTextChanges(text);
-        });
+        filterText.addModifyListener(e -> filterChangeHandler.filterAllColumns(filterText.getText()));
     }
 
-
-    private void createFilterView(IColumn filter) {
-        ViewFilter viewFilter = new ViewFilter(filter, filterableListeners, allTextFilterListener, dataUpdateListener);
-
+    private void createFilterView(IColumn column) {
         Composite group = new Composite(this, SWT.NULL);
         GridLayout layout = new GridLayout(3, false);
         GridData layoutData = new GridData(SWT.FILL, SWT.FILL, true, false);
@@ -97,24 +84,19 @@ public class SwtTreeViewerFilter extends Composite {
 
         Label label = new Label(group, SWT.NONE);
         label.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
-        label.setText(dataSource.getLocalizeString(filter.getColumnName()));
+        label.setText(dataSource.getLocalizeString(column.getColumnName()));
 
         Combo combo = new Combo(group, SWT.DROP_DOWN | SWT.READ_ONLY);
         combo.setLayoutData(comboLayoutData);
         List<FilterValues> filterValues = Arrays.asList(FilterValues.values());
         filterValues.forEach( f -> combo.add(f.toString()));
         combo.select(7);
-        combo.addModifyListener(e -> {
-            FilterValues value = FilterValues.find(combo.getText());
-            viewFilter.onComboChanges(value);
-        });
 
         Text filterText = new Text(group, SWT.FILL | SWT.BORDER);
         filterText.setLayoutData(textLayoutData);
-        filterText.addModifyListener(e -> {
-            String text = filterText.getText();
-            viewFilter.onTextChanges(text);
-        });
+
+        combo.addModifyListener(e -> filterChangeHandler.filter(filterText.getText(), FilterValues.find(combo.getText()), column));
+        filterText.addModifyListener(e -> filterChangeHandler.filter(filterText.getText(), FilterValues.find(combo.getText()), column));
     }
 
     /**

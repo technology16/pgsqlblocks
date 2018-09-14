@@ -5,35 +5,34 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.*;
 import ru.taximaxim.treeviewer.dialog.ColumnConfigDialog;
-import ru.taximaxim.treeviewer.filter.SwtTreeViewerFilter;
-import ru.taximaxim.treeviewer.filter.SwtViewFilter;
-import ru.taximaxim.treeviewer.listeners.DataUpdateListener;
+import ru.taximaxim.treeviewer.filter.FilterComposite;
+import ru.taximaxim.treeviewer.filter.FilterChangeHandler;
 import ru.taximaxim.treeviewer.listeners.MyTreeViewerSortColumnSelectionListener;
-import ru.taximaxim.treeviewer.models.IColumn;
-import ru.taximaxim.treeviewer.models.MyTreeViewerDataSource;
+import ru.taximaxim.treeviewer.models.IObject;
+import ru.taximaxim.treeviewer.models.SwtTreeViewerDataSource;
 import ru.taximaxim.treeviewer.models.ObjectViewComparator;
 import ru.taximaxim.treeviewer.tree.SwtTreeViewerTable;
 import ru.taximaxim.treeviewer.utils.ImageUtils;
 import ru.taximaxim.treeviewer.utils.Images;
 
-import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
 /**
- * Main class with toolbar, filters, table and listeners
+ * Tree viewer that implements common logic. Comes with toolbar where filters and column selection are located.
+ * <br>
+ * Supports filtering, sorting, l10n, hiding columns.
  */
-public class SwtTreeViewer extends Composite implements MyTreeViewerSortColumnSelectionListener{
+public class CommonTreeViewer<T extends IObject> extends Composite implements MyTreeViewerSortColumnSelectionListener{
 
     private ResourceBundle resourceBundle;
-    private SwtTreeViewerTable tree;
-    private SwtTreeViewerFilter viewerFilter;
-    private DataUpdateListener dataUpdateListener;
+    private SwtTreeViewerTable<T> tree;
+    private FilterComposite filterComposite;
     private ObjectViewComparator comparator;
-    private SwtViewFilter myViewFilter;
-    private MyTreeViewerDataSource dataSource;
+    private FilterChangeHandler myViewFilter;
+    private SwtTreeViewerDataSource<T> dataSource;
 
-    public SwtTreeViewer(Composite parent, int style, Object userData, MyTreeViewerDataSource dataSource,
+    public CommonTreeViewer(Composite parent, int style, Object userData, SwtTreeViewerDataSource<T> dataSource,
                          Locale locale) {
         super(parent, style);
         this.dataSource = dataSource;
@@ -44,13 +43,17 @@ public class SwtTreeViewer extends Composite implements MyTreeViewerSortColumnSe
         setLayoutData(data);
         createContent();
         tree.setDataSource(dataSource);
-        myViewFilter = new SwtViewFilter(dataSource, tree);
+        myViewFilter = new FilterChangeHandler(dataSource, tree);
         getTree().setInput(userData);
     }
 
     private void initResourceBundle(Locale locale) {
         resourceBundle = ResourceBundle.getBundle(ru.taximaxim.treeviewer.l10n.MyTreeViewer.class.getName(),
                 locale == null ? new Locale("ru") : locale);
+    }
+
+    public void setInput(Object input) {
+        tree.setInput(input);
     }
 
     public SwtTreeViewerTable getTree() {
@@ -63,17 +66,11 @@ public class SwtTreeViewer extends Composite implements MyTreeViewerSortColumnSe
 
     private void createContent() {
         createToolItems();
-        viewerFilter = new SwtTreeViewerFilter(this, SWT.TOP, resourceBundle, dataSource);
-        viewerFilter.hide();
-        tree = new SwtTreeViewerTable(SwtTreeViewer.this, SWT.FILL | SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL | SWT.FULL_SELECTION | SWT.MULTI);
-        dataUpdateListener = new DataUpdateListener() {
-            @Override
-            public void needUpdateData() {
-                tree.refresh();
-            }
-        };
+        filterComposite = new FilterComposite(this, SWT.TOP, resourceBundle, dataSource, myViewFilter);
+        filterComposite.hide();
+        tree = new SwtTreeViewerTable<>(CommonTreeViewer.this,
+                SWT.FILL | SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL | SWT.FULL_SELECTION | SWT.MULTI);
         tree.addSortListener(this);
-
     }
 
     public ObjectViewComparator getComparator() {
@@ -85,7 +82,7 @@ public class SwtTreeViewer extends Composite implements MyTreeViewerSortColumnSe
         ToolItem updateToolItem = new ToolItem(toolBar, SWT.PUSH);
         updateToolItem.setImage(ImageUtils.getImage(Images.UPDATE));
         updateToolItem.setToolTipText(Images.UPDATE.getDescription(resourceBundle));
-        updateToolItem.addListener(SWT.Selection, event -> updateTreeViewerData());
+        updateToolItem.addListener(SWT.Selection, event -> tree.refresh());
 
         ToolItem filterToolItem = new ToolItem(toolBar, SWT.PUSH);
         filterToolItem.setImage(ImageUtils.getImage(Images.FILTER));
@@ -99,16 +96,9 @@ public class SwtTreeViewer extends Composite implements MyTreeViewerSortColumnSe
     }
 
     private void openFilter() {
-        if (viewerFilter.isVisible()) {
-            viewerFilter.hide();
-        }else viewerFilter.show();
-    }
-
-    private void updateTreeViewerData() {
-        if (dataUpdateListener != null) {
-            dataUpdateListener.needUpdateData();
-        }
-
+        if (filterComposite.isVisible()) {
+            filterComposite.hide();
+        }else filterComposite.show();
     }
 
     private void openConfigColumnDialog() {
@@ -125,12 +115,5 @@ public class SwtTreeViewer extends Composite implements MyTreeViewerSortColumnSe
             tree.setComparator(null);
             tree.setComparator(comparator);
         }
-    }
-
-    /**
-     * List of columns for filter view
-     */
-    public void setColumnsForFilterView(List<? extends IColumn> filters) {
-        viewerFilter.setFilterList(filters, dataUpdateListener, myViewFilter);
     }
 }

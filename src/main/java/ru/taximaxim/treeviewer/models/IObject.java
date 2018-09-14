@@ -9,6 +9,4 @@ public interface IObject<T> {
     List<T> getChildren();
 
     boolean hasChildren();
-
-    boolean isForAllTextFilter(String searchText);
 }
