@@ -8,21 +8,19 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 import ru.taximaxim.treeviewer.models.IColumn;
-import ru.taximaxim.treeviewer.models.MyTreeViewerDataSource;
+import ru.taximaxim.treeviewer.models.IObject;
+import ru.taximaxim.treeviewer.models.SwtTreeViewerDataSource;
 import ru.taximaxim.treeviewer.tree.SwtTreeViewerTable;
 
-import java.util.HashSet;
-import java.util.ResourceBundle;
-import java.util.Set;
-
+import java.util.*;
 
 public class ColumnConfigDialog extends Dialog {
 
-    private SwtTreeViewerTable treeViewer;
+    private SwtTreeViewerTable<? extends IObject> treeViewer;
     private ResourceBundle bundle;
     private final Set<IColumn> invisibleColumn = new HashSet<>();
 
-    public ColumnConfigDialog(ResourceBundle resourceBundle, SwtTreeViewerTable tree, Shell parent) {
+    public ColumnConfigDialog(ResourceBundle resourceBundle, SwtTreeViewerTable<? extends IObject> tree, Shell parent) {
         super(parent);
         this.treeViewer = tree;
         this.bundle = resourceBundle;
@@ -48,7 +46,7 @@ public class ColumnConfigDialog extends Dialog {
         layout.marginTop = 10;
         container.setLayout(layout);
 
-        MyTreeViewerDataSource dataSource = treeViewer.getDataSource();
+        SwtTreeViewerDataSource<? extends IObject> dataSource = treeViewer.getDataSource();
 
         for (IColumn column : dataSource.getColumns()) {
             Button checkBoxButton = new Button(container, SWT.CHECK);

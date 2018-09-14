@@ -1,6 +1,5 @@
 package ru.taximaxim.treeviewer.tree;
 
-
 import org.eclipse.jface.viewers.*;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
@@ -10,7 +9,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.TreeColumn;
 import org.eclipse.swt.widgets.TreeItem;
 import ru.taximaxim.treeviewer.listeners.MyTreeViewerSortColumnSelectionListener;
-import ru.taximaxim.treeviewer.models.MyTreeViewerDataSource;
+import ru.taximaxim.treeviewer.models.IObject;
+import ru.taximaxim.treeviewer.models.SwtTreeViewerDataSource;
 import ru.taximaxim.treeviewer.models.IColumn;
 
 import java.util.ArrayList;
@@ -20,9 +20,9 @@ import java.util.Set;
 /**
  * Class for TreeViewer
  */
-public class SwtTreeViewerTable extends TreeViewer{
+public class SwtTreeViewerTable<T extends IObject> extends TreeViewer {
 
-    private MyTreeViewerDataSource dataSource;
+    private SwtTreeViewerDataSource<T> dataSource;
     private Set<IColumn> invisibleColumns;
     private List<MyTreeViewerSortColumnSelectionListener> sortColumnlisteners = new ArrayList<>();
 
@@ -34,11 +34,11 @@ public class SwtTreeViewerTable extends TreeViewer{
         getTree().setLayoutData(data);
     }
 
-    public MyTreeViewerDataSource getDataSource() {
+    public SwtTreeViewerDataSource<T> getDataSource() {
         return dataSource;
     }
 
-    public void setDataSource(MyTreeViewerDataSource dataSource) {
+    public void setDataSource(SwtTreeViewerDataSource<T> dataSource) {
         if (this.dataSource != null) {
             throw new IllegalStateException("SwtTreeViewerTable already contains data source");
         }
