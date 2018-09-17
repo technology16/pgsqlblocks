@@ -4,19 +4,19 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 import ru.taximaxim.treeviewer.models.IColumn;
 import ru.taximaxim.treeviewer.models.IObject;
-import ru.taximaxim.treeviewer.models.SwtTreeViewerDataSource;
-import ru.taximaxim.treeviewer.tree.SwtTreeViewerTable;
+import ru.taximaxim.treeviewer.models.DataSource;
+import ru.taximaxim.treeviewer.tree.ExtendedTreeViewerComponent;
 
 import java.util.*;
 
 public class FilterChangeHandler {
 
-    private SwtTreeViewerDataSource<? extends IObject> dataSource;
-    private SwtTreeViewerTable tree;
+    private DataSource<? extends IObject> dataSource;
+    private ExtendedTreeViewerComponent tree;
     private Map<IColumn, ViewerFilter> columnFilters = new HashMap<>();
     private ViewerFilter allTextFilter;
 
-    public FilterChangeHandler(SwtTreeViewerDataSource<? extends IObject> dataSource, SwtTreeViewerTable tree) {
+    public FilterChangeHandler(DataSource<? extends IObject> dataSource, ExtendedTreeViewerComponent tree) {
         this.dataSource = dataSource;
         this.tree = tree;
     }

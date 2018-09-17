@@ -4,7 +4,7 @@
 
     <groupId>ru.taximaxim</groupId>
     <artifactId>swttreeviewer</artifactId>
-    <version>0.0.1</version>
+    <version>0.0.2-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <properties>
@@ -16,13 +16,6 @@
         <ftpRepository.id>taximaxim-chelny</ftpRepository.id>
         <ftpRepository.url>ftp://ftp:ftp@storage.chelny.taximaxim.ru/mvn</ftpRepository.url>
     </properties>
-
-    <repositories>
-        <repository>
-            <id>swt-repo</id>
-            <url>http://maven-eclipse.github.io/maven</url>
-        </repository>
-    </repositories>
 
     <build>
         <plugins>

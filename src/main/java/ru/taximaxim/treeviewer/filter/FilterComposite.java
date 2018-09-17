@@ -9,7 +9,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import ru.taximaxim.treeviewer.models.IColumn;
 import ru.taximaxim.treeviewer.models.IObject;
-import ru.taximaxim.treeviewer.models.SwtTreeViewerDataSource;
+import ru.taximaxim.treeviewer.models.DataSource;
 
 import java.util.Arrays;
 import java.util.List;
@@ -23,12 +23,12 @@ public class FilterComposite extends Composite {
     private GridLayout glayout;
     private List<? extends IColumn> filterList;
     private ResourceBundle innerResourceBundle;
-    private SwtTreeViewerDataSource<? extends IObject> dataSource;
+    private DataSource<? extends IObject> dataSource;
     private int numberOfColumns = 1;
     private FilterChangeHandler filterChangeHandler;
 
     public FilterComposite(Composite parent, int style, ResourceBundle innerResourceBundle,
-                           SwtTreeViewerDataSource<? extends IObject> dataSource, FilterChangeHandler filterChangeHandler) {
+                           DataSource<? extends IObject> dataSource, FilterChangeHandler filterChangeHandler) {
         super(parent, style);
         this.innerResourceBundle = innerResourceBundle;
         this.dataSource = dataSource;

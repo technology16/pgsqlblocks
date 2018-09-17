@@ -9,9 +9,9 @@ import ru.taximaxim.treeviewer.filter.FilterComposite;
 import ru.taximaxim.treeviewer.filter.FilterChangeHandler;
 import ru.taximaxim.treeviewer.listeners.MyTreeViewerSortColumnSelectionListener;
 import ru.taximaxim.treeviewer.models.IObject;
-import ru.taximaxim.treeviewer.models.SwtTreeViewerDataSource;
+import ru.taximaxim.treeviewer.models.DataSource;
 import ru.taximaxim.treeviewer.models.ObjectViewComparator;
-import ru.taximaxim.treeviewer.tree.SwtTreeViewerTable;
+import ru.taximaxim.treeviewer.tree.ExtendedTreeViewerComponent;
 import ru.taximaxim.treeviewer.utils.ImageUtils;
 import ru.taximaxim.treeviewer.utils.Images;
 
@@ -23,17 +23,17 @@ import java.util.ResourceBundle;
  * <br>
  * Supports filtering, sorting, l10n, hiding columns.
  */
-public class CommonTreeViewer<T extends IObject> extends Composite implements MyTreeViewerSortColumnSelectionListener{
+public class ExtendedTreeViewer<T extends IObject> extends Composite implements MyTreeViewerSortColumnSelectionListener{
 
     private ResourceBundle resourceBundle;
-    private SwtTreeViewerTable<T> tree;
+    private ExtendedTreeViewerComponent<T> tree;
     private FilterComposite filterComposite;
     private ObjectViewComparator comparator;
     private FilterChangeHandler myViewFilter;
-    private SwtTreeViewerDataSource<T> dataSource;
+    private DataSource<T> dataSource;
 
-    public CommonTreeViewer(Composite parent, int style, Object userData, SwtTreeViewerDataSource<T> dataSource,
-                         Locale locale) {
+    public ExtendedTreeViewer(Composite parent, int style, Object userData, DataSource<T> dataSource,
+                              Locale locale) {
         super(parent, style);
         this.dataSource = dataSource;
         initResourceBundle(locale);
@@ -44,7 +44,7 @@ public class CommonTreeViewer<T extends IObject> extends Composite implements My
         createContent();
         tree.setDataSource(dataSource);
         myViewFilter = new FilterChangeHandler(dataSource, tree);
-        getTree().setInput(userData);
+        getTreeViewer().setInput(userData);
     }
 
     private void initResourceBundle(Locale locale) {
@@ -56,7 +56,7 @@ public class CommonTreeViewer<T extends IObject> extends Composite implements My
         tree.setInput(input);
     }
 
-    public SwtTreeViewerTable getTree() {
+    public ExtendedTreeViewerComponent getTreeViewer() {
         return tree;
     }
 
@@ -68,7 +68,7 @@ public class CommonTreeViewer<T extends IObject> extends Composite implements My
         createToolItems();
         filterComposite = new FilterComposite(this, SWT.TOP, resourceBundle, dataSource, myViewFilter);
         filterComposite.hide();
-        tree = new SwtTreeViewerTable<>(CommonTreeViewer.this,
+        tree = new ExtendedTreeViewerComponent<>(this,
                 SWT.FILL | SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL | SWT.FULL_SELECTION | SWT.MULTI);
         tree.addSortListener(this);
     }
