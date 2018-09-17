@@ -71,13 +71,19 @@ OWNER_OF_REPO="Nataly-Sagel"
 # Название репозитория
 PROJECT="pgsqlblocks"
 
-clean_tmp_files(){
-    rm some.md;
-    rm file.json;
-    rm file2.json;
-    rm description.md;
-}
+# Создаем временные файлы и пишем в переменную
+some=$(mktemp /tmp/some.XXXXXX)
+echo ${some}
+file=$(mktemp /tmp/file.XXXXXX)
+file2=$(mktemp /tmp/file2.XXXXXX)
+descr=$(mktemp /tmp/descr.XXXXXX)
 
+clean_tmp_files(){
+    rm $some;
+    rm $file;
+    rm $file2;
+    rm $descr;
+}
 # Функция для нахождения в CHANGELOG.md номера предыдущей версии
 # сначала игнорим (-v) текущую версию и отбираем следующее первое совпадение
 get_last_version(){
@@ -89,25 +95,26 @@ LAST=$(get_last_version)
 # выбирает весь текст между, например, 1.0.0 и 0.0.9 и пишет в файл some.md
 # так как в файл пишется вместе с ненужными номерами версий, грепаем эти строки и пишем в переменную
 get_descr(){
-sed -n  "/"$version"/,/"$LAST"/p" CHANGELOG.md > some.md
-grep -v  "^[0-9]*\.[0-9]*" some.md > description.md
+#sed -n  "/"$version"/,/"$LAST"/p" CHANGELOG.md > some.md
+sed -n  "/"$version"/,/"$LAST"/p" CHANGELOG.md > ${some}
+grep -v  "^[0-9]*\.[0-9]*" ${some} > ${descr}
 }
 $(get_descr)
 
-description=`cat description.md`
+description=`cat ${descr}`
 
 # Тело запроса на создание тега релиза
 API_JSON='{"tag_name": "v'$version'","target_commitish": "'$TARGET_COMMITISH'","name": "'$NAME_OF_RELEASE'","body": "'$description'","draft": '$DRAFT',"prerelease": '$PRERELEASE'}'
-echo "$API_JSON" > file.json
+echo "$API_JSON" > ${file}
 # Так как описание содержит в себе явные переносы, а парсер апи их распознает некорректно заменяем их на "\n"
-sed -E ':a;N;$!ba;s/\r{0,1}\n/\\n/g' file.json > file2.json
+sed -E ':a;N;$!ba;s/\r{0,1}\n/\\n/g' ${file} > ${file2}
 
 echo Описание релиза
 echo Тэг v$version
 echo Название релиза $RELEASE_NAME
 echo Changelog:
 echo ==============================
-cat description.md
+cat ${descr}
 echo ==============================
 
 read -p "Собрать релиз? [y/n]" -n 1 -r
