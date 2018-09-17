@@ -26,14 +26,14 @@ import ru.taximaxim.pgsqlblocks.utils.Columns;
 import ru.taximaxim.pgsqlblocks.utils.DateUtils;
 import ru.taximaxim.pgsqlblocks.utils.ImageUtils;
 import ru.taximaxim.treeviewer.models.IColumn;
-import ru.taximaxim.treeviewer.models.MyTreeViewerDataSource;
+import ru.taximaxim.treeviewer.models.DataSource;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.ResourceBundle;
 
-public class DBBlocksJournalViewDataSource extends MyTreeViewerDataSource {
+public class DBBlocksJournalViewDataSource extends DataSource<DBBlocksJournalProcess> {
 
     private final DateUtils dateUtils = new DateUtils();
     private final ResourceBundle bundle;
@@ -50,6 +50,23 @@ public class DBBlocksJournalViewDataSource extends MyTreeViewerDataSource {
     @Override
     public List<Columns> getColumns() {
         return Arrays.asList(Columns.values());
+    }
+
+    @Override
+    public List<? extends IColumn> getColumnsToFilter() {
+        List<IColumn> list = new ArrayList<>();
+        list.add(Columns.PID);
+        list.add(Columns.APPLICATION_NAME);
+        list.add(Columns.DATABASE_NAME);
+        list.add(Columns.QUERY);
+        list.add(Columns.USER_NAME);
+        list.add(Columns.CLIENT);
+        return list;
+    }
+
+    @Override
+    public ResourceBundle getResourceBundle() {
+        return bundle;
     }
 
     @Override
@@ -154,20 +171,5 @@ public class DBBlocksJournalViewDataSource extends MyTreeViewerDataSource {
         } else {
             return element instanceof DBBlocksJournalProcess;
         }
-    }
-
-    /**
-     * Можно вообще по-любому передавать список колонок для фильтра.
-     * необязательно именно здесь. Можно передавать по сути в любом месте.
-     */
-    public List<? extends IColumn> getColumnsForFilter() {
-        List<IColumn> list = new ArrayList<>();
-        list.add(Columns.PID);
-        list.add(Columns.APPLICATION_NAME);
-        list.add(Columns.DATABASE_NAME);
-        list.add(Columns.QUERY);
-        list.add(Columns.USER_NAME);
-        list.add(Columns.CLIENT);
-        return list;
     }
 }

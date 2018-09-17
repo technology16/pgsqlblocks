@@ -51,7 +51,7 @@ import ru.taximaxim.pgsqlblocks.utils.ImageUtils;
 import ru.taximaxim.pgsqlblocks.utils.Images;
 import ru.taximaxim.pgsqlblocks.utils.Settings;
 import ru.taximaxim.pgsqlblocks.utils.SettingsListener;
-import ru.taximaxim.treeviewer.SwtTreeViewer;
+import ru.taximaxim.treeviewer.ExtendedTreeViewer;
 
 import java.lang.reflect.InvocationTargetException;
 import java.sql.SQLException;
@@ -72,10 +72,10 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
     private ProcessesView view;
 
     private DBModelsView dbModelsView;
-    private SwtTreeViewer dbProcessView;
+    private ExtendedTreeViewer<DBProcess> dbProcessView;
     private DBProcessInfoView dbProcessInfoView;
 
-    private SwtTreeViewer dbBlocksJournalView;
+    private ExtendedTreeViewer<DBBlocksJournalProcess> dbBlocksJournalView;
 
     private DBProcessInfoView dbBlocksJournalProcessInfoView;
 
@@ -140,11 +140,10 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
         processesViewComposite.setLayout(gl);
 
         DBProcessesViewDataSource dbProcessesViewDataSource = new DBProcessesViewDataSource(resourceBundle, dbProcessesViewDataSourceFilter);
-        dbProcessView = new SwtTreeViewer(processesViewComposite, SWT.NONE,null,
-                dbProcessesViewDataSource, resourceBundle);
-        dbProcessView.setColumnsForFilterView(dbProcessesViewDataSource.getColumnsForFilter());
+        dbProcessView = new ExtendedTreeViewer<>(processesViewComposite, SWT.NONE, null,
+                dbProcessesViewDataSource, settings.getLocale());
         dbProcessView.setComparator(new DBProcessesViewComparator());
-        dbProcessView.getTree().addSelectionChangedListener(this::dbProcessesViewSelectionChanged);
+        dbProcessView.getTreeViewer().addSelectionChangedListener(this::dbProcessesViewSelectionChanged);
 
         dbProcessInfoView = new DBProcessInfoView(resourceBundle, processesViewComposite, SWT.NONE);
         dbProcessInfoView.addListener(this);
@@ -165,10 +164,9 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
         dbBlocksJournalViewComposite.setLayout(gl);
 
         DBBlocksJournalViewDataSource dbBlocksJournalViewDataSource = new DBBlocksJournalViewDataSource(resourceBundle);
-        dbBlocksJournalView = new SwtTreeViewer(dbBlocksJournalViewComposite, SWT.NONE, null,
-                dbBlocksJournalViewDataSource, resourceBundle);
-        dbBlocksJournalView.getTree().addSelectionChangedListener(this::dbBlocksJournalViewSelectionChanged);
-        dbBlocksJournalView.setColumnsForFilterView(dbBlocksJournalViewDataSource.getColumnsForFilter());
+        dbBlocksJournalView = new ExtendedTreeViewer<>(dbBlocksJournalViewComposite, SWT.NONE, null,
+                dbBlocksJournalViewDataSource, settings.getLocale());
+        dbBlocksJournalView.getTreeViewer().addSelectionChangedListener(this::dbBlocksJournalViewSelectionChanged);
 
         dbBlocksJournalProcessInfoView = new DBProcessInfoView(resourceBundle, dbBlocksJournalViewComposite, SWT.NONE);
         dbBlocksJournalProcessInfoView.hideToolBar();
@@ -291,8 +289,8 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
         dbController.shutdown();
         dbControllers.remove(dbController);
         changeToolItemsStateForController(null);
-        dbProcessView.getTree().setInput(null);
-        dbBlocksJournalView.getTree().setInput(null);
+        dbProcessView.getTreeViewer().setInput(null);
+        dbBlocksJournalView.getTreeViewer().setInput(null);
     }
 
     private void saveDatabases() {
@@ -479,7 +477,7 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
             if (dbModelsView.getTableViewer().getStructuredSelection().getFirstElement() != null) {
                 DBController selectedController = (DBController) dbModelsView.getTableViewer().getStructuredSelection().getFirstElement();
                 if (controller.equals(selectedController)) {
-                    dbProcessView.getTree().refresh();
+                    dbProcessView.getTreeViewer().refresh();
                 }
             }
         });
@@ -498,17 +496,12 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
     }
 
     @Override
-    public void dbControllerProcessesFilterChanged(DBController controller) {
-        dbProcessView.getTree().refresh();
-    }
-
-    @Override
     public void dbControllerBlocksJournalChanged(DBController controller) {
         view.getDisplay().asyncExec(() -> {
             if (dbModelsView.getTableViewer().getStructuredSelection().getFirstElement() != null) {
                 DBController selectedController = (DBController) dbModelsView.getTableViewer().getStructuredSelection().getFirstElement();
                 if (controller.equals(selectedController)) {
-                    dbBlocksJournalView.getTree().refresh();
+                    dbBlocksJournalView.getTreeViewer().refresh();
                 }
             }
         });
@@ -516,8 +509,8 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
 
     @Override
     public void dbModelsViewDidSelectController(DBController controller) {
-        dbProcessView.getTree().setInput(controller.getFilteredProcesses());
-        dbBlocksJournalView.getTree().setInput(controller.getBlocksJournal().getFilteredProcesses());
+        dbProcessView.getTreeViewer().setInput(controller.getFilteredProcesses());
+        dbBlocksJournalView.getTreeViewer().setInput(controller.getBlocksJournal().getFilteredProcesses());
         changeToolItemsStateForController(controller);
     }
 
@@ -598,7 +591,7 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
 
     @Override
     public void dataSourceFilterShowOnlyBlockedProcessesChanged(boolean showOnlyBlockedProcesses) {
-        dbProcessView.getTree().refresh();
+        dbProcessView.getTreeViewer().refresh();
     }
 
     private void dbProcessesViewSelectionChanged(SelectionChangedEvent event) {

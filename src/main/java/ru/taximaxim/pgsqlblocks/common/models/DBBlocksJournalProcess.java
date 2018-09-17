@@ -137,9 +137,4 @@ public class DBBlocksJournalProcess implements IObject {
     public boolean hasChildren() {
         return false;
     }
-
-    @Override
-    public boolean isForAllTextFilter(String s) {
-        return false; // TODO: 31.08.18 Add!!!!
-    }
 }

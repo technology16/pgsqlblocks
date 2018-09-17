@@ -133,11 +133,6 @@ public class DBProcess implements IObject {
     }
 
     @Override
-    public boolean isForAllTextFilter(String searchText) {
-        return true; // TODO: 31.08.18 Add!!!
-    }
-
-    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof DBProcess)) return false;

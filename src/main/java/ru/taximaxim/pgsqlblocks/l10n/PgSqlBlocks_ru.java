@@ -141,7 +141,26 @@ public class PgSqlBlocks_ru extends ListResourceBundle {
                 {"already_exists", "Сервер с таким именем %s уже существует!"},
                 {"missing_host_port", "Не заполнены обязательные поля: Хост и/или Порт!"},
                 {"missing_database_user", "Не заполнены обязательные поля: Имя БД и/или Имя пользователя!"},
-                {"attention", "Внимание!"}
+                {"attention", "Внимание!"},
+
+                // tooltips
+                {"PID", "PID"},
+                {"APPLICATION_NAME", "APPLICATION_NAME"},
+                {"DATABASE_NAME", "DATABASE_NAME"},
+                {"USER_NAME", "USER_NAME"},
+                {"CLIENT", "CLIENT"},
+                {"BACKEND_START", "BACKEND_START"},
+                {"QUERY_START", "QUERY_START"},
+                {"XACT_START", "XACT_START"},
+                {"now - XACT_START", "now - XACT_START"},
+                {"STATE", "STATE"},
+                {"STATE_CHANGE", "STATE_CHANGE"},
+                {"BLOCKED", "BLOCKED"},
+                {"LOCK_TYPE", "LOCK_TYPE"},
+                {"RELATION", "RELATION"},
+                {"SLOW_QUERY", "SLOW_QUERY"},
+                {"QUERY", "QUERY"},
+                {"", ""}
         };
     }
 }

@@ -25,7 +25,7 @@ import ru.taximaxim.pgsqlblocks.utils.Columns;
 import ru.taximaxim.pgsqlblocks.utils.DateUtils;
 import ru.taximaxim.pgsqlblocks.utils.ImageUtils;
 import ru.taximaxim.treeviewer.models.IColumn;
-import ru.taximaxim.treeviewer.models.MyTreeViewerDataSource;
+import ru.taximaxim.treeviewer.models.DataSource;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -33,7 +33,7 @@ import java.util.List;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
-public class DBProcessesViewDataSource extends MyTreeViewerDataSource {
+public class DBProcessesViewDataSource extends DataSource<DBProcess> {
 
     private final DateUtils dateUtils = new DateUtils();
     private ResourceBundle bundle;
@@ -58,11 +58,29 @@ public class DBProcessesViewDataSource extends MyTreeViewerDataSource {
     }
 
     @Override
+    public List<? extends IColumn> getColumnsToFilter() {
+        List<IColumn> list = new ArrayList<>();
+        list.add(Columns.PID);
+        list.add(Columns.APPLICATION_NAME);
+        list.add(Columns.DATABASE_NAME);
+        list.add(Columns.QUERY);
+        list.add(Columns.USER_NAME);
+        list.add(Columns.CLIENT);
+        return list;
+    }
+
+    @Override
+    public ResourceBundle getResourceBundle() {
+        return bundle;
+    }
+
+    @Override
     public String getLocalizeString(String s) {
         return bundle.getString(s);
     }
 
     @Override
+    // FIXME дублирование кода с DBBlocksJournalViewDataSource, один может наследоваться от другого?
     public String getRowText(Object element, IColumn column) {
         DBProcess process = (DBProcess)element;
         Columns columns = Columns.getColumn(column);
@@ -117,6 +135,7 @@ public class DBProcessesViewDataSource extends MyTreeViewerDataSource {
 
     @Override
     public Object[] getElements(Object inputElement) {
+        // FIXME do not filter data, use addFilter/removeFilter of tree viewer
         List<DBProcess> input = (List<DBProcess>) inputElement;
         if (dataFilter == null) {
             return input.toArray();

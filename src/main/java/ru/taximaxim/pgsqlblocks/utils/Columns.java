@@ -2,7 +2,7 @@ package ru.taximaxim.pgsqlblocks.utils;
 
 import ru.taximaxim.treeviewer.models.IColumn;
 
-public enum Columns implements IColumn{
+public enum Columns implements IColumn {
     PID("pid", "PID", 80),
     BLOCK_CREATE_DATE("block_start_date", "", 110),
     BLOCK_END_DATE("block_end_date", "", 150),

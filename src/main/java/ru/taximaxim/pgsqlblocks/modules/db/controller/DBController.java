@@ -436,11 +436,6 @@ public class DBController implements DBBlocksJournalListener {
         asyncSaveClosedBlockedProcessesToFile(processes);
     }
 
-    @Override
-    public void dbBlocksJournalDidChangeFilters() {
-        listeners.forEach(listener -> listener.dbControllerBlocksJournalChanged(this));
-    }
-
     private void asyncSaveClosedBlockedProcessesToFile(List<DBBlocksJournalProcess> processes) {
         journalsSaveExecutor.execute(() -> {
             try {

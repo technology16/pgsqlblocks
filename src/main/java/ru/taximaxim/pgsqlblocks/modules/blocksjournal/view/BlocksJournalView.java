@@ -41,7 +41,7 @@ import ru.taximaxim.pgsqlblocks.common.ui.DBProcessInfoView;
 import ru.taximaxim.pgsqlblocks.utils.PathBuilder;
 import ru.taximaxim.pgsqlblocks.utils.Settings;
 import ru.taximaxim.pgsqlblocks.utils.XmlDocumentWorker;
-import ru.taximaxim.treeviewer.SwtTreeViewer;
+import ru.taximaxim.treeviewer.ExtendedTreeViewer;
 
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
@@ -55,7 +55,7 @@ public class BlocksJournalView extends ApplicationWindow implements DBBlocksJour
 
     private TableViewer filesTable;
 
-    private SwtTreeViewer processesView;
+    private ExtendedTreeViewer<DBBlocksJournalProcess> processesView;
 
     private DBProcessInfoView processInfoView;
 
@@ -110,10 +110,9 @@ public class BlocksJournalView extends ApplicationWindow implements DBBlocksJour
         processesContentContainer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
         DBBlocksJournalViewDataSource dbBlocksJournalViewDataSource = new DBBlocksJournalViewDataSource(resourceBundle);
-        processesView = new SwtTreeViewer(processesContentContainer, SWT.NONE, blocksJournal.getFilteredProcesses(),
-               dbBlocksJournalViewDataSource , resourceBundle);
-        processesView.setColumnsForFilterView(dbBlocksJournalViewDataSource.getColumnsForFilter());
-        processesView.getTree().addSelectionChangedListener(this::processesViewSelectionChanged);
+        processesView = new ExtendedTreeViewer<>(processesContentContainer, SWT.NONE, blocksJournal.getFilteredProcesses(),
+               dbBlocksJournalViewDataSource , resourceBundle.getLocale());
+        processesView.getTreeViewer().addSelectionChangedListener(this::processesViewSelectionChanged);
 
         processInfoView = new DBProcessInfoView(resourceBundle, processesView, SWT.NONE);
         processInfoView.hideToolBar();
@@ -186,7 +185,7 @@ public class BlocksJournalView extends ApplicationWindow implements DBBlocksJour
 
     @Override
     public void dbBlocksJournalDidAddProcesses() {
-        processesView.getTree().refresh();
+        processesView.getTreeViewer().refresh();
     }
 
     @Override
@@ -194,9 +193,4 @@ public class BlocksJournalView extends ApplicationWindow implements DBBlocksJour
 
     @Override
     public void dbBlocksJournalDidCloseProcesses(List<DBBlocksJournalProcess> processes) {}
-
-    @Override
-    public void dbBlocksJournalDidChangeFilters() {
-        processesView.getTree().refresh();
-    }
 }

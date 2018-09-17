@@ -141,7 +141,26 @@ public class PgSqlBlocks_en extends ListResourceBundle {
                 {"already_exists", "Connection %s already exists!"},
                 {"missing_host_port", "Missing required field: host and/or port!"},
                 {"missing_database_user", "Missing required field: database and/or user!"},
-                {"attention", "Attention!"}
+                {"attention", "Attention!"},
+
+                // tooltips
+                {"PID", "PID"},
+                {"APPLICATION_NAME", "APPLICATION_NAME"},
+                {"DATABASE_NAME", "DATABASE_NAME"},
+                {"USER_NAME", "USER_NAME"},
+                {"CLIENT", "CLIENT"},
+                {"BACKEND_START", "BACKEND_START"},
+                {"QUERY_START", "QUERY_START"},
+                {"XACT_START", "XACT_START"},
+                {"now - XACT_START", "now - XACT_START"},
+                {"STATE", "STATE"},
+                {"STATE_CHANGE", "STATE_CHANGE"},
+                {"BLOCKED", "BLOCKED"},
+                {"LOCK_TYPE", "LOCK_TYPE"},
+                {"RELATION", "RELATION"},
+                {"SLOW_QUERY", "SLOW_QUERY"},
+                {"QUERY", "QUERY"},
+                {"", ""} // FIXME in treeviewer do not fail if string is not in resource bundle
         };
     }
 }
