@@ -24,7 +24,7 @@ import java.util.ResourceBundle;
  * для возможно проходить не по индексу колонки, а по самой колонке
  * localizeString позволяет получить строку из resourceBundle
  */
-public abstract class SwtTreeViewerDataSource<T extends IObject> implements ITableLabelProvider, ITreeContentProvider {
+public abstract class DataSource<T extends IObject> implements ITableLabelProvider, ITreeContentProvider {
 
     protected List<ILabelProviderListener> listeners = new ArrayList<>();
 

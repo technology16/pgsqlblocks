@@ -9,18 +9,18 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 import ru.taximaxim.treeviewer.models.IColumn;
 import ru.taximaxim.treeviewer.models.IObject;
-import ru.taximaxim.treeviewer.models.SwtTreeViewerDataSource;
-import ru.taximaxim.treeviewer.tree.SwtTreeViewerTable;
+import ru.taximaxim.treeviewer.models.DataSource;
+import ru.taximaxim.treeviewer.tree.ExtendedTreeViewerComponent;
 
 import java.util.*;
 
 public class ColumnConfigDialog extends Dialog {
 
-    private SwtTreeViewerTable<? extends IObject> treeViewer;
+    private ExtendedTreeViewerComponent<? extends IObject> treeViewer;
     private ResourceBundle bundle;
     private final Set<IColumn> invisibleColumn = new HashSet<>();
 
-    public ColumnConfigDialog(ResourceBundle resourceBundle, SwtTreeViewerTable<? extends IObject> tree, Shell parent) {
+    public ColumnConfigDialog(ResourceBundle resourceBundle, ExtendedTreeViewerComponent<? extends IObject> tree, Shell parent) {
         super(parent);
         this.treeViewer = tree;
         this.bundle = resourceBundle;
@@ -46,7 +46,7 @@ public class ColumnConfigDialog extends Dialog {
         layout.marginTop = 10;
         container.setLayout(layout);
 
-        SwtTreeViewerDataSource<? extends IObject> dataSource = treeViewer.getDataSource();
+        DataSource<? extends IObject> dataSource = treeViewer.getDataSource();
 
         for (IColumn column : dataSource.getColumns()) {
             Button checkBoxButton = new Button(container, SWT.CHECK);
