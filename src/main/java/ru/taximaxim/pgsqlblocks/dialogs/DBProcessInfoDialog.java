@@ -54,12 +54,11 @@ public class DBProcessInfoDialog extends Dialog{
         layout.marginRight = 5;
         layout.marginLeft = 10;
         layout.marginTop = 10;
-        layout.horizontalSpacing = 2;
         container.setLayout(layout);
         GridData gridData = new GridData(SWT.FILL, SWT.FILL, true, true);
         container.setLayoutData(gridData);
 
-        GridData textGd = new GridData(SWT.LEFT, SWT.CENTER, true, false, 1, 1);
+        GridData textGd = new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1);
         textGd.widthHint = TEXT_WIDTH;
         if (dbBlocksProcess != null) {
             dbProcess = dbBlocksProcess.getProcess();
@@ -116,7 +115,8 @@ public class DBProcessInfoDialog extends Dialog{
     private void createProcessArea(Composite container, GridData gridData, String type, String data) {
         Label pidLabel = new Label(container, SWT.HORIZONTAL);
         pidLabel.setText(resourceBundle.getString(type));
-        Label pid = new Label(container, SWT.LEFT);
+        Text pid = new Text(container,  SWT.FILL);
+        pid.setEditable(false);
         if (data != null) {
             pid.setText(data);
         }else {
