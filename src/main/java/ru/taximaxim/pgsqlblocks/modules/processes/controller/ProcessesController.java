@@ -27,7 +27,6 @@ import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.ITreeSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
@@ -176,10 +175,18 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
         dbProcessesView.getTreeViewer().addSelectionChangedListener(this::dbProcessesViewSelectionChanged);
         dbProcessesView.getTreeViewer().getTree().addTraverseListener(e -> {
             if (e.detail == SWT.TRAVERSE_RETURN) {
-                ITreeSelection element = dbProcessesView.getTreeViewer().getStructuredSelection();
-                IStructuredSelection structuredSelection = element;
-                selectedProcesses = (List<DBProcess>) structuredSelection.toList();
-                openProcessDialogInfo(selectedProcesses.get(0));
+                //get controller
+                IStructuredSelection modelSelection = dbModelsView.getTableViewer().getStructuredSelection();
+                DBController controller = (DBController) modelSelection.getFirstElement();
+                if (controller != null) {
+                    IStructuredSelection structuredSelection = dbProcessesView.getTreeViewer().getStructuredSelection();
+                    DBProcess process = (DBProcess) structuredSelection.getFirstElement();
+                    openProcessDialogInfo(process, controller);
+                }
+                //get process
+//                IStructuredSelection structuredSelection = dbProcessesView.getTreeViewer().getStructuredSelection();
+//                DBProcess process = (DBProcess) structuredSelection.getFirstElement();
+//                openProcessDialogInfo(process);
             }
         });
 
@@ -190,19 +197,19 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
         processesTabItem.setControl(processesViewComposite);
     }
 
-    private void openProcessDialogInfo(DBProcess dbProcess){
+    private void openProcessDialogInfo(DBProcess dbProcess, DBController controller){
         DBProcessInfoDialog dbProcessInfoDialog = new DBProcessInfoDialog(resourceBundle, view.getShell(), dbProcess, false);
         dbProcessInfoDialog.setProcessInfoListener(new DBProcessInfoDialog.ProcessInfoListener() {
             @Override
             public void terminateButtonClick() {
-                dbProcessInfoViewTerminateProcessToolItemClicked();
+                tryTerminateProcess(controller, dbProcess.getPid());
                 dbProcessInfoDialog.close();
 
             }
 
             @Override
             public void cancelButtonClick() {
-                dbProcessInfoViewCancelProcessToolItemClicked();
+                tryCancelProcess(controller, dbProcess.getPid());
                 dbProcessInfoDialog.close();
             }
         });
@@ -244,9 +251,10 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
         dbBlocksJournalView.getTreeViewer().addSelectionChangedListener(this::dbBlocksJournalViewSelectionChanged);
         dbBlocksJournalView.getTreeViewer().getTree().addTraverseListener(e -> {
             if (e.detail == SWT.TRAVERSE_RETURN) {
+                IStructuredSelection modelSelection = dbProcessesView.getTreeViewer().getStructuredSelection();
                 IStructuredSelection structuredSelection = dbProcessesView.getTreeViewer().getStructuredSelection();
-                selectedProcesses = (List<DBProcess>) structuredSelection.toList();
-                openProcessDialogInfo(selectedProcesses.get(0));
+                DBProcess process = (DBProcess) structuredSelection.getFirstElement();
+                openProcessDialogInfo(process, null);
             }
         });
 
