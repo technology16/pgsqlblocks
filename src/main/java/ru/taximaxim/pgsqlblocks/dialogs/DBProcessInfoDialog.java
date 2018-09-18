@@ -56,8 +56,10 @@ public class DBProcessInfoDialog extends Dialog{
         layout.marginTop = 10;
         layout.horizontalSpacing = 2;
         container.setLayout(layout);
+        GridData gridData = new GridData(SWT.FILL, SWT.FILL, true, true);
+        container.setLayoutData(gridData);
 
-        GridData textGd = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1);
+        GridData textGd = new GridData(SWT.LEFT, SWT.CENTER, true, false, 1, 1);
         textGd.widthHint = TEXT_WIDTH;
         if (dbBlocksProcess != null) {
             dbProcess = dbBlocksProcess.getProcess();
@@ -127,18 +129,19 @@ public class DBProcessInfoDialog extends Dialog{
         Composite composite = new Composite(container, SWT.NONE);
         GridLayout gridLayout = new GridLayout(1, false);
         composite.setLayout(gridLayout);
-        composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 2, 20));
+        composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 20));
         Label pidLabel = new Label(composite, SWT.HORIZONTAL);
         pidLabel.setText(resourceBundle.getString("query"));
 
-        StyledText pid = new StyledText(composite,  SWT.BORDER | SWT.FULL_SELECTION | SWT.V_SCROLL);
+        StyledText pid = new StyledText(composite,   SWT.MULTI |SWT.BORDER | SWT.FULL_SELECTION | SWT.V_SCROLL);
+
         if (data != null) {
             pid.setText(data);
         }else {
             pid.setText("");
         }
         pid.setWordWrap(true);
-        GridData grid = new GridData(SWT.FILL, SWT.FILL, false, true);
+        GridData grid = new GridData(SWT.FILL, SWT.FILL, true, true);
         grid.widthHint = 500;
         pid.setLayoutData(grid);
     }
@@ -150,5 +153,10 @@ public class DBProcessInfoDialog extends Dialog{
     public interface ProcessInfoListener {
         void terminateButtonClick();
         void cancelButtonClick();
+    }
+
+    @Override
+    protected boolean isResizable() {
+        return true;
     }
 }
