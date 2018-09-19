@@ -51,10 +51,8 @@ import ru.taximaxim.pgsqlblocks.utils.*;
 
 import java.lang.reflect.InvocationTargetException;
 import java.sql.SQLException;
-import java.util.ArrayList;
+import java.util.*;
 import java.util.List;
-import java.util.Optional;
-import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
 public class ProcessesController implements DBControllerListener, DBModelsViewListener, SettingsListener,
@@ -65,21 +63,15 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
 
     private final Settings settings;
     private final ResourceBundle resourceBundle;
-
+    private final DBProcessesViewDataSourceFilter dbProcessesViewDataSourceFilter = new DBProcessesViewDataSourceFilter();
     private ProcessesView view;
-
     private DBModelsView dbModelsView;
     private DBProcessesView dbProcessesView;
     private DBProcessesFiltersView dbProcessesFiltersView;
     private DBProcessInfoView dbProcessInfoView;
-
     private DBProcessesView dbBlocksJournalView;
-
     private DBProcessInfoView dbBlocksJournalProcessInfoView;
     private DBProcessesFiltersView dbBlocksJournalProcessesFiltersView;
-
-    private final DBProcessesViewDataSourceFilter dbProcessesViewDataSourceFilter = new DBProcessesViewDataSourceFilter();
-
     private TabFolder tabFolder;
 
     private ToolItem addDatabaseToolItem;
@@ -208,11 +200,11 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
 
     private void cancelButtonClicked(DBProcess dbProcess) {
         Object selectedController = dbModelsView.getTableViewer().getStructuredSelection().getFirstElement();
-        if (selectedController == null || selectedProcesses.isEmpty()) {
+        if (selectedController == null || dbProcess == null) {
             return;
         }
 
-        List<Integer> pidProcessesList = selectedProcesses.stream().map(DBProcess::getPid).collect(Collectors.toList());
+        List<Integer> pidProcessesList = Collections.singletonList(dbProcess.getPid());
         if (settings.isConfirmRequired() && !MessageDialog.openQuestion(view.getShell(), l10n("confirm_action"),
                 l10n("cancel_process_confirm_message", pidProcessesList))) {
             return;
@@ -243,11 +235,11 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
 
     private void terminateButtonClicked(DBProcess dbProcess) {
         Object selectedController = dbModelsView.getTableViewer().getStructuredSelection().getFirstElement();
-        if (selectedController == null || selectedProcesses.isEmpty()) {
+        if (selectedController == null || dbProcess == null) {
             return;
         }
 
-        List<Integer> pidProcessesList = selectedProcesses.stream().map(DBProcess::getPid).collect(Collectors.toList());
+        List<Integer> pidProcessesList = Collections.singletonList(dbProcess.getPid());
         if (settings.isConfirmRequired() && !MessageDialog.openQuestion(view.getShell(), l10n("confirm_action"),
                 l10n("kill_process_confirm_message", pidProcessesList))) {
             return;
