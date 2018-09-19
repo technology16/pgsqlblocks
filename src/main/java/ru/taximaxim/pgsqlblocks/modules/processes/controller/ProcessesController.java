@@ -54,10 +54,8 @@ import ru.taximaxim.pgsqlblocks.utils.*;
 
 import java.lang.reflect.InvocationTargetException;
 import java.sql.SQLException;
-import java.util.ArrayList;
+import java.util.*;
 import java.util.List;
-import java.util.Optional;
-import java.util.ResourceBundle;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
@@ -69,21 +67,15 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
 
     private final Settings settings;
     private final ResourceBundle resourceBundle;
-
+    private final DBProcessesViewDataSourceFilter dbProcessesViewDataSourceFilter = new DBProcessesViewDataSourceFilter();
     private ProcessesView view;
-
     private DBModelsView dbModelsView;
     private DBProcessesView dbProcessesView;
     private DBProcessesFiltersView dbProcessesFiltersView;
     private DBProcessInfoView dbProcessInfoView;
-
     private DBProcessesView dbBlocksJournalView;
-
     private DBProcessInfoView dbBlocksJournalProcessInfoView;
     private DBProcessesFiltersView dbBlocksJournalProcessesFiltersView;
-
-    private final DBProcessesViewDataSourceFilter dbProcessesViewDataSourceFilter = new DBProcessesViewDataSourceFilter();
-
     private TabFolder tabFolder;
 
     private ToolItem addDatabaseToolItem;
@@ -321,14 +313,23 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
     }
 
     private void loadDatabases() {
-        if (dbModelsProvider.needUpdate() && openUpdateDialog()) {
+        List<DBModel> dbModels = dbModelsProvider.get();
+        List<String> defaultList = dbModels.stream()
+                .map( model -> {
+                    if (model.getVersion() == SupportedVersion.VERSION_DEFAULT) {
+                        return model.getName();
+                    }
+                    return null;
+                }).filter(Objects::nonNull)
+                .collect(Collectors.toList());
+        if (!defaultList.isEmpty() && openUpdateDialog()) {
             updateVersion();
             dbControllers.forEach(dbController -> dbController.disconnect(true));
             dbControllers.clear();
         }
-        List<DBModel> dbModels = dbModelsProvider.get();
-        dbModels.forEach(this::addDatabase);
-        dbModelsView.getTableViewer().refresh();
+//        List<DBModel> dbModels = dbModelsProvider.get();
+//        dbModels.forEach(this::addDatabase);
+//        dbModelsView.getTableViewer().refresh();
     }
 
     private void updateVersion() {
