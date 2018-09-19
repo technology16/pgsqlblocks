@@ -148,7 +148,9 @@ public class PgSqlBlocks_en extends ListResourceBundle {
 
                 //create update version dialog
                 {"warning_title","Changes"},
-                {"warning_text","Need to change connection's config file. Do it automatically?"}
+                {"warning_text","Need to add the postgreSql's version for connection.\n" +
+                        "Try to automatically determine the version for the following connections?\n" +
+                        "If you cancel or we get error, the default version (10) will be used"}
         };
     }
 }
