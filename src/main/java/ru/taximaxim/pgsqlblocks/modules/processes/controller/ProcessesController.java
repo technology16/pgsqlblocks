@@ -41,10 +41,7 @@ import ru.taximaxim.pgsqlblocks.common.models.DBModel;
 import ru.taximaxim.pgsqlblocks.common.models.DBProcess;
 import ru.taximaxim.pgsqlblocks.common.models.DBProcessFilter;
 import ru.taximaxim.pgsqlblocks.common.ui.*;
-import ru.taximaxim.pgsqlblocks.dialogs.AddDatabaseDialog;
-import ru.taximaxim.pgsqlblocks.dialogs.EditDatabaseDialog;
-import ru.taximaxim.pgsqlblocks.dialogs.SettingsDialog;
-import ru.taximaxim.pgsqlblocks.dialogs.TMTreeViewerColumnsDialog;
+import ru.taximaxim.pgsqlblocks.dialogs.*;
 import ru.taximaxim.pgsqlblocks.modules.blocksjournal.view.BlocksJournalView;
 import ru.taximaxim.pgsqlblocks.modules.db.controller.DBController;
 import ru.taximaxim.pgsqlblocks.modules.db.controller.DBControllerListener;
@@ -322,14 +319,14 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
                     return null;
                 }).filter(Objects::nonNull)
                 .collect(Collectors.toList());
-        if (!defaultList.isEmpty() && openUpdateDialog()) {
+        if (!defaultList.isEmpty() && openUpdateDialog(defaultList)) {
             updateVersion();
             dbControllers.forEach(dbController -> dbController.disconnect(true));
             dbControllers.clear();
         }
 //        List<DBModel> dbModels = dbModelsProvider.get();
-//        dbModels.forEach(this::addDatabase);
-//        dbModelsView.getTableViewer().refresh();
+        dbModels.forEach(this::addDatabase);
+        dbModelsView.getTableViewer().refresh();
     }
 
     private void updateVersion() {
@@ -381,10 +378,15 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
         dbModelsProvider.save(models);
     }
 
-    private boolean openUpdateDialog() {
-        MessageDialog dialog = new MessageDialog(view.getShell(), resourceBundle.getString("warning_title"), null,
-                resourceBundle.getString("warning_text"), MessageDialog.WARNING, new String[] {"Ok", "Cancel"}, 0);
-        return dialog.open() == 0;
+    private boolean openUpdateDialog(List<String> defaultList) {
+        UpdateVersionDialog updateVersionDialog = new UpdateVersionDialog(resourceBundle, view.getShell(), defaultList);
+        if (updateVersionDialog.open() == Window.OK) {
+            return true;
+        }
+        return false;
+//        MessageDialog dialog = new MessageDialog(view.getShell(), resourceBundle.getString("warning_title"), null,
+//                resourceBundle.getString("warning_text"), MessageDialog.WARNING, new String[] {"Ok", "Cancel"}, 0);
+//        return dialog.open() == 0;
     }
 
     private void openAddNewDatabaseDialog() {
