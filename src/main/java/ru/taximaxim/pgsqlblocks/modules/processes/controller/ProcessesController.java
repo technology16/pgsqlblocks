@@ -203,24 +203,18 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
         if (selectedController == null || dbProcess == null) {
             return;
         }
-
         List<Integer> pidProcessesList = Collections.singletonList(dbProcess.getPid());
         cancellingProcessesByPif((DBController) selectedController, pidProcessesList);
     }
-
-
 
     private void terminateButtonClicked(DBProcess dbProcess) {
         Object selectedController = dbModelsView.getTableViewer().getStructuredSelection().getFirstElement();
         if (selectedController == null || dbProcess == null) {
             return;
         }
-
         List<Integer> pidProcessesList = Collections.singletonList(dbProcess.getPid());
         terminatingProcessesByPid((DBController) selectedController, pidProcessesList);
     }
-
-
 
     private void createBlocksJournalTab() {
         TabItem blocksJournalTabItem = new TabItem(tabFolder, SWT.NONE);
@@ -257,7 +251,6 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
         dbBlocksJournalView.getTreeViewer().addSelectionChangedListener(this::dbBlocksJournalViewSelectionChanged);
         dbBlocksJournalView.getTreeViewer().getTree().addTraverseListener(e -> {
             if (e.detail == SWT.TRAVERSE_RETURN) {
-                IStructuredSelection modelSelection = dbProcessesView.getTreeViewer().getStructuredSelection();
                 IStructuredSelection structuredSelection = dbProcessesView.getTreeViewer().getStructuredSelection();
                 DBProcess process = (DBProcess) structuredSelection.getFirstElement();
                 openProcessInfoDialog(process);
