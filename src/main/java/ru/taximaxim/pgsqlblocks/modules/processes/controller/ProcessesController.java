@@ -175,18 +175,9 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
         dbProcessesView.getTreeViewer().addSelectionChangedListener(this::dbProcessesViewSelectionChanged);
         dbProcessesView.getTreeViewer().getTree().addTraverseListener(e -> {
             if (e.detail == SWT.TRAVERSE_RETURN) {
-                //get controller
-                IStructuredSelection modelSelection = dbModelsView.getTableViewer().getStructuredSelection();
-                DBController controller = (DBController) modelSelection.getFirstElement();
-                if (controller != null) {
-                    IStructuredSelection structuredSelection = dbProcessesView.getTreeViewer().getStructuredSelection();
-                    DBProcess process = (DBProcess) structuredSelection.getFirstElement();
-                    openProcessDialogInfo(process, controller);
-                }
-                //get process
-//                IStructuredSelection structuredSelection = dbProcessesView.getTreeViewer().getStructuredSelection();
-//                DBProcess process = (DBProcess) structuredSelection.getFirstElement();
-//                openProcessDialogInfo(process);
+                IStructuredSelection structuredSelection = dbProcessesView.getTreeViewer().getStructuredSelection();
+                DBProcess process = (DBProcess) structuredSelection.getFirstElement();
+                openProcessInfoDialog(process);
             }
         });
 
@@ -197,23 +188,92 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
         processesTabItem.setControl(processesViewComposite);
     }
 
-    private void openProcessDialogInfo(DBProcess dbProcess, DBController controller){
+    private void openProcessInfoDialog(DBProcess dbProcess){
         DBProcessInfoDialog dbProcessInfoDialog = new DBProcessInfoDialog(resourceBundle, view.getShell(), dbProcess, false);
         dbProcessInfoDialog.setProcessInfoListener(new DBProcessInfoDialog.ProcessInfoListener() {
             @Override
             public void terminateButtonClick() {
-                tryTerminateProcess(controller, dbProcess.getPid());
+                terminateButtonClicked(dbProcess);
                 dbProcessInfoDialog.close();
-
             }
 
             @Override
             public void cancelButtonClick() {
-                tryCancelProcess(controller, dbProcess.getPid());
+                cancelButtonClicked(dbProcess);
                 dbProcessInfoDialog.close();
             }
         });
         dbProcessInfoDialog.open();
+    }
+
+    private void cancelButtonClicked(DBProcess dbProcess) {
+        Object selectedController = dbModelsView.getTableViewer().getStructuredSelection().getFirstElement();
+        if (selectedController == null || selectedProcesses.isEmpty()) {
+            return;
+        }
+
+        List<Integer> pidProcessesList = selectedProcesses.stream().map(DBProcess::getPid).collect(Collectors.toList());
+        if (settings.isConfirmRequired() && !MessageDialog.openQuestion(view.getShell(), l10n("confirm_action"),
+                l10n("cancel_process_confirm_message", pidProcessesList))) {
+            return;
+        }
+
+        DBController selectedDbController = (DBController) selectedController;
+        ProgressMonitorDialog dialog = new ProgressMonitorDialog(Display.getDefault().getActiveShell());
+        try {
+            dialog.run(true, true, progressMonitor -> {
+                progressMonitor.beginTask("Cancel processes", pidProcessesList.size());
+                for (Integer processPid : pidProcessesList) {
+                    if (progressMonitor.isCanceled()) {
+                        LOG.info(l10n("cancel_process_cancelled_message"));
+                        progressMonitor.done();
+                        break;
+                    } else {
+                        tryCancelProcess(selectedDbController, processPid);
+                        progressMonitor.worked(1);
+                    }
+                }
+            });
+        } catch (InvocationTargetException | InterruptedException e) {
+            LOG.error(l10n("cancel_process_error_message", e.getMessage()), e);
+        } finally {
+            selectedDbController.updateProcesses();
+        }
+    }
+
+    private void terminateButtonClicked(DBProcess dbProcess) {
+        Object selectedController = dbModelsView.getTableViewer().getStructuredSelection().getFirstElement();
+        if (selectedController == null || selectedProcesses.isEmpty()) {
+            return;
+        }
+
+        List<Integer> pidProcessesList = selectedProcesses.stream().map(DBProcess::getPid).collect(Collectors.toList());
+        if (settings.isConfirmRequired() && !MessageDialog.openQuestion(view.getShell(), l10n("confirm_action"),
+                l10n("kill_process_confirm_message", pidProcessesList))) {
+            return;
+        }
+
+        DBController selectedDbController = (DBController) selectedController;
+        ProgressMonitorDialog dialog = new ProgressMonitorDialog(Display.getDefault().getActiveShell());
+        try {
+            dialog.run(true, true, progressMonitor -> {
+                progressMonitor.beginTask("Termination processes", pidProcessesList.size());
+                for (Integer processPid : pidProcessesList) {
+                    if (progressMonitor.isCanceled()) {
+                        LOG.info(l10n("kill_process_cancelled_message"));
+                        progressMonitor.done();
+                        break;
+                    } else {
+                        tryTerminateProcess(selectedDbController, processPid);
+                        progressMonitor.worked(1);
+                    }
+                }
+            });
+        } catch (InvocationTargetException | InterruptedException e) {
+            LOG.error(l10n("kill_process_error_message", e.getMessage()), e);
+        } finally {
+            selectedDbController.updateProcesses();
+        }
     }
 
     private void createBlocksJournalTab() {
@@ -254,7 +314,7 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
                 IStructuredSelection modelSelection = dbProcessesView.getTreeViewer().getStructuredSelection();
                 IStructuredSelection structuredSelection = dbProcessesView.getTreeViewer().getStructuredSelection();
                 DBProcess process = (DBProcess) structuredSelection.getFirstElement();
-                openProcessDialogInfo(process, null);
+                openProcessInfoDialog(process);
             }
         });
 
