@@ -205,33 +205,10 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
         }
 
         List<Integer> pidProcessesList = Collections.singletonList(dbProcess.getPid());
-        if (settings.isConfirmRequired() && !MessageDialog.openQuestion(view.getShell(), l10n("confirm_action"),
-                l10n("cancel_process_confirm_message", pidProcessesList))) {
-            return;
-        }
-
-        DBController selectedDbController = (DBController) selectedController;
-        ProgressMonitorDialog dialog = new ProgressMonitorDialog(Display.getDefault().getActiveShell());
-        try {
-            dialog.run(true, true, progressMonitor -> {
-                progressMonitor.beginTask("Cancel processes", pidProcessesList.size());
-                for (Integer processPid : pidProcessesList) {
-                    if (progressMonitor.isCanceled()) {
-                        LOG.info(l10n("cancel_process_cancelled_message"));
-                        progressMonitor.done();
-                        break;
-                    } else {
-                        tryCancelProcess(selectedDbController, processPid);
-                        progressMonitor.worked(1);
-                    }
-                }
-            });
-        } catch (InvocationTargetException | InterruptedException e) {
-            LOG.error(l10n("cancel_process_error_message", e.getMessage()), e);
-        } finally {
-            selectedDbController.updateProcesses();
-        }
+        cancellingProcessesByPif((DBController) selectedController, pidProcessesList);
     }
+
+
 
     private void terminateButtonClicked(DBProcess dbProcess) {
         Object selectedController = dbModelsView.getTableViewer().getStructuredSelection().getFirstElement();
@@ -240,33 +217,10 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
         }
 
         List<Integer> pidProcessesList = Collections.singletonList(dbProcess.getPid());
-        if (settings.isConfirmRequired() && !MessageDialog.openQuestion(view.getShell(), l10n("confirm_action"),
-                l10n("kill_process_confirm_message", pidProcessesList))) {
-            return;
-        }
-
-        DBController selectedDbController = (DBController) selectedController;
-        ProgressMonitorDialog dialog = new ProgressMonitorDialog(Display.getDefault().getActiveShell());
-        try {
-            dialog.run(true, true, progressMonitor -> {
-                progressMonitor.beginTask("Termination processes", pidProcessesList.size());
-                for (Integer processPid : pidProcessesList) {
-                    if (progressMonitor.isCanceled()) {
-                        LOG.info(l10n("kill_process_cancelled_message"));
-                        progressMonitor.done();
-                        break;
-                    } else {
-                        tryTerminateProcess(selectedDbController, processPid);
-                        progressMonitor.worked(1);
-                    }
-                }
-            });
-        } catch (InvocationTargetException | InterruptedException e) {
-            LOG.error(l10n("kill_process_error_message", e.getMessage()), e);
-        } finally {
-            selectedDbController.updateProcesses();
-        }
+        terminatingProcessesByPid((DBController) selectedController, pidProcessesList);
     }
+
+
 
     private void createBlocksJournalTab() {
         TabItem blocksJournalTabItem = new TabItem(tabFolder, SWT.NONE);
@@ -949,14 +903,17 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
         if (selectedController == null || selectedProcesses.isEmpty()) {
             return;
         }
-
         List<Integer> pidProcessesList = selectedProcesses.stream().map(DBProcess::getPid).collect(Collectors.toList());
+        terminatingProcessesByPid((DBController) selectedController, pidProcessesList);
+    }
+
+    private void terminatingProcessesByPid(DBController selectedController, List<Integer> pidProcessesList) {
         if (settings.isConfirmRequired() && !MessageDialog.openQuestion(view.getShell(), l10n("confirm_action"),
                 l10n("kill_process_confirm_message", pidProcessesList))) {
             return;
         }
 
-        DBController selectedDbController = (DBController) selectedController;
+        DBController selectedDbController = selectedController;
         ProgressMonitorDialog dialog = new ProgressMonitorDialog(Display.getDefault().getActiveShell());
         try {
             dialog.run(true, true, progressMonitor -> {
@@ -998,14 +955,17 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
         if (selectedController == null || selectedProcesses.isEmpty()) {
             return;
         }
-
         List<Integer> pidProcessesList = selectedProcesses.stream().map(DBProcess::getPid).collect(Collectors.toList());
+        cancellingProcessesByPif((DBController) selectedController, pidProcessesList);
+    }
+
+    private void cancellingProcessesByPif(DBController selectedController, List<Integer> pidProcessesList) {
         if (settings.isConfirmRequired() && !MessageDialog.openQuestion(view.getShell(), l10n("confirm_action"),
                 l10n("cancel_process_confirm_message", pidProcessesList))) {
             return;
         }
 
-        DBController selectedDbController = (DBController) selectedController;
+        DBController selectedDbController = selectedController;
         ProgressMonitorDialog dialog = new ProgressMonitorDialog(Display.getDefault().getActiveShell());
         try {
             dialog.run(true, true, progressMonitor -> {
