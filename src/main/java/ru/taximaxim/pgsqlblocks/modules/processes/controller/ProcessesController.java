@@ -340,8 +340,9 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
                     v = dbController.getVersion();
                 } catch (InterruptedException | ExecutionException e) {
                     LOG.error(e.getMessage());
+                }finally {
+                    model.setVersion(v);
                 }
-                model.setVersion(v);
             });
         });
         dbModelsProvider.save(models);
