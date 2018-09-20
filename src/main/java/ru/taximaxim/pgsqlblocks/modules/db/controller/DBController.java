@@ -47,39 +47,26 @@ import static ru.taximaxim.pgsqlblocks.PgSqlBlocks.APP_NAME;
 
 public class DBController implements DBProcessFilterListener, DBBlocksJournalListener {
 
-    private DBModel model;
-
-    private final List<DBProcess> processes = new ArrayList<>();
-    private final List<DBProcess> filteredProcesses = new ArrayList<>();
-
     private static final Logger LOG = Logger.getLogger(DBController.class);
-
     private static final String PG_BACKEND_PID = "pg_backend_pid";
     private static final String BLOCKED_BY = "blockedBy";
-
-    private List<DBControllerListener> listeners = new ArrayList<>();
-
+    private final List<DBProcess> processes = new ArrayList<>();
+    private final List<DBProcess> filteredProcesses = new ArrayList<>();
     private final DBProcessFilter processesFilters = new DBProcessFilter();
-
     private final Settings settings;
     private final ResourceBundle resourceBundle;
-
-    private DBStatus status = DBStatus.DISABLED;
-
-    private boolean blocked = false;
-
-    private int backendPid;
-
-    private Connection connection;
-
     private final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
     private final ScheduledExecutorService journalsSaveExecutor = Executors.newSingleThreadScheduledExecutor();
-    private ScheduledFuture<?> updater;
-
     private final DBBlocksJournal blocksJournal = new DBBlocksJournal();
-
-    private Date blocksJournalCreateDate;
     private final DateUtils dateUtils = new DateUtils();
+    private DBModel model;
+    private List<DBControllerListener> listeners = new ArrayList<>();
+    private DBStatus status = DBStatus.DISABLED;
+    private boolean blocked = false;
+    private int backendPid;
+    private Connection connection;
+    private ScheduledFuture<?> updater;
+    private Date blocksJournalCreateDate;
 
     public DBController(Settings settings, DBModel model) {
         this.settings = settings;
@@ -178,15 +165,15 @@ public class DBController implements DBProcessFilterListener, DBBlocksJournalLis
         this.backendPid = backendPid;
     }
 
+    public boolean isBlocked() {
+        return blocked;
+    }
+
     private void setBlocked(boolean blocked) {
         if (this.blocked != blocked) {
             this.blocked = blocked;
             listeners.forEach(listener -> listener.dbControllerBlockedChanged(this));
         }
-    }
-
-    public boolean isBlocked() {
-        return blocked;
     }
 
     public boolean isConnected() {
@@ -531,8 +518,9 @@ public class DBController implements DBProcessFilterListener, DBBlocksJournalLis
                 }
             } catch (SQLException e) {
                 listeners.forEach(listener -> listener.dbControllerConnectionFailed(this, e));
+            }finally {
+                return v != null ? v : SupportedVersion.VERSION_DEFAULT;
             }
-            return v != null ? v : SupportedVersion.VERSION_DEFAULT;
         });
         version = future.get();
         return version;
