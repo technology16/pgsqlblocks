@@ -149,9 +149,7 @@ public class PgSqlBlocks_ru extends ListResourceBundle {
                 //create update version dialog
                 {"warning_title","Необходимо изменение"},
                 {"warning_text","Необходимо задать версию postgresql для подключений.\n" +
-                        "\n" +
                         "Попытаться автоматически определить версии для следующих подключений?\n" +
-                        "\n" +
                         "При отмене или ошибке будет использоваться версия по-умолчанию (10)."}
         };
     }

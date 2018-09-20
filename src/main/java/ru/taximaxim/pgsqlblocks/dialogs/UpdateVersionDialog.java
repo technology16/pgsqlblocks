@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.ResourceBundle;
 
 /**
- * Created by 11 on 19.09.2018.
+ * Dialog for adding version tag into servers.xml
  */
 public class UpdateVersionDialog extends Dialog {
 
@@ -41,7 +41,7 @@ public class UpdateVersionDialog extends Dialog {
         layout.marginTop = 10;
         container.setLayout(layout);
 
-        Label warningLabel = new Label(container, SWT.CENTER);
+        Label warningLabel = new Label(container, SWT.FILL);
         warningLabel.setText(resourceBundle.getString("warning_text"));
         modelList.forEach(model -> createLabelArea(container, model));
         return container;
