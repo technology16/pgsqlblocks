@@ -41,7 +41,10 @@ import ru.taximaxim.pgsqlblocks.common.models.DBModel;
 import ru.taximaxim.pgsqlblocks.common.models.DBProcess;
 import ru.taximaxim.pgsqlblocks.common.models.DBProcessFilter;
 import ru.taximaxim.pgsqlblocks.common.ui.*;
-import ru.taximaxim.pgsqlblocks.dialogs.*;
+import ru.taximaxim.pgsqlblocks.dialogs.AddDatabaseDialog;
+import ru.taximaxim.pgsqlblocks.dialogs.EditDatabaseDialog;
+import ru.taximaxim.pgsqlblocks.dialogs.SettingsDialog;
+import ru.taximaxim.pgsqlblocks.dialogs.TMTreeViewerColumnsDialog;
 import ru.taximaxim.pgsqlblocks.modules.blocksjournal.view.BlocksJournalView;
 import ru.taximaxim.pgsqlblocks.modules.db.controller.DBController;
 import ru.taximaxim.pgsqlblocks.modules.db.controller.DBControllerListener;
@@ -319,7 +322,8 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
                     return null;
                 }).filter(Objects::nonNull)
                 .collect(Collectors.toList());
-        List<String> connectionList = defaultList.stream().map(DBModel::getName).collect(Collectors.toList());
+        List<String> connectionList = defaultList.stream()
+                .map(dbModel -> "*"+dbModel.getName()).collect(Collectors.toList());
         if (!defaultList.isEmpty() && openUpdateDialog(connectionList)) {
             updateVersion(defaultList);
             dbControllers.forEach(dbController -> dbController.disconnect(true));
@@ -380,8 +384,11 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
     }
 
     private boolean openUpdateDialog(List<String> defaultList) {
-        UpdateVersionDialog updateVersionDialog = new UpdateVersionDialog(resourceBundle, view.getShell(), defaultList);
-        return updateVersionDialog.open() == Window.OK;
+        MessageDialog dialog = new MessageDialog(view.getShell(),
+                resourceBundle.getString("warning_title"), null,
+                l10n("warning_text", defaultList),
+                MessageDialog.WARNING, new String[] {"Ok", "Cancel"}, 0);
+        return dialog.open() == 0;
     }
 
     private void openAddNewDatabaseDialog() {
