@@ -380,11 +380,8 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
 
     private boolean openUpdateDialog(List<String> defaultList) {
         UpdateVersionDialog updateVersionDialog = new UpdateVersionDialog(resourceBundle, view.getShell(), defaultList);
-        if (updateVersionDialog.open() == Window.OK) {
-            return true;
-        }
-        return false;
-//        MessageDialog dialog = new MessageDialog(view.getShell(), resourceBundle.getString("warning_title"), null,
+        return updateVersionDialog.open() == Window.OK;
+        //        MessageDialog dialog = new MessageDialog(view.getShell(), resourceBundle.getString("warning_title"), null,
 //                resourceBundle.getString("warning_text"), MessageDialog.WARNING, new String[] {"Ok", "Cancel"}, 0);
 //        return dialog.open() == 0;
     }
