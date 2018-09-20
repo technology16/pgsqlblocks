@@ -51,6 +51,4 @@ public class UpdateVersionDialog extends Dialog {
         Label connectionLabel = new Label(container, SWT.LEFT | SWT.FILL);
         connectionLabel.setText(text);
     }
-
-
 }

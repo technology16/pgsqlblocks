@@ -311,31 +311,31 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
 
     private void loadDatabases() {
         List<DBModel> dbModels = dbModelsProvider.get();
-        List<String> defaultList = dbModels.stream()
+        List<DBModel> defaultList = dbModels.stream()
                 .map( model -> {
                     if (model.getVersion() == SupportedVersion.VERSION_DEFAULT) {
-                        return model.getName();
+                        return model;
                     }
                     return null;
                 }).filter(Objects::nonNull)
                 .collect(Collectors.toList());
-        if (!defaultList.isEmpty() && openUpdateDialog(defaultList)) {
-            updateVersion();
+        List<String> connectionList = defaultList.stream().map(DBModel::getName).collect(Collectors.toList());
+        if (!defaultList.isEmpty() && openUpdateDialog(connectionList)) {
+            updateVersion(defaultList);
             dbControllers.forEach(dbController -> dbController.disconnect(true));
             dbControllers.clear();
         }
-//        List<DBModel> dbModels = dbModelsProvider.get();
         dbModels.forEach(this::addDatabase);
         dbModelsView.getTableViewer().refresh();
     }
 
-    private void updateVersion() {
-        List<DBModel> models = dbModelsProvider.get();
+    //здесь мы подключаемся к бд, запрашиваем версию
+    private void updateVersion(List<DBModel> models) {
         models.forEach( model -> {
             addDatabase(model);
             Optional<DBController> opt = dbControllers.stream().filter(dbc -> dbc.getModel().equals(model)).findFirst();
             opt.ifPresent(dbController -> {
-                SupportedVersion v = SupportedVersion.VERSION_9_2;
+                SupportedVersion v = SupportedVersion.VERSION_DEFAULT;
                 try {
                     v = dbController.getVersion();
                 } catch (InterruptedException | ExecutionException e) {
@@ -381,9 +381,6 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
     private boolean openUpdateDialog(List<String> defaultList) {
         UpdateVersionDialog updateVersionDialog = new UpdateVersionDialog(resourceBundle, view.getShell(), defaultList);
         return updateVersionDialog.open() == Window.OK;
-        //        MessageDialog dialog = new MessageDialog(view.getShell(), resourceBundle.getString("warning_title"), null,
-//                resourceBundle.getString("warning_text"), MessageDialog.WARNING, new String[] {"Ok", "Cancel"}, 0);
-//        return dialog.open() == 0;
     }
 
     private void openAddNewDatabaseDialog() {
