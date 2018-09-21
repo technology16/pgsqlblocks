@@ -323,7 +323,7 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
                 }).filter(Objects::nonNull)
                 .collect(Collectors.toList());
         List<String> connectionList = defaultList.stream()
-                .map(dbModel -> dbModel.getName()).collect(Collectors.toList());
+                .map(dbModel -> "*"+dbModel.getName()).collect(Collectors.toList());
         if (!defaultList.isEmpty() && openUpdateDialog(connectionList)) {
             updateVersion(defaultList);
             dbControllers.forEach(dbController -> dbController.disconnect(true));
@@ -385,7 +385,8 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
 
     private boolean openUpdateDialog(List<String> defaultList) {
         MessageDialog dialog = new MessageDialog(view.getShell(),
-                resourceBundle.getString("warning_title"), null,
+                resourceBundle.getString("warning_title"),
+                null,
                 l10n("warning_text", defaultList),
                 MessageDialog.WARNING, new String[] {"Ok", "Cancel"}, 0);
         return dialog.open() == 0;
