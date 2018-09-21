@@ -323,7 +323,7 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
                 }).filter(Objects::nonNull)
                 .collect(Collectors.toList());
         List<String> connectionList = defaultList.stream()
-                .map(dbModel -> "*"+dbModel.getName()).collect(Collectors.toList());
+                .map(dbModel -> "\n*"+dbModel.getName()).collect(Collectors.toList());
         if (!defaultList.isEmpty() && openUpdateDialog(connectionList)) {
             updateVersion(defaultList);
             dbControllers.forEach(dbController -> dbController.disconnect(true));
