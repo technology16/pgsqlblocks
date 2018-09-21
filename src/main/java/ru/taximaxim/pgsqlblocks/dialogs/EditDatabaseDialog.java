@@ -56,7 +56,7 @@ public class EditDatabaseDialog extends AddDatabaseDialog {
         hostText.setText(editedModel.getHost());
         portText.setText(editedModel.getPort());
         versionCombo.setInput(SupportedVersion.values());
-        versionCombo.setSelection(new StructuredSelection(editedModel.getVersion().getVersionText()));
+        versionCombo.setSelection(new StructuredSelection(editedModel.getVersion()));
         databaseNameText.setText(editedModel.getDatabaseName());
         userText.setText(editedModel.getUser());
         passwordText.setText(editedModel.getPassword());
