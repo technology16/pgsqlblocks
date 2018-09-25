@@ -312,6 +312,10 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
         }
     }
 
+    // тут мы получаем список моделей.
+    // выделяем список с дефолтными версиями
+    // получаем из дефолтного списка названия
+    //
     private void loadDatabases() {
         List<DBModel> dbModels = dbModelsProvider.get();
         List<DBModel> defaultList = dbModels.stream()
@@ -326,9 +330,10 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
                 .map(dbModel -> "\n*"+dbModel.getName()).collect(Collectors.toList());
         if (!defaultList.isEmpty() && openUpdateDialog(connectionList)) {
             updateVersion(defaultList);
-            dbControllers.forEach(dbController -> dbController.disconnect(true));
-            dbControllers.clear();
+            System.out.println(dbControllers.size());
         }
+        dbControllers.forEach(dbController -> dbController.disconnect(true));
+        dbControllers.clear();
         dbModels.forEach(this::addDatabase);
         dbModelsView.getTableViewer().refresh();
     }
