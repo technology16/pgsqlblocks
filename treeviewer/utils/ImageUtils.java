@@ -9,6 +9,7 @@ import java.util.concurrent.ConcurrentMap;
 
 
 public final class ImageUtils {
+
     private static final ConcurrentMap<String, Image> imagesMap = new ConcurrentHashMap<>();
 
     public static Image getImage(Images type) {

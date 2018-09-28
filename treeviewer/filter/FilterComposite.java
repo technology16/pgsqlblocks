@@ -100,7 +100,7 @@ public class FilterComposite extends Composite {
     }
 
     /**
-     * Метод возвращает количество колонок в фильтре
+     * Method returns the number of columns in filter
      */
     private int findColumnNumber() {
         int i = filterList.size();

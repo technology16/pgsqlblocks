@@ -19,5 +19,5 @@
  */
 package ru.taximaxim.treeviewer.l10n;
 
-public class MyTreeViewer extends MyTreeViewer_ru {
+public class TreeViewer extends TreeViewer_ru {
 }

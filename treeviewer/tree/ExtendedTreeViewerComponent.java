@@ -8,7 +8,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.TreeColumn;
 import org.eclipse.swt.widgets.TreeItem;
-import ru.taximaxim.treeviewer.listeners.MyTreeViewerSortColumnSelectionListener;
+import ru.taximaxim.treeviewer.listeners.TreeViewerSortColumnSelectionListener;
 import ru.taximaxim.treeviewer.models.IObject;
 import ru.taximaxim.treeviewer.models.DataSource;
 import ru.taximaxim.treeviewer.models.IColumn;
@@ -24,7 +24,7 @@ public class ExtendedTreeViewerComponent<T extends IObject> extends TreeViewer {
 
     private DataSource<T> dataSource;
     private Set<IColumn> invisibleColumns;
-    private List<MyTreeViewerSortColumnSelectionListener> sortColumnlisteners = new ArrayList<>();
+    private List<TreeViewerSortColumnSelectionListener> sortColumnListeners = new ArrayList<>();
 
     public ExtendedTreeViewerComponent(Composite parent, int style) {
         super(parent, style);
@@ -54,7 +54,7 @@ public class ExtendedTreeViewerComponent<T extends IObject> extends TreeViewer {
             TreeViewerColumn treeColumn = new TreeViewerColumn(this, SWT.NONE);
             treeColumn.getColumn().setText(dataSource.getLocalizeString(column.getColumnName()));
             treeColumn.getColumn().setMoveable(true);
-            treeColumn.getColumn().setToolTipText(dataSource.getLocalizeString(column.getColumnTooltip())); // TODO: 29.08.18 Внешний bundle
+            treeColumn.getColumn().setToolTipText(dataSource.getLocalizeString(column.getColumnTooltip()));
             treeColumn.getColumn().setWidth(column.getColumnWidth());
             treeColumn.getColumn().setData(column);
             if (dataSource.columnIsSortable()) {
@@ -74,12 +74,12 @@ public class ExtendedTreeViewerComponent<T extends IObject> extends TreeViewer {
         }
     }
 
-    public void addSortListener(MyTreeViewerSortColumnSelectionListener listener){
-        sortColumnlisteners.add(listener);
+    public void addSortListener(TreeViewerSortColumnSelectionListener listener){
+        sortColumnListeners.add(listener);
     }
 
-    public void removeSortListener(MyTreeViewerSortColumnSelectionListener listener){
-        sortColumnlisteners.remove(listener);
+    public void removeSortListener(TreeViewerSortColumnSelectionListener listener){
+        sortColumnListeners.remove(listener);
     }
 
     private void selectSortColumn(TreeColumn column) {
@@ -99,7 +99,7 @@ public class ExtendedTreeViewerComponent<T extends IObject> extends TreeViewer {
             getTree().setSortDirection(SWT.DOWN);
         }
         int fSortDirection = sortDirection;
-        sortColumnlisteners.forEach(listener -> listener.didSelectSortColumn(column, fSortDirection));
+        sortColumnListeners.forEach(listener -> listener.didSelectSortColumn(column, fSortDirection));
     }
 
     public Set<IColumn> getInvisibleColumns() {
@@ -107,7 +107,7 @@ public class ExtendedTreeViewerComponent<T extends IObject> extends TreeViewer {
     }
 
     /**
-     * Список приходит из диалога конфигурации списка колонок
+     * The list comes from the column configuration dialog
      */
     public void setInvisibleColumns(Set<IColumn> invisible) {
         if (invisibleColumns != null) {
