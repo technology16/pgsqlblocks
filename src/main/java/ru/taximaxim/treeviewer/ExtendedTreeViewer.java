@@ -7,7 +7,8 @@ import org.eclipse.swt.widgets.*;
 import ru.taximaxim.treeviewer.dialog.ColumnConfigDialog;
 import ru.taximaxim.treeviewer.filter.FilterComposite;
 import ru.taximaxim.treeviewer.filter.FilterChangeHandler;
-import ru.taximaxim.treeviewer.listeners.MyTreeViewerSortColumnSelectionListener;
+import ru.taximaxim.treeviewer.l10n.TreeViewer;
+import ru.taximaxim.treeviewer.listeners.TreeViewerSortColumnSelectionListener;
 import ru.taximaxim.treeviewer.models.IObject;
 import ru.taximaxim.treeviewer.models.DataSource;
 import ru.taximaxim.treeviewer.models.ObjectViewComparator;
@@ -23,7 +24,7 @@ import java.util.ResourceBundle;
  * <br>
  * Supports filtering, sorting, l10n, hiding columns.
  */
-public class ExtendedTreeViewer<T extends IObject> extends Composite implements MyTreeViewerSortColumnSelectionListener{
+public class ExtendedTreeViewer<T extends IObject> extends Composite implements TreeViewerSortColumnSelectionListener {
 
     private ResourceBundle resourceBundle;
     private ExtendedTreeViewerComponent<T> tree;
@@ -48,11 +49,11 @@ public class ExtendedTreeViewer<T extends IObject> extends Composite implements 
     }
 
     private void initResourceBundle(Locale locale) {
-        resourceBundle = ResourceBundle.getBundle(ru.taximaxim.treeviewer.l10n.MyTreeViewer.class.getName(),
+        resourceBundle = ResourceBundle.getBundle(TreeViewer.class.getName(),
                 locale == null ? new Locale("ru") : locale);
     }
 
-    public void setInput(Object input) {
+    public void setInput(Object input) { // TODO: 28.09.18 Remove.
         tree.setInput(input);
     }
 
@@ -104,7 +105,6 @@ public class ExtendedTreeViewer<T extends IObject> extends Composite implements 
     private void openConfigColumnDialog() {
         ColumnConfigDialog dialog = new ColumnConfigDialog(resourceBundle, tree, this.getShell());
         dialog.open();
-
     }
 
     @Override

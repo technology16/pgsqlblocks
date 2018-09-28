@@ -21,7 +21,7 @@ package ru.taximaxim.treeviewer.l10n;
 
 import java.util.ListResourceBundle;
 
-public class MyTreeViewer_en extends ListResourceBundle {
+public class TreeViewer_en extends ListResourceBundle {
     @Override
     protected Object[][] getContents() {
         return new Object[][]{
