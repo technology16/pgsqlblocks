@@ -13,12 +13,12 @@ public enum Columns implements IColumn{
 
     private final String columnName;
     private final String columnTooltip;
-    private final int columnwidth;
+    private final int columnWidth;
 
-    Columns(String columnName, String columnTooltip, int columnwidth) {
+    Columns(String columnName, String columnTooltip, int columnWidth) {
         this.columnName = columnName;
         this.columnTooltip = columnTooltip;
-        this.columnwidth = columnwidth;
+        this.columnWidth = columnWidth;
     }
 
 
@@ -34,6 +34,6 @@ public enum Columns implements IColumn{
 
     @Override
     public int getColumnWidth() {
-        return columnwidth;
+        return columnWidth;
     }
 }
