@@ -106,7 +106,7 @@ public class FilterComposite extends Composite {
         int i = filterList.size();
         if (i == 1) {
             return 1;
-        }else if (i % 2 == 0) {
+        }else if (i==4 || i == 2) {
             return 2;
         } else {
             return 3;
