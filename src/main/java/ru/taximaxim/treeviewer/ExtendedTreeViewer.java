@@ -53,10 +53,6 @@ public class ExtendedTreeViewer<T extends IObject> extends Composite implements 
                 locale == null ? new Locale("ru") : locale);
     }
 
-    public void setInput(Object input) { // TODO: 28.09.18 Remove.
-        tree.setInput(input);
-    }
-
     public ExtendedTreeViewerComponent getTreeViewer() {
         return tree;
     }
