@@ -30,7 +30,7 @@ public class ExtendedTreeViewer<T extends IObject> extends Composite implements 
     private ExtendedTreeViewerComponent<T> tree;
     private FilterComposite filterComposite;
     private ObjectViewComparator comparator;
-    private FilterChangeHandler myViewFilter;
+    private FilterChangeHandler filterChangeHandler;
     private DataSource<T> dataSource;
 
     public ExtendedTreeViewer(Composite parent, int style, Object userData, DataSource<T> dataSource,
@@ -42,7 +42,7 @@ public class ExtendedTreeViewer<T extends IObject> extends Composite implements 
         GridData data = new GridData(SWT.FILL, SWT.FILL, true, true);
         setLayout(mainLayout);
         setLayoutData(data);
-        myViewFilter = new FilterChangeHandler(dataSource, tree);
+        filterChangeHandler = new FilterChangeHandler(dataSource);
         createContent();
         tree.setDataSource(dataSource);
         getTreeViewer().setInput(userData);
@@ -63,10 +63,11 @@ public class ExtendedTreeViewer<T extends IObject> extends Composite implements 
 
     private void createContent() {
         createToolItems();
-        filterComposite = new FilterComposite(this, SWT.TOP, resourceBundle, dataSource, myViewFilter);
+        filterComposite = new FilterComposite(this, SWT.TOP, resourceBundle, dataSource, filterChangeHandler);
         filterComposite.hide();
         tree = new ExtendedTreeViewerComponent<>(this,
                 SWT.FILL | SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL | SWT.FULL_SELECTION | SWT.MULTI);
+        filterChangeHandler.setTree(tree);
         tree.addSortListener(this);
     }
 
