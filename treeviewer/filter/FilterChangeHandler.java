@@ -15,10 +15,12 @@ public class FilterChangeHandler {
     private ExtendedTreeViewerComponent tree;
     private Map<IColumn, ViewerFilter> columnFilters = new HashMap<>();
     private ViewerFilter allTextFilter;
+    private FilterComparison filterComparison;
 
     public FilterChangeHandler(DataSource<? extends IObject> dataSource, ExtendedTreeViewerComponent tree) {
         this.dataSource = dataSource;
         this.tree = tree;
+        this.filterComparison = new FilterComparison();
     }
 
     void filterAllColumns(String searchText) {
@@ -31,7 +33,8 @@ public class FilterChangeHandler {
                     return dataSource.getColumnsToFilter().stream()
                             .anyMatch(column -> {
                                 String textFromObject = dataSource.getRowText(element, column);
-                                return FilterValues.CONTAINS.comparison(textFromObject, searchText);
+                                //return FilterValues.CONTAINS.comparison(textFromObject, searchText);
+                                return filterComparison.comparison(textFromObject, searchText);
                             });
                 }
             };
@@ -47,7 +50,9 @@ public class FilterChangeHandler {
                 @Override
                 public boolean select(Viewer viewer, Object parentElement, Object element) {
                     String textFromObject = dataSource.getRowText(element, column);
-                    return value.comparison(textFromObject, searchText);
+                    //return value.comparison(textFromObject, searchText);
+                    return new FilterComparison().comparison(textFromObject, searchText,
+                            value, column.getColumnType());
                 }
             };
             columnFilters.put(column, columnFilter);

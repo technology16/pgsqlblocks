@@ -42,9 +42,9 @@ public class ExtendedTreeViewer<T extends IObject> extends Composite implements 
         GridData data = new GridData(SWT.FILL, SWT.FILL, true, true);
         setLayout(mainLayout);
         setLayoutData(data);
+        myViewFilter = new FilterChangeHandler(dataSource, tree);
         createContent();
         tree.setDataSource(dataSource);
-        myViewFilter = new FilterChangeHandler(dataSource, tree);
         getTreeViewer().setInput(userData);
     }
 
