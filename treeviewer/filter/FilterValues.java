@@ -16,7 +16,7 @@ public enum FilterValues {
 //    GREATER_OR_EQUAL(">=", (objectValue, searchValue) -> getInteger(objectValue) >= getInteger(searchValue)), // FIXME а что с double? date?
 //    LESS("<", (objectValue, searchValue) -> getInteger(objectValue) < getInteger(searchValue)), // FIXME а что с double? date?
 //    LESS_OR_EQUAL("<=", (objectValue, searchValue) -> getInteger(objectValue) <= getInteger(searchValue));
-NONE(""),
+    NONE(""),
     EQUALS("="),
     NOT_EQUALS("!="),
     CONTAINS("~"),
@@ -40,52 +40,52 @@ NONE(""),
 //        return compareFunction.apply(objectValue, searchValue);
 //    }
 
-//    private static Boolean greaterFunction(String objectValue, String searchValue) {
-//        int type = getType(objectValue);
-//        switch (type) {
-//            case 1: //integer
-//                return getInteger(objectValue) > getInteger(searchValue);
-//            case 2: //double
-//                return getDouble(objectValue) > getDouble(searchValue);
-//            case 3: //date
-//                return getDate(objectValue).after(getDate(searchValue));
-//        }
-//        return false;
-//    }
+    private static Boolean greaterFunction(String objectValue, String searchValue) {
+        int type = getType(objectValue);
+        switch (type) {
+            case 1: //integer
+                return getInteger(objectValue) > getInteger(searchValue);
+            case 2: //double
+                return getDouble(objectValue) > getDouble(searchValue);
+            case 3: //date
+                return getDate(objectValue).after(getDate(searchValue));
+        }
+        return false;
+    }
 
-//    private static int getType(String text){
-//        if (text.matches("[0-9]+")){
-//            return 1;
-//        }else if (text.matches("[0-9]+\\.[0-9]+")){
-//            return 2;
-//        }
-//        return 3;
-//    }
-//
-//    private static int getInteger(String value){
-//        int i;
-//        try{
-//            i = Integer.parseInt(value);
-//        }catch (NumberFormatException e){
-//            i = 1;
-//        }
-//        return i;
-//    }
-//
-//    private static double getDouble(String value){
-//        double d;
-//        try {
-//            d = Double.parseDouble(value);
-//        }catch (NumberFormatException e){
-//            d = 1.0;
-//        }
-//        return d;
-//    }
-//
-//    private static Date getDate(String value){
-//
-//        return new Date();
-//    }
+    private static int getType(String text){
+        if (text.matches("[0-9]+")){
+            return 1;
+        }else if (text.matches("[0-9]+\\.[0-9]+")){
+            return 2;
+        }
+        return 3;
+    }
+
+    private static int getInteger(String value){
+        int i;
+        try{
+            i = Integer.parseInt(value);
+        }catch (NumberFormatException e){
+            i = 1;
+        }
+        return i;
+    }
+
+    private static double getDouble(String value){
+        double d;
+        try {
+            d = Double.parseDouble(value);
+        }catch (NumberFormatException e){
+            d = 1.0;
+        }
+        return d;
+    }
+
+    private static Date getDate(String value){
+
+        return new Date();
+    }
 
     @Override
     public String toString() {
