@@ -17,10 +17,13 @@ public class FilterChangeHandler {
     private ViewerFilter allTextFilter;
     private FilterComparison filterComparison;
 
-    public FilterChangeHandler(DataSource<? extends IObject> dataSource, ExtendedTreeViewerComponent tree) {
+    public FilterChangeHandler(DataSource<? extends IObject> dataSource) {
         this.dataSource = dataSource;
-        this.tree = tree;
         this.filterComparison = new FilterComparison();
+    }
+
+    public void setTree(ExtendedTreeViewerComponent tree) {
+        this.tree = tree;
     }
 
     void filterAllColumns(String searchText) {
