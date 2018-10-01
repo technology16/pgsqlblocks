@@ -37,7 +37,7 @@ public class App {
         shell.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
         ResourceBundle bundle = ResourceBundle.getBundle(l10n.AppBundle.class.getName(), new Locale("en"));
         ExampleDataSource dataSource = new ExampleDataSource(null);
-        ExtendedTreeViewer treeViewer = new ExtendedTreeViewer(shell, SWT.FILL | SWT.BORDER, list, dataSource, new Locale("en"));
+        ExtendedTreeViewer<Test> treeViewer = new ExtendedTreeViewer<Test>(shell, SWT.FILL | SWT.BORDER, list, dataSource, new Locale("en"));
         treeViewer.getTreeViewer().setInput(list);
         treeViewer.setComparator(new TestComparator());
         //treeViewer.setColumnsForFilterView(dataSource.getColumns());
