@@ -186,13 +186,11 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
             @Override
             public void terminateButtonClick() {
                 terminateButtonClicked(dbProcess);
-                dbProcessInfoDialog.close();
             }
 
             @Override
             public void cancelButtonClick() {
                 cancelButtonClicked(dbProcess);
-                dbProcessInfoDialog.close();
             }
         });
         dbProcessInfoDialog.open();

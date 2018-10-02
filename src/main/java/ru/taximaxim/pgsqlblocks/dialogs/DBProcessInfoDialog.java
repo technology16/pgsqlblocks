@@ -133,7 +133,7 @@ public class DBProcessInfoDialog extends Dialog{
         Label pidLabel = new Label(composite, SWT.HORIZONTAL);
         pidLabel.setText(resourceBundle.getString("query"));
 
-        StyledText pid = new StyledText(composite,   SWT.MULTI |SWT.BORDER | SWT.FULL_SELECTION | SWT.V_SCROLL);
+        StyledText pid = new StyledText(composite,   SWT.MULTI |SWT.BORDER | SWT.FULL_SELECTION | SWT.V_SCROLL | SWT.READ_ONLY);
 
         if (data != null) {
             pid.setText(data);
