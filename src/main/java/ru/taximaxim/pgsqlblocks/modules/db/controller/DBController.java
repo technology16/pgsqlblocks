@@ -28,10 +28,7 @@ import ru.taximaxim.pgpass.PgPassException;
 import ru.taximaxim.pgsqlblocks.common.DBQueries;
 import ru.taximaxim.pgsqlblocks.common.models.*;
 import ru.taximaxim.pgsqlblocks.modules.db.model.DBStatus;
-import ru.taximaxim.pgsqlblocks.utils.DateUtils;
-import ru.taximaxim.pgsqlblocks.utils.PathBuilder;
-import ru.taximaxim.pgsqlblocks.utils.Settings;
-import ru.taximaxim.pgsqlblocks.utils.XmlDocumentWorker;
+import ru.taximaxim.pgsqlblocks.utils.*;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -54,6 +51,7 @@ import static ru.taximaxim.pgsqlblocks.PgSqlBlocks.APP_NAME;
 public class DBController implements DBProcessFilterListener, DBBlocksJournalListener {
 
     private DBModel model;
+    private final UserInputPasswordProvider userInputPasswordProvider;
 
     private final List<DBProcess> processes = new ArrayList<>();
     private final List<DBProcess> filteredProcesses = new ArrayList<>();
@@ -87,10 +85,11 @@ public class DBController implements DBProcessFilterListener, DBBlocksJournalLis
     private Date blocksJournalCreateDate;
     private final DateUtils dateUtils = new DateUtils();
 
-    public DBController(Settings settings, DBModel model) {
+    public DBController(Settings settings, DBModel model, UserInputPasswordProvider userInputPasswordProvider) {
         this.settings = settings;
         this.resourceBundle = settings.getResourceBundle();
         this.model = model;
+        this.userInputPasswordProvider = userInputPasswordProvider;
         blocksJournalCreateDate = new Date();
         blocksJournal.addListener(this);
         processesFilters.addListener(this);
@@ -113,9 +112,18 @@ public class DBController implements DBProcessFilterListener, DBBlocksJournalLis
         return model.isEnabled();
     }
 
+    /**
+     * Connect to database. If getting password fails connection is not started
+     */
     public synchronized void connect() {
         executor.execute(() -> {
-            String password = getPassword();
+            String password;
+            try {
+                password = getPassword();
+            } catch (UserCancelException e) {
+                LOG.info("Пользователь отменил ввод пароля и подключение к " + model.getName() + " не состоялось");
+                return;
+            }
             try {
                 listeners.forEach(listener -> listener.dbControllerWillConnect(this));
 
@@ -135,16 +143,25 @@ public class DBController implements DBProcessFilterListener, DBBlocksJournalLis
         });
     }
 
-    private String getPassword() {
+    /**
+     * Get password from model or pgpass or user input
+     */
+    private String getPassword() throws UserCancelException {
+        String password = null;
         if (model.hasPassword()) {
-            return model.getPassword();
+            password = model.getPassword();
         }
-        String password = "";
-        try {
-            String pgPass = PgPass.get(model.getHost(), model.getPort(), model.getDatabaseName(), model.getUser());
-            password = pgPass == null ? password : pgPass;
-        } catch (PgPassException e) {
-            LOG.error("Ошибка получения пароля из pgpass файла " + e.getMessage(), e);
+
+        if (password == null) {
+            try {
+                password = PgPass.get(model.getHost(), model.getPort(), model.getDatabaseName(), model.getUser());
+            } catch (PgPassException e) {
+                LOG.warn("Ошибка получения пароля из pgpass файла " + e.getMessage(), e);
+            }
+        }
+
+        if (password == null) {
+            password = userInputPasswordProvider.getPasswordFromUser(this);
         }
         return password;
     }

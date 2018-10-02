@@ -142,7 +142,10 @@ public class PgSqlBlocks_ru extends ListResourceBundle {
                 {"missing_host_port", "Не заполнены обязательные поля: Хост и/или Порт!"},
                 {"missing_database_user", "Не заполнены обязательные поля: Имя БД и/или Имя пользователя!"},
                 {"attention", "Внимание!"},
-                {"process_info", "Информация о процессе"}
+                {"process_info", "Информация о процессе"},
+
+                //password dialog
+                {"type_password_for", "Ввведите пароль для подключения "}
         };
     }
 }

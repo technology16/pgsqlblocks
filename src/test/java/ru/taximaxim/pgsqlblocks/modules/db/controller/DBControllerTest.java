@@ -35,7 +35,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
@@ -106,7 +108,7 @@ public class DBControllerTest {
     @BeforeClass
     public static void initialize() throws IOException {
         DBModel model = new DBModel("TestDbc", REMOTE_HOST,  REMOTE_PORT, REMOTE_DB, REMOTE_USERNAME,  REMOTE_PASSWORD,  true);
-        testDbc = new DBController(Settings.getInstance(), model);
+        testDbc = new DBController(Settings.getInstance(), model, null);
         testDbc.connect();
         testDbc.addListener(listener);
     }

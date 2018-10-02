@@ -46,6 +46,7 @@ import ru.taximaxim.pgsqlblocks.dialogs.*;
 import ru.taximaxim.pgsqlblocks.modules.blocksjournal.view.BlocksJournalView;
 import ru.taximaxim.pgsqlblocks.modules.db.controller.DBController;
 import ru.taximaxim.pgsqlblocks.modules.db.controller.DBControllerListener;
+import ru.taximaxim.pgsqlblocks.modules.db.controller.UserInputPasswordProvider;
 import ru.taximaxim.pgsqlblocks.modules.db.model.DBStatus;
 import ru.taximaxim.pgsqlblocks.modules.processes.view.ProcessesView;
 import ru.taximaxim.pgsqlblocks.utils.*;
@@ -56,8 +57,8 @@ import java.util.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class ProcessesController implements DBControllerListener, DBModelsViewListener, SettingsListener,
-        DBProcessesViewDataSourceFilterListener, DBProcessesFiltersViewListener,
+public class ProcessesController implements DBControllerListener, UserInputPasswordProvider, DBModelsViewListener,
+        SettingsListener, DBProcessesViewDataSourceFilterListener, DBProcessesFiltersViewListener,
         TMTreeViewerSortColumnSelectionListener, DBProcessInfoViewListener {
 
     private static final Logger LOG = Logger.getLogger(ProcessesController.class);
@@ -375,7 +376,7 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
     }
 
     private DBController addDatabase(DBModel dbModel, int index) {
-        DBController controller = new DBController(settings, dbModel);
+        DBController controller = new DBController(settings, dbModel, this);
         controller.addListener(this);
         dbControllers.add(index, controller);
         return controller;
@@ -650,6 +651,26 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
                 }
             }
         });
+    }
+
+    @Override
+    public String getPasswordFromUser(DBController controller) throws UserCancelException {
+        final String[] pass = new String[1];
+
+        Display.getDefault().syncExec(() -> {
+            PasswordDialog passwordDialog = new PasswordDialog(resourceBundle, view.getShell(), controller.getModel());
+            if (passwordDialog.open() == Window.OK) {
+                pass[0] = passwordDialog.getPassword();
+            }else {
+                pass[0] = null;
+            }
+        });
+
+        if (pass[0] != null) {
+            return pass[0];
+        }else {
+            throw new UserCancelException();
+        }
     }
 
     @Override
