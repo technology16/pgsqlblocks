@@ -54,18 +54,25 @@ public enum FilterOperation {
     private static boolean equalsByType(String objectValue, String searchValue, ColumnType columnType) {
         switch (columnType) {
             case INTEGER:
-                Optional<Integer> object = getInteger(objectValue);
-                Optional<Integer> search = getInteger(searchValue);
-                if (!object.isPresent() || !search.isPresent()) {
+                Optional objectInt = getInteger(objectValue);
+                Optional searchInt = getInteger(searchValue);
+                if (!objectInt.isPresent() || !searchInt.isPresent()) {
                     return false;
+                } else {
+                    return objectInt == searchInt;
                 }
-                return object == search;
             case DOUBLE:
-                return getDouble(objectValue) == getDouble(searchValue);
+                Optional<Double> objectDouble = getDouble(objectValue);
+                Optional<Double> searchDouble = getDouble(searchValue);
+                if (!objectDouble.isPresent() || !searchDouble.isPresent()) {
+                    return false;
+                } else {
+                    return objectDouble == searchDouble;
+                }
             case DATE:
 //                Date objectDate = getDate(objectValue);
 //                Date searchDate = getDate(searchValue);
-//                return objectDate.after(searchDate) || objectDate.equals(searchDate);
+//                return objectDate.equals(searchDate);
             case STRING:
                 return objectValue.equals(searchValue);
         }
@@ -75,14 +82,21 @@ public enum FilterOperation {
     private static boolean greater(String objectValue, String searchValue, ColumnType columnType) {
         switch (columnType) {
             case INTEGER:
-                Optional<Integer> object = getInteger(objectValue);
-                Optional<Integer> search = getInteger(searchValue);
-                if (!object.isPresent() || !search.isPresent()) {
+                Optional<Integer> objectInt = getInteger(objectValue);
+                Optional<Integer> searchInt = getInteger(searchValue);
+                if (!objectInt.isPresent() || !searchInt.isPresent()) {
                     return false;
+                } else {
+                    return objectInt.get() > searchInt.get();
                 }
-                return object.get() > search.get();
             case DOUBLE:
-               // return getDouble(objectValue) > getDouble(searchValue);
+                Optional<Double> objectDouble = getDouble(objectValue);
+                Optional<Double> searchDouble = getDouble(searchValue);
+                if (!objectDouble.isPresent() || !searchDouble.isPresent()) {
+                    return false;
+                } else {
+                    return objectDouble.get() > searchDouble.get();
+                }
             case DATE:
                 //return getDate(objectValue).after(getDate(searchValue));
             case STRING:
@@ -94,14 +108,21 @@ public enum FilterOperation {
     private static boolean less(String objectValue, String searchValue, ColumnType columnType) {
         switch (columnType) {
             case INTEGER:
-                Optional<Integer> object = getInteger(objectValue);
-                Optional<Integer> search = getInteger(searchValue);
-                if (!object.isPresent() || !search.isPresent()) {
+                Optional<Integer> objectInt = getInteger(objectValue);
+                Optional<Integer> searchInt = getInteger(searchValue);
+                if (!objectInt.isPresent() || !searchInt.isPresent()) {
                     return false;
+                } else {
+                    return objectInt.get() < searchInt.get();
                 }
-                return object.get() < search.get();
             case DOUBLE:
-               // return getDouble(objectValue) < getDouble(searchValue);
+                Optional<Double> objectDouble = getDouble(objectValue);
+                Optional<Double> searchDouble = getDouble(searchValue);
+                if (!objectDouble.isPresent() || !searchDouble.isPresent()) {
+                    return false;
+                } else {
+                    return objectDouble.get() < searchDouble.get();
+                }
             case DATE:
                 //return getDate(objectValue).before(getDate(searchValue));
             case STRING:
@@ -118,7 +139,7 @@ public enum FilterOperation {
         }
     }
 
-    private static Optional<Double> getDouble(String value) { // TODO return optional value
+    private static Optional<Double> getDouble(String value) {
         try {
             return Optional.of(Double.parseDouble(value));
         } catch (NumberFormatException e) {
@@ -127,7 +148,7 @@ public enum FilterOperation {
     }
 
     // TODO: 01.10.18 parse date!!!!
-    private Date getDate(String value) {
-        return new Date();
+    private Optional<Date> getDate(String value) {
+        return Optional.empty();
     }
 }
