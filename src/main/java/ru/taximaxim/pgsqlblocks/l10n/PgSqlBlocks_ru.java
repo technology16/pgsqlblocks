@@ -72,7 +72,6 @@ public class PgSqlBlocks_ru extends ListResourceBundle {
                 {"show_saved_blocks_journals", "Показать сохраненные журналы блокировок"},
                 {"saved_blocks_journals", "Сохраненные журналы блокировок"},
                 {"open_dir", "Открыть директорию"},
-                {"duration", "Длительность"},
 
                 // action icons
                 {"add_db", "Добавить БД"},
@@ -112,6 +111,7 @@ public class PgSqlBlocks_ru extends ListResourceBundle {
                 {"undefined", "Без имени"},
                 {"block_start_date", "Блокировка началась"},
                 {"block_end_date", "Блокировка завершена"},
+                {"duration", "Длительность"},
 
                 // settings dialog
                 {"processes", "Процессы"},
@@ -141,7 +141,8 @@ public class PgSqlBlocks_ru extends ListResourceBundle {
                 {"already_exists", "Сервер с таким именем %s уже существует!"},
                 {"missing_host_port", "Не заполнены обязательные поля: Хост и/или Порт!"},
                 {"missing_database_user", "Не заполнены обязательные поля: Имя БД и/или Имя пользователя!"},
-                {"attention", "Внимание!"}
+                {"attention", "Внимание!"},
+                {"process_info", "Информация о процессе"}
         };
     }
 }
