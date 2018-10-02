@@ -6,6 +6,7 @@ import ru.taximaxim.treeviewer.models.IColumn;
 import ru.taximaxim.treeviewer.models.IObject;
 import ru.taximaxim.treeviewer.models.DataSource;
 import ru.taximaxim.treeviewer.tree.ExtendedTreeViewerComponent;
+import ru.taximaxim.treeviewer.utils.ColumnType;
 
 import java.util.*;
 
@@ -15,11 +16,9 @@ public class FilterChangeHandler {
     private ExtendedTreeViewerComponent tree;
     private Map<IColumn, ViewerFilter> columnFilters = new HashMap<>();
     private ViewerFilter allTextFilter;
-    private FilterComparison filterComparison;
 
     public FilterChangeHandler(DataSource<? extends IObject> dataSource) {
         this.dataSource = dataSource;
-        this.filterComparison = new FilterComparison();
     }
 
     public void setTree(ExtendedTreeViewerComponent tree) {
@@ -36,7 +35,7 @@ public class FilterChangeHandler {
                     return dataSource.getColumnsToFilter().stream()
                             .anyMatch(column -> {
                                 String textFromObject = dataSource.getRowText(element, column);
-                                return filterComparison.comparison(textFromObject, searchText);
+                                return FilterOperation.CONTAINS.matchesForType(textFromObject, searchText, ColumnType.STRING);
                             });
                 }
             };
@@ -44,16 +43,15 @@ public class FilterChangeHandler {
         updateFilters();
     }
 
-    void filter(String searchText, FilterValues value, IColumn column) {
-        if (searchText.isEmpty() || value == FilterValues.NONE) {
+    void filter(String searchText, FilterOperation value, IColumn column) {
+        if (searchText.isEmpty() || value == FilterOperation.NONE) {
             columnFilters.remove(column);
         } else {
             ViewerFilter columnFilter = new ViewerFilter() {
                 @Override
                 public boolean select(Viewer viewer, Object parentElement, Object element) {
                     String textFromObject = dataSource.getRowText(element, column);
-                    return new FilterComparison().comparison(textFromObject, searchText,
-                            value, column.getColumnType());
+                    return value.matchesForType(textFromObject, searchText, column.getColumnType());
                 }
             };
             columnFilters.put(column, columnFilter);
