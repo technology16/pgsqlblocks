@@ -88,15 +88,15 @@ public class FilterComposite extends Composite {
 
         Combo combo = new Combo(group, SWT.DROP_DOWN | SWT.READ_ONLY);
         combo.setLayoutData(comboLayoutData);
-        List<FilterValues> filterValues = Arrays.asList(FilterValues.values());
+        List<FilterOperation> filterValues = Arrays.asList(FilterOperation.values());
         filterValues.forEach( f -> combo.add(f.toString()));
         combo.select(7);
 
         Text filterText = new Text(group, SWT.FILL | SWT.BORDER);
         filterText.setLayoutData(textLayoutData);
 
-        combo.addModifyListener(e -> filterChangeHandler.filter(filterText.getText(), FilterValues.find(combo.getText()), column));
-        filterText.addModifyListener(e -> filterChangeHandler.filter(filterText.getText(), FilterValues.find(combo.getText()), column));
+        combo.addModifyListener(e -> filterChangeHandler.filter(filterText.getText(), FilterOperation.find(combo.getText()), column));
+        filterText.addModifyListener(e -> filterChangeHandler.filter(filterText.getText(), FilterOperation.find(combo.getText()), column));
     }
 
     /**
