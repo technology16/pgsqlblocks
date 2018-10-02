@@ -40,7 +40,6 @@ public class App {
         ExtendedTreeViewer<Test> treeViewer = new ExtendedTreeViewer<Test>(shell, SWT.FILL | SWT.BORDER, list, dataSource, new Locale("en"));
         treeViewer.getTreeViewer().setInput(list);
         treeViewer.setComparator(new TestComparator());
-        //treeViewer.setColumnsForFilterView(dataSource.getColumns());
 
         shell.open ();
         while (!shell.isDisposed()) {
