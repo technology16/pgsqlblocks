@@ -74,23 +74,4 @@ public class Test implements IObject {
         result = 31 * result + price;
         return result;
     }
-
-
-    // TODO: 28.08.18  добавить поиск по наследникам
-    @Override
-    public boolean isForAllTextFilter(String searchText) {
-        if (name.contains(searchText)) {
-            return true;
-        }
-        if (title.contains(searchText)) {
-            return true;
-        }
-        if (author.contains(searchText)) {
-            return true;
-        }
-        if (String.valueOf(price).contains(searchText)) {
-            return true;
-        }
-        return false;
-    }
 }

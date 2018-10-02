@@ -4,7 +4,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.*;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
-import ru.taximaxim.treeviewer.SwtTreeViewer;
+import ru.taximaxim.treeviewer.ExtendedTreeViewer;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -37,10 +37,9 @@ public class App {
         shell.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
         ResourceBundle bundle = ResourceBundle.getBundle(l10n.AppBundle.class.getName(), new Locale("en"));
         ExampleDataSource dataSource = new ExampleDataSource(null);
-        SwtTreeViewer treeViewer = new SwtTreeViewer(shell, SWT.FILL | SWT.BORDER, list, dataSource, bundle);
-        treeViewer.getTree().setInput(list);
+        ExtendedTreeViewer<Test> treeViewer = new ExtendedTreeViewer<Test>(shell, SWT.FILL | SWT.BORDER, list, dataSource, new Locale("en"));
+        treeViewer.getTreeViewer().setInput(list);
         treeViewer.setComparator(new TestComparator());
-        treeViewer.setColumnsForFilterView(dataSource.getColumns());
 
         shell.open ();
         while (!shell.isDisposed()) {

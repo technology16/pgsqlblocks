@@ -1,9 +1,8 @@
 package newview;
 
 import org.eclipse.swt.graphics.Image;
+import ru.taximaxim.treeviewer.models.DataSource;
 import ru.taximaxim.treeviewer.models.IColumn;
-import ru.taximaxim.treeviewer.models.MyTreeViewerDataSource;
-
 import java.util.Arrays;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -11,7 +10,7 @@ import java.util.ResourceBundle;
 /**
  * Created by user on 16.08.18.
  */
-public class ExampleDataSource extends MyTreeViewerDataSource{
+public class ExampleDataSource extends DataSource<Test> {
 
     protected final ResourceBundle resourceBundle;
 
@@ -31,13 +30,14 @@ public class ExampleDataSource extends MyTreeViewerDataSource{
         return list;
     }
 
+    @Override
+    public List<? extends IColumn> getColumnsToFilter() {
+        return Arrays.<IColumn>asList(Columns.values());
+    }
 
     @Override
-    public String getLocalizeString(String name) {
-        if (resourceBundle != null) {
-            return resourceBundle.getString(name);
-        }
-        return name;
+    public ResourceBundle getResourceBundle() {
+        return resourceBundle;
     }
 
     @Override

@@ -4,7 +4,7 @@
 
     <groupId>ru.taximaxim</groupId>
     <artifactId>swttreeviewer</artifactId>
-    <version>0.0.1</version>
+    <version>0.0.2</version>
     <packaging>jar</packaging>
 
     <properties>
@@ -13,18 +13,9 @@
         <swt.artifactId>org.eclipse.swt.gtk.linux.x86_64</swt.artifactId>
         <swt.id>Linux-x86_64</swt.id>
         <swt.version>3.105.3</swt.version>
-        <mainClass>ru.taximaxim.treeviewer.SwtTreeViewer</mainClass>
-        <license.licenseName>apache_v2</license.licenseName>
         <ftpRepository.id>taximaxim-chelny</ftpRepository.id>
         <ftpRepository.url>ftp://ftp:ftp@storage.chelny.taximaxim.ru/mvn</ftpRepository.url>
     </properties>
-
-    <repositories>
-        <repository>
-            <id>swt-repo</id>
-            <url>http://maven-eclipse.github.io/maven</url>
-        </repository>
-    </repositories>
 
     <build>
         <plugins>
@@ -76,7 +67,6 @@
                     <archive>
                         <manifest>
                             <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
-                            <mainClass>${mainClass}</mainClass>
                         </manifest>
                     </archive>
                     <appendAssemblyId>false</appendAssemblyId>
@@ -110,11 +100,6 @@
             <artifactId>junit</artifactId>
             <version>4.11</version>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>log4j</groupId>
-            <artifactId>log4j</artifactId>
-            <version>1.2.17</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.platform</groupId>

@@ -1,6 +1,5 @@
 package ru.taximaxim.treeviewer.tree;
 
-
 import org.eclipse.jface.viewers.*;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
@@ -9,8 +8,9 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.TreeColumn;
 import org.eclipse.swt.widgets.TreeItem;
-import ru.taximaxim.treeviewer.listeners.MyTreeViewerSortColumnSelectionListener;
-import ru.taximaxim.treeviewer.models.MyTreeViewerDataSource;
+import ru.taximaxim.treeviewer.listeners.TreeViewerSortColumnSelectionListener;
+import ru.taximaxim.treeviewer.models.IObject;
+import ru.taximaxim.treeviewer.models.DataSource;
 import ru.taximaxim.treeviewer.models.IColumn;
 
 import java.util.ArrayList;
@@ -20,13 +20,13 @@ import java.util.Set;
 /**
  * Class for TreeViewer
  */
-public class SwtTreeViewerTable extends TreeViewer{
+public class ExtendedTreeViewerComponent<T extends IObject> extends TreeViewer {
 
-    private MyTreeViewerDataSource dataSource;
+    private DataSource<T> dataSource;
     private Set<IColumn> invisibleColumns;
-    private List<MyTreeViewerSortColumnSelectionListener> sortColumnlisteners = new ArrayList<>();
+    private List<TreeViewerSortColumnSelectionListener> sortColumnListeners = new ArrayList<>();
 
-    public SwtTreeViewerTable(Composite parent, int style) {
+    public ExtendedTreeViewerComponent(Composite parent, int style) {
         super(parent, style);
         getTree().setLinesVisible(true);
         getTree().setHeaderVisible(true);
@@ -34,13 +34,13 @@ public class SwtTreeViewerTable extends TreeViewer{
         getTree().setLayoutData(data);
     }
 
-    public MyTreeViewerDataSource getDataSource() {
+    public DataSource<T> getDataSource() {
         return dataSource;
     }
 
-    public void setDataSource(MyTreeViewerDataSource dataSource) {
+    public void setDataSource(DataSource<T> dataSource) {
         if (this.dataSource != null) {
-            throw new IllegalStateException("SwtTreeViewerTable already contains data source");
+            throw new IllegalStateException("ExtendedTreeViewerComponent already contains data source");
         }
         this.dataSource = dataSource;
         createColumns();
@@ -54,7 +54,7 @@ public class SwtTreeViewerTable extends TreeViewer{
             TreeViewerColumn treeColumn = new TreeViewerColumn(this, SWT.NONE);
             treeColumn.getColumn().setText(dataSource.getLocalizeString(column.getColumnName()));
             treeColumn.getColumn().setMoveable(true);
-            treeColumn.getColumn().setToolTipText(dataSource.getLocalizeString(column.getColumnTooltip())); // TODO: 29.08.18 Внешний bundle
+            treeColumn.getColumn().setToolTipText(dataSource.getLocalizeString(column.getColumnTooltip()));
             treeColumn.getColumn().setWidth(column.getColumnWidth());
             treeColumn.getColumn().setData(column);
             if (dataSource.columnIsSortable()) {
@@ -74,12 +74,12 @@ public class SwtTreeViewerTable extends TreeViewer{
         }
     }
 
-    public void addSortListener(MyTreeViewerSortColumnSelectionListener listener){
-        sortColumnlisteners.add(listener);
+    public void addSortListener(TreeViewerSortColumnSelectionListener listener){
+        sortColumnListeners.add(listener);
     }
 
-    public void removeSortListener(MyTreeViewerSortColumnSelectionListener listener){
-        sortColumnlisteners.remove(listener);
+    public void removeSortListener(TreeViewerSortColumnSelectionListener listener){
+        sortColumnListeners.remove(listener);
     }
 
     private void selectSortColumn(TreeColumn column) {
@@ -99,7 +99,7 @@ public class SwtTreeViewerTable extends TreeViewer{
             getTree().setSortDirection(SWT.DOWN);
         }
         int fSortDirection = sortDirection;
-        sortColumnlisteners.forEach(listener -> listener.didSelectSortColumn(column, fSortDirection));
+        sortColumnListeners.forEach(listener -> listener.didSelectSortColumn(column, fSortDirection));
     }
 
     public Set<IColumn> getInvisibleColumns() {
@@ -107,7 +107,7 @@ public class SwtTreeViewerTable extends TreeViewer{
     }
 
     /**
-     * Список приходит из диалога конфигурации списка колонок
+     * The list comes from the column configuration dialog
      */
     public void setInvisibleColumns(Set<IColumn> invisible) {
         if (invisibleColumns != null) {

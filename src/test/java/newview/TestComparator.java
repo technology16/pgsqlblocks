@@ -1,12 +1,12 @@
 package newview;
 
+
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.TreeColumn;
 import ru.taximaxim.treeviewer.models.ObjectViewComparator;
 
-
-public class TestComparator extends ObjectViewComparator{
+public class TestComparator extends ObjectViewComparator {
 
     private Columns column;
     private int sortDirection;
