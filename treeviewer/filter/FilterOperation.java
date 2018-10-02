@@ -3,8 +3,9 @@ package ru.taximaxim.treeviewer.filter;
 import ru.taximaxim.treeviewer.utils.ColumnType;
 import ru.taximaxim.treeviewer.utils.TriFunction;
 
-import java.util.Date;
 import java.util.Optional;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
 /**
  * Enum for types of column filters
@@ -54,25 +55,10 @@ public enum FilterOperation {
     private static boolean equalsByType(String objectValue, String searchValue, ColumnType columnType) {
         switch (columnType) {
             case INTEGER:
-                Optional objectInt = getInteger(objectValue);
-                Optional searchInt = getInteger(searchValue);
-                if (!objectInt.isPresent() || !searchInt.isPresent()) {
-                    return false;
-                } else {
-                    return objectInt == searchInt;
-                }
+                return testMatches(objectValue, searchValue, FilterOperation::getInteger, (i1, i2) -> i1.equals(i2));
             case DOUBLE:
-                Optional<Double> objectDouble = getDouble(objectValue);
-                Optional<Double> searchDouble = getDouble(searchValue);
-                if (!objectDouble.isPresent() || !searchDouble.isPresent()) {
-                    return false;
-                } else {
-                    return objectDouble == searchDouble;
-                }
+                return testMatches(objectValue, searchValue, FilterOperation::getDouble, (i1, i2) -> i1.equals(i2));
             case DATE:
-//                Date objectDate = getDate(objectValue);
-//                Date searchDate = getDate(searchValue);
-//                return objectDate.equals(searchDate);
             case STRING:
                 return objectValue.equals(searchValue);
         }
@@ -82,23 +68,10 @@ public enum FilterOperation {
     private static boolean greater(String objectValue, String searchValue, ColumnType columnType) {
         switch (columnType) {
             case INTEGER:
-                Optional<Integer> objectInt = getInteger(objectValue);
-                Optional<Integer> searchInt = getInteger(searchValue);
-                if (!objectInt.isPresent() || !searchInt.isPresent()) {
-                    return false;
-                } else {
-                    return objectInt.get() > searchInt.get();
-                }
+                return testMatches(objectValue, searchValue, FilterOperation::getInteger, (i1, i2) -> i1 > i2);
             case DOUBLE:
-                Optional<Double> objectDouble = getDouble(objectValue);
-                Optional<Double> searchDouble = getDouble(searchValue);
-                if (!objectDouble.isPresent() || !searchDouble.isPresent()) {
-                    return false;
-                } else {
-                    return objectDouble.get() > searchDouble.get();
-                }
+                return testMatches(objectValue, searchValue, FilterOperation::getDouble, (i1, i2) -> i1 > i2);
             case DATE:
-                //return getDate(objectValue).after(getDate(searchValue));
             case STRING:
                 return objectValue.compareTo(searchValue) > 0;
         }
@@ -108,27 +81,21 @@ public enum FilterOperation {
     private static boolean less(String objectValue, String searchValue, ColumnType columnType) {
         switch (columnType) {
             case INTEGER:
-                Optional<Integer> objectInt = getInteger(objectValue);
-                Optional<Integer> searchInt = getInteger(searchValue);
-                if (!objectInt.isPresent() || !searchInt.isPresent()) {
-                    return false;
-                } else {
-                    return objectInt.get() < searchInt.get();
-                }
+                return testMatches(objectValue, searchValue, FilterOperation::getInteger, (i1, i2) -> i1 < i2);
             case DOUBLE:
-                Optional<Double> objectDouble = getDouble(objectValue);
-                Optional<Double> searchDouble = getDouble(searchValue);
-                if (!objectDouble.isPresent() || !searchDouble.isPresent()) {
-                    return false;
-                } else {
-                    return objectDouble.get() < searchDouble.get();
-                }
+                return testMatches(objectValue, searchValue, FilterOperation::getInteger, (i1, i2) -> i1 < i2);
             case DATE:
-                //return getDate(objectValue).before(getDate(searchValue));
             case STRING:
                 return objectValue.compareTo(searchValue) < 0;
         }
         return false;
+    }
+
+    private static <T> boolean testMatches(String objectValue, String searchValue,
+                                           Function<String, Optional<T>> converter, BiFunction<T, T, Boolean> matcher) {
+        Optional<T> objectOpt = converter.apply(objectValue);
+        Optional<T> searchOpt = converter.apply(searchValue);
+        return objectOpt.isPresent() && searchOpt.isPresent() && matcher.apply(objectOpt.get(), searchOpt.get());
     }
 
     private static Optional<Integer> getInteger(String value) {
@@ -145,10 +112,5 @@ public enum FilterOperation {
         } catch (NumberFormatException e) {
             return Optional.empty();
         }
-    }
-
-    // TODO: 01.10.18 parse date!!!!
-    private Optional<Date> getDate(String value) {
-        return Optional.empty();
     }
 }
