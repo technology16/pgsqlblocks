@@ -45,7 +45,7 @@ public class FilterComparison {
             case DOUBLE:
                 return getDouble(objectValue) > getDouble(searchValue);
             case DATE:
-                return getDate(objectValue).after(getDate(searchValue));
+                //return getDate(objectValue).after(getDate(searchValue));
             case STRING:
                 return objectValue.compareTo(searchValue) > 0;
         }
@@ -59,9 +59,9 @@ public class FilterComparison {
             case DOUBLE:
                 return getDouble(objectValue) >= getDouble(searchValue);
             case DATE:
-                Date objectDate = getDate(objectValue);
-                Date searchDate = getDate(searchValue);
-                return objectDate.after(searchDate) || objectDate.equals(searchDate);
+//                Date objectDate = getDate(objectValue);
+//                Date searchDate = getDate(searchValue);
+//                return objectDate.after(searchDate) || objectDate.equals(searchDate);
             case STRING:
                 return objectValue.compareTo(searchValue) >= 0;
         }
@@ -75,7 +75,7 @@ public class FilterComparison {
             case DOUBLE:
                 return getDouble(objectValue) < getDouble(searchValue);
             case DATE:
-                return getDate(objectValue).before(getDate(searchValue));
+                //return getDate(objectValue).before(getDate(searchValue));
             case STRING:
                 return objectValue.compareTo(searchValue) < 0;
         }
@@ -89,9 +89,9 @@ public class FilterComparison {
             case DOUBLE:
                 return getDouble(objectValue) <= getDouble(searchValue);
             case DATE:
-                Date objectDate = getDate(objectValue);
-                Date searchDate = getDate(searchValue);
-                return objectDate.before(searchDate) || objectDate.equals(searchDate);
+//                Date objectDate = getDate(objectValue);
+//                Date searchDate = getDate(searchValue);
+//                return objectDate.before(searchDate) || objectDate.equals(searchDate);
             case STRING:
                 return objectValue.compareTo(searchValue) <= 0;
         }
@@ -118,7 +118,7 @@ public class FilterComparison {
         return d;
     }
 
-    // TODO: 01.10.18 [arse date!!!!
+    // TODO: 01.10.18 parse date!!!!
     private Date getDate(String value){
         return new Date();
     }
