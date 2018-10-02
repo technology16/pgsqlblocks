@@ -171,9 +171,10 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
         dbProcessesView.getTreeViewer().addSelectionChangedListener(this::dbProcessesViewSelectionChanged);
         dbProcessesView.getTreeViewer().getTree().addTraverseListener(e -> {
             if (e.detail == SWT.TRAVERSE_RETURN) {
-                IStructuredSelection structuredSelection = dbProcessesView.getTreeViewer().getStructuredSelection();
-                DBProcess process = (DBProcess) structuredSelection.getFirstElement();
-                openProcessInfoDialog(process);
+                IStructuredSelection selection = dbProcessesView.getTreeViewer().getStructuredSelection();
+                if (!selection.isEmpty()) {
+                    openProcessInfoDialog((DBProcess) selection.getFirstElement());
+                }
             }
         });
 
@@ -184,7 +185,7 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
         processesTabItem.setControl(processesViewSash);
     }
 
-    private void openProcessInfoDialog(DBProcess dbProcess){
+    private void openProcessInfoDialog(DBProcess dbProcess) {
         DBProcessInfoDialog dbProcessInfoDialog = new DBProcessInfoDialog(resourceBundle, view.getShell(), dbProcess, false);
         dbProcessInfoDialog.setProcessInfoListener(new DBProcessInfoDialog.ProcessInfoListener() {
             @Override
@@ -206,7 +207,7 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
             return;
         }
         List<Integer> pidProcessesList = Collections.singletonList(dbProcess.getPid());
-        cancellingProcessesByPif((DBController) selectedController, pidProcessesList);
+        cancelProcessesByPid((DBController) selectedController, pidProcessesList);
     }
 
     private void terminateButtonClicked(DBProcess dbProcess) {
@@ -215,7 +216,7 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
             return;
         }
         List<Integer> pidProcessesList = Collections.singletonList(dbProcess.getPid());
-        terminatingProcessesByPid((DBController) selectedController, pidProcessesList);
+        terminateProcessesByPid((DBController) selectedController, pidProcessesList);
     }
 
     private void createBlocksJournalTab() {
@@ -902,16 +903,15 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
             return;
         }
         List<Integer> pidProcessesList = selectedProcesses.stream().map(DBProcess::getPid).collect(Collectors.toList());
-        terminatingProcessesByPid((DBController) selectedController, pidProcessesList);
+        terminateProcessesByPid((DBController) selectedController, pidProcessesList);
     }
 
-    private void terminatingProcessesByPid(DBController selectedController, List<Integer> pidProcessesList) {
+    private void terminateProcessesByPid(DBController selectedController, List<Integer> pidProcessesList) {
         if (settings.isConfirmRequired() && !MessageDialog.openQuestion(view.getShell(), l10n("confirm_action"),
                 l10n("kill_process_confirm_message", pidProcessesList))) {
             return;
         }
 
-        DBController selectedDbController = selectedController;
         ProgressMonitorDialog dialog = new ProgressMonitorDialog(Display.getDefault().getActiveShell());
         try {
             dialog.run(true, true, progressMonitor -> {
@@ -922,7 +922,7 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
                         progressMonitor.done();
                         break;
                     } else {
-                        tryTerminateProcess(selectedDbController, processPid);
+                        tryTerminateProcess(selectedController, processPid);
                         progressMonitor.worked(1);
                     }
                 }
@@ -930,7 +930,7 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
         } catch (InvocationTargetException | InterruptedException e) {
             LOG.error(l10n("kill_process_error_message", e.getMessage()), e);
         } finally {
-            selectedDbController.updateProcesses();
+            selectedController.updateProcesses();
         }
     }
 
@@ -954,16 +954,15 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
             return;
         }
         List<Integer> pidProcessesList = selectedProcesses.stream().map(DBProcess::getPid).collect(Collectors.toList());
-        cancellingProcessesByPif((DBController) selectedController, pidProcessesList);
+        cancelProcessesByPid((DBController) selectedController, pidProcessesList);
     }
 
-    private void cancellingProcessesByPif(DBController selectedController, List<Integer> pidProcessesList) {
+    private void cancelProcessesByPid(DBController selectedController, List<Integer> pidProcessesList) {
         if (settings.isConfirmRequired() && !MessageDialog.openQuestion(view.getShell(), l10n("confirm_action"),
                 l10n("cancel_process_confirm_message", pidProcessesList))) {
             return;
         }
 
-        DBController selectedDbController = selectedController;
         ProgressMonitorDialog dialog = new ProgressMonitorDialog(Display.getDefault().getActiveShell());
         try {
             dialog.run(true, true, progressMonitor -> {
@@ -974,7 +973,7 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
                         progressMonitor.done();
                         break;
                     } else {
-                        tryCancelProcess(selectedDbController, processPid);
+                        tryCancelProcess(selectedController, processPid);
                         progressMonitor.worked(1);
                     }
                 }
@@ -982,7 +981,7 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
         } catch (InvocationTargetException | InterruptedException e) {
             LOG.error(l10n("cancel_process_error_message", e.getMessage()), e);
         } finally {
-            selectedDbController.updateProcesses();
+            selectedController.updateProcesses();
         }
     }
 
