@@ -144,9 +144,7 @@ public class PgSqlBlocks_ru extends ListResourceBundle {
                 {"attention", "Внимание!"},
 
                 //password dialog
-                {"type_password_for", "Ввведите пароль для подключения "},
-                {"and_user", " и пользователя "}
-
+                {"type_password_for", "Ввведите пароль для подключения "}
         };
     }
 }

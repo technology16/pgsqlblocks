@@ -144,8 +144,7 @@ public class PgSqlBlocks_en extends ListResourceBundle {
                 {"attention", "Attention!"},
 
                 //password dialog
-                {"type_password_for", "Type password for database "},
-                {"and_user", " and user "}
+                {"type_password_for", "Type password for database "}
         };
     }
 }
