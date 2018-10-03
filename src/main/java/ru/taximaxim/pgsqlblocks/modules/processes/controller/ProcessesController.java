@@ -332,6 +332,7 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
                 }
                 });
             dbControllers.clear();
+            dbModelsProvider.save(dbModels);
         }
         dbModels.forEach(this::addDatabase);
         dbModelsView.getTableViewer().refresh();
@@ -353,7 +354,6 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
                 }
             });
         });
-        dbModelsProvider.save(models);
     }
 
     private DBController addDatabase(DBModel dbModel) {
