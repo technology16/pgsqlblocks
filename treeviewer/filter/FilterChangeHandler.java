@@ -33,28 +33,29 @@ public class FilterChangeHandler {
                 @Override
                 public boolean select(Viewer viewer, Object parentElement, Object element) {
                     return dataSource.getColumnsToFilter().stream()
-                            .anyMatch(column -> testAll(column, element, searchText));
+                            .anyMatch(column -> match(column, element, searchText,
+                                    FilterOperation.CONTAINS, ColumnType.STRING));
                 }
             };
         }
         updateFilters();
     }
 
-    private boolean testAll(IColumn column, Object element, String searchText) {
+    private boolean match(IColumn column, Object element, String searchText,
+                          FilterOperation value, ColumnType columnType) {
         IObject parentObject = (IObject) element;
         if (parentObject.getChildren().isEmpty()) {
             String textFromObject = dataSource.getRowText(element, column);
-            return FilterOperation.CONTAINS.matchesForType(textFromObject, searchText, ColumnType.STRING);
+            return value.matchesForType(textFromObject, searchText, columnType);
         } else {
             for (Object child : parentObject.getChildren()) {
-                if (testAll(column, child, searchText)) {
+                if (match(column, child, searchText, value, columnType)) {
                     return true;
                 }
             }
         }
         return false;
     }
-
 
     void filter(String searchText, FilterOperation value, IColumn column) {
         if (searchText.isEmpty() || value == FilterOperation.NONE) {
@@ -63,8 +64,7 @@ public class FilterChangeHandler {
             ViewerFilter columnFilter = new ViewerFilter() {
                 @Override
                 public boolean select(Viewer viewer, Object parentElement, Object element) {
-                    String textFromObject = dataSource.getRowText(element, column);
-                    return value.matchesForType(textFromObject, searchText, column.getColumnType());
+                    return match(column, element, searchText, value, column.getColumnType());
                 }
             };
             columnFilters.put(column, columnFilter);
