@@ -20,7 +20,6 @@ public class App {
         Shell shell = new Shell (display);
         shell.setLayout(new GridLayout());
         shell.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-        ResourceBundle bundle = ResourceBundle.getBundle(l10n.AppBundle.class.getName(), new Locale("en"));
         ExampleDataSource dataSource = new ExampleDataSource(null);
         ExtendedTreeViewer<Test> treeViewer = new ExtendedTreeViewer<Test>(shell, SWT.FILL | SWT.BORDER, testList, dataSource, new Locale("en"));
         treeViewer.getTreeViewer().setInput(testList);
@@ -53,6 +52,12 @@ public class App {
         Test childObject31 = new Test("childtest31", "childTitle", "childAuthor", 300);
         Test childObject32 = new Test("childtest32", "childTitle", "childAuthor", 185);
         Test childObject33 = new Test("childtest33", "childTitle", "childAuthor", 315);
+
+        Test subchildObject31 = new Test("childtest311", "childTitle", "subChildAuthor", 33300);
+        Test subchildObject32 = new Test("childtest321", "childTitle", "childAuthor", 2185);
+        Test subchildObject33 = new Test("childtest331", "childTitle", "childAuthor", 2315);
+
+        childObject1.setChildren(Arrays.asList(subchildObject31, subchildObject32, subchildObject33));
 
         childlist.addAll(Arrays.asList(childObject1, childObject2, childObject3));
         childlist2.addAll(Arrays.asList(childObject21, childObject22, childObject23));
