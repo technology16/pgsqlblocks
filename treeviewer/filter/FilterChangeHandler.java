@@ -33,15 +33,28 @@ public class FilterChangeHandler {
                 @Override
                 public boolean select(Viewer viewer, Object parentElement, Object element) {
                     return dataSource.getColumnsToFilter().stream()
-                            .anyMatch(column -> {
-                                String textFromObject = dataSource.getRowText(element, column);
-                                return FilterOperation.CONTAINS.matchesForType(textFromObject, searchText, ColumnType.STRING);
-                            });
+                            .anyMatch(column -> testAll(column, element, searchText));
                 }
             };
         }
         updateFilters();
     }
+
+    private boolean testAll(IColumn column, Object element, String searchText) {
+        IObject parentObject = (IObject) element;
+        if (parentObject.getChildren().isEmpty()) {
+            String textFromObject = dataSource.getRowText(element, column);
+            return FilterOperation.CONTAINS.matchesForType(textFromObject, searchText, ColumnType.STRING);
+        } else {
+            for (Object child : parentObject.getChildren()) {
+                if (testAll(column, child, searchText)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
 
     void filter(String searchText, FilterOperation value, IColumn column) {
         if (searchText.isEmpty() || value == FilterOperation.NONE) {
