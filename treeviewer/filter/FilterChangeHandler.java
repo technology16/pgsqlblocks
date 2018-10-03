@@ -32,9 +32,12 @@ public class FilterChangeHandler {
             allTextFilter = new ViewerFilter() {
                 @Override
                 public boolean select(Viewer viewer, Object parentElement, Object element) {
-                    return dataSource.getColumnsToFilter().stream()
-                            .anyMatch(column -> match(column, element, searchText,
-                                    FilterOperation.CONTAINS, ColumnType.STRING));
+                    if (parentElement instanceof ArrayList) {
+                        return dataSource.getColumnsToFilter().stream()
+                                .anyMatch(column -> match(column, element, searchText,
+                                        FilterOperation.CONTAINS, ColumnType.STRING));
+                    }
+                    return true;
                 }
             };
         }
@@ -44,17 +47,15 @@ public class FilterChangeHandler {
     private boolean match(IColumn column, Object element, String searchText,
                           FilterOperation value, ColumnType columnType) {
         IObject parentObject = (IObject) element;
-        if (parentObject.getChildren().isEmpty()) {
-            String textFromObject = dataSource.getRowText(element, column);
-            return value.matchesForType(textFromObject, searchText, columnType);
-        } else {
+        if (parentObject.hasChildren()) {
             for (Object child : parentObject.getChildren()) {
                 if (match(column, child, searchText, value, columnType)) {
                     return true;
                 }
             }
         }
-        return false;
+        String textFromObject = dataSource.getRowText(element, column);
+        return value.matchesForType(textFromObject, searchText, columnType);
     }
 
     void filter(String searchText, FilterOperation value, IColumn column) {
@@ -64,7 +65,10 @@ public class FilterChangeHandler {
             ViewerFilter columnFilter = new ViewerFilter() {
                 @Override
                 public boolean select(Viewer viewer, Object parentElement, Object element) {
-                    return match(column, element, searchText, value, column.getColumnType());
+                    if (parentElement instanceof ArrayList) {
+                        return match(column, element, searchText, value, column.getColumnType());
+                    }
+                    return true;
                 }
             };
             columnFilters.put(column, columnFilter);
