@@ -73,7 +73,6 @@ PROJECT="pgsqlblocks"
 
 # Создаем временные файлы и пишем в переменную
 some=$(mktemp /tmp/some.XXXXXX)
-echo ${some}
 file=$(mktemp /tmp/file.XXXXXX)
 file2=$(mktemp /tmp/file2.XXXXXX)
 descr=$(mktemp /tmp/descr.XXXXXX)
@@ -166,7 +165,7 @@ done
 
 GH_URL="https://api.github.com/repos/$OWNER_OF_REPO/$PROJECT/releases?access_token=$GIT_TOKEN"
 # Отправляем запрос, в ответ приходит JSON с полным описанием релиза. Из него получаем id релиза.
-response=$(curl -H "Content-Type: application/json" --data-binary ""@file2.json"" $GH_URL | grep -m 1 "id.:")
+response=$(curl -H "Content-Type: application/json" --data-binary @"$file2" $GH_URL | grep -m 1 "id.:")
 # Приводим id релиза в нормальный вид. ID нужен для загрузки ассетов
 id=$(grep -o '[[:digit:]]*' <<< "$response")
 # Construct url
@@ -180,9 +179,6 @@ do
     GH_ASSET="https://uploads.github.com/repos/"$OWNER_OF_REPO"/"$PROJECT"/releases/"$id"/assets?name="${filename}""
     curl -sS -H "Authorization: token $GIT_TOKEN" -H "Content-Type: application/octet-stream" --data-binary @"$file"  $GH_ASSET > /dev/null
 done
-
-$(clean_tmp_files);
-
 git fetch --tags
 
 x-www-browser https://github.com/$OWNER_OF_REPO/$PROJECT/releases/latest
