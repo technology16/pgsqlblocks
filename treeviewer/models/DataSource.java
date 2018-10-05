@@ -6,6 +6,7 @@ import org.eclipse.jface.viewers.ITreeContentProvider;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
 /**
@@ -38,7 +39,15 @@ public abstract class DataSource<T extends IObject> implements ITableLabelProvid
     public abstract String getRowText(Object element, IColumn column);
 
     public String getLocalizeString(String name) {
-        return getResourceBundle() == null ? name : getResourceBundle().getString(name);
+        if (getResourceBundle() == null) {
+            return name;
+        } else {
+            try {
+                return getResourceBundle().getString(name);
+            } catch (MissingResourceException e){
+                return name;
+            }
+        }
     }
 
     @Override
