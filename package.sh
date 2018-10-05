@@ -66,8 +66,7 @@ DRAFT=false
 # Если true, то это пререлиз
 PRERELEASE=false
 # Владелец репозитория
-OWNER_OF_REPO="Nataly-Sagel"
-#OWNER_OF_REPO="technology16"
+OWNER_OF_REPO="technology16"
 # Название репозитория
 PROJECT="pgsqlblocks"
 
@@ -94,7 +93,6 @@ LAST=$(get_last_version)
 # выбирает весь текст между, например, 1.0.0 и 0.0.9 и пишет в файл some.md
 # так как в файл пишется вместе с ненужными номерами версий, грепаем эти строки и пишем в переменную
 get_descr(){
-#sed -n  "/"$version"/,/"$LAST"/p" CHANGELOG.md > some.md
 sed -n  "/"$version"/,/"$LAST"/p" CHANGELOG.md > ${some}
 grep -v  "^[0-9]*\.[0-9]*" ${some} > ${descr}
 }
@@ -165,9 +163,18 @@ done
 
 GH_URL="https://api.github.com/repos/$OWNER_OF_REPO/$PROJECT/releases?access_token=$GIT_TOKEN"
 # Отправляем запрос, в ответ приходит JSON с полным описанием релиза. Из него получаем id релиза.
-response=$(curl -H "Content-Type: application/json" --data-binary @"$file2" $GH_URL | grep -m 1 "id.:")
+response=$(curl -H "Content-Type: application/json" --data-binary @"$file2" $GH_URL)
+# check status
+check_errors=$(grep -q -m 1 "errors:" <<< ${response})
+    if [[ "${check_errors}" == "errors:" ]]; then
+        echo ${response}
+        $(clean_tmp_files)
+        exit 1;
+    fi
 # Приводим id релиза в нормальный вид. ID нужен для загрузки ассетов
-id=$(grep -o '[[:digit:]]*' <<< "$response")
+get_id=$(grep -m 1 "id.:" <<< "$response")
+id=$(grep -o '[[:digit:]]*' <<< "$get_id")
+echo "Тэг для релиза был создан"
 # Construct url
 echo "Uploading assets..."
 # Проходим по массиву ассетов и загружаем их на сайт
@@ -177,7 +184,12 @@ do
     echo Uploading $filename
     file=${TARGET}"/"${filename}
     GH_ASSET="https://uploads.github.com/repos/"$OWNER_OF_REPO"/"$PROJECT"/releases/"$id"/assets?name="${filename}""
-    curl -sS -H "Authorization: token $GIT_TOKEN" -H "Content-Type: application/octet-stream" --data-binary @"$file"  $GH_ASSET > /dev/null
+    upload_responce=$(curl -sS -H "Authorization: token $GIT_TOKEN" -H "Content-Type: application/octet-stream" --write-out "HTTPSTATUS:%{http_code}" --data-binary @"$file"  $GH_ASSET)
+    upload_status=$(echo $upload_responce | tr -d '\n' | sed -e 's/.*HTTPSTATUS://')
+    if [ ! $upload_status -eq 201  ]; then
+        upload_body=$(echo $upload_responce | sed -e 's/HTTPSTATUS\:.*//g')
+        echo ${upload_body}
+       fi
 done
 git fetch --tags
 
