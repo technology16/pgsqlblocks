@@ -44,20 +44,6 @@ public class FilterChangeHandler {
         updateFilters();
     }
 
-    private boolean match(IColumn column, Object element, String searchText,
-                          FilterOperation value, ColumnType columnType) {
-        IObject parentObject = (IObject) element;
-        if (parentObject.hasChildren()) {
-            for (Object child : parentObject.getChildren()) {
-                if (match(column, child, searchText, value, columnType)) {
-                    return true;
-                }
-            }
-        }
-        String textFromObject = dataSource.getRowText(element, column);
-        return value.matchesForType(textFromObject, searchText, columnType);
-    }
-
     void filter(String searchText, FilterOperation value, IColumn column) {
         if (searchText.isEmpty() || value == FilterOperation.NONE) {
             columnFilters.remove(column);
@@ -74,6 +60,20 @@ public class FilterChangeHandler {
             columnFilters.put(column, columnFilter);
         }
         updateFilters();
+    }
+
+    private boolean match(IColumn column, Object element, String searchText,
+                          FilterOperation value, ColumnType columnType) {
+        IObject parentObject = (IObject) element;
+        if (parentObject.hasChildren()) {
+            for (Object child : parentObject.getChildren()) {
+                if (match(column, child, searchText, value, columnType)) {
+                    return true;
+                }
+            }
+        }
+        String textFromObject = dataSource.getRowText(element, column);
+        return value.matchesForType(textFromObject, searchText, columnType);
     }
 
     private void updateFilters() {
