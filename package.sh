@@ -191,6 +191,7 @@ do
         echo ${upload_body}
        fi
 done
+$(clean_tmp_files)
 git fetch --tags
 
 x-www-browser https://github.com/$OWNER_OF_REPO/$PROJECT/releases/latest
