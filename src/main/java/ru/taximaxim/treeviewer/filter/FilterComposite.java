@@ -90,7 +90,7 @@ public class FilterComposite extends Composite {
         combo.setLayoutData(comboLayoutData);
         List<FilterOperation> filterValues = Arrays.asList(FilterOperation.values());
         filterValues.forEach( f -> combo.add(f.toString()));
-        combo.select(3);
+        combo.select(FilterOperation.CONTAINS.ordinal());
 
         Text filterText = new Text(group, SWT.FILL | SWT.BORDER);
         filterText.setLayoutData(textLayoutData);
