@@ -5,9 +5,9 @@ import java.util.List;
 /**
  * Methods which need to implement in model class
  */
-public interface IObject<T> {
+public interface IObject {
 
-    List<T> getChildren();
+    List<? extends IObject> getChildren();
 
     boolean hasChildren();
 }

@@ -24,7 +24,7 @@ public class Test implements IObject {
     }
 
     @Override
-    public List getChildren() {
+    public List<Test> getChildren() {
         return children;
     }
 
