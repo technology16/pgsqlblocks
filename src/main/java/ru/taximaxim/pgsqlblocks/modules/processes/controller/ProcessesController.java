@@ -25,9 +25,7 @@ import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.*;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
@@ -92,10 +90,12 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
     private ToolItem showOnlyBlockedProcessesToolItem;
 
     private DBModelsProvider dbModelsProvider;
+    private OnlyBlockedFilter onlyBlockedFilter;
 
     private List<DBController> dbControllers = new ArrayList<>();
 
     private List<DBProcess> selectedProcesses = new ArrayList<>();
+
 
     public ProcessesController(Settings settings, DBModelsProvider dbModelsProvider) {
         this.settings = settings;
@@ -229,8 +229,18 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
         showOnlyBlockedProcessesToolItem = new ToolItem(view.getToolBar(), SWT.CHECK);
         showOnlyBlockedProcessesToolItem.setImage(ImageUtils.getImage(Images.VIEW_ONLY_BLOCKED));
         showOnlyBlockedProcessesToolItem.setToolTipText(Images.VIEW_ONLY_BLOCKED.getDescription(resourceBundle));
-        showOnlyBlockedProcessesToolItem.addListener(SWT.Selection, event ->
-                dbProcessesViewDataSourceFilter.setShowOnlyBlockedProcesses(showOnlyBlockedProcessesToolItem.getSelection()));
+        showOnlyBlockedProcessesToolItem.addListener(SWT.Selection, event -> {
+            if (showOnlyBlockedProcessesToolItem.getSelection()) {
+                onlyBlockedFilter = new OnlyBlockedFilter();
+                dbProcessView.getTreeViewer().addFilter(onlyBlockedFilter);
+            } else {
+                if (onlyBlockedFilter != null) {
+                    dbProcessView.getTreeViewer().removeFilter(onlyBlockedFilter);
+                }
+            }
+                    //dbProcessesViewDataSourceFilter.setShowOnlyBlockedProcesses(showOnlyBlockedProcessesToolItem.getSelection());
+        }
+        );
 
         new ToolItem(view.getToolBar(), SWT.SEPARATOR);
 
@@ -723,5 +733,17 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
 
     private String l10n(String msgId, Object... objects) {
         return String.format(resourceBundle.getString(msgId), objects);
+    }
+
+    class OnlyBlockedFilter extends ViewerFilter{
+
+        @Override
+        public boolean select(Viewer viewer, Object parentElement, Object element) {
+            if (parentElement instanceof ArrayList) {
+                DBProcess process = (DBProcess) element;
+                return process.hasChildren();
+            }
+            return true;
+        }
     }
 }
