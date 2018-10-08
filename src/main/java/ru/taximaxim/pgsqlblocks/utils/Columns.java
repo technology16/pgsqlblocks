@@ -17,7 +17,7 @@ public enum Columns implements IColumn {
     XACT_START("xact_start", "XACT_START", 150, ColumnType.DATE),
     DURATION("duration", "now - XACT_START", 70, ColumnType.DATE),
     STATE("state", "STATE", 70, ColumnType.STRING),
-    STATE_CHANGE("state_change", "STATE_CHANGE", 150, ColumnType.STRING),
+    STATE_CHANGE("state_change", "STATE_CHANGE", 150, ColumnType.DATE),
     BLOCKED("blocked_by", "BLOCKED", 110, ColumnType.STRING),
     LOCK_TYPE("lock_type", "LOCK_TYPE", 110, ColumnType.STRING),
     RELATION("relation", "RELATION", 130, ColumnType.STRING),
