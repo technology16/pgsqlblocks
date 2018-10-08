@@ -32,11 +32,16 @@ public class FilterChangeHandler {
             allTextFilter = new ViewerFilter() {
                 @Override
                 public boolean select(Viewer viewer, Object parentElement, Object element) {
-                    return dataSource.getColumnsToFilter().stream()
-                            .anyMatch(column -> {
-                                String textFromObject = dataSource.getRowText(element, column);
-                                return FilterOperation.CONTAINS.matchesForType(textFromObject, searchText, ColumnType.STRING);
-                            });
+                    if (parentElement instanceof IObject) {
+                        // Show all children (not first-level elements) because all children
+                        // should be shown if parent is shown. If parent is not matched then
+                        // his children will not be shown anyway.
+                        return true;
+                    } else {
+                        return dataSource.getColumnsToFilter().stream()
+                                .anyMatch(column -> matches(column, (IObject)element, searchText,
+                                        FilterOperation.CONTAINS, ColumnType.STRING));
+                    }
                 }
             };
         }
@@ -50,13 +55,32 @@ public class FilterChangeHandler {
             ViewerFilter columnFilter = new ViewerFilter() {
                 @Override
                 public boolean select(Viewer viewer, Object parentElement, Object element) {
-                    String textFromObject = dataSource.getRowText(element, column);
-                    return value.matchesForType(textFromObject, searchText, column.getColumnType());
+                    if (parentElement instanceof IObject) {
+                        // Show all children (not first-level elements) because all children
+                        // should be shown if parent is shown. If parent is not matched then
+                        // his children will not be shown anyway.
+                        return true;
+                    } else {
+                        return matches(column, (IObject) element, searchText, value, column.getColumnType());
+                    }
                 }
             };
             columnFilters.put(column, columnFilter);
         }
         updateFilters();
+    }
+
+    private boolean matches(IColumn column, IObject element, String searchText,
+                            FilterOperation value, ColumnType columnType) {
+        if (element.hasChildren()) {
+            for (IObject child : element.getChildren()) {
+                if (matches(column, child, searchText, value, columnType)) {
+                    return true;
+                }
+            }
+        }
+        String textFromObject = dataSource.getRowText(element, column);
+        return value.matchesForType(textFromObject, searchText, columnType);
     }
 
     private void updateFilters() {
