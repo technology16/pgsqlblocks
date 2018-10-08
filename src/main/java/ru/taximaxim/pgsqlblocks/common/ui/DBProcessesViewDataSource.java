@@ -24,24 +24,21 @@ import ru.taximaxim.pgsqlblocks.common.models.DBProcess;
 import ru.taximaxim.pgsqlblocks.utils.Columns;
 import ru.taximaxim.pgsqlblocks.utils.DateUtils;
 import ru.taximaxim.pgsqlblocks.utils.ImageUtils;
-import ru.taximaxim.treeviewer.models.IColumn;
 import ru.taximaxim.treeviewer.models.DataSource;
+import ru.taximaxim.treeviewer.models.IColumn;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.ResourceBundle;
-import java.util.stream.Collectors;
 
 public class DBProcessesViewDataSource extends DataSource<DBProcess> {
 
     private final DateUtils dateUtils = new DateUtils();
     private ResourceBundle bundle;
-    private TMTreeViewerDataSourceFilter<DBProcess> dataFilter;
 
-    public DBProcessesViewDataSource(ResourceBundle bundle, TMTreeViewerDataSourceFilter<DBProcess> dataSourceFilter) {
+    public DBProcessesViewDataSource(ResourceBundle bundle) {
         this.bundle = bundle;
-        this.dataFilter = dataSourceFilter;
     }
 
     @Override
@@ -135,17 +132,8 @@ public class DBProcessesViewDataSource extends DataSource<DBProcess> {
 
     @Override
     public Object[] getElements(Object inputElement) {
-        // FIXME do not filter data, use addFilter/removeFilter of tree viewer
         List<DBProcess> input = (List<DBProcess>) inputElement;
-        if (dataFilter == null) {
-            return input.toArray();
-        } else {
-            return filterInput(input).toArray();
-        }
-    }
-
-    private List<DBProcess> filterInput(List<DBProcess> input) {
-        return input.stream().filter(process -> dataFilter.filter(process)).collect(Collectors.toList());
+        return input.toArray();
     }
 
     @Override
@@ -163,20 +151,5 @@ public class DBProcessesViewDataSource extends DataSource<DBProcess> {
     public boolean hasChildren(Object element) {
         DBProcess process = (DBProcess)element;
         return process.hasChildren();
-    }
-
-    /**
-     * Можно вообще по-любому передавать список колонок для фильтра.
-     * необязательно именно здесь. Можно передавать по сути в любом месте.
-     */
-    public List<? extends IColumn> getColumnsForFilter() {
-        List<IColumn> list = new ArrayList<>();
-        list.add(Columns.PID);
-        list.add(Columns.APPLICATION_NAME);
-        list.add(Columns.DATABASE_NAME);
-        list.add(Columns.QUERY);
-        list.add(Columns.USER_NAME);
-        list.add(Columns.CLIENT);
-        return list;
     }
 }

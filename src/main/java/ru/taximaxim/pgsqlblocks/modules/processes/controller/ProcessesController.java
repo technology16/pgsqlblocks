@@ -59,8 +59,7 @@ import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
-public class ProcessesController implements DBControllerListener, DBModelsViewListener, SettingsListener,
-        DBProcessesViewDataSourceFilterListener, DBProcessInfoViewListener {
+public class ProcessesController implements DBControllerListener, DBModelsViewListener, SettingsListener, DBProcessInfoViewListener {
 
     private static final Logger LOG = Logger.getLogger(ProcessesController.class);
 
@@ -77,7 +76,6 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
 
     private DBProcessInfoView dbBlocksJournalProcessInfoView;
 
-    private final DBProcessesViewDataSourceFilter dbProcessesViewDataSourceFilter = new DBProcessesViewDataSourceFilter();
 
     private TabFolder tabFolder;
 
@@ -114,9 +112,6 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
         dbModelsView = new DBModelsView(resourceBundle, view.getLeftPanelComposite(), SWT.NONE);
         dbModelsView.getTableViewer().setInput(dbControllers);
         dbModelsView.addListener(this);
-
-        dbProcessesViewDataSourceFilter.addListener(this);
-
         tabFolder = new TabFolder(view.getRightPanelComposite(), SWT.NONE);
 
         tabFolder.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -139,7 +134,7 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
         gl.marginHeight = 0;
         processesViewComposite.setLayout(gl);
 
-        DBProcessesViewDataSource dbProcessesViewDataSource = new DBProcessesViewDataSource(resourceBundle, dbProcessesViewDataSourceFilter);
+        DBProcessesViewDataSource dbProcessesViewDataSource = new DBProcessesViewDataSource(resourceBundle);
         dbProcessView = new ExtendedTreeViewer<>(processesViewComposite, SWT.NONE, null,
                 dbProcessesViewDataSource, settings.getLocale());
         dbProcessView.setComparator(new DBProcessesViewComparator());
@@ -238,9 +233,7 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
                     dbProcessView.getTreeViewer().removeFilter(onlyBlockedFilter);
                 }
             }
-                    //dbProcessesViewDataSourceFilter.setShowOnlyBlockedProcesses(showOnlyBlockedProcessesToolItem.getSelection());
-        }
-        );
+        });
 
         new ToolItem(view.getToolBar(), SWT.SEPARATOR);
 
@@ -597,11 +590,6 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
         } else {
             dbControllers.stream().filter(DBController::isConnected).forEach(DBController::stopProcessesUpdater);
         }
-    }
-
-    @Override
-    public void dataSourceFilterShowOnlyBlockedProcessesChanged(boolean showOnlyBlockedProcesses) {
-        dbProcessView.getTreeViewer().refresh();
     }
 
     private void dbProcessesViewSelectionChanged(SelectionChangedEvent event) {
