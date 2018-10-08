@@ -22,7 +22,6 @@ public class App {
         shell.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
         ExampleDataSource dataSource = new ExampleDataSource(null);
         ExtendedTreeViewer<Test> treeViewer = new ExtendedTreeViewer<Test>(shell, SWT.FILL | SWT.BORDER, testList, dataSource, new Locale("en"));
-        treeViewer.getTreeViewer().setInput(testList);
         treeViewer.setComparator(new TestComparator());
 
         shell.open ();
