@@ -77,7 +77,6 @@ public class DBProcessesViewDataSource extends DataSource<DBProcess> {
     }
 
     @Override
-    // FIXME дублирование кода с DBBlocksJournalViewDataSource, один может наследоваться от другого?
     public String getRowText(Object element, IColumn column) {
         DBProcess process = (DBProcess)element;
         Columns columns = Columns.getColumn(column);

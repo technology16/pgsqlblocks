@@ -160,7 +160,6 @@ public class PgSqlBlocks_en extends ListResourceBundle {
                 {"RELATION", "RELATION"},
                 {"SLOW_QUERY", "SLOW_QUERY"},
                 {"QUERY", "QUERY"},
-                {"", ""} // FIXME in treeviewer do not fail if string is not in resource bundle
         };
     }
 }
