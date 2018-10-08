@@ -10,7 +10,7 @@ import java.util.function.Function;
 /**
  * Enum for types of column filters
  */
-public enum FilterOperation {
+enum FilterOperation {
 
     NONE("", (o, s, t) -> true),
     EQUALS("=", (o, s, t) -> equalsByType(o, s, t)),
@@ -22,15 +22,15 @@ public enum FilterOperation {
     LESS_OR_EQUAL("<=", (o, s, t) -> EQUALS.matchesForType(o, s, t) || LESS.matchesForType(o, s, t));
 
     private final String conditionText;
-    private final TriFunction<String, String, ColumnType, Boolean> testFunction;
+    private final TriFunction<String, String, ColumnType, Boolean> matcherFunction;
 
-    FilterOperation(String conditionText, TriFunction<String, String, ColumnType, Boolean> testFunction) {
+    FilterOperation(String conditionText, TriFunction<String, String, ColumnType, Boolean> matcherFunction) {
         this.conditionText = conditionText;
-        this.testFunction = testFunction;
+        this.matcherFunction = matcherFunction;
     }
 
-    public boolean matchesForType(String objectValue, String searchValue, ColumnType columnType) {
-        return testFunction.apply(objectValue, searchValue, columnType);
+    boolean matchesForType(String objectValue, String searchValue, ColumnType columnType) {
+        return matcherFunction.apply(objectValue, searchValue, columnType);
     }
 
     @Override
@@ -55,9 +55,9 @@ public enum FilterOperation {
     private static boolean equalsByType(String objectValue, String searchValue, ColumnType columnType) {
         switch (columnType) {
             case INTEGER:
-                return testMatches(objectValue, searchValue, FilterOperation::getInteger, (i1, i2) -> i1.equals(i2));
+                return matches(objectValue, searchValue, FilterOperation::getInteger, Integer::equals);
             case DOUBLE:
-                return testMatches(objectValue, searchValue, FilterOperation::getDouble, (i1, i2) -> i1.equals(i2));
+                return matches(objectValue, searchValue, FilterOperation::getDouble, Double::equals);
             case DATE:
             case STRING:
                 return objectValue.equals(searchValue);
@@ -68,9 +68,9 @@ public enum FilterOperation {
     private static boolean greater(String objectValue, String searchValue, ColumnType columnType) {
         switch (columnType) {
             case INTEGER:
-                return testMatches(objectValue, searchValue, FilterOperation::getInteger, (i1, i2) -> i1 > i2);
+                return matches(objectValue, searchValue, FilterOperation::getInteger, (i1, i2) -> i1 > i2);
             case DOUBLE:
-                return testMatches(objectValue, searchValue, FilterOperation::getDouble, (i1, i2) -> i1 > i2);
+                return matches(objectValue, searchValue, FilterOperation::getDouble, (i1, i2) -> i1 > i2);
             case DATE:
             case STRING:
                 return objectValue.compareTo(searchValue) > 0;
@@ -81,9 +81,9 @@ public enum FilterOperation {
     private static boolean less(String objectValue, String searchValue, ColumnType columnType) {
         switch (columnType) {
             case INTEGER:
-                return testMatches(objectValue, searchValue, FilterOperation::getInteger, (i1, i2) -> i1 < i2);
+                return matches(objectValue, searchValue, FilterOperation::getInteger, (i1, i2) -> i1 < i2);
             case DOUBLE:
-                return testMatches(objectValue, searchValue, FilterOperation::getInteger, (i1, i2) -> i1 < i2);
+                return matches(objectValue, searchValue, FilterOperation::getDouble, (i1, i2) -> i1 < i2);
             case DATE:
             case STRING:
                 return objectValue.compareTo(searchValue) < 0;
@@ -91,8 +91,8 @@ public enum FilterOperation {
         return false;
     }
 
-    private static <T> boolean testMatches(String objectValue, String searchValue,
-                                           Function<String, Optional<T>> converter, BiFunction<T, T, Boolean> matcher) {
+    private static <T> boolean matches(String objectValue, String searchValue,
+                                       Function<String, Optional<T>> converter, BiFunction<T, T, Boolean> matcher) {
         Optional<T> objectOpt = converter.apply(objectValue);
         Optional<T> searchOpt = converter.apply(searchValue);
         return objectOpt.isPresent() && searchOpt.isPresent() && matcher.apply(objectOpt.get(), searchOpt.get());
