@@ -55,7 +55,7 @@ public class BlocksJournalView extends ApplicationWindow implements DBBlocksJour
 
     private TableViewer filesTable;
 
-    private ExtendedTreeViewer<DBBlocksJournalProcess> processesView;
+    private ExtendedTreeViewer<DBProcess> processesView;
 
     private DBProcessInfoView processInfoView;
 
@@ -110,7 +110,7 @@ public class BlocksJournalView extends ApplicationWindow implements DBBlocksJour
         processesContentContainer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
         DBBlocksJournalViewDataSource dbBlocksJournalViewDataSource = new DBBlocksJournalViewDataSource(resourceBundle);
-        processesView = new ExtendedTreeViewer<>(processesContentContainer, SWT.NONE, blocksJournal.getFilteredProcesses(),
+        processesView = new ExtendedTreeViewer<DBProcess>(processesContentContainer, SWT.NONE, blocksJournal.getFilteredProcesses(),
                dbBlocksJournalViewDataSource , resourceBundle.getLocale());
         processesView.getTreeViewer().addSelectionChangedListener(this::processesViewSelectionChanged);
 

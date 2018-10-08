@@ -72,7 +72,7 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
     private ExtendedTreeViewer<DBProcess> dbProcessView;
     private DBProcessInfoView dbProcessInfoView;
 
-    private ExtendedTreeViewer<DBBlocksJournalProcess> dbBlocksJournalView;
+    private ExtendedTreeViewer<DBProcess> dbBlocksJournalView;
 
     private DBProcessInfoView dbBlocksJournalProcessInfoView;
 
@@ -135,7 +135,7 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
         processesViewComposite.setLayout(gl);
 
         DBProcessesViewDataSource dbProcessesViewDataSource = new DBProcessesViewDataSource(resourceBundle);
-        dbProcessView = new ExtendedTreeViewer<>(processesViewComposite, SWT.NONE, null,
+        dbProcessView = new ExtendedTreeViewer<DBProcess>(processesViewComposite, SWT.NONE, null,
                 dbProcessesViewDataSource, settings.getLocale());
         dbProcessView.setComparator(new DBProcessesViewComparator());
         dbProcessView.getTreeViewer().addSelectionChangedListener(this::dbProcessesViewSelectionChanged);
