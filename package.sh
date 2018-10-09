@@ -31,7 +31,6 @@
 version=$(mvn help:evaluate -Dexpression=project.version | grep '^[0-9][0-9A-Za-z\.\-]*$')
 
 # Чтение аргументов
-echo "ARGUMENTS"
 for i in "$@"
 do
 case $i in
@@ -45,7 +44,6 @@ case $i in
     ;;
     -rn=*|--releasename=*)
     RELEASE_NAME="${i#*=}"
-    echo "RELEASE NAME"
     shift
     ;;
 esac
@@ -107,8 +105,8 @@ echo "$API_JSON" > ${file}
 sed -E ':a;N;$!ba;s/\r{0,1}\n/\\n/g' ${file} > ${file2}
 
 echo Описание релиза
-echo Тэг v$version
-echo Название релиза $RELEASE_NAME
+echo Тэг: v$version
+echo Название релиза: $RELEASE_NAME
 echo Changelog:
 echo ==============================
 cat ${descr}
@@ -124,33 +122,25 @@ fi
 
 echo
 
+platformArray=("Linux-32" "Linux-64" "Macosx-64" "Windows-32" "Windows-64")
+
 # Build files for release
 mvn clean -q
 
 echo "Выполняются тесты..."
 mvn test -q || { echo; echo 'Ошибка в тестах, деплой отменен!' ; $(clean_tmp_files); exit 1;}
 
-echo "Идет сборка Windows-32..."
-mvn package -P Windows-32 -q -DskipTests
-
-echo "Идет сборка Windows-64..."
-mvn package -P Windows-64 -q -DskipTests
-
-echo "Идет сборка Linux-32..."
-mvn package -P Linux-32 -q -DskipTests
-
-echo "Идет сборка Linux-64..."
-mvn package -P Linux-64 -q -DskipTests
-
-echo "Идет сборка Macosx-64..."
-mvn package -P Macosx-64 -q -DskipTests
+for platform in ${platformArray[*]}
+do
+    echo "Идет сборка "$platform"..."
+    mvn package -P $platform -q -DskipTests
+done
 
 echo "Сборка завершена"
 
 # Проверка корректности сборки проекта
 FILENAME="pgSqlBlocks"
 TARGET="./target"
-platformArray=("Linux-32" "Linux-64" "Macosx-64" "Windows-32" "Windows-64")
 
 for platform in ${platformArray[*]}
 do
@@ -176,12 +166,12 @@ get_id=$(grep -m 1 "id.:" <<< "$response")
 id=$(grep -o '[[:digit:]]*' <<< "$get_id")
 echo "Тэг для релиза был создан"
 # Construct url
-echo "Uploading assets..."
+echo "Загрузка файлов..."
 # Проходим по массиву ассетов и загружаем их на сайт
 for platform in ${platformArray[*]}
 do
     filename=${FILENAME}"-"${version}"-"${platform}".jar"
-    echo Uploading $filename
+    echo Загрузка $filename
     file=${TARGET}"/"${filename}
     GH_ASSET="https://uploads.github.com/repos/"$OWNER_OF_REPO"/"$PROJECT"/releases/"$id"/assets?name="${filename}""
     upload_responce=$(curl -sS -H "Authorization: token $GIT_TOKEN" -H "Content-Type: application/octet-stream" --write-out "HTTPSTATUS:%{http_code}" --data-binary @"$file"  $GH_ASSET)
