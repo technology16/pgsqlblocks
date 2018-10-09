@@ -22,7 +22,6 @@ package ru.taximaxim.pgsqlblocks.common.ui;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.IDecoration;
 import org.eclipse.swt.graphics.Image;
-import ru.taximaxim.pgsqlblocks.TreeLabelProvider;
 import ru.taximaxim.pgsqlblocks.modules.db.controller.DBController;
 import ru.taximaxim.pgsqlblocks.utils.ImageUtils;
 import ru.taximaxim.pgsqlblocks.utils.Images;
