@@ -6,7 +6,6 @@ import org.eclipse.jface.viewers.ITreeContentProvider;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
 /**

@@ -9,9 +9,9 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.TreeColumn;
 import org.eclipse.swt.widgets.TreeItem;
 import ru.taximaxim.treeviewer.listeners.TreeViewerSortColumnSelectionListener;
-import ru.taximaxim.treeviewer.models.IObject;
 import ru.taximaxim.treeviewer.models.DataSource;
 import ru.taximaxim.treeviewer.models.IColumn;
+import ru.taximaxim.treeviewer.models.IObject;
 
 import java.util.ArrayList;
 import java.util.List;

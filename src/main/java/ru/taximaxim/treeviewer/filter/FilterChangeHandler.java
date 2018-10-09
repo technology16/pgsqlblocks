@@ -2,13 +2,16 @@ package ru.taximaxim.treeviewer.filter;
 
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
+import ru.taximaxim.treeviewer.models.DataSource;
 import ru.taximaxim.treeviewer.models.IColumn;
 import ru.taximaxim.treeviewer.models.IObject;
-import ru.taximaxim.treeviewer.models.DataSource;
 import ru.taximaxim.treeviewer.tree.ExtendedTreeViewerComponent;
 import ru.taximaxim.treeviewer.utils.ColumnType;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class FilterChangeHandler {
 
