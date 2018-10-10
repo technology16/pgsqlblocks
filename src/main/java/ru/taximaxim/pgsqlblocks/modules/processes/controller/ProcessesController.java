@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -56,7 +56,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 public class ProcessesController implements DBControllerListener, DBModelsViewListener, SettingsListener,
@@ -183,7 +182,7 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
 
         Composite dbBlocksJournalViewComposite = new Composite(tabFolder, SWT.NONE);
         GridLayout gl = new GridLayout();
-        gl.marginWidth= 0;
+        gl.marginWidth = 0;
         gl.marginHeight = 0;
 
         dbBlocksJournalViewComposite.setLayout(gl);
@@ -288,7 +287,7 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
     }
 
     private void changeToolItemsStateForController(DBController controller) {
-        Display.getDefault().syncExec( () -> {
+        Display.getDefault().syncExec(() -> {
             boolean isDisconnected = controller != null && !controller.isConnected();
             toggleVisibilityProcessesFilterPanelToolItem.setEnabled(controller != null);
             toggleVisibilityBlocksJournalProcessesFilterPanelToolItem.setEnabled(controller != null);
@@ -315,7 +314,7 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
     private void loadDatabases() {
         List<DBModel> dbModels = dbModelsProvider.get();
         List<DBModel> defaultList = dbModels.stream()
-                .map( model -> {
+                .map(model -> {
                     if (model.getVersion() == SupportedVersion.VERSION_DEFAULT) {
                         return model;
                     }
@@ -323,37 +322,47 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
                 }).filter(Objects::nonNull)
                 .collect(Collectors.toList());
         List<String> connectionList = defaultList.stream()
-                .map(dbModel -> "\n*"+dbModel.getName()).collect(Collectors.toList());
+                .map(dbModel -> "\n*" + dbModel.getName()).collect(Collectors.toList());
         if (!defaultList.isEmpty() && openUpdateDialog(connectionList)) {
-            updateVersion(defaultList);
+            updateVersionWithDialog(defaultList);
+            dbModelsProvider.save(dbModels);
+            dbModels.forEach(this::addDatabase);
+            dbModelsView.getTableViewer().refresh();
+        }
+    }
+
+    private void updateVersionWithDialog(List<DBModel> defaultList) {
+        ProgressMonitorDialog dialog = new ProgressMonitorDialog(Display.getDefault().getActiveShell());
+        try {
+            dialog.run(true, true, progressMonitor -> {
+                progressMonitor.beginTask("Updating version", defaultList.size());
+                for (DBModel dbModel : defaultList) {
+                    if (progressMonitor.isCanceled()) {
+                        LOG.info(l10n("kill_process_cancelled_message"));
+                        progressMonitor.done();
+                        break;
+                    } else {
+                        addDatabase(dbModel);
+                        Optional<DBController> opt = dbControllers.stream().filter(dbc -> dbc.getModel().equals(dbModel)).findFirst();
+                        opt.ifPresent(dbController -> {
+                            SupportedVersion v;
+                            v = dbController.getVersion();
+                            dbModel.setVersion(v);
+                        });
+                        progressMonitor.worked(1);
+                    }
+                }
+            });
+        } catch (InvocationTargetException | InterruptedException e) {
+            LOG.error(l10n("kill_process_error_message", e.getMessage()), e);
+        } finally {
             dbControllers.forEach(dbController -> {
                 if (dbController.isConnected()) {
                     dbController.disconnect(true);
                 }
-                });
-            dbControllers.clear();
-            dbModelsProvider.save(dbModels);
-        }
-        dbModels.forEach(this::addDatabase);
-        dbModelsView.getTableViewer().refresh();
-    }
-
-    //здесь мы подключаемся к бд, создаем connection, запрашиваем версию
-    private void updateVersion(List<DBModel> models) {
-        models.forEach( model -> {
-            addDatabase(model);
-            Optional<DBController> opt = dbControllers.stream().filter(dbc -> dbc.getModel().equals(model)).findFirst();
-            opt.ifPresent(dbController -> {
-                SupportedVersion v = SupportedVersion.VERSION_DEFAULT;
-                try {
-                    v = dbController.getVersion();
-                } catch (InterruptedException | ExecutionException e) {
-                    LOG.error(e.getMessage());
-                }finally {
-                    model.setVersion(v);
-                }
             });
-        });
+            dbControllers.clear();
+        }
     }
 
     private DBController addDatabase(DBModel dbModel) {
@@ -392,7 +401,7 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
                 resourceBundle.getString("warning_title"),
                 null,
                 l10n("warning_text", defaultList),
-                MessageDialog.WARNING, new String[] {"Ok", "Cancel"}, 0);
+                MessageDialog.WARNING, new String[]{"Ok", "Cancel"}, 0);
         return dialog.open() == 0;
     }
 
@@ -517,7 +526,7 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
     }
 
     private void hideTrayMessageIfAllDatabasesUnblocked() {
-        if (PgSqlBlocks.getInstance().getApplicationController().getApplicationView().trayIsAvailable() 
+        if (PgSqlBlocks.getInstance().getApplicationController().getApplicationView().trayIsAvailable()
                 && dbControllers.stream().noneMatch(DBController::isBlocked)) {
             view.getDisplay().asyncExec(() -> {
                 Tray tray = PgSqlBlocks.getInstance().getApplicationController().getApplicationView().getTray();
@@ -867,7 +876,7 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
         if (selection.isEmpty()) {
             dbProcessInfoView.hide();
         } else {
-            IStructuredSelection structuredSelection = (IStructuredSelection)selection;
+            IStructuredSelection structuredSelection = (IStructuredSelection) selection;
             selectedProcesses = (List<DBProcess>) structuredSelection.toList();
             dbProcessInfoView.show(selectedProcesses.get(0));
         }
@@ -879,13 +888,13 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
             dbBlocksJournalProcessInfoView.hide();
         } else {
             DBProcess process;
-            IStructuredSelection structuredSelection = (IStructuredSelection)selection;
+            IStructuredSelection structuredSelection = (IStructuredSelection) selection;
             Object element = structuredSelection.getFirstElement();
             if (element instanceof DBBlocksJournalProcess) {
-                DBBlocksJournalProcess blocksJournalProcess = (DBBlocksJournalProcess)element;
+                DBBlocksJournalProcess blocksJournalProcess = (DBBlocksJournalProcess) element;
                 process = blocksJournalProcess.getProcess();
             } else {
-                process = (DBProcess)element;
+                process = (DBProcess) element;
             }
             dbBlocksJournalProcessInfoView.show(process);
         }
@@ -931,7 +940,7 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
         try {
             boolean result = dbController.terminateProcessWithPid(pid);
             if (result) {
-                LOG.info(l10n("process_terminated", dbController.getModel().getName(), pid)); 
+                LOG.info(l10n("process_terminated", dbController.getModel().getName(), pid));
             } else {
                 LOG.info(l10n("process_not_terminated", dbController.getModel().getName(), pid, ""));
             }
@@ -941,7 +950,7 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
     }
 
     @Override
-    public void dbProcessInfoViewCancelProcessToolItemClicked(){
+    public void dbProcessInfoViewCancelProcessToolItemClicked() {
         Object selectedController = dbModelsView.getTableViewer().getStructuredSelection().getFirstElement();
         if (selectedController == null || selectedProcesses.isEmpty()) {
             return;

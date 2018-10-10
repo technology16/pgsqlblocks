@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -40,7 +40,10 @@ import java.nio.file.Paths;
 import java.sql.*;
 import java.util.*;
 import java.util.Date;
-import java.util.concurrent.*;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static ru.taximaxim.pgsqlblocks.PgSqlBlocks.APP_NAME;
@@ -87,7 +90,7 @@ public class DBController implements DBProcessFilterListener, DBBlocksJournalLis
 
     private String getConnectionUrl() {
         return String.format("jdbc:postgresql://%1$s:%2$s/%3$s?ApplicationName=%4$s",
-                                model.getHost(), model.getPort(), model.getDatabaseName(), APP_NAME);
+                model.getHost(), model.getPort(), model.getDatabaseName(), APP_NAME);
     }
 
     public boolean isEnabledAutoConnection() {
@@ -218,7 +221,7 @@ public class DBController implements DBProcessFilterListener, DBBlocksJournalLis
     public void startProcessesUpdater(long initDelay) {
         stopProcessesUpdater();
         updater = executor.scheduleWithFixedDelay(this::updateProcesses,
-                                                    initDelay, settings.getUpdatePeriod(), TimeUnit.SECONDS);
+                initDelay, settings.getUpdatePeriod(), TimeUnit.SECONDS);
     }
 
     public void startProcessesUpdater() {
@@ -248,7 +251,7 @@ public class DBController implements DBProcessFilterListener, DBBlocksJournalLis
 
     private void loadProcesses() {
         listeners.forEach(listener -> listener.dbControllerWillUpdateProcesses(this));
-        try(
+        try (
                 PreparedStatement preparedStatement = connection.prepareStatement(getProcessesQuery());
                 ResultSet resultSet = preparedStatement.executeQuery()
         ) {
@@ -256,7 +259,7 @@ public class DBController implements DBProcessFilterListener, DBBlocksJournalLis
             Map<Integer, Set<DBBlock>> tmpBlocks = new HashMap<>();
             DBProcessSerializer processDeserializer = new DBProcessSerializer();
             DBBlockDeserializer blockDeserializer = new DBBlockDeserializer();
-            while(resultSet.next()) {
+            while (resultSet.next()) {
                 DBProcess process = processDeserializer.deserialize(resultSet);
                 int blockedBy = resultSet.getInt(BLOCKED_BY);
                 if (blockedBy != 0) {
@@ -353,10 +356,10 @@ public class DBController implements DBProcessFilterListener, DBBlocksJournalLis
     private String getProcessesQuery() {
         float ver = Float.parseFloat(model.getVersion().getVersion());
         if (settings.getShowIdle()) {
-            return ver>=10.0 ? DBQueries.getProcessesQueryWithIdleForTen()
+            return ver >= 10.0 ? DBQueries.getProcessesQueryWithIdleForTen()
                     : DBQueries.getProcessesQueryWithIdle();
         } else {
-            return ver>=10.0 ? DBQueries.getProcessesQueryForTen()
+            return ver >= 10.0 ? DBQueries.getProcessesQueryForTen()
                     : DBQueries.getProcessesQuery();
         }
     }
@@ -499,30 +502,24 @@ public class DBController implements DBProcessFilterListener, DBBlocksJournalLis
         }
     }
 
-    public SupportedVersion getVersion() throws ExecutionException, InterruptedException {
-        SupportedVersion version;
-        CompletableFuture<SupportedVersion> future = CompletableFuture.supplyAsync(() -> {
-            SupportedVersion v = null;
-            String password = getPassword();
-            try {
-                Properties info = new Properties();
-                info.put("user", model.getUser());
-                info.put("password", password);
-                info.put("loginTimeout", String.valueOf(settings.getLoginTimeout()));
-                connection = DriverManager.getConnection(getConnectionUrl(), info);
-                PreparedStatement preparedStatement = connection.prepareStatement(DBQueries.getVersionQuery());
-                ResultSet resultSet = preparedStatement.executeQuery();
-                if (resultSet.next()) {
-                    int ver = resultSet.getInt(1);
-                    v = SupportedVersion.get(ver);
-                }
-            } catch (SQLException e) {
-                listeners.forEach(listener -> listener.dbControllerConnectionFailed(this, e));
-            }finally {
-                return v != null ? v : SupportedVersion.VERSION_DEFAULT;
+    public SupportedVersion getVersion() {
+        SupportedVersion v = null;
+        String password = getPassword();
+        try {
+            Properties info = new Properties();
+            info.put("user", model.getUser());
+            info.put("password", password);
+            info.put("loginTimeout", String.valueOf(settings.getLoginTimeout()));
+            connection = DriverManager.getConnection(getConnectionUrl(), info);
+            PreparedStatement preparedStatement = connection.prepareStatement(DBQueries.getVersionQuery());
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                int ver = resultSet.getInt(1);
+                v = SupportedVersion.get(ver);
             }
-        });
-        version = future.get();
-        return version;
+        } catch (SQLException e) {
+            listeners.forEach(listener -> listener.dbControllerConnectionFailed(this, e));
+        }
+        return v != null ? v : SupportedVersion.VERSION_DEFAULT;
     }
 }
