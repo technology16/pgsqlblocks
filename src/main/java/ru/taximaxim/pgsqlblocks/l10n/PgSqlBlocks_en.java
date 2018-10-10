@@ -150,7 +150,10 @@ public class PgSqlBlocks_en extends ListResourceBundle {
                 {"warning_title","Changes"},
                 {"warning_text","Need to add the postgreSql's version for connection.\n" +
                         "Try to automatically determine the version for the following connections?\n" +
-                        "If you cancel or we get error, the default version (10) will be used"}
+                        "If you cancel or we get error, the default version (10) will be used"},
+                {"update_version_dialog", "Updating of versions"},
+                {"update_version_cancelled_message", "Updating of versions was cancelled"},
+                {"update_version_error_message", "Error in updating of versions  %s"}
         };
     }
 }

@@ -326,19 +326,19 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
         if (!defaultList.isEmpty() && openUpdateDialog(connectionList)) {
             updateVersionWithDialog(defaultList);
             dbModelsProvider.save(dbModels);
-            dbModels.forEach(this::addDatabase);
-            dbModelsView.getTableViewer().refresh();
         }
+        dbModels.forEach(this::addDatabase);
+        dbModelsView.getTableViewer().refresh();
     }
 
     private void updateVersionWithDialog(List<DBModel> defaultList) {
         ProgressMonitorDialog dialog = new ProgressMonitorDialog(Display.getDefault().getActiveShell());
         try {
             dialog.run(true, true, progressMonitor -> {
-                progressMonitor.beginTask("Updating version", defaultList.size());
+                progressMonitor.beginTask(l10n("update_version_dialog"), defaultList.size());
                 for (DBModel dbModel : defaultList) {
                     if (progressMonitor.isCanceled()) {
-                        LOG.info(l10n("kill_process_cancelled_message"));
+                        LOG.info(l10n("update_version_cancelled_message"));
                         progressMonitor.done();
                         break;
                     } else {
@@ -354,7 +354,7 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
                 }
             });
         } catch (InvocationTargetException | InterruptedException e) {
-            LOG.error(l10n("kill_process_error_message", e.getMessage()), e);
+            LOG.error(l10n("update_version_error_message", e.getMessage()), e);
         } finally {
             dbControllers.forEach(dbController -> {
                 if (dbController.isConnected()) {
