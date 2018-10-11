@@ -3,14 +3,17 @@ package ru.taximaxim.treeviewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.*;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.ToolBar;
+import org.eclipse.swt.widgets.ToolItem;
+import org.eclipse.swt.widgets.TreeColumn;
 import ru.taximaxim.treeviewer.dialog.ColumnConfigDialog;
-import ru.taximaxim.treeviewer.filter.FilterComposite;
 import ru.taximaxim.treeviewer.filter.FilterChangeHandler;
+import ru.taximaxim.treeviewer.filter.FilterComposite;
 import ru.taximaxim.treeviewer.l10n.TreeViewer;
 import ru.taximaxim.treeviewer.listeners.TreeViewerSortColumnSelectionListener;
-import ru.taximaxim.treeviewer.models.IObject;
 import ru.taximaxim.treeviewer.models.DataSource;
+import ru.taximaxim.treeviewer.models.IObject;
 import ru.taximaxim.treeviewer.models.ObjectViewComparator;
 import ru.taximaxim.treeviewer.tree.ExtendedTreeViewerComponent;
 import ru.taximaxim.treeviewer.utils.ImageUtils;
@@ -66,7 +69,7 @@ public class ExtendedTreeViewer<T extends IObject> extends Composite implements 
         filterComposite = new FilterComposite(this, SWT.TOP, resourceBundle, dataSource, filterChangeHandler);
         filterComposite.hide();
         tree = new ExtendedTreeViewerComponent<>(this,
-                SWT.FILL | SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL | SWT.FULL_SELECTION | SWT.MULTI);
+                 SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL | SWT.FULL_SELECTION | SWT.MULTI);
         filterChangeHandler.setTree(tree);
         tree.addSortListener(this);
     }
