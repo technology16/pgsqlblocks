@@ -242,10 +242,5 @@
             <artifactId>PgPass</artifactId>
             <version>0.0.2</version>
         </dependency>
-        <dependency>
-            <groupId>ru.taximaxim</groupId>
-            <artifactId>swttreeviewer</artifactId>
-            <version>0.0.2-SNAPSHOT</version>
-        </dependency>
     </dependencies>
 </project>
