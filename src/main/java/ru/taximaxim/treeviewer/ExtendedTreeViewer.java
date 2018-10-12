@@ -35,6 +35,7 @@ public class ExtendedTreeViewer<T extends IObject> extends Composite implements 
     private ObjectViewComparator comparator;
     private FilterChangeHandler filterChangeHandler;
     private DataSource<T> dataSource;
+    private ToolItem filterToolItem;
 
     public ExtendedTreeViewer(Composite parent, int style, Object userData, DataSource<T> dataSource,
                               Locale locale) {
@@ -80,12 +81,14 @@ public class ExtendedTreeViewer<T extends IObject> extends Composite implements 
 
     private void createToolItems() {
         ToolBar toolBar = new ToolBar(this, SWT.HORIZONTAL);
+
         ToolItem updateToolItem = new ToolItem(toolBar, SWT.PUSH);
         updateToolItem.setImage(ImageUtils.getImage(Images.UPDATE));
         updateToolItem.setToolTipText(Images.UPDATE.getDescription(resourceBundle));
         updateToolItem.addListener(SWT.Selection, event -> tree.refresh());
 
-        ToolItem filterToolItem = new ToolItem(toolBar, SWT.PUSH);
+        filterToolItem = new ToolItem(toolBar, SWT.CHECK);
+        filterToolItem.setSelection(false);
         filterToolItem.setImage(ImageUtils.getImage(Images.FILTER));
         filterToolItem.addListener(SWT.Selection, event -> openFilter());
         filterToolItem.setToolTipText(Images.FILTER.getDescription(resourceBundle));
@@ -99,7 +102,11 @@ public class ExtendedTreeViewer<T extends IObject> extends Composite implements 
     private void openFilter() {
         if (filterComposite.isVisible()) {
             filterComposite.hide();
-        }else filterComposite.show();
+            filterToolItem.setSelection(false);
+        } else {
+            filterComposite.show();
+            filterToolItem.setSelection(true);
+        }
     }
 
     private void openConfigColumnDialog() {
