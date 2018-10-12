@@ -36,6 +36,8 @@ public class ExtendedTreeViewer<T extends IObject> extends Composite implements 
     private FilterChangeHandler filterChangeHandler;
     private DataSource<T> dataSource;
     private ToolItem filterToolItem;
+    private ToolItem updateToolItem;
+    private Runnable updateToolItemAction;
 
     public ExtendedTreeViewer(Composite parent, int style, Object userData, DataSource<T> dataSource,
                               Locale locale) {
@@ -79,13 +81,25 @@ public class ExtendedTreeViewer<T extends IObject> extends Composite implements 
         return comparator;
     }
 
+    //If not called then null
+    public void setUpdateButtonAction(Runnable runnable) {
+        this.updateToolItemAction = runnable;
+    }
+
     private void createToolItems() {
         ToolBar toolBar = new ToolBar(this, SWT.HORIZONTAL);
 
-        ToolItem updateToolItem = new ToolItem(toolBar, SWT.PUSH);
+        updateToolItem = new ToolItem(toolBar, SWT.PUSH);
         updateToolItem.setImage(ImageUtils.getImage(Images.UPDATE));
         updateToolItem.setToolTipText(Images.UPDATE.getDescription(resourceBundle));
-        updateToolItem.addListener(SWT.Selection, event -> tree.refresh());
+        updateToolItem.addListener(SWT.Selection, event -> {
+            if (updateToolItemAction != null) {
+                updateToolItemAction.run();
+                tree.refresh();
+            } else {
+                tree.refresh();
+            }
+        });
 
         filterToolItem = new ToolItem(toolBar, SWT.CHECK);
         filterToolItem.setSelection(false);

@@ -139,6 +139,7 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
                 dbProcessesViewDataSource, settings.getLocale());
         dbProcessView.setComparator(new DBProcessesViewComparator());
         dbProcessView.getTreeViewer().addSelectionChangedListener(this::dbProcessesViewSelectionChanged);
+        dbProcessView.setUpdateButtonAction(this::updateProcessesInSelectedDatabase);
 
         dbProcessInfoView = new DBProcessInfoView(resourceBundle, processesViewComposite, SWT.NONE);
         dbProcessInfoView.addListener(this);
@@ -162,6 +163,7 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
         dbBlocksJournalView = new ExtendedTreeViewer<>(dbBlocksJournalViewComposite, SWT.NONE, null,
                 dbBlocksJournalViewDataSource, settings.getLocale());
         dbBlocksJournalView.getTreeViewer().addSelectionChangedListener(this::dbBlocksJournalViewSelectionChanged);
+        dbBlocksJournalView.setUpdateButtonAction(this::updateProcessesInSelectedDatabase);
 
         dbBlocksJournalProcessInfoView = new DBProcessInfoView(resourceBundle, dbBlocksJournalViewComposite, SWT.NONE);
         dbBlocksJournalProcessInfoView.hideToolBar();
