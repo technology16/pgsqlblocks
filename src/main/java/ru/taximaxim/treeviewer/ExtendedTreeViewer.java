@@ -36,7 +36,6 @@ public class ExtendedTreeViewer<T extends IObject> extends Composite implements 
     private FilterChangeHandler filterChangeHandler;
     private DataSource<T> dataSource;
     private ToolItem filterToolItem;
-    private ToolItem updateToolItem;
     private Runnable updateToolItemAction;
 
     public ExtendedTreeViewer(Composite parent, int style, Object userData, DataSource<T> dataSource,
@@ -89,7 +88,7 @@ public class ExtendedTreeViewer<T extends IObject> extends Composite implements 
     private void createToolItems() {
         ToolBar toolBar = new ToolBar(this, SWT.HORIZONTAL);
 
-        updateToolItem = new ToolItem(toolBar, SWT.PUSH);
+        ToolItem updateToolItem = new ToolItem(toolBar, SWT.PUSH);
         updateToolItem.setImage(ImageUtils.getImage(Images.UPDATE));
         updateToolItem.setToolTipText(Images.UPDATE.getDescription(resourceBundle));
         updateToolItem.addListener(SWT.Selection, event -> {
@@ -116,9 +115,11 @@ public class ExtendedTreeViewer<T extends IObject> extends Composite implements 
     private void openFilter() {
         if (filterComposite.isVisible()) {
             filterComposite.hide();
+            filterChangeHandler.setActive(false);
             filterToolItem.setSelection(false);
         } else {
             filterComposite.show();
+            filterChangeHandler.setActive(true);
             filterToolItem.setSelection(true);
         }
     }

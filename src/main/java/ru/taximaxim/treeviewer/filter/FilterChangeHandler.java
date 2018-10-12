@@ -2,13 +2,16 @@ package ru.taximaxim.treeviewer.filter;
 
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
+import ru.taximaxim.treeviewer.models.DataSource;
 import ru.taximaxim.treeviewer.models.IColumn;
 import ru.taximaxim.treeviewer.models.IObject;
-import ru.taximaxim.treeviewer.models.DataSource;
 import ru.taximaxim.treeviewer.tree.ExtendedTreeViewerComponent;
 import ru.taximaxim.treeviewer.utils.ColumnType;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class FilterChangeHandler {
 
@@ -16,6 +19,7 @@ public class FilterChangeHandler {
     private ExtendedTreeViewerComponent tree;
     private Map<IColumn, ViewerFilter> columnFilters = new HashMap<>();
     private ViewerFilter allTextFilter;
+    private boolean active;
 
     public FilterChangeHandler(DataSource<? extends IObject> dataSource) {
         this.dataSource = dataSource;
@@ -89,5 +93,14 @@ public class FilterChangeHandler {
             filters.add(allTextFilter);
         }
         tree.setFilters(filters.toArray(new ViewerFilter[0]));
+    }
+
+    public void setActive(boolean actived) {
+        this.active = actived;
+        if (!active && tree != null) {
+            allTextFilter = null;
+            columnFilters.clear();
+            updateFilters();
+        }
     }
 }
