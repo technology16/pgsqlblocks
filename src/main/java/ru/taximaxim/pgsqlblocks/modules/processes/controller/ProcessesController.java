@@ -124,7 +124,7 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
 
         loadDatabases();
 
-        dbControllers.stream().filter(DBController::isEnabledAutoConnection).forEach(DBController::connect);
+        dbControllers.stream().filter(DBController::isEnabledAutoConnection).forEach(DBController::connectAsync);
     }
 
     private void createProcessesTab() {
@@ -313,40 +313,35 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
 
     private void loadDatabases() {
         List<DBModel> dbModels = dbModelsProvider.get();
-        List<DBModel> defaultList = dbModels.stream()
-                .map(model -> {
-                    if (model.getVersion() == SupportedVersion.VERSION_DEFAULT) {
-                        return model;
-                    }
-                    return null;
-                }).filter(Objects::nonNull)
+
+        List<DBModel> modelsWithDefault = dbModels.stream()
+                .filter(m -> m.getVersion() == SupportedVersion.VERSION_DEFAULT)
                 .collect(Collectors.toList());
-        List<String> connectionList = defaultList.stream()
-                .map(dbModel -> "\n*" + dbModel.getName()).collect(Collectors.toList());
-        if (!defaultList.isEmpty() && openUpdateDialog(connectionList)) {
-            updateVersionWithDialog(defaultList);
+        List<String> connectionNames = modelsWithDefault.stream().map(DBModel::getName).collect(Collectors.toList());
+        if (!modelsWithDefault.isEmpty() && openUpdateDialog(connectionNames)) {
+            updateVersions(modelsWithDefault);
             dbModelsProvider.save(dbModels);
         }
+
         dbModels.forEach(this::addDatabase);
         dbModelsView.getTableViewer().refresh();
     }
 
-    private void updateVersionWithDialog(List<DBModel> defaultList) {
+    private void updateVersions(List<DBModel> dbModelsWithDefault) {
         ProgressMonitorDialog dialog = new ProgressMonitorDialog(Display.getDefault().getActiveShell());
         try {
             dialog.run(true, true, progressMonitor -> {
-                progressMonitor.beginTask(l10n("update_version_dialog"), defaultList.size());
-                for (DBModel dbModel : defaultList) {
+                progressMonitor.beginTask(l10n("update_version_dialog"), dbModelsWithDefault.size());
+                for (DBModel dbModel : dbModelsWithDefault) {
                     if (progressMonitor.isCanceled()) {
                         LOG.info(l10n("update_version_cancelled_message"));
                         progressMonitor.done();
                         break;
                     } else {
-                        addDatabase(dbModel);
-                        Optional<DBController> opt = dbControllers.stream().filter(dbc -> dbc.getModel().equals(dbModel)).findFirst();
-                        opt.ifPresent(dbController -> {
-                            SupportedVersion v;
-                            v = dbController.getVersion();
+                        DBController dbController = new DBController(settings, dbModel);
+                        dbController.getVersion().ifPresent(v -> {
+                            LOG.info("Обновлена версия сервера для подключения \"" + dbModel.getName()
+                                        + "\". Новая версия: " + v.getVersion());
                             dbModel.setVersion(v);
                         });
                         progressMonitor.worked(1);
@@ -355,13 +350,6 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
             });
         } catch (InvocationTargetException | InterruptedException e) {
             LOG.error(l10n("update_version_error_message", e.getMessage()), e);
-        } finally {
-            dbControllers.forEach(dbController -> {
-                if (dbController.isConnected()) {
-                    dbController.disconnect(true);
-                }
-            });
-            dbControllers.clear();
         }
     }
 
@@ -396,11 +384,11 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
         dbModelsProvider.save(models);
     }
 
-    private boolean openUpdateDialog(List<String> defaultList) {
+    private boolean openUpdateDialog(List<String> connectionNames) {
         MessageDialog dialog = new MessageDialog(view.getShell(),
                 resourceBundle.getString("warning_title"),
                 null,
-                l10n("warning_text", defaultList),
+                l10n("warning_text", connectionNames.stream().collect(Collectors.joining("\n*", "*", ""))),
                 MessageDialog.WARNING, new String[]{"Ok", "Cancel"}, 0);
         return dialog.open() == 0;
     }
@@ -415,7 +403,7 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
             DBController controller = addDatabase(addDatabaseDialog.getCreatedModel());
             dbModelsView.getTableViewer().refresh();
             if (controller.isEnabledAutoConnection()) {
-                controller.connect();
+                controller.connectAsync();
             }
             saveDatabases();
         }
@@ -428,7 +416,7 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
             dbModelsView.getTableViewer().refresh(true, true);
             saveDatabases();
             if (controller.isEnabledAutoConnection()) {
-                controller.connect();
+                controller.connectAsync();
             }
         });
     }
@@ -462,7 +450,7 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
     private void connectToSelectedDatabase() {
         if (dbModelsView.getTableViewer().getStructuredSelection().getFirstElement() != null) {
             DBController selectedController = (DBController) dbModelsView.getTableViewer().getStructuredSelection().getFirstElement();
-            selectedController.connect();
+            selectedController.connectAsync();
         }
     }
 
@@ -684,7 +672,7 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
     @Override
     public void dbModelsViewDidCallActionToController(DBController controller) {
         if (!controller.isConnected()) {
-            controller.connect();
+            controller.connectAsync();
         } else {
             controller.disconnect(true);
         }

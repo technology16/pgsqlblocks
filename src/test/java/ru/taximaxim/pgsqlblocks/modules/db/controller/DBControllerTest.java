@@ -112,7 +112,7 @@ public class DBControllerTest {
         DBModel model = new DBModel("TestDbc", REMOTE_HOST, REMOTE_PORT,
                 SupportedVersion.getByVersionName(REMOTE_VERSION).get(), REMOTE_DB, REMOTE_USERNAME,  REMOTE_PASSWORD,  true);
         testDbc = new DBController(Settings.getInstance(), model);
-        testDbc.connect();
+        testDbc.connectAsync();
         testDbc.addListener(listener);
     }
 

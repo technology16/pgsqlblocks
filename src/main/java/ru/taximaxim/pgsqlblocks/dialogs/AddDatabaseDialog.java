@@ -43,14 +43,14 @@ public class AddDatabaseDialog extends Dialog {
 
     private DBModel createdModel;
 
-    protected Text nameText;
-    protected Text hostText;
-    protected Text portText;
-    protected ComboViewer versionCombo;
-    protected Text userText;
-    protected Text passwordText;
-    protected Text databaseNameText;
-    protected Button enabledButton;
+    Text nameText;
+    Text hostText;
+    Text portText;
+    ComboViewer versionCombo;
+    Text userText;
+    Text passwordText;
+    Text databaseNameText;
+    Button enabledButton;
 
     private static final String DEFAULT_PORT = "5432";
     private static final int TEXT_WIDTH = 200;
@@ -114,11 +114,11 @@ public class AddDatabaseDialog extends Dialog {
                 if (element instanceof SupportedVersion) {
                     SupportedVersion version = (SupportedVersion) element;
                     return version.getVersionText();
+                } else {
+                    return super.getText(element);
                 }
-                return super.getText(element);
             }
         });
-
 
         Label userLabel = new Label(container, SWT.HORIZONTAL);
         userLabel.setText(resourceBundle.getString("user"));
@@ -160,29 +160,29 @@ public class AddDatabaseDialog extends Dialog {
         String password = passwordText.getText();
         boolean enabled = enabledButton.getSelection();
         if (name.isEmpty()) {
-            MessageDialog.openError(null, resourceBundle.getString(ATTENTION),
-                    resourceBundle.getString("missing_connection_name"));
+            displayError("missing_connection_name");
             return;
         } else if (reservedConnectionNames.contains(name)) {
-            MessageDialog.openError(null, resourceBundle.getString(ATTENTION),
-                    String.format(resourceBundle.getString("already_exists"), name));
+            displayError("already_exists", name);
             return;
         } else if (host.isEmpty() || port.isEmpty()) {
-            MessageDialog.openError(null, resourceBundle.getString(ATTENTION),
-                    resourceBundle.getString("missing_host_port"));
+            displayError("missing_host_port");
             return;
         } else if (databaseName.isEmpty() || user.isEmpty()) {
-            MessageDialog.openError(null, resourceBundle.getString(ATTENTION),
-                    resourceBundle.getString("missing_database_user"));
+            displayError("missing_database_user");
             return;
         } else if (version == SupportedVersion.VERSION_DEFAULT || version == null){
-            MessageDialog.openError(null, resourceBundle.getString(ATTENTION),
-                    resourceBundle.getString("missing_database_version"));
+            displayError("missing_database_version");
             return;
         }
 
         createdModel = new DBModel(name, host, port, version, databaseName, user, password, enabled);
 
         super.okPressed();
+    }
+    
+    private void displayError(String msg, String... args) {
+        MessageDialog.openError(null, resourceBundle.getString(ATTENTION),
+                                String.format(resourceBundle.getString(msg), (Object[]) args));
     }
 }

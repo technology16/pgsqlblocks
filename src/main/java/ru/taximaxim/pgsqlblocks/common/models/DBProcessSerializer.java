@@ -56,10 +56,7 @@ public class DBProcessSerializer {
 
     public DBProcess deserialize(ResultSet resultSet) throws SQLException {
         int pid = resultSet.getInt(PID);
-        String backendType = "";
-        if (hasBackendType(resultSet.getMetaData())) {
-            backendType = resultSet.getString(BACKEND_TYPE);
-        }
+        String backendType = hasBackendType(resultSet.getMetaData()) ? resultSet.getString(BACKEND_TYPE) : "";
         String state = resultSet.getString(STATE) == null ? "" : resultSet.getString(STATE);
         Date stateChangeDate = dateUtils.dateFromString(resultSet.getString(STATE_CHANGE));
 

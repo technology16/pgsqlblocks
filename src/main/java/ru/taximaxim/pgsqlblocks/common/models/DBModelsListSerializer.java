@@ -31,7 +31,6 @@ public class DBModelsListSerializer {
 
     private static final String ROOT_ELEMENT_TAG_NAME = "servers";
     private static final String ELEMENTS_ROOT_ELEMENT_TAG_NAME = "server";
-    private static final String VERSION = "version";
 
     public List<DBModel> deserialize(Document document) {
         List<DBModel> dbModels = new ArrayList<>();
@@ -57,9 +56,5 @@ public class DBModelsListSerializer {
         }
         document.appendChild(rootElement);
         return document;
-    }
-
-    public boolean checkExistingNode(Document document) {
-        return document.getElementsByTagName(VERSION).getLength() == document.getElementsByTagName(ELEMENTS_ROOT_ELEMENT_TAG_NAME).getLength();
     }
 }

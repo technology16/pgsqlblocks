@@ -54,7 +54,7 @@ public class DBModelSerializer {
         String name = getTextContentFromNode(nameNode);
         String host = getTextContentFromNode(hostNode);
         String port = getTextContentFromNode(portNode);
-        SupportedVersion version = getVersionFromNode(versionNode);
+        SupportedVersion version = getVersionFromNode(versionNode, name);
         String databaseName = getTextContentFromNode(databaseNameNode);
         String user = getTextContentFromNode(userNode);
         String password = getTextContentFromNode(passwordNode);
@@ -85,17 +85,18 @@ public class DBModelSerializer {
         return "";
     }
 
-    private SupportedVersion getVersionFromNode(Node node) {
+    private SupportedVersion getVersionFromNode(Node node, String name) {
         if (node != null) {
             String version = node.getTextContent();
             Optional<SupportedVersion> versionOpt = SupportedVersion.getByVersionName(version);
             if (versionOpt.isPresent()) {
                 return versionOpt.get();
             } else {
-                LOG.warn("Запрошена незнакомая версия PostgreSQL: " + version);
+                LOG.warn("Запрошена незнакомая версия PostgreSQL для \"" + name + "\":" + version);
                 return SupportedVersion.VERSION_DEFAULT;
             }
         } else {
+            LOG.warn("Версия сервера PostgreSQL не задана для \"" + name + "\"");
             return SupportedVersion.VERSION_DEFAULT;
         }
     }

@@ -28,4 +28,5 @@ public interface DBModelsProvider {
     List<DBModel> get();
 
     void save(List<DBModel> models);
+
 }

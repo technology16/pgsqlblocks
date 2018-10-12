@@ -97,18 +97,12 @@ public class DBController implements DBProcessFilterListener, DBBlocksJournalLis
         return model.isEnabled();
     }
 
-    public synchronized void connect() {
+    public synchronized void connectAsync() {
         executor.execute(() -> {
-            String password = getPassword();
             try {
                 listeners.forEach(listener -> listener.dbControllerWillConnect(this));
 
-                Properties info = new Properties();
-                info.put("user", model.getUser());
-                info.put("password", password);
-                info.put("loginTimeout", String.valueOf(settings.getLoginTimeout()));
-
-                connection = DriverManager.getConnection(getConnectionUrl(), info);
+                createConnection();
                 setBackendPid(getPgBackendPid());
                 setStatus(DBStatus.CONNECTED);
                 listeners.forEach(listener -> listener.dbControllerDidConnect(this));
@@ -117,6 +111,17 @@ public class DBController implements DBProcessFilterListener, DBBlocksJournalLis
                 listeners.forEach(listener -> listener.dbControllerConnectionFailed(this, e));
             }
         });
+    }
+
+    private void createConnection() throws SQLException {
+        String password = getPassword();
+
+        Properties info = new Properties();
+        info.put("user", model.getUser());
+        info.put("password", password);
+        info.put("loginTimeout", String.valueOf(settings.getLoginTimeout()));
+
+        connection = DriverManager.getConnection(getConnectionUrl(), info);
     }
 
     private String getPassword() {
@@ -236,7 +241,7 @@ public class DBController implements DBProcessFilterListener, DBBlocksJournalLis
 
     public void updateProcesses() {
         if (!isConnected()) {
-            connect();
+            connectAsync();
         } else {
             executor.execute(this::loadProcesses);
         }
@@ -354,13 +359,11 @@ public class DBController implements DBProcessFilterListener, DBBlocksJournalLis
     }
 
     private String getProcessesQuery() {
-        float ver = Float.parseFloat(model.getVersion().getVersion());
+        boolean isTen = model.getVersion() == SupportedVersion.VERSION_10;
         if (settings.getShowIdle()) {
-            return ver >= 10.0 ? DBQueries.getProcessesQueryWithIdleForTen()
-                    : DBQueries.getProcessesQueryWithIdle();
+            return isTen ? DBQueries.getProcessesQueryWithIdleForTen() : DBQueries.getProcessesQueryWithIdle();
         } else {
-            return ver >= 10.0 ? DBQueries.getProcessesQueryForTen()
-                    : DBQueries.getProcessesQuery();
+            return isTen ? DBQueries.getProcessesQueryForTen() : DBQueries.getProcessesQuery();
         }
     }
 
@@ -502,24 +505,23 @@ public class DBController implements DBProcessFilterListener, DBBlocksJournalLis
         }
     }
 
-    public SupportedVersion getVersion() {
-        SupportedVersion v = null;
-        String password = getPassword();
+    public Optional<SupportedVersion> getVersion() {
         try {
-            Properties info = new Properties();
-            info.put("user", model.getUser());
-            info.put("password", password);
-            info.put("loginTimeout", String.valueOf(settings.getLoginTimeout()));
-            connection = DriverManager.getConnection(getConnectionUrl(), info);
+            createConnection();
             PreparedStatement preparedStatement = connection.prepareStatement(DBQueries.getVersionQuery());
             ResultSet resultSet = preparedStatement.executeQuery();
             if (resultSet.next()) {
                 int ver = resultSet.getInt(1);
-                v = SupportedVersion.getByVersionNumber(ver).orElse(SupportedVersion.VERSION_DEFAULT);
+                return SupportedVersion.getByVersionNumber(ver);
             }
-        } catch (SQLException e) {
-            listeners.forEach(listener -> listener.dbControllerConnectionFailed(this, e));
+        } catch (Exception e) {
+            LOG.warn("Ошибка при получении версии сервера для \"" + model.getName() + "\": " + e.getMessage(), e);
+        } finally {
+            if (connection != null) {
+                disconnect(true);
+            }
+            shutdown();
         }
-        return v != null ? v : SupportedVersion.VERSION_DEFAULT;
+        return Optional.empty();
     }
 }
