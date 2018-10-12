@@ -58,11 +58,4 @@ public class DBModelsLocalProvider implements DBModelsProvider {
             // FIXME
         }
     }
-
-    // FIXME broken if at least one db has version and at least one doesn't 
-    @Override
-    public boolean needUpdate() {
-        Document document = documentWorker.open(file);
-        return document != null && !serializer.checkExistingNode(document);
-    }
 }

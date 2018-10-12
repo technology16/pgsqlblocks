@@ -515,7 +515,7 @@ public class DBController implements DBProcessFilterListener, DBBlocksJournalLis
             ResultSet resultSet = preparedStatement.executeQuery();
             if (resultSet.next()) {
                 int ver = resultSet.getInt(1);
-                v = SupportedVersion.get(ver);
+                v = SupportedVersion.getByVersionNumber(ver).orElse(SupportedVersion.VERSION_DEFAULT);
             }
         } catch (SQLException e) {
             listeners.forEach(listener -> listener.dbControllerConnectionFailed(this, e));

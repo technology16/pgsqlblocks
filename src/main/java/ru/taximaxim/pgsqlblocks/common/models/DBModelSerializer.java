@@ -19,12 +19,17 @@
  */
 package ru.taximaxim.pgsqlblocks.common.models;
 
+import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import ru.taximaxim.pgsqlblocks.utils.SupportedVersion;
 
+import java.util.Optional;
+
 public class DBModelSerializer {
+
+    private static final Logger LOG = Logger.getLogger(DBModelSerializer.class);
 
     private static final String ROOT_ELEMENT_TAG_NAME       = "server";
     private static final String ELEMENT_NAME_TAG_NAME         = "name";
@@ -82,8 +87,14 @@ public class DBModelSerializer {
 
     private SupportedVersion getVersionFromNode(Node node) {
         if (node != null) {
-            String version =  node.getTextContent();
-            return version.isEmpty() ? SupportedVersion.VERSION_DEFAULT : SupportedVersion.get(version);
+            String version = node.getTextContent();
+            Optional<SupportedVersion> versionOpt = SupportedVersion.getByVersionName(version);
+            if (versionOpt.isPresent()) {
+                return versionOpt.get();
+            } else {
+                LOG.warn("Запрошена незнакомая версия PostgreSQL: " + version);
+                return SupportedVersion.VERSION_DEFAULT;
+            }
         } else {
             return SupportedVersion.VERSION_DEFAULT;
         }

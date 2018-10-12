@@ -109,7 +109,8 @@ public class DBControllerTest {
 
     @BeforeClass
     public static void initialize() throws IOException {
-        DBModel model = new DBModel("TestDbc", REMOTE_HOST, REMOTE_PORT, SupportedVersion.get(REMOTE_VERSION), REMOTE_DB, REMOTE_USERNAME,  REMOTE_PASSWORD,  true);
+        DBModel model = new DBModel("TestDbc", REMOTE_HOST, REMOTE_PORT,
+                SupportedVersion.getByVersionName(REMOTE_VERSION).get(), REMOTE_DB, REMOTE_USERNAME,  REMOTE_PASSWORD,  true);
         testDbc = new DBController(Settings.getInstance(), model);
         testDbc.connect();
         testDbc.addListener(listener);

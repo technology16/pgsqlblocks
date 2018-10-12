@@ -106,7 +106,7 @@ public class AddDatabaseDialog extends Dialog {
         versionLabel.setText(resourceBundle.getString("version"));
         versionCombo = new ComboViewer(container, SWT.BORDER | SWT.DROP_DOWN | SWT.READ_ONLY);
         versionCombo.setContentProvider(ArrayContentProvider.getInstance());
-        versionCombo.setInput(SupportedVersion.getValuesAdd());
+        versionCombo.setInput(SupportedVersion.getValuesNoDefault());
         versionCombo.setSelection(new StructuredSelection(SupportedVersion.VERSION_10));
         versionCombo.setLabelProvider(new LabelProvider() {
             @Override
