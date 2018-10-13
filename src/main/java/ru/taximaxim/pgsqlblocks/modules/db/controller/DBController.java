@@ -50,24 +50,23 @@ import static ru.taximaxim.pgsqlblocks.PgSqlBlocks.APP_NAME;
 
 public class DBController implements DBProcessFilterListener, DBBlocksJournalListener {
 
-    private DBModel model;
-    private final UserInputPasswordProvider userInputPasswordProvider;
-
-    private final List<DBProcess> processes = new ArrayList<>();
-    private final List<DBProcess> filteredProcesses = new ArrayList<>();
-
     private static final Logger LOG = Logger.getLogger(DBController.class);
 
     private static final String PG_BACKEND_PID = "pg_backend_pid";
     private static final String BLOCKED_BY = "blockedBy";
-
-    private List<DBControllerListener> listeners = new ArrayList<>();
-
+    private final List<DBProcess> processes = new ArrayList<>();
+    private final List<DBProcess> filteredProcesses = new ArrayList<>();
     private final DBProcessFilter processesFilters = new DBProcessFilter();
+    private final UserInputPasswordProvider userInputPasswordProvider;
 
     private final Settings settings;
     private final ResourceBundle resourceBundle;
-
+    private final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
+    private final ScheduledExecutorService journalsSaveExecutor = Executors.newSingleThreadScheduledExecutor();
+    private final DBBlocksJournal blocksJournal = new DBBlocksJournal();
+    private final DateUtils dateUtils = new DateUtils();
+    private DBModel model;
+    private List<DBControllerListener> listeners = new ArrayList<>();
     private DBStatus status = DBStatus.DISABLED;
 
     private boolean blocked = false;
@@ -75,15 +74,8 @@ public class DBController implements DBProcessFilterListener, DBBlocksJournalLis
     private int backendPid;
 
     private Connection connection;
-
-    private final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
-    private final ScheduledExecutorService journalsSaveExecutor = Executors.newSingleThreadScheduledExecutor();
     private ScheduledFuture<?> updater;
-
-    private final DBBlocksJournal blocksJournal = new DBBlocksJournal();
-
     private Date blocksJournalCreateDate;
-    private final DateUtils dateUtils = new DateUtils();
 
     public DBController(Settings settings, DBModel model, UserInputPasswordProvider userInputPasswordProvider) {
         this.settings = settings;
@@ -115,32 +107,34 @@ public class DBController implements DBProcessFilterListener, DBBlocksJournalLis
     /**
      * Connect to database. If getting password fails connection is not started
      */
-    public synchronized void connect() {
+    public synchronized void connectAsync() {
         executor.execute(() -> {
-            String password;
-            try {
-                password = getPassword();
-            } catch (UserCancelException e) {
-                LOG.info("Пользователь отменил ввод пароля и подключение к " + model.getName() + " не состоялось");
-                return;
-            }
             try {
                 listeners.forEach(listener -> listener.dbControllerWillConnect(this));
 
-                Properties info = new Properties();
-                info.put("user", model.getUser());
-                info.put("password", password);
-                info.put("loginTimeout", String.valueOf(settings.getLoginTimeout()));
-
-                connection = DriverManager.getConnection(getConnectionUrl(), info);
+                createConnection();
                 setBackendPid(getPgBackendPid());
                 setStatus(DBStatus.CONNECTED);
                 listeners.forEach(listener -> listener.dbControllerDidConnect(this));
+            } catch (UserCancelException e) {
+                LOG.info("Пользователь отменил ввод пароля и подключение к " + model.getName() + " не состоялось");
+                return;
             } catch (SQLException e) {
                 setStatus(DBStatus.CONNECTION_ERROR);
                 listeners.forEach(listener -> listener.dbControllerConnectionFailed(this, e));
             }
         });
+    }
+
+    private void createConnection() throws UserCancelException, SQLException {
+        String password = getPassword();
+
+        Properties info = new Properties();
+        info.put("user", model.getUser());
+        info.put("password", password);
+        info.put("loginTimeout", String.valueOf(settings.getLoginTimeout()));
+
+        connection = DriverManager.getConnection(getConnectionUrl(), info);
     }
 
     /**
@@ -269,7 +263,7 @@ public class DBController implements DBProcessFilterListener, DBBlocksJournalLis
 
     public void updateProcesses() {
         if (!isConnected()) {
-            connect();
+            connectAsync();
         } else {
             executor.execute(this::loadProcesses);
         }
@@ -284,7 +278,7 @@ public class DBController implements DBProcessFilterListener, DBBlocksJournalLis
 
     private void loadProcesses() {
         listeners.forEach(listener -> listener.dbControllerWillUpdateProcesses(this));
-        try(
+        try (
                 PreparedStatement preparedStatement = connection.prepareStatement(getProcessesQuery());
                 ResultSet resultSet = preparedStatement.executeQuery()
         ) {
@@ -292,7 +286,7 @@ public class DBController implements DBProcessFilterListener, DBBlocksJournalLis
             Map<Integer, Set<DBBlock>> tmpBlocks = new HashMap<>();
             DBProcessSerializer processDeserializer = new DBProcessSerializer();
             DBBlockDeserializer blockDeserializer = new DBBlockDeserializer();
-            while(resultSet.next()) {
+            while (resultSet.next()) {
                 DBProcess process = processDeserializer.deserialize(resultSet);
                 int blockedBy = resultSet.getInt(BLOCKED_BY);
                 if (blockedBy != 0) {
@@ -387,10 +381,11 @@ public class DBController implements DBProcessFilterListener, DBBlocksJournalLis
     }
 
     private String getProcessesQuery() {
+        boolean isTen = model.getVersion() == SupportedVersion.VERSION_10;
         if (settings.getShowIdle()) {
-            return DBQueries.getProcessesQueryWithIdle();
+            return isTen ? DBQueries.getProcessesQueryWithIdleForTen() : DBQueries.getProcessesQueryWithIdle();
         } else {
-            return DBQueries.getProcessesQuery();
+            return isTen ? DBQueries.getProcessesQueryForTen() : DBQueries.getProcessesQuery();
         }
     }
 
@@ -530,5 +525,25 @@ public class DBController implements DBProcessFilterListener, DBBlocksJournalLis
         } catch (ParserConfigurationException | IOException | SAXException e) {
             LOG.error(e.getMessage(), e);
         }
+    }
+
+    public Optional<SupportedVersion> getVersion() {
+        try {
+            createConnection();
+            PreparedStatement preparedStatement = connection.prepareStatement(DBQueries.getVersionQuery());
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                int ver = resultSet.getInt(1);
+                return SupportedVersion.getByVersionNumber(ver);
+            }
+        } catch (Exception e) {
+            LOG.warn("Ошибка при получении версии сервера для \"" + model.getName() + "\": " + e.getMessage(), e);
+        } finally {
+            if (connection != null) {
+                disconnect(true);
+            }
+            shutdown();
+        }
+        return Optional.empty();
     }
 }

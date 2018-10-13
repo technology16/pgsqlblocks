@@ -27,6 +27,7 @@ import org.w3c.dom.NodeList;
 import ru.taximaxim.pgsqlblocks.utils.DateUtils;
 
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.Date;
 
@@ -39,6 +40,7 @@ public class DBProcessSerializer {
     private static final String PROCESS_STATUS_ELEMENT_TAG_NAME = "processStatus";
 
     private static final String PID = "pid";
+    private static final String BACKEND_TYPE = "backend_type";
     private static final String STATE = "state";
     private static final String STATE_CHANGE = "state_change";
     private static final String QUERY_SQL = "query";
@@ -54,6 +56,7 @@ public class DBProcessSerializer {
 
     public DBProcess deserialize(ResultSet resultSet) throws SQLException {
         int pid = resultSet.getInt(PID);
+        String backendType = hasBackendType(resultSet.getMetaData()) ? resultSet.getString(BACKEND_TYPE) : "";
         String state = resultSet.getString(STATE) == null ? "" : resultSet.getString(STATE);
         Date stateChangeDate = dateUtils.dateFromString(resultSet.getString(STATE_CHANGE));
 
@@ -71,7 +74,7 @@ public class DBProcessSerializer {
         String client = resultSet.getString(CLIENT);
         DBProcessQueryCaller caller = new DBProcessQueryCaller(appName, databaseName, userName, client);
 
-        return new DBProcess(pid, caller, state, stateChangeDate, query);
+        return new DBProcess(pid, backendType, caller, state, stateChangeDate, query);
     }
 
     public DBProcess deserialize(Element xmlElement, boolean elementIsRoot) {
@@ -82,6 +85,7 @@ public class DBProcessSerializer {
             rootElement = (Element) xmlElement.getElementsByTagName(ROOT_ELEMENT_TAG_NAME).item(0);
         }
         int pid = Integer.parseInt(rootElement.getElementsByTagName(PID).item(0).getTextContent());
+        String backendType = hasBackendType(rootElement) ? rootElement.getElementsByTagName(BACKEND_TYPE).item(0).getTextContent() : "";
         String appName = rootElement.getElementsByTagName(APPLICATION_NAME).item(0).getTextContent();
         String databaseName = rootElement.getElementsByTagName(DAT_NAME).item(0).getTextContent();
         String userName = rootElement.getElementsByTagName(USE_NAME).item(0).getTextContent();
@@ -98,7 +102,7 @@ public class DBProcessSerializer {
 
         String state = rootElement.getElementsByTagName(STATE).item(0).getTextContent();
         Date stateChange = dateUtils.dateFromString(rootElement.getElementsByTagName(STATE_CHANGE).item(0).getTextContent());
-        DBProcess process = new DBProcess(pid, caller, state, stateChange, query);
+        DBProcess process = new DBProcess(pid, backendType, caller, state, stateChange, query);
         Element childrenRootElement = (Element)rootElement.getElementsByTagName(CHILDREN_ELEMENT_TAG_NAME).item(0);
         NodeList childrenElements = childrenRootElement.getElementsByTagName(ROOT_ELEMENT_TAG_NAME);
         for (int i = 0; i < childrenRootElement.getChildNodes().getLength(); i++) {
@@ -120,6 +124,7 @@ public class DBProcessSerializer {
     public Element serialize(Document document, DBProcess process) {
         Element rootElement = document.createElement(ROOT_ELEMENT_TAG_NAME);
         createAndAppendElement(document, rootElement, PID, String.valueOf(process.getPid()));
+        createAndAppendElement(document, rootElement, BACKEND_TYPE, process.getBackendType());
         createAndAppendElement(document, rootElement, STATE, process.getState());
         createAndAppendElement(document, rootElement, STATE_CHANGE, dateUtils.dateToStringWithTz(process.getStateChange()));
         createAndAppendElement(document, rootElement, QUERY_SQL, process.getQuery().getQueryString());
@@ -142,5 +147,23 @@ public class DBProcessSerializer {
         Element element = document.createElement(elementTagName);
         element.setTextContent(elementContent);
         parentElement.appendChild(element);
+    }
+
+    private boolean hasBackendType(ResultSetMetaData metaData) {
+        try {
+            int columns = metaData.getColumnCount();
+            for (int x = 1; x <= columns; x++) {
+                if (BACKEND_TYPE.equals(metaData.getColumnName(x))) {
+                    return true;
+                }
+            }
+        } catch (SQLException e) {
+            LOG.error(e.getMessage());
+        }
+        return false;
+    }
+
+    private boolean hasBackendType(Element element) {
+        return element.getElementsByTagName(BACKEND_TYPE).getLength() > 0;
     }
 }

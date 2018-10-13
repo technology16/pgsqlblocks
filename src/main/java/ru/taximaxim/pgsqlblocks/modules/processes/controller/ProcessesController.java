@@ -123,7 +123,7 @@ public class ProcessesController implements DBControllerListener, UserInputPassw
 
         loadDatabases();
 
-        dbControllers.stream().filter(DBController::isEnabledAutoConnection).forEach(DBController::connect);
+        dbControllers.stream().filter(DBController::isEnabledAutoConnection).forEach(DBController::connectAsync);
     }
 
     private void createProcessesTab() {
@@ -227,7 +227,7 @@ public class ProcessesController implements DBControllerListener, UserInputPassw
         SashForm dbBlocksJournalViewSash = new SashForm(tabFolder, SWT.VERTICAL);
         Composite dbBlocksJournalViewComposite = new Composite(dbBlocksJournalViewSash, SWT.NONE);
         GridLayout gl = new GridLayout();
-        gl.marginWidth= 0;
+        gl.marginWidth = 0;
         gl.marginHeight = 0;
         dbBlocksJournalViewSash.setLayout(gl);
         dbBlocksJournalViewSash.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
@@ -341,7 +341,7 @@ public class ProcessesController implements DBControllerListener, UserInputPassw
     }
 
     private void changeToolItemsStateForController(DBController controller) {
-        Display.getDefault().syncExec( () -> {
+        Display.getDefault().syncExec(() -> {
             boolean isDisconnected = controller != null && !controller.isConnected();
             toggleVisibilityProcessesFilterPanelToolItem.setEnabled(controller != null);
             toggleVisibilityBlocksJournalProcessesFilterPanelToolItem.setEnabled(controller != null);
@@ -367,8 +367,44 @@ public class ProcessesController implements DBControllerListener, UserInputPassw
 
     private void loadDatabases() {
         List<DBModel> dbModels = dbModelsProvider.get();
+
+        List<DBModel> modelsWithDefault = dbModels.stream()
+                .filter(m -> m.getVersion() == SupportedVersion.VERSION_DEFAULT)
+                .collect(Collectors.toList());
+        List<String> connectionNames = modelsWithDefault.stream().map(DBModel::getName).collect(Collectors.toList());
+        if (!modelsWithDefault.isEmpty() && openUpdateDialog(connectionNames)) {
+            updateVersions(modelsWithDefault);
+            dbModelsProvider.save(dbModels);
+        }
+
         dbModels.forEach(this::addDatabase);
         dbModelsView.getTableViewer().refresh();
+    }
+
+    private void updateVersions(List<DBModel> dbModelsWithDefault) {
+        ProgressMonitorDialog dialog = new ProgressMonitorDialog(Display.getDefault().getActiveShell());
+        try {
+            dialog.run(true, true, progressMonitor -> {
+                progressMonitor.beginTask(l10n("update_version_dialog"), dbModelsWithDefault.size());
+                for (DBModel dbModel : dbModelsWithDefault) {
+                    if (progressMonitor.isCanceled()) {
+                        LOG.info(l10n("update_version_cancelled_message"));
+                        progressMonitor.done();
+                        break;
+                    } else {
+                        DBController dbController = new DBController(settings, dbModel);
+                        dbController.getVersion().ifPresent(v -> {
+                            LOG.info("Обновлена версия сервера для подключения \"" + dbModel.getName()
+                                        + "\". Новая версия: " + v.getVersion());
+                            dbModel.setVersion(v);
+                        });
+                        progressMonitor.worked(1);
+                    }
+                }
+            });
+        } catch (InvocationTargetException | InterruptedException e) {
+            LOG.error(l10n("update_version_error_message", e.getMessage()), e);
+        }
     }
 
     private DBController addDatabase(DBModel dbModel) {
@@ -402,6 +438,15 @@ public class ProcessesController implements DBControllerListener, UserInputPassw
         dbModelsProvider.save(models);
     }
 
+    private boolean openUpdateDialog(List<String> connectionNames) {
+        MessageDialog dialog = new MessageDialog(view.getShell(),
+                resourceBundle.getString("warning_title"),
+                null,
+                l10n("warning_text", connectionNames.stream().collect(Collectors.joining("\n*", "*", ""))),
+                MessageDialog.WARNING, new String[]{"Ok", "Cancel"}, 0);
+        return dialog.open() == 0;
+    }
+
     private void openAddNewDatabaseDialog() {
         List<String> reservedConnectionNames = dbControllers.stream()
                 .map(DBController::getModel)
@@ -412,7 +457,7 @@ public class ProcessesController implements DBControllerListener, UserInputPassw
             DBController controller = addDatabase(addDatabaseDialog.getCreatedModel());
             dbModelsView.getTableViewer().refresh();
             if (controller.isEnabledAutoConnection()) {
-                controller.connect();
+                controller.connectAsync();
             }
             saveDatabases();
         }
@@ -425,7 +470,7 @@ public class ProcessesController implements DBControllerListener, UserInputPassw
             dbModelsView.getTableViewer().refresh(true, true);
             saveDatabases();
             if (controller.isEnabledAutoConnection()) {
-                controller.connect();
+                controller.connectAsync();
             }
         });
     }
@@ -459,7 +504,7 @@ public class ProcessesController implements DBControllerListener, UserInputPassw
     private void connectToSelectedDatabase() {
         if (dbModelsView.getTableViewer().getStructuredSelection().getFirstElement() != null) {
             DBController selectedController = (DBController) dbModelsView.getTableViewer().getStructuredSelection().getFirstElement();
-            selectedController.connect();
+            selectedController.connectAsync();
         }
     }
 
@@ -523,7 +568,7 @@ public class ProcessesController implements DBControllerListener, UserInputPassw
     }
 
     private void hideTrayMessageIfAllDatabasesUnblocked() {
-        if (PgSqlBlocks.getInstance().getApplicationController().getApplicationView().trayIsAvailable() 
+        if (PgSqlBlocks.getInstance().getApplicationController().getApplicationView().trayIsAvailable()
                 && dbControllers.stream().noneMatch(DBController::isBlocked)) {
             view.getDisplay().asyncExec(() -> {
                 Tray tray = PgSqlBlocks.getInstance().getApplicationController().getApplicationView().getTray();
@@ -661,14 +706,14 @@ public class ProcessesController implements DBControllerListener, UserInputPassw
             PasswordDialog passwordDialog = new PasswordDialog(resourceBundle, view.getShell(), controller.getModel());
             if (passwordDialog.open() == Window.OK) {
                 pass[0] = passwordDialog.getPassword();
-            }else {
+            } else {
                 pass[0] = null;
             }
         });
 
         if (pass[0] != null) {
             return pass[0];
-        }else {
+        } else {
             throw new UserCancelException();
         }
     }
@@ -701,7 +746,7 @@ public class ProcessesController implements DBControllerListener, UserInputPassw
     @Override
     public void dbModelsViewDidCallActionToController(DBController controller) {
         if (!controller.isConnected()) {
-            controller.connect();
+            controller.connectAsync();
         } else {
             controller.disconnect(true);
         }
@@ -893,7 +938,7 @@ public class ProcessesController implements DBControllerListener, UserInputPassw
         if (selection.isEmpty()) {
             dbProcessInfoView.hide();
         } else {
-            IStructuredSelection structuredSelection = (IStructuredSelection)selection;
+            IStructuredSelection structuredSelection = (IStructuredSelection) selection;
             selectedProcesses = (List<DBProcess>) structuredSelection.toList();
             dbProcessInfoView.show(selectedProcesses.get(0));
         }
@@ -905,13 +950,13 @@ public class ProcessesController implements DBControllerListener, UserInputPassw
             dbBlocksJournalProcessInfoView.hide();
         } else {
             DBProcess process;
-            IStructuredSelection structuredSelection = (IStructuredSelection)selection;
+            IStructuredSelection structuredSelection = (IStructuredSelection) selection;
             Object element = structuredSelection.getFirstElement();
             if (element instanceof DBBlocksJournalProcess) {
-                DBBlocksJournalProcess blocksJournalProcess = (DBBlocksJournalProcess)element;
+                DBBlocksJournalProcess blocksJournalProcess = (DBBlocksJournalProcess) element;
                 process = blocksJournalProcess.getProcess();
             } else {
-                process = (DBProcess)element;
+                process = (DBProcess) element;
             }
             dbBlocksJournalProcessInfoView.show(process);
         }
@@ -959,7 +1004,7 @@ public class ProcessesController implements DBControllerListener, UserInputPassw
         try {
             boolean result = dbController.terminateProcessWithPid(pid);
             if (result) {
-                LOG.info(l10n("process_terminated", dbController.getModel().getName(), pid)); 
+                LOG.info(l10n("process_terminated", dbController.getModel().getName(), pid));
             } else {
                 LOG.info(l10n("process_not_terminated", dbController.getModel().getName(), pid, ""));
             }
@@ -969,7 +1014,7 @@ public class ProcessesController implements DBControllerListener, UserInputPassw
     }
 
     @Override
-    public void dbProcessInfoViewCancelProcessButtonClicked(){
+    public void dbProcessInfoViewCancelProcessButtonClicked() {
         Object selectedController = dbModelsView.getTableViewer().getStructuredSelection().getFirstElement();
         if (selectedController == null || selectedProcesses.isEmpty()) {
             return;

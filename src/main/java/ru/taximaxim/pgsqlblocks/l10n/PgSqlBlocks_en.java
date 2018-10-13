@@ -94,6 +94,7 @@ public class PgSqlBlocks_en extends ListResourceBundle {
 
                 // columns
                 {"pid", "PID"},
+                {"backend_type", "Type"},
                 {"num_of_blocked_processes", "# blocked by"},
                 {"application", "Application"},
                 {"db_name", "Database"},
@@ -130,6 +131,7 @@ public class PgSqlBlocks_en extends ListResourceBundle {
                 {"name", "Connection name*"},
                 {"host", "Host*"},
                 {"port", "Port*"},
+                {"version", "Version*"},
                 {"user", "User*"},
                 {"password", "Password"},
                 {"use_pgpass_file", "Password will be stored in insecure storage. Use .pgpass file instead."},
@@ -141,8 +143,18 @@ public class PgSqlBlocks_en extends ListResourceBundle {
                 {"already_exists", "Connection %s already exists!"},
                 {"missing_host_port", "Missing required field: host and/or port!"},
                 {"missing_database_user", "Missing required field: database and/or user!"},
+                {"missing_database_version", "Missing required field: database version!"},
                 {"attention", "Attention!"},
                 {"process_info", "Process information"},
+
+                //create update version dialog
+                {"warning_title","Changes"},
+                {"warning_text","Need to add the PostgreSQL version for connections.\n" +
+                        "Try to automatically determine the version for the following connections?\n" +
+                        "Default version (10) will be used in case of error or if you cancel now.\n\n%s"},
+                {"update_version_dialog", "Updating of versions"},
+                {"update_version_cancelled_message", "Updating of versions was cancelled"},
+                {"update_version_error_message", "Error in updating of versions  %s"},
 
                 //password dialog
                 {"type_password_for", "Type password for database "}

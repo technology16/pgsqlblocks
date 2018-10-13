@@ -21,11 +21,16 @@ package ru.taximaxim.pgsqlblocks.dialogs;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.ComboViewer;
+import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.*;
 import ru.taximaxim.pgsqlblocks.common.models.DBModel;
+import ru.taximaxim.pgsqlblocks.utils.SupportedVersion;
 
 import java.util.List;
 import java.util.ResourceBundle;
@@ -38,13 +43,14 @@ public class AddDatabaseDialog extends Dialog {
 
     private DBModel createdModel;
 
-    protected Text nameText;
-    protected Text hostText;
-    protected Text portText;
-    protected Text userText;
-    protected Text passwordText;
-    protected Text databaseNameText;
-    protected Button enabledButton;
+    Text nameText;
+    Text hostText;
+    Text portText;
+    ComboViewer versionCombo;
+    Text userText;
+    Text passwordText;
+    Text databaseNameText;
+    Button enabledButton;
 
     private static final String DEFAULT_PORT = "5432";
     private static final int TEXT_WIDTH = 200;
@@ -96,6 +102,24 @@ public class AddDatabaseDialog extends Dialog {
         portText.setText(DEFAULT_PORT);
         portText.setLayoutData(textGd);
 
+        Label versionLabel = new Label(container, SWT.HORIZONTAL);
+        versionLabel.setText(resourceBundle.getString("version"));
+        versionCombo = new ComboViewer(container, SWT.BORDER | SWT.DROP_DOWN | SWT.READ_ONLY);
+        versionCombo.setContentProvider(ArrayContentProvider.getInstance());
+        versionCombo.setInput(SupportedVersion.getValuesNoDefault());
+        versionCombo.setSelection(new StructuredSelection(SupportedVersion.VERSION_10));
+        versionCombo.setLabelProvider(new LabelProvider() {
+            @Override
+            public String getText(Object element) {
+                if (element instanceof SupportedVersion) {
+                    SupportedVersion version = (SupportedVersion) element;
+                    return version.getVersionText();
+                } else {
+                    return super.getText(element);
+                }
+            }
+        });
+
         Label userLabel = new Label(container, SWT.HORIZONTAL);
         userLabel.setText(resourceBundle.getString("user"));
         userText = new Text(container, SWT.BORDER);
@@ -130,30 +154,35 @@ public class AddDatabaseDialog extends Dialog {
         String name = nameText.getText();
         String host = hostText.getText();
         String port = portText.getText();
+        SupportedVersion version = (SupportedVersion) versionCombo.getStructuredSelection().getFirstElement();
         String databaseName = databaseNameText.getText();
         String user = userText.getText();
         String password = passwordText.getText();
         boolean enabled = enabledButton.getSelection();
         if (name.isEmpty()) {
-            MessageDialog.openError(null, resourceBundle.getString(ATTENTION),
-                    resourceBundle.getString("missing_connection_name"));
+            displayError("missing_connection_name");
             return;
         } else if (reservedConnectionNames.contains(name)) {
-            MessageDialog.openError(null, resourceBundle.getString(ATTENTION),
-                    String.format(resourceBundle.getString("already_exists"), name));
+            displayError("already_exists", name);
             return;
         } else if (host.isEmpty() || port.isEmpty()) {
-            MessageDialog.openError(null, resourceBundle.getString(ATTENTION),
-                    resourceBundle.getString("missing_host_port"));
+            displayError("missing_host_port");
             return;
         } else if (databaseName.isEmpty() || user.isEmpty()) {
-            MessageDialog.openError(null, resourceBundle.getString(ATTENTION),
-                    resourceBundle.getString("missing_database_user"));
+            displayError("missing_database_user");
+            return;
+        } else if (version == SupportedVersion.VERSION_DEFAULT || version == null){
+            displayError("missing_database_version");
             return;
         }
 
-        createdModel = new DBModel(name, host, port, databaseName, user, password, enabled);
+        createdModel = new DBModel(name, host, port, version, databaseName, user, password, enabled);
 
         super.okPressed();
+    }
+    
+    private void displayError(String msg, String... args) {
+        MessageDialog.openError(null, resourceBundle.getString(ATTENTION),
+                                String.format(resourceBundle.getString(msg), (Object[]) args));
     }
 }

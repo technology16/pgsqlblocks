@@ -31,14 +31,16 @@ public class DBProcess {
 
     private final int pid;
     private final String state;
+    private final String backendType;
     private final Date stateChange;
     private final DBProcessQuery query;
     private final DBProcessQueryCaller queryCaller;
 
     private DBProcessStatus status = DBProcessStatus.WORKING;
 
-    public DBProcess(int pid, DBProcessQueryCaller queryCaller, String state, Date stateChange, DBProcessQuery query) {
+    public DBProcess(int pid, String backendType, DBProcessQueryCaller queryCaller, String state, Date stateChange, DBProcessQuery query) {
         this.pid = pid;
+        this.backendType = backendType;
         this.queryCaller = queryCaller;
         this.state = state;
         this.stateChange = stateChange;
@@ -108,6 +110,10 @@ public class DBProcess {
 
     public int getPid() {
         return pid;
+    }
+
+    public String getBackendType() {
+        return backendType;
     }
 
     public String getState() {
