@@ -157,7 +157,10 @@ public class PgSqlBlocks_ru extends ListResourceBundle {
                 {"update_version_error_message", "Ошибка во время обновления версий %s"},
 
                 //password dialog
-                {"type_password_for", "Ввведите пароль для подключения "}
+                {"type_password_for", "Ввведите пароль для подключения "},
+                {"user_cancelled_on_connection", "Пользователь отменил ввод пароля для %s и подключение не состоялось"},
+                {"user_cancelled_on_update_version", "Пользователь отменил ввод пароля для %s, версия сервера не была изменена"},
+                {"update_version_error", "Ошибка при получении версии сервера для %s: %s"}
         };
     }
 }

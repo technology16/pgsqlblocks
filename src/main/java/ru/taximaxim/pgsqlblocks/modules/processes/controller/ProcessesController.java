@@ -392,7 +392,7 @@ public class ProcessesController implements DBControllerListener, UserInputPassw
                         progressMonitor.done();
                         break;
                     } else {
-                        DBController dbController = new DBController(settings, dbModel);
+                        DBController dbController = new DBController(settings, dbModel, this);
                         dbController.getVersion().ifPresent(v -> {
                             LOG.info("Обновлена версия сервера для подключения \"" + dbModel.getName()
                                         + "\". Новая версия: " + v.getVersion());

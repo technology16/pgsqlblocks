@@ -117,8 +117,7 @@ public class DBController implements DBProcessFilterListener, DBBlocksJournalLis
                 setStatus(DBStatus.CONNECTED);
                 listeners.forEach(listener -> listener.dbControllerDidConnect(this));
             } catch (UserCancelException e) {
-                LOG.info("Пользователь отменил ввод пароля и подключение к " + model.getName() + " не состоялось");
-                return;
+                LOG.info(String.format(resourceBundle.getString("user_cancelled_on_connection"), model.getName()));
             } catch (SQLException e) {
                 setStatus(DBStatus.CONNECTION_ERROR);
                 listeners.forEach(listener -> listener.dbControllerConnectionFailed(this, e));
@@ -536,8 +535,10 @@ public class DBController implements DBProcessFilterListener, DBBlocksJournalLis
                 int ver = resultSet.getInt(1);
                 return SupportedVersion.getByVersionNumber(ver);
             }
+        } catch (UserCancelException e) {
+            LOG.info(String.format(resourceBundle.getString("user_cancelled_on_update_version"), model.getName()));
         } catch (Exception e) {
-            LOG.warn("Ошибка при получении версии сервера для \"" + model.getName() + "\": " + e.getMessage(), e);
+            LOG.warn(String.format(resourceBundle.getString("update_version_error"), model.getName(), e.getMessage()), e);
         } finally {
             if (connection != null) {
                 disconnect(true);

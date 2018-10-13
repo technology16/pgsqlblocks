@@ -157,7 +157,10 @@ public class PgSqlBlocks_en extends ListResourceBundle {
                 {"update_version_error_message", "Error in updating of versions  %s"},
 
                 //password dialog
-                {"type_password_for", "Type password for database "}
+                {"type_password_for", "Type password for database "},
+                {"user_cancelled_on_connection", "User cancelled password entry for %s and connection was cancelled"},
+                {"user_cancelled_on_update_version", "User cancelled password entry for %s, server version was not updated"},
+                {"update_version_error", "Could not update version for %s due to error: %s"}
         };
     }
 }
