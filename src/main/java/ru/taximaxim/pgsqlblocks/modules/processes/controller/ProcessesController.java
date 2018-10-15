@@ -514,8 +514,8 @@ public class ProcessesController implements DBControllerListener, DBModelsViewLi
 
     @Override
     public void dbModelsViewDidSelectController(DBController controller) {
-        dbProcessView.getTreeViewer().setInput(controller.getFilteredProcesses());
-        dbBlocksJournalView.getTreeViewer().setInput(controller.getBlocksJournal().getFilteredProcesses());
+        dbProcessView.getTreeViewer().setInput(controller.getProcesses());
+        dbBlocksJournalView.getTreeViewer().setInput(controller.getBlocksJournal().getProcesses());
         changeToolItemsStateForController(controller);
     }
 

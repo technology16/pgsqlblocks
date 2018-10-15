@@ -29,15 +29,8 @@ public class DBBlocksJournal{
 
     private final List<DBBlocksJournalProcess> processes = new ArrayList<>();
 
-    private final List<DBBlocksJournalProcess> filteredProcesses = new ArrayList<>();
-
-
     public List<DBBlocksJournalProcess> getProcesses() {
         return processes;
-    }
-
-    public List<DBBlocksJournalProcess> getFilteredProcesses() {
-        return filteredProcesses;
     }
 
     public DBBlocksJournal() {
@@ -73,20 +66,13 @@ public class DBBlocksJournal{
                 }
             }
         }
-        prepareFilteredProcesses();
         listeners.forEach(DBBlocksJournalListener::dbBlocksJournalDidAddProcesses);
     }
 
     public void setJournalProcesses(List<DBBlocksJournalProcess> processes) {
         clear();
         this.processes.addAll(processes);
-        prepareFilteredProcesses();
         listeners.forEach(DBBlocksJournalListener::dbBlocksJournalDidAddProcesses);
-    }
-
-    private void prepareFilteredProcesses() {
-        filteredProcesses.clear();
-        filteredProcesses.addAll(processes);
     }
 
     private void closeProcesses() {

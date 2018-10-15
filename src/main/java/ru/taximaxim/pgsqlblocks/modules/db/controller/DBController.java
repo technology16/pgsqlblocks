@@ -56,7 +56,6 @@ public class DBController implements DBBlocksJournalListener {
     private DBModel model;
 
     private final List<DBProcess> processes = new ArrayList<>();
-    private final List<DBProcess> filteredProcesses = new ArrayList<>();
 
     private static final Logger LOG = Logger.getLogger(DBController.class);
 
@@ -210,10 +209,6 @@ public class DBController implements DBBlocksJournalListener {
         return process.getChildren().size() + process.getChildren().stream().mapToInt(this::countChildren).sum();
     }
 
-    public List<DBProcess> getFilteredProcesses() {
-        return filteredProcesses;
-    }
-
     public DBBlocksJournal getBlocksJournal() {
         return blocksJournal;
     }
@@ -347,10 +342,6 @@ public class DBController implements DBBlocksJournalListener {
     private void processesLoaded(List<DBProcess> loadedProcesses) {
         processes.clear();
         processes.addAll(loadedProcesses);
-
-        filteredProcesses.clear();
-        // TODO: 03.09.18 Why was here filter enable check? How it worked if filter was always hide
-        filteredProcesses.addAll(processes);
 
         blocksJournal.add(loadedProcesses.stream().filter(DBProcess::hasChildren).collect(Collectors.toList()));
 
