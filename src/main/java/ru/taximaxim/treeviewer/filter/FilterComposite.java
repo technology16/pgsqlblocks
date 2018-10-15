@@ -35,7 +35,7 @@ public class FilterComposite extends Composite {
         this.innerResourceBundle = innerResourceBundle;
         this.dataSource = dataSource;
         glayout = new GridLayout();
-        glayout.marginWidth = 0;
+        glayout.marginWidth = 5;
         glayout.marginHeight = 0;
         GridData layoutData = new GridData(SWT.FILL, SWT.TOP, true, false);
         setLayout(glayout);
@@ -47,7 +47,7 @@ public class FilterComposite extends Composite {
     }
 
     private void createContent() {
-        numberOfColumns = findColumnNumber();
+        numberOfColumns = findColumnNumber()*3;
         glayout.numColumns = numberOfColumns;
         createAllTextFilter();
         filterList.forEach(this::createFilterView);
@@ -74,28 +74,22 @@ public class FilterComposite extends Composite {
     }
 
     private void createFilterView(IColumn column) {
-        Composite group = new Composite(this, SWT.NULL);
-        GridLayout layout = new GridLayout(3, false);
-        GridData layoutData = new GridData(SWT.FILL, SWT.FILL, true, false);
-        group.setLayout(layout);
-        group.setLayoutData(layoutData);
-
         GridData comboLayoutData = new GridData(SWT.CENTER, SWT.CENTER, false,false);
         comboLayoutData.widthHint = 60;
         GridData textLayoutData = new GridData(SWT.FILL, SWT.FILL, true, false);
         textLayoutData.widthHint = 150;
 
-        Label label = new Label(group, SWT.NONE);
+        Label label = new Label(this, SWT.NONE);
         label.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
         label.setText(dataSource.getLocalizeString(column.getColumnName()));
 
-        Combo combo = new Combo(group, SWT.DROP_DOWN | SWT.READ_ONLY);
+        Combo combo = new Combo(this, SWT.DROP_DOWN | SWT.READ_ONLY);
         combo.setLayoutData(comboLayoutData);
         List<FilterOperation> filterValues = Arrays.asList(FilterOperation.values());
         filterValues.forEach( f -> combo.add(f.toString()));
         combo.select(FilterOperation.CONTAINS.ordinal());
 
-        Text filterText = new Text(group, SWT.FILL | SWT.BORDER);
+        Text filterText = new Text(this, SWT.FILL | SWT.BORDER);
         filterText.setLayoutData(textLayoutData);
         filterTextList.add(filterText);
 
