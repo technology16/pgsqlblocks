@@ -19,7 +19,6 @@ public class FilterChangeHandler {
     private ExtendedTreeViewerComponent tree;
     private Map<IColumn, ViewerFilter> columnFilters = new HashMap<>();
     private ViewerFilter allTextFilter;
-    private boolean active;
 
     public FilterChangeHandler(DataSource<? extends IObject> dataSource) {
         this.dataSource = dataSource;
@@ -74,6 +73,12 @@ public class FilterChangeHandler {
         updateFilters();
     }
 
+    void deactivateFilters() {
+        allTextFilter = null;
+        columnFilters.clear();
+        updateFilters();
+    }
+
     private boolean matches(IColumn column, IObject element, String searchText,
                             FilterOperation value, ColumnType columnType) {
         if (element.hasChildren()) {
@@ -93,14 +98,5 @@ public class FilterChangeHandler {
             filters.add(allTextFilter);
         }
         tree.setFilters(filters.toArray(new ViewerFilter[0]));
-    }
-
-    public void setActive(boolean actived) {
-        this.active = actived;
-        if (!active && tree != null) {
-            allTextFilter = null;
-            columnFilters.clear();
-            updateFilters();
-        }
     }
 }

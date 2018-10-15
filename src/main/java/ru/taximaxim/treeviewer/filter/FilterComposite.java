@@ -11,6 +11,7 @@ import ru.taximaxim.treeviewer.models.DataSource;
 import ru.taximaxim.treeviewer.models.IColumn;
 import ru.taximaxim.treeviewer.models.IObject;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -26,6 +27,7 @@ public class FilterComposite extends Composite {
     private DataSource<? extends IObject> dataSource;
     private int numberOfColumns = 1;
     private FilterChangeHandler filterChangeHandler;
+    private List<Text> filterTextList = new ArrayList<>();
 
     public FilterComposite(Composite parent, int style, ResourceBundle innerResourceBundle,
                            DataSource<? extends IObject> dataSource, FilterChangeHandler filterChangeHandler) {
@@ -67,6 +69,7 @@ public class FilterComposite extends Composite {
         Text filterText = new Text(group, SWT.FILL | SWT.BORDER);
         GridData textLayoutData = new GridData(SWT.FILL, SWT.FILL, true, false);
         filterText.setLayoutData(textLayoutData);
+        filterTextList.add(filterText);
         filterText.addModifyListener(e -> filterChangeHandler.filterAllColumns(filterText.getText()));
     }
 
@@ -94,6 +97,7 @@ public class FilterComposite extends Composite {
 
         Text filterText = new Text(group, SWT.FILL | SWT.BORDER);
         filterText.setLayoutData(textLayoutData);
+        filterTextList.add(filterText);
 
         combo.addModifyListener(e -> filterChangeHandler.filter(filterText.getText(), FilterOperation.find(combo.getText()), column));
         filterText.addModifyListener(e -> filterChangeHandler.filter(filterText.getText(), FilterOperation.find(combo.getText()), column));
@@ -124,7 +128,8 @@ public class FilterComposite extends Composite {
         this.setVisible(false);
         GridData layoutData = (GridData) this.getLayoutData();
         layoutData.exclude = true;
-        filterChangeHandler.setActive(false);
+        filterChangeHandler.deactivateFilters();
+        filterTextList.forEach(t -> t.setText(""));
         this.getParent().layout();
     }
 }

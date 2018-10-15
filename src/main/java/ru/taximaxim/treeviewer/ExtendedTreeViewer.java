@@ -69,10 +69,10 @@ public class ExtendedTreeViewer<T extends IObject> extends Composite implements 
     private void createContent() {
         createToolItems();
         filterComposite = new FilterComposite(this, SWT.TOP, resourceBundle, dataSource, filterChangeHandler);
-        filterComposite.hide();
         tree = new ExtendedTreeViewerComponent<>(this,
                  SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL | SWT.FULL_SELECTION | SWT.MULTI);
         filterChangeHandler.setTree(tree);
+        filterComposite.hide();
         tree.addSortListener(this);
     }
 
@@ -115,11 +115,9 @@ public class ExtendedTreeViewer<T extends IObject> extends Composite implements 
     private void openFilter() {
         if (filterComposite.isVisible()) {
             filterComposite.hide();
-            filterChangeHandler.setActive(false);
             filterToolItem.setSelection(false);
         } else {
             filterComposite.show();
-            filterChangeHandler.setActive(true);
             filterToolItem.setSelection(true);
         }
     }
