@@ -68,7 +68,7 @@ public class ExtendedTreeViewer<T extends IObject> extends Composite implements 
 
     private void createContent() {
         createToolItems();
-        filterComposite = new FilterComposite(this, SWT.TOP, resourceBundle, dataSource, filterChangeHandler);
+        filterComposite = new FilterComposite(this, SWT.TOP | SWT.BORDER, resourceBundle, dataSource, filterChangeHandler);
         tree = new ExtendedTreeViewerComponent<>(this,
                  SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL | SWT.FULL_SELECTION | SWT.MULTI);
         filterChangeHandler.setTree(tree);
