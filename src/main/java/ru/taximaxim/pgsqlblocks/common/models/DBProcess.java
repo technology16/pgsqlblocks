@@ -32,7 +32,7 @@ public class DBProcess {
     private final int pid;
     private final String state;
     private final String backendType;
-    private final Date stateChange;
+    private final Date stateChange; //изменено
     private final DBProcessQuery query;
     private final DBProcessQueryCaller queryCaller;
 
