@@ -65,7 +65,6 @@ public class DBProcessSerializer {
         Date queryStart = dateUtils.dateFromString(resultSet.getString(QUERY_START));
         Date xactStart = dateUtils.dateFromString(resultSet.getString(XACT_START));
         Date timestamp = new Date();
-        //Duration duration = Duration.ofMillis(new Date().getTime() - xactStart.getTime());
 
         boolean slowQuery = resultSet.getBoolean(SLOW_QUERY);
 
@@ -107,7 +106,7 @@ public class DBProcessSerializer {
         DBProcess process = new DBProcess(pid, backendType, caller, state, stateChange, query);
         Element childrenRootElement = (Element)rootElement.getElementsByTagName(CHILDREN_ELEMENT_TAG_NAME).item(0);
         NodeList childrenElements = childrenRootElement.getElementsByTagName(ROOT_ELEMENT_TAG_NAME);
-        for (int i = 0; i < childrenRootElement.getChildNodes().getLength(); i++) {
+        for (int i = 0; i < childrenElements.getLength(); i++) {
             Node childNode = childrenElements.item(i);
             if (childNode.getNodeType() == Node.ELEMENT_NODE) {
                 Element childElement = (Element)childNode;
