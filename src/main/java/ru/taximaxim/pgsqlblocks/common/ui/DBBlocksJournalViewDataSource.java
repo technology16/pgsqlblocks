@@ -103,7 +103,7 @@ public class DBBlocksJournalViewDataSource extends TMTreeViewerDataSource {
                 return dateUtils.dateToString(process.getQuery().getXactStart());
             case DURATION:
                 return parentProcess != null ? DateUtils.durationToString(parentProcess.getDuration())
-                        : DateUtils.durationToString(process.getDuration());
+                        : DateUtils.durationToString(process.getQuery().getDuration());
             case STATE:
                 return process.getState();
             case STATE_CHANGE:

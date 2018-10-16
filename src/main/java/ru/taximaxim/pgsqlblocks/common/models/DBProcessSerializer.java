@@ -29,7 +29,6 @@ import ru.taximaxim.pgsqlblocks.utils.DateUtils;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.time.Duration;
 import java.util.Date;
 
 public class DBProcessSerializer {
@@ -65,11 +64,12 @@ public class DBProcessSerializer {
         Date backendStart = dateUtils.dateFromString(resultSet.getString(BACKEND_START));
         Date queryStart = dateUtils.dateFromString(resultSet.getString(QUERY_START));
         Date xactStart = dateUtils.dateFromString(resultSet.getString(XACT_START));
-        Duration duration = Duration.ofMillis(new Date().getTime() - xactStart.getTime());
+        Date timestamp = new Date();
+        //Duration duration = Duration.ofMillis(new Date().getTime() - xactStart.getTime());
 
         boolean slowQuery = resultSet.getBoolean(SLOW_QUERY);
 
-        DBProcessQuery query = new DBProcessQuery(queryString, slowQuery, backendStart, queryStart, xactStart, duration);
+        DBProcessQuery query = new DBProcessQuery(queryString, slowQuery, backendStart, queryStart, xactStart, timestamp);
         String appName = resultSet.getString(APPLICATION_NAME);
         String databaseName = resultSet.getString(DAT_NAME);
         String userName = resultSet.getString(USE_NAME);
