@@ -29,6 +29,7 @@ import ru.taximaxim.pgsqlblocks.utils.DateUtils;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.time.Duration;
 import java.util.Date;
 
 public class DBProcessSerializer {
@@ -99,8 +100,7 @@ public class DBProcessSerializer {
         Date backendStart = dateUtils.dateFromString(rootElement.getElementsByTagName(BACKEND_START).item(0).getTextContent());
         Date queryStart = dateUtils.dateFromString(rootElement.getElementsByTagName(QUERY_START).item(0).getTextContent());
         Date xactStart = dateUtils.dateFromString(rootElement.getElementsByTagName(XACT_START).item(0).getTextContent());
-        Date duration = dateUtils.timeFromString(rootElement.getElementsByTagName(DURATION).item(0).getTextContent());
-
+        Duration duration = dateUtils.timeFromString(rootElement.getElementsByTagName(DURATION).item(0).getTextContent());
 
         DBProcessQuery query = new DBProcessQuery(queryString, slowQuery, backendStart, queryStart, xactStart, null, duration);
 
@@ -136,7 +136,7 @@ public class DBProcessSerializer {
         createAndAppendElement(document, rootElement, SLOW_QUERY, String.valueOf(process.getQuery().isSlowQuery()));
         createAndAppendElement(document, rootElement, QUERY_START, dateUtils.dateToStringWithTz(process.getQuery().getQueryStart()));
         createAndAppendElement(document, rootElement, XACT_START, dateUtils.dateToStringWithTz(process.getQuery().getXactStart()));
-        createAndAppendElement(document, rootElement, DURATION, dateUtils.durationToString(process.getQuery().getDuration()));
+        createAndAppendElement(document, rootElement, DURATION, DateUtils.durationToString(process.getQuery().getDuration()));
         createAndAppendElement(document, rootElement, APPLICATION_NAME, process.getQueryCaller().getApplicationName());
         createAndAppendElement(document, rootElement, DAT_NAME, process.getQueryCaller().getDatabaseName());
         createAndAppendElement(document, rootElement, USE_NAME, process.getQueryCaller().getUserName());

@@ -24,6 +24,8 @@ import org.apache.log4j.Logger;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
 public final class DateUtils {
@@ -32,7 +34,6 @@ public final class DateUtils {
 
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ssX");
     private final SimpleDateFormat dateFormatWithoutTimeZone = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-    private final SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss");
 
     public synchronized Date dateFromString(String dateString) {
         if (dateString == null || dateString.isEmpty()) {
@@ -47,18 +48,12 @@ public final class DateUtils {
         return result;
     }
 
-    public synchronized Date timeFromString(String timeString) {
+    public synchronized Duration timeFromString(String timeString) {
         if (timeString == null || timeString.isEmpty()) {
             return null;
         }
-        Date result = null;
-
-        try {
-            result = timeFormat.parse(timeString);
-        } catch (ParseException exception) {
-            LOG.error(exception.getMessage(), exception);
-        }
-        return result;
+        LocalTime time = LocalTime.parse(timeString, DateTimeFormatter.ofPattern("HH:mm:ss"));
+        return Duration.between(LocalTime.MIN, time);
     }
 
     public synchronized String dateToString(Date date) {

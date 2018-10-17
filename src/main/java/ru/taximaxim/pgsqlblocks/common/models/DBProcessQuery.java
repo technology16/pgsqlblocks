@@ -29,12 +29,12 @@ public class DBProcessQuery {
     private final Date backendStart; //время подключения к серверу
     private final Date queryStart; //старт запроса
     private final Date xactStart; //старт транзакции
-    private final Date duration; //длительность запроса
+    private final Duration duration; //длительность запроса
     private final Date timestamp; //длительность запроса
     private final String queryFirstLine;
 
     public DBProcessQuery(String queryString, boolean slowQuery, Date backendStart, Date queryStart,
-                          Date xactStart, Date timestamp, Date duration) {
+                          Date xactStart, Date timestamp, Duration duration) {
         this.queryString = queryString == null ? "" : queryString;
         int indexOfNewLine = this.queryString.indexOf('\n');
         String substring = this.queryString.substring(0, indexOfNewLine >= 0 ? indexOfNewLine : this.queryString.length());
@@ -73,8 +73,12 @@ public class DBProcessQuery {
     }
 
     public Duration getDuration() {
+//        System.out.println("duration "+duration);
+//        System.out.println("timestamp "+timestamp);
+//        System.out.println("xact "+xactStart);
+//        System.out.println(Duration.ofMillis(timestamp.getTime() - xactStart.getTime()));
         if (duration != null) {
-            return Duration.ofMillis(duration.getTime());
+            return duration;
         } else {
             return timestamp != null && xactStart != null ?
                     Duration.ofMillis(timestamp.getTime() - xactStart.getTime()) : null;
