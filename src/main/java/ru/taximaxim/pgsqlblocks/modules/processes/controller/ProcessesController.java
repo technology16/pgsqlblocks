@@ -45,10 +45,7 @@ import ru.taximaxim.pgsqlblocks.modules.db.controller.DBControllerListener;
 import ru.taximaxim.pgsqlblocks.modules.db.controller.UserInputPasswordProvider;
 import ru.taximaxim.pgsqlblocks.modules.db.model.DBStatus;
 import ru.taximaxim.pgsqlblocks.modules.processes.view.ProcessesView;
-import ru.taximaxim.pgsqlblocks.utils.ImageUtils;
-import ru.taximaxim.pgsqlblocks.utils.Images;
-import ru.taximaxim.pgsqlblocks.utils.Settings;
-import ru.taximaxim.pgsqlblocks.utils.SettingsListener;
+import ru.taximaxim.pgsqlblocks.utils.*;
 import ru.taximaxim.treeviewer.ExtendedTreeViewer;
 
 import java.lang.reflect.InvocationTargetException;
@@ -141,7 +138,7 @@ public class ProcessesController implements DBControllerListener, UserInputPassw
         dbProcessView.setUpdateButtonAction(this::updateProcessesInSelectedDatabase);
         dbProcessView.getTreeViewer().getTree().addTraverseListener(e -> {
             if (e.detail == SWT.TRAVERSE_RETURN) {
-                IStructuredSelection selection = dbProcessesView.getTreeViewer().getStructuredSelection();
+                IStructuredSelection selection = dbProcessView.getTreeViewer().getStructuredSelection();
                 if (!selection.isEmpty()) {
                     openProcessInfoDialog((DBProcess) selection.getFirstElement());
                 }
@@ -209,7 +206,7 @@ public class ProcessesController implements DBControllerListener, UserInputPassw
         dbBlocksJournalView.getTreeViewer().addSelectionChangedListener(this::dbBlocksJournalViewSelectionChanged);
         dbBlocksJournalView.getTreeViewer().getTree().addTraverseListener(e -> {
             if (e.detail == SWT.TRAVERSE_RETURN) {
-                IStructuredSelection structuredSelection = dbProcessesView.getTreeViewer().getStructuredSelection();
+                IStructuredSelection structuredSelection = dbProcessView.getTreeViewer().getStructuredSelection();
                 DBProcess process = (DBProcess) structuredSelection.getFirstElement();
                 openProcessInfoDialog(process);
             }

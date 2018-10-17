@@ -72,11 +72,6 @@ public class DBProcessesViewDataSource extends DataSource<DBProcess> {
     }
 
     @Override
-    public String getLocalizeString(String s) {
-        return bundle.getString(s);
-    }
-
-    @Override
     public String getRowText(Object element, IColumn column) {
         DBProcess process = (DBProcess)element;
         Columns columns = Columns.getColumn(column);

@@ -145,26 +145,6 @@ public class PgSqlBlocks_ru extends ListResourceBundle {
                 {"missing_database_user", "Не заполнены обязательные поля: Имя БД и/или Имя пользователя!"},
                 {"missing_database_version", "Не заполнены обязательные поля: Версия БД!"},
                 {"attention", "Внимание!"},
-
-                // tooltips
-                {"PID", "PID"},
-                {"APPLICATION_NAME", "APPLICATION_NAME"},
-                {"DATABASE_NAME", "DATABASE_NAME"},
-                {"USER_NAME", "USER_NAME"},
-                {"CLIENT", "CLIENT"},
-                {"BACKEND_START", "BACKEND_START"},
-                {"QUERY_START", "QUERY_START"},
-                {"XACT_START", "XACT_START"},
-                {"now - XACT_START", "now - XACT_START"},
-                {"STATE", "STATE"},
-                {"STATE_CHANGE", "STATE_CHANGE"},
-                {"BLOCKED", "BLOCKED"},
-                {"LOCK_TYPE", "LOCK_TYPE"},
-                {"RELATION", "RELATION"},
-                {"SLOW_QUERY", "SLOW_QUERY"},
-                {"QUERY", "QUERY"},
-                {"", ""}
-
                 {"process_info", "Информация о процессе"},
 
                 //create update version dialog
@@ -180,8 +160,26 @@ public class PgSqlBlocks_ru extends ListResourceBundle {
                 {"type_password_for", "Ввведите пароль для подключения "},
                 {"user_cancelled_on_connection", "Пользователь отменил ввод пароля для %s и подключение не состоялось"},
                 {"user_cancelled_on_update_version", "Пользователь отменил ввод пароля для %s, версия сервера не была изменена"},
-                {"update_version_error", "Ошибка при получении версии сервера для %s: %s"}
+                {"update_version_error", "Ошибка при получении версии сервера для %s: %s"},
 
+                // tooltips
+                {"PID", "PID"},
+                {"BACKEND_TYPE", "BACKEND_TYPE"},
+                {"APPLICATION_NAME", "APPLICATION_NAME"},
+                {"DATABASE_NAME", "DATABASE_NAME"},
+                {"USER_NAME", "USER_NAME"},
+                {"CLIENT", "CLIENT"},
+                {"BACKEND_START", "BACKEND_START"},
+                {"QUERY_START", "QUERY_START"},
+                {"XACT_START", "XACT_START"},
+                {"now - XACT_START", "now - XACT_START"},
+                {"STATE", "STATE"},
+                {"STATE_CHANGE", "STATE_CHANGE"},
+                {"BLOCKED", "BLOCKED"},
+                {"LOCK_TYPE", "LOCK_TYPE"},
+                {"RELATION", "RELATION"},
+                {"SLOW_QUERY", "SLOW_QUERY"},
+                {"QUERY", "QUERY"}
         };
     }
 }

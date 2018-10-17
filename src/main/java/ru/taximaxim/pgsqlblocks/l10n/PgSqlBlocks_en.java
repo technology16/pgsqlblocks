@@ -38,8 +38,8 @@ public class PgSqlBlocks_en extends ListResourceBundle {
                 {"about", "&About"},
                 {"exit", "&Exit"},
                 {"current_activity", "Current Activity"},
-                {"database", "Database"},
                 {"blocks_journal", "Blocks journal"},
+                {"database", "Database"},
                 {"kill_process", "Kill process(es)"},
                 {"cancel_process", "Cancel process(es)"},
                 {"lock_history", "Lock history"},
@@ -72,7 +72,6 @@ public class PgSqlBlocks_en extends ListResourceBundle {
                 {"show_saved_blocks_journals", "Show saved blocks journals"},
                 {"saved_blocks_journals", "Saved blocks journals"},
                 {"open_dir", "Open directory"},
-                {"duration", "Duration"},
 
                 // action icons
                 {"add_db", "Add database"},
@@ -113,6 +112,7 @@ public class PgSqlBlocks_en extends ListResourceBundle {
                 {"undefined", "Undefined"},
                 {"block_start_date", "Block started"},
                 {"block_end_date", "Block ended"},
+                {"duration", "Duration"},
 
                 // settings dialog
                 {"processes", "Processes"},
@@ -144,7 +144,7 @@ public class PgSqlBlocks_en extends ListResourceBundle {
                 {"missing_host_port", "Missing required field: host and/or port!"},
                 {"missing_database_user", "Missing required field: database and/or user!"},
                 {"missing_database_version", "Missing required field: database version!"},
-                {"attention", "Attention!"}
+                {"attention", "Attention!"},
                 {"process_info", "Process information"},
 
                 //create update version dialog
@@ -160,10 +160,11 @@ public class PgSqlBlocks_en extends ListResourceBundle {
                 {"type_password_for", "Type password for database "},
                 {"user_cancelled_on_connection", "User cancelled password entry for %s and connection was cancelled"},
                 {"user_cancelled_on_update_version", "User cancelled password entry for %s, server version was not updated"},
-                {"update_version_error", "Could not update version for %s due to error: %s"}
+                {"update_version_error", "Could not update version for %s due to error: %s"},
 
                 // tooltips
                 {"PID", "PID"},
+                {"BACKEND_TYPE", "BACKEND_TYPE"},
                 {"APPLICATION_NAME", "APPLICATION_NAME"},
                 {"DATABASE_NAME", "DATABASE_NAME"},
                 {"USER_NAME", "USER_NAME"},
@@ -178,7 +179,7 @@ public class PgSqlBlocks_en extends ListResourceBundle {
                 {"LOCK_TYPE", "LOCK_TYPE"},
                 {"RELATION", "RELATION"},
                 {"SLOW_QUERY", "SLOW_QUERY"},
-                {"QUERY", "QUERY"},
+                {"QUERY", "QUERY"}
         };
     }
 }
