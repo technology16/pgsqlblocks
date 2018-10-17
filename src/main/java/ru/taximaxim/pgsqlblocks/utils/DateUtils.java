@@ -32,6 +32,7 @@ public final class DateUtils {
 
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ssX");
     private final SimpleDateFormat dateFormatWithoutTimeZone = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    private final SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss");
 
     public synchronized Date dateFromString(String dateString) {
         if (dateString == null || dateString.isEmpty()) {
@@ -40,6 +41,20 @@ public final class DateUtils {
         Date result = null;
         try {
             result = dateFormat.parse(dateString);
+        } catch (ParseException exception) {
+            LOG.error(exception.getMessage(), exception);
+        }
+        return result;
+    }
+
+    public synchronized Date timeFromString(String timeString) {
+        if (timeString == null || timeString.isEmpty()) {
+            return null;
+        }
+        Date result = null;
+
+        try {
+            result = timeFormat.parse(timeString);
         } catch (ParseException exception) {
             LOG.error(exception.getMessage(), exception);
         }

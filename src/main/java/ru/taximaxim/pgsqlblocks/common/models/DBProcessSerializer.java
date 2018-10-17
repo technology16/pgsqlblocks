@@ -48,6 +48,7 @@ public class DBProcessSerializer {
     private static final String SLOW_QUERY = "slowQuery";
     private static final String QUERY_START = "query_start";
     private static final String XACT_START = "xact_start";
+    private static final String DURATION = "duration";
     private static final String APPLICATION_NAME = "application_name";
     private static final String DAT_NAME = "datname";
     private static final String USE_NAME = "usename";
@@ -68,7 +69,7 @@ public class DBProcessSerializer {
 
         boolean slowQuery = resultSet.getBoolean(SLOW_QUERY);
 
-        DBProcessQuery query = new DBProcessQuery(queryString, slowQuery, backendStart, queryStart, xactStart, timestamp);
+        DBProcessQuery query = new DBProcessQuery(queryString, slowQuery, backendStart, queryStart, xactStart, timestamp, null);
         String appName = resultSet.getString(APPLICATION_NAME);
         String databaseName = resultSet.getString(DAT_NAME);
         String userName = resultSet.getString(USE_NAME);
@@ -98,8 +99,10 @@ public class DBProcessSerializer {
         Date backendStart = dateUtils.dateFromString(rootElement.getElementsByTagName(BACKEND_START).item(0).getTextContent());
         Date queryStart = dateUtils.dateFromString(rootElement.getElementsByTagName(QUERY_START).item(0).getTextContent());
         Date xactStart = dateUtils.dateFromString(rootElement.getElementsByTagName(XACT_START).item(0).getTextContent());
+        Date duration = dateUtils.timeFromString(rootElement.getElementsByTagName(DURATION).item(0).getTextContent());
 
-        DBProcessQuery query = new DBProcessQuery(queryString, slowQuery, backendStart, queryStart, xactStart, null);
+
+        DBProcessQuery query = new DBProcessQuery(queryString, slowQuery, backendStart, queryStart, xactStart, null, duration);
 
         String state = rootElement.getElementsByTagName(STATE).item(0).getTextContent();
         Date stateChange = dateUtils.dateFromString(rootElement.getElementsByTagName(STATE_CHANGE).item(0).getTextContent());
@@ -133,6 +136,7 @@ public class DBProcessSerializer {
         createAndAppendElement(document, rootElement, SLOW_QUERY, String.valueOf(process.getQuery().isSlowQuery()));
         createAndAppendElement(document, rootElement, QUERY_START, dateUtils.dateToStringWithTz(process.getQuery().getQueryStart()));
         createAndAppendElement(document, rootElement, XACT_START, dateUtils.dateToStringWithTz(process.getQuery().getXactStart()));
+        createAndAppendElement(document, rootElement, DURATION, dateUtils.durationToString(process.getQuery().getDuration()));
         createAndAppendElement(document, rootElement, APPLICATION_NAME, process.getQueryCaller().getApplicationName());
         createAndAppendElement(document, rootElement, DAT_NAME, process.getQueryCaller().getDatabaseName());
         createAndAppendElement(document, rootElement, USE_NAME, process.getQueryCaller().getUserName());

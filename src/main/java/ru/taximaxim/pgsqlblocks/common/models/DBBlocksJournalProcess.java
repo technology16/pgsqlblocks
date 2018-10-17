@@ -70,10 +70,10 @@ public class DBBlocksJournalProcess {
     }
 
     public Duration getDuration(){
-        if (isOpened()) {
-            return process.getQuery().getDuration();
-        } else {
+        if (isClosed()) {
             return Duration.ofMillis(closeDate.getTime() - createDate.getTime());
+        } else {
+            return process.getQuery().getDuration();
         }
     }
 
