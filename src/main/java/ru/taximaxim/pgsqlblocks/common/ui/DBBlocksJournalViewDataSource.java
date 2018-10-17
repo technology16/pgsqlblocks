@@ -63,7 +63,6 @@ public class DBBlocksJournalViewDataSource extends DBProcessesViewDataSource {
         }
     }
 
-
     @Override
     public String getRowText(Object element, IColumn column) {
         Columns columns = Columns.getColumn(column);
@@ -72,7 +71,7 @@ public class DBBlocksJournalViewDataSource extends DBProcessesViewDataSource {
         if (element instanceof DBBlocksJournalProcess) {
             parentProcess = (DBBlocksJournalProcess)element;
             process = parentProcess.getProcess();
-        }else {
+        } else {
             process = (DBProcess)element;
         }
 

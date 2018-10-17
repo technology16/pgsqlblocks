@@ -28,10 +28,7 @@ import ru.taximaxim.pgpass.PgPassException;
 import ru.taximaxim.pgsqlblocks.common.DBQueries;
 import ru.taximaxim.pgsqlblocks.common.models.*;
 import ru.taximaxim.pgsqlblocks.modules.db.model.DBStatus;
-import ru.taximaxim.pgsqlblocks.utils.DateUtils;
-import ru.taximaxim.pgsqlblocks.utils.PathBuilder;
-import ru.taximaxim.pgsqlblocks.utils.Settings;
-import ru.taximaxim.pgsqlblocks.utils.XmlDocumentWorker;
+import ru.taximaxim.pgsqlblocks.utils.*;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -53,20 +50,21 @@ import static ru.taximaxim.pgsqlblocks.PgSqlBlocks.APP_NAME;
 
 public class DBController implements DBBlocksJournalListener {
 
-    private DBModel model;
-
-    private final List<DBProcess> processes = new ArrayList<>();
-
     private static final Logger LOG = Logger.getLogger(DBController.class);
 
     private static final String PG_BACKEND_PID = "pg_backend_pid";
     private static final String BLOCKED_BY = "blockedBy";
-
-    private List<DBControllerListener> listeners = new ArrayList<>();
+    private final List<DBProcess> processes = new ArrayList<>();
+    private final UserInputPasswordProvider userInputPasswordProvider;
 
     private final Settings settings;
     private final ResourceBundle resourceBundle;
-
+    private final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
+    private final ScheduledExecutorService journalsSaveExecutor = Executors.newSingleThreadScheduledExecutor();
+    private final DBBlocksJournal blocksJournal = new DBBlocksJournal();
+    private final DateUtils dateUtils = new DateUtils();
+    private DBModel model;
+    private List<DBControllerListener> listeners = new ArrayList<>();
     private DBStatus status = DBStatus.DISABLED;
 
     private boolean blocked = false;
@@ -74,20 +72,14 @@ public class DBController implements DBBlocksJournalListener {
     private int backendPid;
 
     private Connection connection;
-
-    private final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
-    private final ScheduledExecutorService journalsSaveExecutor = Executors.newSingleThreadScheduledExecutor();
     private ScheduledFuture<?> updater;
-
-    private final DBBlocksJournal blocksJournal = new DBBlocksJournal();
-
     private Date blocksJournalCreateDate;
-    private final DateUtils dateUtils = new DateUtils();
 
-    public DBController(Settings settings, DBModel model) {
+    public DBController(Settings settings, DBModel model, UserInputPasswordProvider userInputPasswordProvider) {
         this.settings = settings;
         this.resourceBundle = settings.getResourceBundle();
         this.model = model;
+        this.userInputPasswordProvider = userInputPasswordProvider;
         blocksJournalCreateDate = new Date();
         blocksJournal.addListener(this);
     }
@@ -109,21 +101,20 @@ public class DBController implements DBBlocksJournalListener {
         return model.isEnabled();
     }
 
-    public synchronized void connect() {
+    /**
+     * Connect to database. If getting password fails connection is not started
+     */
+    public synchronized void connectAsync() {
         executor.execute(() -> {
-            String password = getPassword();
             try {
                 listeners.forEach(listener -> listener.dbControllerWillConnect(this));
 
-                Properties info = new Properties();
-                info.put("user", model.getUser());
-                info.put("password", password);
-                info.put("loginTimeout", String.valueOf(settings.getLoginTimeout()));
-
-                connection = DriverManager.getConnection(getConnectionUrl(), info);
+                createConnection();
                 setBackendPid(getPgBackendPid());
                 setStatus(DBStatus.CONNECTED);
                 listeners.forEach(listener -> listener.dbControllerDidConnect(this));
+            } catch (UserCancelException e) {
+                LOG.info(String.format(resourceBundle.getString("user_cancelled_on_connection"), model.getName()));
             } catch (SQLException e) {
                 setStatus(DBStatus.CONNECTION_ERROR);
                 listeners.forEach(listener -> listener.dbControllerConnectionFailed(this, e));
@@ -131,16 +122,36 @@ public class DBController implements DBBlocksJournalListener {
         });
     }
 
-    private String getPassword() {
+    private void createConnection() throws UserCancelException, SQLException {
+        String password = getPassword();
+
+        Properties info = new Properties();
+        info.put("user", model.getUser());
+        info.put("password", password);
+        info.put("loginTimeout", String.valueOf(settings.getLoginTimeout()));
+
+        connection = DriverManager.getConnection(getConnectionUrl(), info);
+    }
+
+    /**
+     * Get password from model or pgpass or user input
+     */
+    private String getPassword() throws UserCancelException {
+        String password = null;
         if (model.hasPassword()) {
-            return model.getPassword();
+            password = model.getPassword();
         }
-        String password = "";
-        try {
-            String pgPass = PgPass.get(model.getHost(), model.getPort(), model.getDatabaseName(), model.getUser());
-            password = pgPass == null ? password : pgPass;
-        } catch (PgPassException e) {
-            LOG.error("Ошибка получения пароля из pgpass файла " + e.getMessage(), e);
+
+        if (password == null) {
+            try {
+                password = PgPass.get(model.getHost(), model.getPort(), model.getDatabaseName(), model.getUser());
+            } catch (PgPassException e) {
+                LOG.warn("Ошибка получения пароля из pgpass файла " + e.getMessage(), e);
+            }
+        }
+
+        if (password == null) {
+            password = userInputPasswordProvider.getPasswordFromUser(this);
         }
         return password;
     }
@@ -240,7 +251,7 @@ public class DBController implements DBBlocksJournalListener {
 
     public void updateProcesses() {
         if (!isConnected()) {
-            connect();
+            connectAsync();
         } else {
             executor.execute(this::loadProcesses);
         }
@@ -255,7 +266,7 @@ public class DBController implements DBBlocksJournalListener {
 
     private void loadProcesses() {
         listeners.forEach(listener -> listener.dbControllerWillUpdateProcesses(this));
-        try(
+        try (
                 PreparedStatement preparedStatement = connection.prepareStatement(getProcessesQuery());
                 ResultSet resultSet = preparedStatement.executeQuery()
         ) {
@@ -263,7 +274,7 @@ public class DBController implements DBBlocksJournalListener {
             Map<Integer, Set<DBBlock>> tmpBlocks = new HashMap<>();
             DBProcessSerializer processDeserializer = new DBProcessSerializer();
             DBBlockDeserializer blockDeserializer = new DBBlockDeserializer();
-            while(resultSet.next()) {
+            while (resultSet.next()) {
                 DBProcess process = processDeserializer.deserialize(resultSet);
                 int blockedBy = resultSet.getInt(BLOCKED_BY);
                 if (blockedBy != 0) {
@@ -351,10 +362,11 @@ public class DBController implements DBBlocksJournalListener {
     }
 
     private String getProcessesQuery() {
+        boolean isTen = model.getVersion() == SupportedVersion.VERSION_10;
         if (settings.getShowIdle()) {
-            return DBQueries.getProcessesQueryWithIdle();
+            return isTen ? DBQueries.getProcessesQueryWithIdleForTen() : DBQueries.getProcessesQueryWithIdle();
         } else {
-            return DBQueries.getProcessesQuery();
+            return isTen ? DBQueries.getProcessesQueryForTen() : DBQueries.getProcessesQuery();
         }
     }
 
@@ -482,5 +494,27 @@ public class DBController implements DBBlocksJournalListener {
         } catch (ParserConfigurationException | IOException | SAXException e) {
             LOG.error(e.getMessage(), e);
         }
+    }
+
+    public Optional<SupportedVersion> getVersion() {
+        try {
+            createConnection();
+            PreparedStatement preparedStatement = connection.prepareStatement(DBQueries.getVersionQuery());
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                int ver = resultSet.getInt(1);
+                return SupportedVersion.getByVersionNumber(ver);
+            }
+        } catch (UserCancelException e) {
+            LOG.info(String.format(resourceBundle.getString("user_cancelled_on_update_version"), model.getName()));
+        } catch (Exception e) {
+            LOG.warn(String.format(resourceBundle.getString("update_version_error"), model.getName(), e.getMessage()), e);
+        } finally {
+            if (connection != null) {
+                disconnect(true);
+            }
+            shutdown();
+        }
+        return Optional.empty();
     }
 }

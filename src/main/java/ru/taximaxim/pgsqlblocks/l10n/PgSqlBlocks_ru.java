@@ -72,7 +72,6 @@ public class PgSqlBlocks_ru extends ListResourceBundle {
                 {"show_saved_blocks_journals", "Показать сохраненные журналы блокировок"},
                 {"saved_blocks_journals", "Сохраненные журналы блокировок"},
                 {"open_dir", "Открыть директорию"},
-                {"duration", "Длительность"},
 
                 // action icons
                 {"add_db", "Добавить БД"},
@@ -94,6 +93,7 @@ public class PgSqlBlocks_ru extends ListResourceBundle {
 
                 // columns
                 {"pid", "PID"},
+                {"backend_type", "Тип"},
                 {"num_of_blocked_processes", "Блокирует"},
                 {"application", "Приложение"},
                 {"db_name", "Имя БД"},
@@ -112,6 +112,7 @@ public class PgSqlBlocks_ru extends ListResourceBundle {
                 {"undefined", "Без имени"},
                 {"block_start_date", "Блокировка началась"},
                 {"block_end_date", "Блокировка завершена"},
+                {"duration", "Длительность"},
 
                 // settings dialog
                 {"processes", "Процессы"},
@@ -130,6 +131,7 @@ public class PgSqlBlocks_ru extends ListResourceBundle {
                 {"name", "Имя соединения*"},
                 {"host", "Хост*"},
                 {"port", "Порт*"},
+                {"version", "Версия*"},
                 {"user", "Имя пользователя*"},
                 {"password", "Пароль"},
                 {"use_pgpass_file", "Указание пароля здесь небезопасно. Используйте .pgpass файл."},
@@ -141,6 +143,7 @@ public class PgSqlBlocks_ru extends ListResourceBundle {
                 {"already_exists", "Сервер с таким именем %s уже существует!"},
                 {"missing_host_port", "Не заполнены обязательные поля: Хост и/или Порт!"},
                 {"missing_database_user", "Не заполнены обязательные поля: Имя БД и/или Имя пользователя!"},
+                {"missing_database_version", "Не заполнены обязательные поля: Версия БД!"},
                 {"attention", "Внимание!"},
 
                 // tooltips
@@ -161,6 +164,24 @@ public class PgSqlBlocks_ru extends ListResourceBundle {
                 {"SLOW_QUERY", "SLOW_QUERY"},
                 {"QUERY", "QUERY"},
                 {"", ""}
+
+                {"process_info", "Информация о процессе"},
+
+                //create update version dialog
+                {"warning_title","Необходимо изменение"},
+                {"warning_text","Необходимо задать версию postgresql для подключений.\n" +
+                        "Попытаться автоматически определить версии для следующих подключений?\n" +
+                        "При отмене или ошибке будет использоваться версия по-умолчанию (10).\n\n%s"},
+                {"update_version_dialog", "Обновление версий"},
+                {"update_version_cancelled_message", "Обновление версий было отменено"},
+                {"update_version_error_message", "Ошибка во время обновления версий %s"},
+
+                //password dialog
+                {"type_password_for", "Ввведите пароль для подключения "},
+                {"user_cancelled_on_connection", "Пользователь отменил ввод пароля для %s и подключение не состоялось"},
+                {"user_cancelled_on_update_version", "Пользователь отменил ввод пароля для %s, версия сервера не была изменена"},
+                {"update_version_error", "Ошибка при получении версии сервера для %s: %s"}
+
         };
     }
 }

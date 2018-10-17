@@ -1,3 +1,22 @@
+/*-
+ * ========================LICENSE_START=================================
+ * pgSqlBlocks
+ * %
+ * Copyright (C) 2017 - 2018 "Technology" LLC
+ * %
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * =========================LICENSE_END==================================
+ */
 package ru.taximaxim.pgsqlblocks.utils;
 
 import ru.taximaxim.treeviewer.models.IColumn;
@@ -5,6 +24,7 @@ import ru.taximaxim.treeviewer.utils.ColumnType;
 
 public enum Columns implements IColumn {
     PID("pid", "PID", 80, ColumnType.INTEGER),
+    BACKEND_TYPE("backend_type", "BACKEND_TYPE", 80, ColumnType.STRING),
     BLOCK_CREATE_DATE("block_start_date", "", 110, ColumnType.DATE),
     BLOCK_END_DATE("block_end_date", "", 150, ColumnType.DATE),
     BLOCKED_COUNT("num_of_blocked_processes", "", 70, ColumnType.STRING),

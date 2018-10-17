@@ -20,7 +20,7 @@
 package ru.taximaxim.pgsqlblocks.modules.blocksjournal.view;
 
 import org.eclipse.swt.graphics.Image;
-import ru.taximaxim.pgsqlblocks.TreeLabelProvider;
+import ru.taximaxim.pgsqlblocks.common.ui.TreeLabelProvider;
 
 import java.io.File;
 

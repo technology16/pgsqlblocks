@@ -42,6 +42,7 @@ import ru.taximaxim.pgsqlblocks.utils.PathBuilder;
 import ru.taximaxim.pgsqlblocks.utils.Settings;
 import ru.taximaxim.pgsqlblocks.utils.XmlDocumentWorker;
 import ru.taximaxim.treeviewer.ExtendedTreeViewer;
+import ru.taximaxim.pgsqlblocks.dialogs.DBProcessInfoDialog;
 
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
@@ -49,7 +50,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.*;
 
-public class BlocksJournalView extends ApplicationWindow implements DBBlocksJournalListener{
+public class BlocksJournalView extends ApplicationWindow implements DBBlocksJournalListener {
 
     private static final Logger LOG = Logger.getLogger(BlocksJournalView.class);
 
@@ -113,6 +114,13 @@ public class BlocksJournalView extends ApplicationWindow implements DBBlocksJour
         processesView = new ExtendedTreeViewer<>(processesContentContainer, SWT.NONE, blocksJournal.getProcesses(),
                dbBlocksJournalViewDataSource , resourceBundle.getLocale());
         processesView.getTreeViewer().addSelectionChangedListener(this::processesViewSelectionChanged);
+        processesView.getTreeViewer().getTree().addTraverseListener(e -> {
+            if (e.detail == SWT.TRAVERSE_RETURN) {
+                IStructuredSelection structuredSelection = processesView.getTreeViewer().getStructuredSelection();
+                List<DBBlocksJournalProcess> selectedProcesses = (List<DBBlocksJournalProcess>) structuredSelection.toList();
+                openProcessDialogInfo(selectedProcesses.get(0));
+            }
+        });
 
         processInfoView = new DBProcessInfoView(resourceBundle, processesView, SWT.NONE);
         processInfoView.hideToolBar();
@@ -124,6 +132,10 @@ public class BlocksJournalView extends ApplicationWindow implements DBBlocksJour
         return super.createContents(parent);
     }
 
+    private void openProcessDialogInfo(Object dbProcess){
+        DBProcessInfoDialog dbProcessInfoView = new DBProcessInfoDialog(resourceBundle, this.getShell(), dbProcess, true);
+        dbProcessInfoView.open();
+    }
 
     private void filesTableSelectionChanged(SelectionChangedEvent event) {
         if (event.getSelection().isEmpty()) {

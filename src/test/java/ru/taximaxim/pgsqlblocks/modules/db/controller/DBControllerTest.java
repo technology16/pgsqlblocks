@@ -27,6 +27,7 @@ import ru.taximaxim.pgsqlblocks.common.models.DBProcess;
 import ru.taximaxim.pgsqlblocks.common.models.DBProcessStatus;
 import ru.taximaxim.pgsqlblocks.modules.db.model.DBStatus;
 import ru.taximaxim.pgsqlblocks.utils.Settings;
+import ru.taximaxim.pgsqlblocks.utils.SupportedVersion;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -86,6 +87,7 @@ public class DBControllerTest {
     private static final long DELAY_MS = CONFIG.getLong("pgsqlblocks-test-configs.delay-ms");
     private static final String REMOTE_HOST = CONFIG.getString("pgsqlblocks-test-configs.remote-host");
     private static final String REMOTE_PORT = CONFIG.getString("pgsqlblocks-test-configs.remote-port");
+    private static final String REMOTE_VERSION = CONFIG.getString("pgsqlblocks-test-configs.remote-version");
     private static final String REMOTE_DB = CONFIG.getString("pgsqlblocks-test-configs.remote-db");
     private static final String REMOTE_USERNAME = CONFIG.getString("pgsqlblocks-test-configs.remote-username");
     private static final String REMOTE_PASSWORD = CONFIG.getString("pgsqlblocks-test-configs.remote-password");
@@ -102,9 +104,10 @@ public class DBControllerTest {
 
     @BeforeClass
     public static void initialize() throws IOException {
-        DBModel model = new DBModel("TestDbc", REMOTE_HOST,  REMOTE_PORT, REMOTE_DB, REMOTE_USERNAME,  REMOTE_PASSWORD,  true);
-        testDbc = new DBController(Settings.getInstance(), model);
-        testDbc.connect();
+        DBModel model = new DBModel("TestDbc", REMOTE_HOST, REMOTE_PORT,
+                SupportedVersion.getByVersionName(REMOTE_VERSION).get(), REMOTE_DB, REMOTE_USERNAME,  REMOTE_PASSWORD,  true);
+        testDbc = new DBController(Settings.getInstance(), model, null);
+        testDbc.connectAsync();
         testDbc.addListener(listener);
     }
 
