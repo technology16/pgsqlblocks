@@ -27,6 +27,7 @@ public class TreeViewer_en extends ListResourceBundle {
         return new Object[][]{
                 {"update", "Update"},
                 {"filter", "Filter"},
+                {"all-filter-tooltip", "Filter by filters below using \"contains (~)\""},
                 {"columns", "Columns"},
                 {"default_action", "Empty"},
         };

@@ -21,7 +21,6 @@ import java.util.ResourceBundle;
  */
 public class FilterComposite extends Composite {
 
-    private GridLayout glayout;
     private List<? extends IColumn> filterList;
     private ResourceBundle innerResourceBundle;
     private DataSource<? extends IObject> dataSource;
@@ -34,41 +33,37 @@ public class FilterComposite extends Composite {
         super(parent, style);
         this.innerResourceBundle = innerResourceBundle;
         this.dataSource = dataSource;
-        glayout = new GridLayout();
-        glayout.marginWidth = 5;
-        glayout.marginHeight = 0;
-        GridData layoutData = new GridData(SWT.FILL, SWT.TOP, true, false);
-        setLayout(glayout);
-        setLayoutData(layoutData);
         this.filterList = dataSource.getColumnsToFilter();
         this.filterChangeHandler = filterChangeHandler;
+
+        numberOfColumns = findColumnNumber() * 3;
+        GridLayout glayout = new GridLayout();
+        glayout.numColumns = numberOfColumns;
+        setLayout(glayout);
+
+        GridData layoutData = new GridData(SWT.FILL, SWT.TOP, true, false);
+        setLayoutData(layoutData);
 
         createContent();
     }
 
     private void createContent() {
-        numberOfColumns = findColumnNumber()*3;
-        glayout.numColumns = numberOfColumns;
         createAllTextFilter();
         filterList.forEach(this::createFilterView);
     }
 
     private void createAllTextFilter() {
-        Composite group = new Composite(this, SWT.NULL);
-        GridLayout layout = new GridLayout(2, false);
-        layout.horizontalSpacing = numberOfColumns;
-        GridData layoutData = new GridData(SWT.FILL, SWT.FILL, true, false, numberOfColumns, 1 );
-        group.setLayout(layout);
-        group.setLayoutData(layoutData);
-
-        Label label = new Label(group, SWT.NONE);
-        GridData data = new GridData(SWT.FILL, SWT.FILL, false, false);
+        Label label = new Label(this, SWT.NONE);
+        GridData data = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1);
         label.setLayoutData(data);
         label.setText(innerResourceBundle.getString("filter"));
+        label.setToolTipText(innerResourceBundle.getString("all-filter-tooltip"));
 
-        Text filterText = new Text(group, SWT.FILL | SWT.BORDER);
-        GridData textLayoutData = new GridData(SWT.FILL, SWT.FILL, true, false);
+        Text filterText = new Text(this, SWT.FILL | SWT.BORDER);
+        int horizontalSpan = numberOfColumns - 1 > 0 ? numberOfColumns - 1 : 1;
+        GridData textLayoutData = new GridData(SWT.FILL, SWT.FILL, true, false, horizontalSpan, 1);
         filterText.setLayoutData(textLayoutData);
+        filterText.setToolTipText(innerResourceBundle.getString("all-filter-tooltip"));
         filterTextList.add(filterText);
         filterText.addModifyListener(e -> filterChangeHandler.filterAllColumns(filterText.getText()));
     }

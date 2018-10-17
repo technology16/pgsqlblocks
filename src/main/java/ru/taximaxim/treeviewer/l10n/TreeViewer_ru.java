@@ -27,6 +27,7 @@ public class TreeViewer_ru extends ListResourceBundle {
         return new Object[][]{
                 {"update", "Обновить"},
                 {"filter", "Фильтр"},
+                {"all-filter-tooltip", "Фильтровать по всем фильтрам снизу используя условие \"содержит (~)\""},
                 {"columns", "Колонки"},
                 {"default_action", "Пусто"},
         };
