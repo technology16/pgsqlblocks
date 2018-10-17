@@ -100,7 +100,9 @@ public class DBProcessSerializer {
         Date backendStart = dateUtils.dateFromString(rootElement.getElementsByTagName(BACKEND_START).item(0).getTextContent());
         Date queryStart = dateUtils.dateFromString(rootElement.getElementsByTagName(QUERY_START).item(0).getTextContent());
         Date xactStart = dateUtils.dateFromString(rootElement.getElementsByTagName(XACT_START).item(0).getTextContent());
-        Duration duration = dateUtils.timeFromString(rootElement.getElementsByTagName(DURATION).item(0).getTextContent());
+        Duration duration = hasDuration(rootElement) ?
+                            dateUtils.timeFromString(rootElement.getElementsByTagName(DURATION).item(0).getTextContent())
+                            : null;
 
         DBProcessQuery query = new DBProcessQuery(queryString, slowQuery, backendStart, queryStart, xactStart, null, duration);
 
@@ -170,5 +172,9 @@ public class DBProcessSerializer {
 
     private boolean hasBackendType(Element element) {
         return element.getElementsByTagName(BACKEND_TYPE).getLength() > 0;
+    }
+
+    private boolean hasDuration(Element element) {
+        return element.getElementsByTagName(DURATION).getLength() > 0;
     }
 }
