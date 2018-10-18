@@ -22,16 +22,23 @@ package ru.taximaxim.pgsqlblocks.common.models;
 import java.time.Duration;
 import java.util.Date;
 
+/**
+ * Когда DBProcessQuery создается внутри десериализации resultSet, невозможно
+ * создать Duration. В связи с этим передается таймстамп, на основании которого вычисляется
+ * длительность процесса.
+ * <br>
+ * Длительность процесса вычисляется на момент получения результат запроса.
+ */
 public class DBProcessQuery {
 
     private final String queryString;
+    private final String queryFirstLine;
     private final boolean slowQuery;
     private final Date backendStart; //время подключения к серверу
     private final Date queryStart; //старт запроса
     private final Date xactStart; //старт транзакции
     private final Duration duration; //длительность запроса
-    private final Date timestamp; //длительность запроса
-    private final String queryFirstLine;
+    private final Date timestamp; //таймстамп десериализации запроса
 
     public DBProcessQuery(String queryString, boolean slowQuery, Date backendStart, Date queryStart,
                           Date xactStart, Date timestamp, Duration duration) {
@@ -73,10 +80,6 @@ public class DBProcessQuery {
     }
 
     public Duration getDuration() {
-//        System.out.println("duration "+duration);
-//        System.out.println("timestamp "+timestamp);
-//        System.out.println("xact "+xactStart);
-//        System.out.println(Duration.ofMillis(timestamp.getTime() - xactStart.getTime()));
         if (duration != null) {
             return duration;
         } else {
