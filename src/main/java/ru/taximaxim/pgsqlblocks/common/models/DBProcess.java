@@ -19,10 +19,12 @@
  */
 package ru.taximaxim.pgsqlblocks.common.models;
 
+import ru.taximaxim.treeviewer.models.IObject;
+
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class DBProcess {
+public class DBProcess implements IObject {
 
     private List<DBProcess> parents = new ArrayList<>();
     private List<DBProcess> children = new ArrayList<>();
@@ -55,20 +57,12 @@ public class DBProcess {
         return parents;
     }
 
-    public List<DBProcess> getChildren() {
-        return children;
-    }
-
     public void addChild(DBProcess process) {
         children.add(process);
     }
 
     public void addParent(DBProcess parentProcess) {
         this.parents.add(parentProcess);
-    }
-
-    public boolean hasChildren() {
-        return !children.isEmpty();
     }
 
     public boolean hasParent() {
@@ -130,6 +124,16 @@ public class DBProcess {
 
     public DBProcessQueryCaller getQueryCaller() {
         return queryCaller;
+    }
+
+    @Override
+    public List<DBProcess> getChildren() {
+        return children;
+    }
+
+    @Override
+    public boolean hasChildren() {
+        return !children.isEmpty();
     }
 
     @Override

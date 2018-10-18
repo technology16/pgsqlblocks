@@ -47,7 +47,7 @@ public class DBModelsListSerializer {
         return dbModels;
     }
 
-    public Document serialize(Document document, List<DBModel> dbModelList) {
+    public void serialize(Document document, List<DBModel> dbModelList) {
         Element rootElement = document.createElement(ROOT_ELEMENT_TAG_NAME);
         DBModelSerializer modelSerializer = new DBModelSerializer();
         for (DBModel dbModel : dbModelList) {
@@ -55,6 +55,5 @@ public class DBModelsListSerializer {
             rootElement.appendChild(dbModelElement);
         }
         document.appendChild(rootElement);
-        return document;
     }
 }

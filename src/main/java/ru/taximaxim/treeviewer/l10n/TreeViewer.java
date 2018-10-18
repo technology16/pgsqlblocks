@@ -17,9 +17,7 @@
  * limitations under the License.
  * =========================LICENSE_END==================================
  */
-package ru.taximaxim.pgsqlblocks.common;
+package ru.taximaxim.treeviewer.l10n;
 
-public enum FilterValueType {
-    INTEGER,
-    STRING
+public class TreeViewer extends TreeViewer_ru {
 }

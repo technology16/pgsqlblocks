@@ -56,7 +56,6 @@ public enum Images {
 
     /**
      * Получение иконки
-     * @return
      */
     public String getImageAddr() {
         switch(this) {

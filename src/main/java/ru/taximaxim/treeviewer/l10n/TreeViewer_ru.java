@@ -17,10 +17,19 @@
  * limitations under the License.
  * =========================LICENSE_END==================================
  */
-package ru.taximaxim.pgsqlblocks.common.ui;
+package ru.taximaxim.treeviewer.l10n;
 
-public interface DBProcessesViewDataSourceFilterListener {
+import java.util.ListResourceBundle;
 
-    void dataSourceFilterShowOnlyBlockedProcessesChanged(boolean showOnlyBlockedProcesses);
-
+public class TreeViewer_ru extends ListResourceBundle {
+    @Override
+    protected Object[][] getContents() {
+        return new Object[][]{
+                {"update", "Обновить"},
+                {"filter", "Фильтр"},
+                {"all-filter-tooltip", "Фильтровать по всем фильтрам снизу используя условие \"содержит (~)\""},
+                {"columns", "Колонки"},
+                {"default_action", "Пусто"},
+        };
+    }
 }

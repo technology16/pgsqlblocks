@@ -35,6 +35,7 @@ public class SettingsDialog extends Dialog {
 
     private Spinner updatePeriod;
     private Button showIdleButton;
+    private Button showBackendPidButton;
     private Button showToolTip;
     private Button confirmRequiredButton;
     private Button confirmExitButton;
@@ -92,7 +93,7 @@ public class SettingsDialog extends Dialog {
         updatePeriod.setLayoutData(textGd);
         updatePeriod.setMinimum(1);
         updatePeriod.setMaximum(100);
-        updatePeriod.setSelection(settings.getUpdatePeriod());
+        updatePeriod.setSelection(settings.getUpdatePeriodSeconds());
 
         Label idleShowLabel = new Label(processGroup, SWT.HORIZONTAL);
         idleShowLabel.setText(resourceBundle.getString("show_idle_process"));
@@ -102,6 +103,13 @@ public class SettingsDialog extends Dialog {
 
         showIdleButton = new Button(processGroup, SWT.CHECK);
         showIdleButton.setSelection(settings.getShowIdle());
+
+        Label showBackendPidLabel = new Label(processGroup, SWT.HORIZONTAL);
+        showBackendPidLabel.setText(resourceBundle.getString("show_own_process"));
+        showBackendPidLabel.setLayoutData(labelGd);
+
+        showBackendPidButton = new Button(processGroup, SWT.CHECK);
+        showBackendPidButton.setSelection(settings.getShowBackendPid());
     }
 
     private void populateNotificationGroup(Composite container) {
@@ -137,12 +145,13 @@ public class SettingsDialog extends Dialog {
 
     @Override
     protected void okPressed() {
-        settings.setUpdatePeriod(updatePeriod.getSelection());
+        settings.setUpdatePeriodSeconds(updatePeriod.getSelection());
         settings.setShowIdle(showIdleButton.getSelection());
         settings.setShowToolTip(showToolTip.getSelection());
         settings.setConfirmRequired(confirmRequiredButton.getSelection());
         settings.setConfirmExit(confirmExitButton.getSelection());
         settings.setLanguage(languageCombo.getText());
+        settings.setShowBackendPid(showBackendPidButton.getSelection());
 
         super.okPressed();
     }

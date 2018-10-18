@@ -80,9 +80,6 @@ public class DBControllerTest {
         public void dbControllerBlockedChanged(DBController controller) {}
 
         @Override
-        public void dbControllerProcessesFilterChanged(DBController controller) {}
-
-        @Override
         public void dbControllerBlocksJournalChanged(DBController controller) {}
     }
 

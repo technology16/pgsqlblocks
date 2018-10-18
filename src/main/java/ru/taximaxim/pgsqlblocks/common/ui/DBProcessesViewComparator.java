@@ -20,21 +20,27 @@
 package ru.taximaxim.pgsqlblocks.common.ui;
 
 import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.TreeColumn;
 import ru.taximaxim.pgsqlblocks.common.models.DBProcess;
 import ru.taximaxim.pgsqlblocks.utils.Columns;
 import ru.taximaxim.pgsqlblocks.utils.DateUtils;
+import ru.taximaxim.treeviewer.models.ObjectViewComparator;
 
-public class DBProcessesViewComparator extends ViewerComparator {
+public class DBProcessesViewComparator extends ObjectViewComparator {
 
-    private final Columns column;
+    private Columns column;
 
-    private final int sortDirection;
+    private int sortDirection;
 
-    public DBProcessesViewComparator(Columns column, int sortDirection) {
-        this.column = column;
-        this.sortDirection = sortDirection;
+    @Override
+    public void setColumn(TreeColumn treeColumn) {
+        column = (Columns) treeColumn.getData();
+    }
+
+    @Override
+    public void setSortDirection(int i) {
+        this.sortDirection = i;
     }
 
     @Override
@@ -112,17 +118,20 @@ public class DBProcessesViewComparator extends ViewerComparator {
         return sortDirection == SWT.DOWN ? compareResult : -compareResult;
     }
 
-    private int compareIntegerValues(int i1, int i2) {
+    @Override
+    public int compareIntegerValues(int i1, int i2) {
         Integer integer1 = i1;
         Integer integer2 = i2;
         return integer1.compareTo(integer2);
     }
 
-    private int compareStringValues(String s1, String s2) {
+    @Override
+    public int compareStringValues(String s1, String s2) {
         return s1.compareTo(s2);
     }
 
-    private int compareBooleans(boolean b1, boolean b2) {
+    @Override
+    public int compareBooleans(boolean b1, boolean b2) {
         return b1 == b2 ? 0 : b1 ? 1 : -1;
     }
 }

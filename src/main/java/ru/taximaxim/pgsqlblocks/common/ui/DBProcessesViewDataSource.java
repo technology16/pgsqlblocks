@@ -24,27 +24,21 @@ import ru.taximaxim.pgsqlblocks.common.models.DBProcess;
 import ru.taximaxim.pgsqlblocks.utils.Columns;
 import ru.taximaxim.pgsqlblocks.utils.DateUtils;
 import ru.taximaxim.pgsqlblocks.utils.ImageUtils;
+import ru.taximaxim.treeviewer.models.DataSource;
+import ru.taximaxim.treeviewer.models.IColumn;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.ResourceBundle;
-import java.util.stream.Collectors;
 
-public class DBProcessesViewDataSource extends TMTreeViewerDataSource {
+public class DBProcessesViewDataSource extends DataSource<DBProcess> {
 
     private final DateUtils dateUtils = new DateUtils();
+    private ResourceBundle bundle;
 
-    public DBProcessesViewDataSource(ResourceBundle resourceBundle, TMTreeViewerDataSourceFilter<DBProcess> dataFilter) {
-        super(resourceBundle, dataFilter);
-    }
-
-    @Override
-    public List<Columns> getColumns() {
-        List<Columns> list = new ArrayList<>(Arrays.asList(Columns.values()));
-        list.remove(Columns.BLOCK_CREATE_DATE);
-        list.remove(Columns.BLOCK_END_DATE);
-        return list;
+    public DBProcessesViewDataSource(ResourceBundle bundle) {
+        this.bundle = bundle;
     }
 
     @Override
@@ -53,22 +47,35 @@ public class DBProcessesViewDataSource extends TMTreeViewerDataSource {
     }
 
     @Override
-    public Image getColumnImage(Object element, int columnIndex) {
-        DBProcess process = (DBProcess)element;
-        if (columnIndex == 0) {
-            return ImageUtils.getImage(process.getStatus().getStatusImage());
-        }
-        return null;
+    public List<? extends IColumn> getColumns() {
+        List<Columns> list = new ArrayList<>(Arrays.asList(Columns.values()));
+        list.remove(Columns.BLOCK_CREATE_DATE);
+        list.remove(Columns.BLOCK_END_DATE);
+        return list;
     }
 
     @Override
-    public String getColumnText(Object element, int columnIndex) {
-         return getColumnText(element, getColumns().get(columnIndex));
+    public List<? extends IColumn> getColumnsToFilter() {
+        List<IColumn> list = new ArrayList<>();
+        list.add(Columns.PID);
+        list.add(Columns.APPLICATION_NAME);
+        list.add(Columns.DATABASE_NAME);
+        list.add(Columns.QUERY);
+        list.add(Columns.USER_NAME);
+        list.add(Columns.CLIENT);
+        return list;
     }
 
-    private String getColumnText(Object element, Columns column) {
+    @Override
+    public ResourceBundle getResourceBundle() {
+        return bundle;
+    }
+
+    @Override
+    public String getRowText(Object element, IColumn column) {
         DBProcess process = (DBProcess)element;
-        switch (column) {
+        Columns columns = Columns.getColumn(column);
+        switch (columns) {
             case PID:
                 return String.valueOf(process.getPid());
             case BACKEND_TYPE:
@@ -111,17 +118,18 @@ public class DBProcessesViewDataSource extends TMTreeViewerDataSource {
     }
 
     @Override
-    public Object[] getElements(Object inputElement) {
-        List<DBProcess> input = (List<DBProcess>) inputElement;
-        if (dataFilter == null) {
-            return input.toArray();
-        } else {
-            return filterInput(input).toArray();
+    public Image getColumnImage(Object element, int columnIndex) {
+        DBProcess process = (DBProcess)element;
+        if (columnIndex == 0) {
+            return ImageUtils.getImage(process.getStatus().getStatusImage());
         }
+        return null;
     }
 
-    private List<DBProcess> filterInput(List<DBProcess> input) {
-        return input.stream().filter(process -> dataFilter.filter(process)).collect(Collectors.toList());
+    @Override
+    public Object[] getElements(Object inputElement) {
+        List<DBProcess> input = (List<DBProcess>) inputElement;
+        return input.toArray();
     }
 
     @Override

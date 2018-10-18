@@ -23,30 +23,17 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class DBBlocksJournal implements DBProcessFilterListener {
+public class DBBlocksJournal{
 
     private final List<DBBlocksJournalListener> listeners = new ArrayList<>();
 
     private final List<DBBlocksJournalProcess> processes = new ArrayList<>();
 
-    private final List<DBBlocksJournalProcess> filteredProcesses = new ArrayList<>();
-
-    private final DBProcessFilter processesFilters = new DBProcessFilter();
-
     public List<DBBlocksJournalProcess> getProcesses() {
         return processes;
     }
 
-    public List<DBBlocksJournalProcess> getFilteredProcesses() {
-        return filteredProcesses;
-    }
-
-    public DBProcessFilter getProcessesFilters() {
-        return processesFilters;
-    }
-
     public DBBlocksJournal() {
-        processesFilters.addListener(this);
     }
 
     public void add(List<DBProcess> processes) {
@@ -79,24 +66,13 @@ public class DBBlocksJournal implements DBProcessFilterListener {
                 }
             }
         }
-        prepareFilteredProcesses();
         listeners.forEach(DBBlocksJournalListener::dbBlocksJournalDidAddProcesses);
     }
 
     public void setJournalProcesses(List<DBBlocksJournalProcess> processes) {
         clear();
         this.processes.addAll(processes);
-        prepareFilteredProcesses();
         listeners.forEach(DBBlocksJournalListener::dbBlocksJournalDidAddProcesses);
-    }
-
-    private void prepareFilteredProcesses() {
-        filteredProcesses.clear();
-        if (processesFilters.isEnabled()) {
-            filteredProcesses.addAll(processes.stream().filter(p -> processesFilters.filter(p.getProcess())).collect(Collectors.toList()));
-        } else {
-            filteredProcesses.addAll(processes);
-        }
     }
 
     private void closeProcesses() {
@@ -114,10 +90,6 @@ public class DBBlocksJournal implements DBProcessFilterListener {
         processes.clear();
     }
 
-    public int size() {
-        return processes.size();
-    }
-
     public boolean isEmpty() {
         return processes.isEmpty();
     }
@@ -128,11 +100,5 @@ public class DBBlocksJournal implements DBProcessFilterListener {
 
     public void removeListener(DBBlocksJournalListener listener) {
         listeners.remove(listener);
-    }
-
-    @Override
-    public void dbProcessFilterChanged() {
-        prepareFilteredProcesses();
-        listeners.forEach(DBBlocksJournalListener::dbBlocksJournalDidChangeFilters);
     }
 }

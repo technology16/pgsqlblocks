@@ -17,33 +17,19 @@
  * limitations under the License.
  * =========================LICENSE_END==================================
  */
-package ru.taximaxim.pgsqlblocks.common;
+package ru.taximaxim.treeviewer.l10n;
 
-public class StringValueTypeFilter extends Filter<String> {
+import java.util.ListResourceBundle;
 
-    public StringValueTypeFilter() {
-        super(FilterValueType.STRING);
-    }
-
+public class TreeViewer_en extends ListResourceBundle {
     @Override
-    public boolean filter(String actualValue) {
-        if (!isActive()) {
-            return true;
-        }
-        switch (condition) {
-            case NONE:
-                return true;
-            case EQUALS:
-                return actualValue.equals(value);
-            case CONTAINS:
-                return actualValue.toLowerCase().contains(value.toLowerCase());
-            default:
-                return true;
-        }
-    }
-
-    @Override
-    public boolean isActive() {
-        return super.isActive() && !value.isEmpty();
+    protected Object[][] getContents() {
+        return new Object[][]{
+                {"update", "Update"},
+                {"filter", "Filter"},
+                {"all-filter-tooltip", "Filter by filters below using \"contains (~)\""},
+                {"columns", "Columns"},
+                {"default_action", "Empty"},
+        };
     }
 }

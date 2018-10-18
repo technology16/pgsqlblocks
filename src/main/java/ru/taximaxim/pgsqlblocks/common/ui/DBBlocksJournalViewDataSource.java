@@ -25,12 +25,14 @@ import ru.taximaxim.pgsqlblocks.common.models.DBProcess;
 import ru.taximaxim.pgsqlblocks.utils.Columns;
 import ru.taximaxim.pgsqlblocks.utils.DateUtils;
 import ru.taximaxim.pgsqlblocks.utils.ImageUtils;
+import ru.taximaxim.treeviewer.models.IColumn;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.ResourceBundle;
 
-public class DBBlocksJournalViewDataSource extends TMTreeViewerDataSource {
+// FIXME seems wrong to inherit from DBProcessesViewDataSource which is DBProcess-related
+public class DBBlocksJournalViewDataSource extends DBProcessesViewDataSource {
 
     private final DateUtils dateUtils = new DateUtils();
 
@@ -63,62 +65,23 @@ public class DBBlocksJournalViewDataSource extends TMTreeViewerDataSource {
     }
 
     @Override
-    public String getColumnText(Object element, int columnIndex) {
-        return getRowText(element, getColumns().get(columnIndex));
-    }
-
-    private String getRowText(Object element, Columns column) {
+    public String getRowText(Object element, IColumn column) {
+        Columns columns = Columns.getColumn(column);
         DBProcess process;
         DBBlocksJournalProcess parentProcess = null;
         if (element instanceof DBBlocksJournalProcess) {
             parentProcess = (DBBlocksJournalProcess)element;
             process = parentProcess.getProcess();
-        }else {
+        } else {
             process = (DBProcess)element;
         }
-        switch (column){
-            case PID:
-                return String.valueOf(process.getPid());
-            case BACKEND_TYPE:
-                return process.getBackendType();
-            case BLOCK_CREATE_DATE:
-                return parentProcess != null ? dateUtils.dateToString(parentProcess.getCreateDate()) : "";
-            case BLOCK_END_DATE:
-                return parentProcess != null ? dateUtils.dateToString(parentProcess.getCloseDate()) : "";
-            case BLOCKED_COUNT:
-                return String.valueOf(process.getChildren().size());
-            case APPLICATION_NAME:
-                return process.getQueryCaller().getApplicationName();
-            case DATABASE_NAME:
-                return process.getQueryCaller().getDatabaseName();
-            case USER_NAME:
-                return process.getQueryCaller().getUserName();
-            case CLIENT:
-                return process.getQueryCaller().getClient();
-            case BACKEND_START:
-                return dateUtils.dateToString(process.getQuery().getBackendStart());
-            case QUERY_START:
-                return dateUtils.dateToString(process.getQuery().getQueryStart());
-            case XACT_START:
-                return dateUtils.dateToString(process.getQuery().getXactStart());
-            case DURATION:
-                return DateUtils.durationToString(process.getQuery().getDuration());
-            case STATE:
-                return process.getState();
-            case STATE_CHANGE:
-                return dateUtils.dateToString(process.getStateChange());
-            case BLOCKED:
-                return process.getBlocksPidsString();
-            case LOCK_TYPE:
-                return process.getBlocksLocktypesString();
-            case RELATION:
-                return process.getBlocksRelationsString();
-            case SLOW_QUERY:
-                return String.valueOf(process.getQuery().isSlowQuery());
-            case QUERY:
-                return process.getQuery().getQueryFirstLine();
-            default:
-                return "UNDEFINED";
+
+        if (columns == Columns.BLOCK_CREATE_DATE) {
+            return parentProcess != null ? dateUtils.dateToString(parentProcess.getCreateDate()) : "";
+        } else if (columns == Columns.BLOCK_END_DATE) {
+            return parentProcess != null ? dateUtils.dateToString(parentProcess.getCloseDate()) : "";
+        } else {
+            return super.getRowText(process, columns);
         }
     }
 
@@ -135,11 +98,6 @@ public class DBBlocksJournalViewDataSource extends TMTreeViewerDataSource {
         } else {
             return ((DBProcess)parentElement).getChildren().toArray();
         }
-    }
-
-    @Override
-    public Object getParent(Object element) {
-        return null;
     }
 
     @Override

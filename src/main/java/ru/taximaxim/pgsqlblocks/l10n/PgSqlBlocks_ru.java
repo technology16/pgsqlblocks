@@ -118,6 +118,7 @@ public class PgSqlBlocks_ru extends ListResourceBundle {
                 {"processes", "Процессы"},
                 {"auto_update_interval", "Период автообновления"},
                 {"show_idle_process", "Показывать idle процессы"},
+                {"show_own_process", "Показывать процесс текущего подключения pgSqlBlocks"},
                 {"show_pgSqlBlock_process", "Показывать собственные запросы среди процессов"},
                 {"notifications", "Уведомления"},
                 {"show_tray_notifications", "Показывать оповещения о блокировках в трее"},
@@ -160,7 +161,26 @@ public class PgSqlBlocks_ru extends ListResourceBundle {
                 {"type_password_for", "Ввведите пароль для подключения "},
                 {"user_cancelled_on_connection", "Пользователь отменил ввод пароля для %s и подключение не состоялось"},
                 {"user_cancelled_on_update_version", "Пользователь отменил ввод пароля для %s, версия сервера не была изменена"},
-                {"update_version_error", "Ошибка при получении версии сервера для %s: %s"}
+                {"update_version_error", "Ошибка при получении версии сервера для %s: %s"},
+
+                // tooltips
+                {"PID", "PID"},
+                {"BACKEND_TYPE", "BACKEND_TYPE"},
+                {"APPLICATION_NAME", "APPLICATION_NAME"},
+                {"DATABASE_NAME", "DATABASE_NAME"},
+                {"USER_NAME", "USER_NAME"},
+                {"CLIENT", "CLIENT"},
+                {"BACKEND_START", "BACKEND_START"},
+                {"QUERY_START", "QUERY_START"},
+                {"XACT_START", "XACT_START"},
+                {"now - XACT_START", "now - XACT_START"},
+                {"STATE", "STATE"},
+                {"STATE_CHANGE", "STATE_CHANGE"},
+                {"BLOCKED", "BLOCKED"},
+                {"LOCK_TYPE", "LOCK_TYPE"},
+                {"RELATION", "RELATION"},
+                {"SLOW_QUERY", "SLOW_QUERY"},
+                {"QUERY", "QUERY"}
         };
     }
 }
