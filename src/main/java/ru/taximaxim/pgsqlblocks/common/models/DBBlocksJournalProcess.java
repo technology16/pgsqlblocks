@@ -129,7 +129,7 @@ public class DBBlocksJournalProcess implements IObject {
     }
 
     @Override
-    public List getChildren() {
+    public List<? extends IObject> getChildren() {
         return Collections.emptyList();
     }
 

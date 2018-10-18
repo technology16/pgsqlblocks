@@ -57,7 +57,6 @@ public class DBProcess implements IObject {
         return parents;
     }
 
-
     public void addChild(DBProcess process) {
         children.add(process);
     }
@@ -65,7 +64,6 @@ public class DBProcess implements IObject {
     public void addParent(DBProcess parentProcess) {
         this.parents.add(parentProcess);
     }
-
 
     public boolean hasParent() {
         return !parents.isEmpty();

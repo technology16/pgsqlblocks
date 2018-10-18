@@ -26,8 +26,6 @@ import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 public final class PathBuilder {
 
@@ -60,18 +58,6 @@ public final class PathBuilder {
         return instance;
     }
 
-    public Path getBlockHistoryDir() {
-        Path blocksHistoryDir = Paths.get(path.toString(), "blocksHistory");
-        if (!blocksHistoryDir.toFile().exists()) {
-            try {
-                Files.createDirectory(blocksHistoryDir);
-            } catch (IOException e) {
-                LOG.error(String.format("Ошибка создания директории %s: %s", blocksHistoryDir, e.getMessage()));
-            }
-        }
-        return blocksHistoryDir;
-    }
-
     public Path getBlocksJournalsDir() {
         Path blocksJournalsDir = Paths.get(path.toString(), "blocksJournals");
         if (!blocksJournalsDir.toFile().exists()) {
@@ -82,14 +68,6 @@ public final class PathBuilder {
             }
         }
         return blocksJournalsDir;
-    }
-
-    public Path getBlockHistoryPath() {
-        Path blocksHistoryDir = getBlockHistoryDir();
-        SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy HH-mm-ss");
-        String dateTime = sdf.format(new Date(System.currentTimeMillis()));
-
-        return Paths.get(blocksHistoryDir.toString(), String.format("blocksHistory-%s.xml", dateTime));
     }
 
     public Path getServersPath() {
@@ -104,7 +82,7 @@ public final class PathBuilder {
         return serversPath;
     }
     // TODO разные конфиги log4j.propertires для разных ОС
-    public Path getPropertiesPath() {
+    Path getPropertiesPath() {
         Path propPath = Paths.get(path.toString(), "pgsqlblocks.properties");
         if (!propPath.toFile().exists()) {
             try {

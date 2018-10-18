@@ -49,7 +49,6 @@ public enum DBProcessStatus {
 
     /**
      * Получение иконки в зависимости от состояния
-     * @return
      */
     public Images getStatusImage() {
         switch(this) {

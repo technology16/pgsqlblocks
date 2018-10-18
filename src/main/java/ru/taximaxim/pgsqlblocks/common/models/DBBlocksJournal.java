@@ -90,10 +90,6 @@ public class DBBlocksJournal{
         processes.clear();
     }
 
-    public int size() {
-        return processes.size();
-    }
-
     public boolean isEmpty() {
         return processes.isEmpty();
     }

@@ -85,7 +85,7 @@ public class DBController implements DBBlocksJournalListener {
     }
 
     public DBModel getModel() {
-        return model.clone();
+        return model.copy();
     }
 
     public void setModel(DBModel model) {
@@ -179,10 +179,6 @@ public class DBController implements DBBlocksJournalListener {
         }
     }
 
-    public int getBackendPid() {
-        return backendPid;
-    }
-
     private void setBackendPid(int backendPid) {
         this.backendPid = backendPid;
     }
@@ -236,7 +232,7 @@ public class DBController implements DBBlocksJournalListener {
     public void startProcessesUpdater(long initDelay) {
         stopProcessesUpdater();
         updater = executor.scheduleWithFixedDelay(this::updateProcesses,
-                                                    initDelay, settings.getUpdatePeriod(), TimeUnit.SECONDS);
+                                                    initDelay, settings.getUpdatePeriodSeconds(), TimeUnit.SECONDS);
     }
 
     public void startProcessesUpdater() {
@@ -285,7 +281,12 @@ public class DBController implements DBBlocksJournalListener {
             }
             proceedBlocks(tmpProcesses, tmpBlocks);
             proceedProcesses(tmpProcesses);
-            processesLoaded(tmpProcesses.values().stream().filter(process -> !process.hasParent()).collect(Collectors.toList()));
+            List<DBProcess> procs = tmpProcesses.values().stream()
+                    .filter(p -> !p.hasParent())
+                    // do not show this process if setting is set (current pgSqlBlocks connection)
+                    .filter(p -> settings.getShowBackendPid() || p.getPid() != backendPid || !p.getChildren().isEmpty())
+                    .collect(Collectors.toList());
+            processesLoaded(procs);
         } catch (SQLException e) {
             LOG.error(String.format("Ошибка при получении процессов для %s", model.getName()), e);
             disconnect(false);

@@ -84,7 +84,7 @@ public class DBModel implements Cloneable {
         return enabled;
     }
 
-    public DBModel clone() {
+    public DBModel copy() {
         return new DBModel(this.name, this.host, this.port, this.version, this.databaseName,
                 this.user, this.password, this.enabled);
     }

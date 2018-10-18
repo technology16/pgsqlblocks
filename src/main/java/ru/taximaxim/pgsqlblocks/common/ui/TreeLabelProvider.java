@@ -21,18 +21,13 @@ package ru.taximaxim.pgsqlblocks.common.ui;
 
 import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.viewers.ITableLabelProvider;
-import org.eclipse.swt.graphics.Image;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
   public abstract class TreeLabelProvider implements ITableLabelProvider {
         // The listeners
         private List<ILabelProviderListener> listeners;
-
-        protected ConcurrentMap<String, Image> imagesMap = new ConcurrentHashMap<>();
 
         /**
          * Constructs a FileTreeLabelProvider

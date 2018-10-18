@@ -1,6 +1,5 @@
 package ru.taximaxim.treeviewer.utils;
 
-
 import java.util.ResourceBundle;
 
 public enum Images {

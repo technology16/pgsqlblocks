@@ -41,7 +41,7 @@ public class AboutDlg extends Dialog {
         super(parentShell, SWT.DIALOG_TRIM | SWT.APPLICATION_MODAL);
     }
 
-    public String open() {
+    public void open() {
         Shell shell = new Shell(getParent(), getStyle());
         shell.setText(DIALOGTITLE);
         createContent(shell);
@@ -53,7 +53,6 @@ public class AboutDlg extends Dialog {
                 display.sleep();
             }
         }
-        return null;
     }
 
     private void createContent(Shell container){

@@ -48,20 +48,16 @@ public final class Settings {
     private static final String SHOW_LOG_MESSAGES = "show_log_messages";
     private static final String CURRENT_LOCALE = "current_locale";
 
-    private int updatePeriod;
+    private int updatePeriodSeconds;
     private int loginTimeout;
 
     private boolean autoUpdate;
 
-    private boolean onlyBlocked;
     private boolean showIdle;
     private boolean showToolTip;
     private boolean confirmRequired;
     private boolean showBackendPid;
-    private boolean showLogMessages;
     private boolean confirmExit;
-
-    private Set<Columns> columnsList;
 
     private Properties properties;
     private File propFile;
@@ -95,22 +91,14 @@ public final class Settings {
             LOG.error(String.format("Ошибка чтения файла %s!", propFile.toString()));
         }
 
-        this.updatePeriod = Integer.parseInt(properties.getProperty(UPDATE_PERIOD));
+        this.updatePeriodSeconds = Integer.parseInt(properties.getProperty(UPDATE_PERIOD));
         this.autoUpdate = Boolean.parseBoolean(properties.getProperty(AUTO_UPDATE));
-        this.onlyBlocked = Boolean.parseBoolean(properties.getProperty(ONLY_BLOCKED));
         this.loginTimeout = Integer.parseInt(properties.getProperty(LOGIN_TIMEOUT));
         this.showIdle = Boolean.parseBoolean(properties.getProperty(SHOW_IDLE));
         this.showToolTip = Boolean.parseBoolean(properties.getProperty(SHOW_TOOL_TIP));
         this.showBackendPid = Boolean.parseBoolean(properties.getProperty(SHOW_BACKEND_PID));
-        try {
-            this.columnsList = Arrays.stream(properties.getProperty(COLUMNS_LIST).split(","))
-                    .map(Columns::valueOf).collect(Collectors.toSet());
-        } catch (IllegalArgumentException e) {
-            this.columnsList = new HashSet<>(Arrays.asList(Columns.values()));
-        }
         this.confirmRequired = Boolean.parseBoolean(properties.getProperty(CONFIRM_REQUIRED));
         this.confirmExit = Boolean.parseBoolean(properties.getProperty(CONFIRM_EXIT));
-        this.showLogMessages = Boolean.parseBoolean(properties.getProperty(SHOW_LOG_MESSAGES));
         this.locale = new Locale.Builder().setLanguageTag(properties.getProperty(CURRENT_LOCALE)).build();
 
         resources = ResourceBundle.getBundle(ru.taximaxim.pgsqlblocks.l10n.PgSqlBlocks.class.getName(), locale);
@@ -137,42 +125,28 @@ public final class Settings {
 
     /**
      * Устанавливаем период обновления
-     * @param updatePeriod
      */
-    public void setUpdatePeriod(int updatePeriod) {
-        if (this.updatePeriod != updatePeriod) {
-            this.updatePeriod = updatePeriod;
-            saveProperties(UPDATE_PERIOD, Integer.toString(updatePeriod));
-            listeners.forEach(listener -> listener.settingsUpdatePeriodChanged(this.updatePeriod));
+    public void setUpdatePeriodSeconds(int updatePeriodSeconds) {
+        if (this.updatePeriodSeconds != updatePeriodSeconds) {
+            this.updatePeriodSeconds = updatePeriodSeconds;
+            saveProperties(UPDATE_PERIOD, Integer.toString(updatePeriodSeconds));
+            listeners.forEach(listener -> listener.settingsUpdatePeriodChanged(this.updatePeriodSeconds));
         }
     }
 
     /**
      * Получаем период обновления
-     * @return the updatePeriod
+     * @return the updatePeriodSeconds
      */
-    public int getUpdatePeriod() {
-        return updatePeriod;
+    public int getUpdatePeriodSeconds() {
+        return updatePeriodSeconds;
     }
 
-    /**
-     * Sets the maximum time in seconds that a driver will wait
-     * while attempting to connect to a database once the driver has
-     * been identified.
-     *
-     * @param seconds the login time limit in seconds; zero means there is no limit
-     * @see #getLoginTimeout
-     */
-    public void setLoginTimeout(int seconds) {
-        this.loginTimeout = seconds;
-        saveProperties(LOGIN_TIMEOUT, Integer.toString(seconds));
-    }
     /**
      * Gets the maximum time in seconds that a driver can wait
      * when attempting to log in to a database.
      *
      * @return the driver login time limit in seconds
-     * @see #setLoginTimeout
      */
     public int getLoginTimeout() {
         return loginTimeout;
@@ -195,23 +169,6 @@ public final class Settings {
             saveProperties(AUTO_UPDATE, Boolean.toString(autoUpdate));
             listeners.forEach(listener -> listener.settingsAutoUpdateChanged(this.autoUpdate));
         }
-    }
-
-    /**
-     * Получаем флаг отображения только блокированных процессов
-     * @return the onlyBlocked
-     */
-    public boolean isOnlyBlocked() {
-        return onlyBlocked;
-    }
-
-    /**
-     * Устанавливаем флаг отображения тоьлко блокированных процессов
-     * @param onlyBlocked the onlyBlocked to set
-     */
-    public void setOnlyBlocked(boolean onlyBlocked) {
-        this.onlyBlocked = onlyBlocked;
-        saveProperties(ONLY_BLOCKED, Boolean.toString(onlyBlocked));
     }
 
     /**
@@ -242,6 +199,7 @@ public final class Settings {
         if (this.showBackendPid != showBackendPid) {
             this.showBackendPid = showBackendPid;
             saveProperties(SHOW_BACKEND_PID, Boolean.toString(showBackendPid));
+            listeners.forEach(listener -> listener.settingsShowBackendPidChanged(this.showBackendPid));
         }
     }
 
@@ -270,15 +228,6 @@ public final class Settings {
         return showToolTip;
     }
 
-    public Set<Columns> getColumnsList() {
-        return columnsList;
-    }
-
-    public void setColumnsList(Set<Columns> columnsList) {
-        this.columnsList = columnsList;
-        saveProperties(COLUMNS_LIST, columnsList.stream().map(Enum::name).collect(Collectors.joining(",")));
-    }
-
     /**
      * Получаем флаг "подтверждать действие отмены/уничтожения процесса"
      * @return флаг "подтверждать действие отмены/уничтожения процесса"
@@ -305,25 +254,6 @@ public final class Settings {
     public void setConfirmExit(boolean confirmExit) {
         this.confirmExit = confirmExit;
         saveProperties(CONFIRM_EXIT, String.valueOf(confirmExit));
-    }
-
-    /**
-     * Устанавливаем флаг отображения логов
-     * @param showLogMessages флаг отображения логов
-     * @see #setShowLogMessages(boolean)
-     */
-    public void setShowLogMessages(boolean showLogMessages) {
-        this.showLogMessages = showLogMessages;
-        saveProperties(SHOW_LOG_MESSAGES, Boolean.toString(showLogMessages));
-    }
-
-    /**
-     * Устанавливаем флаг отображения логов
-     * @return the showLogMessages
-     * @see #getShowLogMessages()
-     */
-    public boolean getShowLogMessages() {
-        return showLogMessages;
     }
 
     public Locale getLocale() {

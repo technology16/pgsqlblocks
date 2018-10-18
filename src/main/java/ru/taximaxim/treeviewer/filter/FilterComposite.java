@@ -24,7 +24,7 @@ public class FilterComposite extends Composite {
     private List<? extends IColumn> filterList;
     private ResourceBundle innerResourceBundle;
     private DataSource<? extends IObject> dataSource;
-    private int numberOfColumns = 1;
+    private int numberOfColumns;
     private FilterChangeHandler filterChangeHandler;
     private List<Text> filterTextList = new ArrayList<>();
 

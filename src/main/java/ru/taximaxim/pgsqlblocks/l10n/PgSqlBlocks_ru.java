@@ -118,6 +118,7 @@ public class PgSqlBlocks_ru extends ListResourceBundle {
                 {"processes", "Процессы"},
                 {"auto_update_interval", "Период автообновления"},
                 {"show_idle_process", "Показывать idle процессы"},
+                {"show_own_process", "Показывать процесс текущего подключения pgSqlBlocks"},
                 {"show_pgSqlBlock_process", "Показывать собственные запросы среди процессов"},
                 {"notifications", "Уведомления"},
                 {"show_tray_notifications", "Показывать оповещения о блокировках в трее"},

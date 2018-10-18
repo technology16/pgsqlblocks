@@ -25,6 +25,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 
 public final class DBQueries {
     private static final Logger LOG = Logger.getLogger(DBQueries.class);
@@ -84,7 +85,7 @@ public final class DBQueries {
 
     private static String loadQuery(String queryFile) {
         try (InputStream input = ClassLoader.getSystemResourceAsStream(queryFile);
-             BufferedReader reader = new BufferedReader(new InputStreamReader(input, "UTF-8"))) {
+             BufferedReader reader = new BufferedReader(new InputStreamReader(input, StandardCharsets.UTF_8))) {
             StringBuilder out = new StringBuilder();
             String line;
             while ((line = reader.readLine()) != null) {

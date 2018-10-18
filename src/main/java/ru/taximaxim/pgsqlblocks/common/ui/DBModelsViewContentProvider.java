@@ -20,7 +20,6 @@
 package ru.taximaxim.pgsqlblocks.common.ui;
 
 import org.eclipse.jface.viewers.IStructuredContentProvider;
-import org.eclipse.jface.viewers.Viewer;
 
 import java.util.List;
 

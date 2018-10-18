@@ -2,7 +2,6 @@ package ru.taximaxim.treeviewer.models;
 
 import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.swt.widgets.TreeColumn;
-import ru.taximaxim.treeviewer.models.IColumn;
 
 /**
  * Класс необходим для сортировки колонки по возрастанию/убыванию

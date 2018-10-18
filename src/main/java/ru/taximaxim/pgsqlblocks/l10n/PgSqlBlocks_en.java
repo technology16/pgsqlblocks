@@ -118,6 +118,7 @@ public class PgSqlBlocks_en extends ListResourceBundle {
                 {"processes", "Processes"},
                 {"auto_update_interval", "Autoupdate interval"},
                 {"show_idle_process", "Show idle processes"},
+                {"show_own_process", "Show current pgSqlBlocks process"},
                 {"show_pgSqlBlock_process", "Show pgSqlBlock process"},
                 {"notifications", "Notifications"},
                 {"show_tray_notifications", "Show tray notifications"},

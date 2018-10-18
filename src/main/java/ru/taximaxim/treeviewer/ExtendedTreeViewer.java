@@ -76,10 +76,6 @@ public class ExtendedTreeViewer<T extends IObject> extends Composite implements 
         tree.addSortListener(this);
     }
 
-    public ObjectViewComparator getComparator() {
-        return comparator;
-    }
-
     //If not called then null
     public void setUpdateButtonAction(Runnable runnable) {
         this.updateToolItemAction = runnable;

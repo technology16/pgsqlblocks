@@ -542,8 +542,8 @@ public class ProcessesController implements DBControllerListener, UserInputPassw
     public void dbControllerDisconnectFailed(DBController controller, boolean forcedByUser, SQLException exception) {
         if (!forcedByUser && settings.isAutoUpdate()) {
             LOG.info(l10n("db_disconnected_will_reconnect",
-                    controller.getModel().getName(), settings.getUpdatePeriod()));
-            controller.startProcessesUpdater(settings.getUpdatePeriod());
+                    controller.getModel().getName(), settings.getUpdatePeriodSeconds()));
+            controller.startProcessesUpdater(settings.getUpdatePeriodSeconds());
         } else {
             LOG.error(controller.getModel().getName() + " " + exception.getMessage(), exception);
         }
@@ -554,8 +554,8 @@ public class ProcessesController implements DBControllerListener, UserInputPassw
     public void dbControllerDidDisconnect(DBController controller, boolean forcedByUser) {
         if (!forcedByUser && settings.isAutoUpdate()) {
             LOG.info(l10n("db_disconnected_will_reconnect",
-                    controller.getModel().getName(), settings.getUpdatePeriod()));
-            controller.startProcessesUpdater(settings.getUpdatePeriod());
+                    controller.getModel().getName(), settings.getUpdatePeriodSeconds()));
+            controller.startProcessesUpdater(settings.getUpdatePeriodSeconds());
         } else {
             LOG.info(l10n("db_disconnected", controller.getModel().getName()));
         }
@@ -692,6 +692,13 @@ public class ProcessesController implements DBControllerListener, UserInputPassw
 
     @Override
     public void settingsShowIdleChanged(boolean isShowIdle) {
+        if (settings.isAutoUpdate()) {
+            dbControllers.stream().filter(DBController::isConnected).forEach(DBController::startProcessesUpdater);
+        }
+    }
+
+    @Override
+    public void settingsShowBackendPidChanged(boolean isShowBackendPid) {
         if (settings.isAutoUpdate()) {
             dbControllers.stream().filter(DBController::isConnected).forEach(DBController::startProcessesUpdater);
         }
