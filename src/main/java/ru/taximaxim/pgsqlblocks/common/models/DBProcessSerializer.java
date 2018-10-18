@@ -66,11 +66,10 @@ public class DBProcessSerializer {
         Date backendStart = dateUtils.dateFromString(resultSet.getString(BACKEND_START));
         Date queryStart = dateUtils.dateFromString(resultSet.getString(QUERY_START));
         Date xactStart = dateUtils.dateFromString(resultSet.getString(XACT_START));
-        Date timestamp = new Date();
-
+        Duration duration = xactStart != null ? Duration.ofMillis(System.currentTimeMillis() - xactStart.getTime()) : null;
         boolean slowQuery = resultSet.getBoolean(SLOW_QUERY);
 
-        DBProcessQuery query = new DBProcessQuery(queryString, slowQuery, backendStart, queryStart, xactStart, timestamp, null);
+        DBProcessQuery query = new DBProcessQuery(queryString, slowQuery, backendStart, queryStart, xactStart, duration);
         String appName = resultSet.getString(APPLICATION_NAME);
         String databaseName = resultSet.getString(DAT_NAME);
         String userName = resultSet.getString(USE_NAME);
@@ -80,7 +79,7 @@ public class DBProcessSerializer {
         return new DBProcess(pid, backendType, caller, state, stateChangeDate, query);
     }
 
-    public DBProcess deserialize(Element xmlElement, boolean elementIsRoot) {
+    DBProcess deserialize(Element xmlElement, boolean elementIsRoot) {
         Element rootElement;
         if (elementIsRoot) {
             rootElement = xmlElement;
@@ -101,10 +100,10 @@ public class DBProcessSerializer {
         Date queryStart = dateUtils.dateFromString(rootElement.getElementsByTagName(QUERY_START).item(0).getTextContent());
         Date xactStart = dateUtils.dateFromString(rootElement.getElementsByTagName(XACT_START).item(0).getTextContent());
         Duration duration = hasDuration(rootElement) ?
-                            dateUtils.timeFromString(rootElement.getElementsByTagName(DURATION).item(0).getTextContent())
+                            dateUtils.durationFromString(rootElement.getElementsByTagName(DURATION).item(0).getTextContent())
                             : null;
 
-        DBProcessQuery query = new DBProcessQuery(queryString, slowQuery, backendStart, queryStart, xactStart, null, duration);
+        DBProcessQuery query = new DBProcessQuery(queryString, slowQuery, backendStart, queryStart, xactStart, duration);
 
         String state = rootElement.getElementsByTagName(STATE).item(0).getTextContent();
         Date stateChange = dateUtils.dateFromString(rootElement.getElementsByTagName(STATE_CHANGE).item(0).getTextContent());

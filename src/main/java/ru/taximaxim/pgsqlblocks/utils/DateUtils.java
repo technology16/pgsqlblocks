@@ -34,6 +34,7 @@ public final class DateUtils {
 
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ssX");
     private final SimpleDateFormat dateFormatWithoutTimeZone = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    private final DateTimeFormatter timeFormat = DateTimeFormatter.ofPattern("HH:mm:ss");
 
     public synchronized Date dateFromString(String dateString) {
         if (dateString == null || dateString.isEmpty()) {
@@ -46,14 +47,6 @@ public final class DateUtils {
             LOG.error(exception.getMessage(), exception);
         }
         return result;
-    }
-
-    public synchronized Duration timeFromString(String timeString) {
-        if (timeString == null || timeString.isEmpty()) {
-            return null;
-        }
-        LocalTime time = LocalTime.parse(timeString, DateTimeFormatter.ofPattern("HH:mm:ss"));
-        return Duration.between(LocalTime.MIN, time);
     }
 
     public synchronized String dateToString(Date date) {
@@ -94,6 +87,15 @@ public final class DateUtils {
             long absSeconds = Math.abs(seconds);
             String positive = String.format("%02d:%02d:%02d", absSeconds / 3600, (absSeconds % 3600) / 60, absSeconds % 60);
             return seconds < 0 ? "-" + positive : positive;
+        }
+    }
+
+    public synchronized Duration durationFromString(String timeString) {
+        if (timeString == null || timeString.isEmpty()) {
+            return null;
+        } else {
+            LocalTime time = LocalTime.parse(timeString, timeFormat);
+            return Duration.between(LocalTime.MIN, time);
         }
     }
 }

@@ -38,10 +38,9 @@ public class DBProcessQuery {
     private final Date queryStart; //старт запроса
     private final Date xactStart; //старт транзакции
     private final Duration duration; //длительность запроса
-    private final Date timestamp; //таймстамп десериализации запроса
 
-    public DBProcessQuery(String queryString, boolean slowQuery, Date backendStart, Date queryStart,
-                          Date xactStart, Date timestamp, Duration duration) {
+    DBProcessQuery(String queryString, boolean slowQuery, Date backendStart, Date queryStart,
+                          Date xactStart, Duration duration) {
         this.queryString = queryString == null ? "" : queryString;
         int indexOfNewLine = this.queryString.indexOf('\n');
         String substring = this.queryString.substring(0, indexOfNewLine >= 0 ? indexOfNewLine : this.queryString.length());
@@ -51,7 +50,6 @@ public class DBProcessQuery {
         this.backendStart = backendStart;
         this.queryStart = queryStart;
         this.xactStart = xactStart;
-        this.timestamp = timestamp;
         this.duration = duration;
     }
 
@@ -80,12 +78,7 @@ public class DBProcessQuery {
     }
 
     public Duration getDuration() {
-        if (duration != null) {
-            return duration;
-        } else {
-            return timestamp != null && xactStart != null ?
-                    Duration.ofMillis(timestamp.getTime() - xactStart.getTime()) : null;
-        }
+        return duration;
     }
 
     @Override
