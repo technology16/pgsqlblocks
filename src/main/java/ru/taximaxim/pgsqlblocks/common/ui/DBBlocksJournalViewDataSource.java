@@ -76,12 +76,15 @@ public class DBBlocksJournalViewDataSource extends DBProcessesViewDataSource {
             process = (DBProcess)element;
         }
 
-        if (columns == Columns.BLOCK_CREATE_DATE) {
-            return parentProcess != null ? dateUtils.dateToString(parentProcess.getCreateDate()) : "";
-        } else if (columns == Columns.BLOCK_END_DATE) {
-            return parentProcess != null ? dateUtils.dateToString(parentProcess.getCloseDate()) : "";
-        } else {
-            return super.getRowText(process, columns);
+        switch (columns) {
+            case DURATION:
+                return parentProcess != null ? parentProcess.getDuration() : process.getQuery().getDuration();
+            case BLOCK_CREATE_DATE:
+                return parentProcess != null ? dateUtils.dateToString(parentProcess.getCreateDate()) : "";
+            case BLOCK_END_DATE:
+                return parentProcess != null ? dateUtils.dateToString(parentProcess.getCloseDate()) : "";
+            default:
+                return super.getRowText(process, columns);
         }
     }
 
