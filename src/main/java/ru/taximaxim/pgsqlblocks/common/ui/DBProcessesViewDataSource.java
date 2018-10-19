@@ -90,7 +90,7 @@ public class DBProcessesViewDataSource extends TMTreeViewerDataSource {
             case XACT_START:
                 return dateUtils.dateToString(process.getQuery().getXactStart());
             case DURATION:
-                return DateUtils.durationToString(process.getQuery().getDuration());
+                return process.getQuery().getDuration();
             case STATE:
                 return process.getState();
             case STATE_CHANGE:

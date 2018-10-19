@@ -24,9 +24,8 @@ import org.apache.log4j.Logger;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Date;
+
 
 public final class DateUtils {
 
@@ -34,7 +33,6 @@ public final class DateUtils {
 
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ssX");
     private final SimpleDateFormat dateFormatWithoutTimeZone = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-    private final DateTimeFormatter timeFormat = DateTimeFormatter.ofPattern("HH:mm:ss");
 
     public synchronized Date dateFromString(String dateString) {
         if (dateString == null || dateString.isEmpty()) {
@@ -71,14 +69,6 @@ public final class DateUtils {
         }
     }
 
-    public static int compareDurations(Duration d1, Duration d2) {
-        if (d1 == null) {
-            return d2 == null ? 0 : -1;
-        } else {
-            return d2 == null ? 1 : d1.compareTo(d2);
-        }
-    }
-
     public static String durationToString(Duration duration) {
         if (duration == null) {
             return "";
@@ -87,15 +77,6 @@ public final class DateUtils {
             long absSeconds = Math.abs(seconds);
             String positive = String.format("%02d:%02d:%02d", absSeconds / 3600, (absSeconds % 3600) / 60, absSeconds % 60);
             return seconds < 0 ? "-" + positive : positive;
-        }
-    }
-
-    public synchronized Duration durationFromString(String timeString) {
-        if (timeString == null || timeString.isEmpty()) {
-            return null;
-        } else {
-            LocalTime time = LocalTime.parse(timeString, timeFormat);
-            return Duration.between(LocalTime.MIN, time);
         }
     }
 }

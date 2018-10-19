@@ -19,7 +19,6 @@
  */
 package ru.taximaxim.pgsqlblocks.common.models;
 
-import java.time.Duration;
 import java.util.Date;
 
 /**
@@ -37,10 +36,10 @@ public class DBProcessQuery {
     private final Date backendStart; //время подключения к серверу
     private final Date queryStart; //старт запроса
     private final Date xactStart; //старт транзакции
-    private final Duration duration; //длительность запроса
+    private final String duration; //длительность запроса
 
     DBProcessQuery(String queryString, boolean slowQuery, Date backendStart, Date queryStart,
-                          Date xactStart, Duration duration) {
+                   Date xactStart, String duration) {
         this.queryString = queryString == null ? "" : queryString;
         int indexOfNewLine = this.queryString.indexOf('\n');
         String substring = this.queryString.substring(0, indexOfNewLine >= 0 ? indexOfNewLine : this.queryString.length());
@@ -77,7 +76,7 @@ public class DBProcessQuery {
         return xactStart;
     }
 
-    public Duration getDuration() {
+    public String getDuration() {
         return duration;
     }
 

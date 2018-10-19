@@ -69,7 +69,7 @@ public class DBProcessSerializer {
         Duration duration = xactStart != null ? Duration.ofMillis(System.currentTimeMillis() - xactStart.getTime()) : null;
         boolean slowQuery = resultSet.getBoolean(SLOW_QUERY);
 
-        DBProcessQuery query = new DBProcessQuery(queryString, slowQuery, backendStart, queryStart, xactStart, duration);
+        DBProcessQuery query = new DBProcessQuery(queryString, slowQuery, backendStart, queryStart, xactStart, DateUtils.durationToString(duration));
         String appName = resultSet.getString(APPLICATION_NAME);
         String databaseName = resultSet.getString(DAT_NAME);
         String userName = resultSet.getString(USE_NAME);
@@ -99,9 +99,9 @@ public class DBProcessSerializer {
         Date backendStart = dateUtils.dateFromString(rootElement.getElementsByTagName(BACKEND_START).item(0).getTextContent());
         Date queryStart = dateUtils.dateFromString(rootElement.getElementsByTagName(QUERY_START).item(0).getTextContent());
         Date xactStart = dateUtils.dateFromString(rootElement.getElementsByTagName(XACT_START).item(0).getTextContent());
-        Duration duration = hasDuration(rootElement) ?
-                            dateUtils.durationFromString(rootElement.getElementsByTagName(DURATION).item(0).getTextContent())
-                            : null;
+        String duration = hasDuration(rootElement) ?
+                            rootElement.getElementsByTagName(DURATION).item(0).getTextContent()
+                            : "";
 
         DBProcessQuery query = new DBProcessQuery(queryString, slowQuery, backendStart, queryStart, xactStart, duration);
 
@@ -137,7 +137,7 @@ public class DBProcessSerializer {
         createAndAppendElement(document, rootElement, SLOW_QUERY, String.valueOf(process.getQuery().isSlowQuery()));
         createAndAppendElement(document, rootElement, QUERY_START, dateUtils.dateToStringWithTz(process.getQuery().getQueryStart()));
         createAndAppendElement(document, rootElement, XACT_START, dateUtils.dateToStringWithTz(process.getQuery().getXactStart()));
-        createAndAppendElement(document, rootElement, DURATION, DateUtils.durationToString(process.getQuery().getDuration()));
+        createAndAppendElement(document, rootElement, DURATION, process.getQuery().getDuration());
         createAndAppendElement(document, rootElement, APPLICATION_NAME, process.getQueryCaller().getApplicationName());
         createAndAppendElement(document, rootElement, DAT_NAME, process.getQueryCaller().getDatabaseName());
         createAndAppendElement(document, rootElement, USE_NAME, process.getQueryCaller().getUserName());

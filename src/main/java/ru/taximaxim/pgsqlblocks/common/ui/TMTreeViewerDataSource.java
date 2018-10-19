@@ -30,7 +30,7 @@ import java.util.ResourceBundle;
 
 public abstract class TMTreeViewerDataSource implements ITableLabelProvider, ITreeContentProvider {
 
-    protected TMTreeViewerDataSourceFilter dataFilter; // FIXME add type definition
+    protected TMTreeViewerDataSourceFilter dataFilter;
     protected final ResourceBundle resourceBundle;
 
     public TMTreeViewerDataSource(ResourceBundle resourceBundle) {

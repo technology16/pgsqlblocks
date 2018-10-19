@@ -78,7 +78,7 @@ public class DBProcessesViewComparator extends ViewerComparator {
                         process2.getQuery().getXactStart());
                 break;
             case DURATION:
-                compareResult = DateUtils.compareDurations(process1.getQuery().getDuration(),
+                compareResult = compareStringValues(process1.getQuery().getDuration(),
                         process2.getQuery().getDuration());
                 break;
             case STATE:

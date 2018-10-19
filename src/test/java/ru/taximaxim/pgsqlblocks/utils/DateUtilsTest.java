@@ -8,7 +8,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 
 public class DateUtilsTest {
 
@@ -31,18 +30,8 @@ public class DateUtilsTest {
                 put(Duration.ofSeconds(100 * HOUR + 305), "100:05:05");
             }});
 
-    private final DateUtils dateUtils = new DateUtils();
-
     @Test
     public void durationToStringTest() {
         durationToExpectedRepresentation.forEach((d, r) -> assertEquals(r, DateUtils.durationToString(d)));
-    }
-
-    @Test
-    public void durationFromStringTest() {
-        assertNull(dateUtils.durationFromString(null));
-        assertNull(dateUtils.durationFromString(""));
-
-        durationToExpectedRepresentation.forEach((d, r) -> assertEquals(d, dateUtils.durationFromString(r)));
     }
 }

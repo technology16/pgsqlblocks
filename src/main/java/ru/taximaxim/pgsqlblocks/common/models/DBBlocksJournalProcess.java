@@ -19,6 +19,8 @@
  */
 package ru.taximaxim.pgsqlblocks.common.models;
 
+import ru.taximaxim.pgsqlblocks.utils.DateUtils;
+
 import java.time.Duration;
 import java.util.Date;
 import java.util.List;
@@ -69,9 +71,9 @@ public class DBBlocksJournalProcess {
         return closeDate;
     }
 
-    public Duration getDuration(){
+    public String getDuration(){
         if (isClosed()) {
-            return Duration.ofMillis(closeDate.getTime() - createDate.getTime());
+            return DateUtils.durationToString(Duration.ofMillis(closeDate.getTime() - createDate.getTime()));
         } else {
             return process.getQuery().getDuration();
         }
