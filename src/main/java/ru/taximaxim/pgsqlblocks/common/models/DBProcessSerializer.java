@@ -29,6 +29,7 @@ import ru.taximaxim.pgsqlblocks.utils.DateUtils;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.time.Duration;
 import java.util.Date;
 
 public class DBProcessSerializer {
@@ -48,6 +49,7 @@ public class DBProcessSerializer {
     private static final String SLOW_QUERY = "slowQuery";
     private static final String QUERY_START = "query_start";
     private static final String XACT_START = "xact_start";
+    private static final String DURATION = "duration";
     private static final String APPLICATION_NAME = "application_name";
     private static final String DAT_NAME = "datname";
     private static final String USE_NAME = "usename";
@@ -64,10 +66,10 @@ public class DBProcessSerializer {
         Date backendStart = dateUtils.dateFromString(resultSet.getString(BACKEND_START));
         Date queryStart = dateUtils.dateFromString(resultSet.getString(QUERY_START));
         Date xactStart = dateUtils.dateFromString(resultSet.getString(XACT_START));
-
+        Duration duration = xactStart != null ? Duration.ofMillis(System.currentTimeMillis() - xactStart.getTime()) : null;
         boolean slowQuery = resultSet.getBoolean(SLOW_QUERY);
 
-        DBProcessQuery query = new DBProcessQuery(queryString, slowQuery, backendStart, queryStart, xactStart);
+        DBProcessQuery query = new DBProcessQuery(queryString, slowQuery, backendStart, queryStart, xactStart, DateUtils.durationToString(duration));
         String appName = resultSet.getString(APPLICATION_NAME);
         String databaseName = resultSet.getString(DAT_NAME);
         String userName = resultSet.getString(USE_NAME);
@@ -77,7 +79,7 @@ public class DBProcessSerializer {
         return new DBProcess(pid, backendType, caller, state, stateChangeDate, query);
     }
 
-    public DBProcess deserialize(Element xmlElement, boolean elementIsRoot) {
+    DBProcess deserialize(Element xmlElement, boolean elementIsRoot) {
         Element rootElement;
         if (elementIsRoot) {
             rootElement = xmlElement;
@@ -97,15 +99,18 @@ public class DBProcessSerializer {
         Date backendStart = dateUtils.dateFromString(rootElement.getElementsByTagName(BACKEND_START).item(0).getTextContent());
         Date queryStart = dateUtils.dateFromString(rootElement.getElementsByTagName(QUERY_START).item(0).getTextContent());
         Date xactStart = dateUtils.dateFromString(rootElement.getElementsByTagName(XACT_START).item(0).getTextContent());
+        String duration = hasDuration(rootElement) ?
+                            rootElement.getElementsByTagName(DURATION).item(0).getTextContent()
+                            : "";
 
-        DBProcessQuery query = new DBProcessQuery(queryString, slowQuery, backendStart, queryStart, xactStart);
+        DBProcessQuery query = new DBProcessQuery(queryString, slowQuery, backendStart, queryStart, xactStart, duration);
 
         String state = rootElement.getElementsByTagName(STATE).item(0).getTextContent();
         Date stateChange = dateUtils.dateFromString(rootElement.getElementsByTagName(STATE_CHANGE).item(0).getTextContent());
         DBProcess process = new DBProcess(pid, backendType, caller, state, stateChange, query);
         Element childrenRootElement = (Element)rootElement.getElementsByTagName(CHILDREN_ELEMENT_TAG_NAME).item(0);
         NodeList childrenElements = childrenRootElement.getElementsByTagName(ROOT_ELEMENT_TAG_NAME);
-        for (int i = 0; i < childrenRootElement.getChildNodes().getLength(); i++) {
+        for (int i = 0; i < childrenElements.getLength(); i++) {
             Node childNode = childrenElements.item(i);
             if (childNode.getNodeType() == Node.ELEMENT_NODE) {
                 Element childElement = (Element)childNode;
@@ -132,6 +137,7 @@ public class DBProcessSerializer {
         createAndAppendElement(document, rootElement, SLOW_QUERY, String.valueOf(process.getQuery().isSlowQuery()));
         createAndAppendElement(document, rootElement, QUERY_START, dateUtils.dateToStringWithTz(process.getQuery().getQueryStart()));
         createAndAppendElement(document, rootElement, XACT_START, dateUtils.dateToStringWithTz(process.getQuery().getXactStart()));
+        createAndAppendElement(document, rootElement, DURATION, process.getQuery().getDuration());
         createAndAppendElement(document, rootElement, APPLICATION_NAME, process.getQueryCaller().getApplicationName());
         createAndAppendElement(document, rootElement, DAT_NAME, process.getQueryCaller().getDatabaseName());
         createAndAppendElement(document, rootElement, USE_NAME, process.getQueryCaller().getUserName());
@@ -165,5 +171,9 @@ public class DBProcessSerializer {
 
     private boolean hasBackendType(Element element) {
         return element.getElementsByTagName(BACKEND_TYPE).getLength() > 0;
+    }
+
+    private boolean hasDuration(Element element) {
+        return element.getElementsByTagName(DURATION).getLength() > 0;
     }
 }

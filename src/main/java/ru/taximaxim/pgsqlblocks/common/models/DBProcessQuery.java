@@ -19,19 +19,27 @@
  */
 package ru.taximaxim.pgsqlblocks.common.models;
 
-import java.time.Duration;
 import java.util.Date;
 
+/**
+ * Когда DBProcessQuery создается внутри десериализации resultSet, невозможно
+ * создать Duration. В связи с этим передается таймстамп, на основании которого вычисляется
+ * длительность процесса.
+ * <br>
+ * Длительность процесса вычисляется на момент получения результат запроса.
+ */
 public class DBProcessQuery {
 
     private final String queryString;
-    private final boolean slowQuery;
-    private final Date backendStart;
-    private final Date queryStart;
-    private final Date xactStart;
     private final String queryFirstLine;
+    private final boolean slowQuery;
+    private final Date backendStart; //время подключения к серверу
+    private final Date queryStart; //старт запроса
+    private final Date xactStart; //старт транзакции
+    private final String duration; //длительность запроса
 
-    public DBProcessQuery(String queryString, boolean slowQuery, Date backendStart, Date queryStart, Date xactStart) {
+    DBProcessQuery(String queryString, boolean slowQuery, Date backendStart, Date queryStart,
+                   Date xactStart, String duration) {
         this.queryString = queryString == null ? "" : queryString;
         int indexOfNewLine = this.queryString.indexOf('\n');
         String substring = this.queryString.substring(0, indexOfNewLine >= 0 ? indexOfNewLine : this.queryString.length());
@@ -41,6 +49,7 @@ public class DBProcessQuery {
         this.backendStart = backendStart;
         this.queryStart = queryStart;
         this.xactStart = xactStart;
+        this.duration = duration;
     }
 
     public String getQueryString() {
@@ -67,8 +76,8 @@ public class DBProcessQuery {
         return xactStart;
     }
 
-    public Duration getDuration() {
-        return xactStart == null ? null : Duration.ofMillis(new Date().getTime() - xactStart.getTime());
+    public String getDuration() {
+        return duration;
     }
 
     @Override

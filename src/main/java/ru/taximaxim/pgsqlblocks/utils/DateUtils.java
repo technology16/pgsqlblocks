@@ -68,14 +68,6 @@ public final class DateUtils {
         }
     }
 
-    public static int compareDurations(Duration d1, Duration d2) {
-        if (d1 == null) {
-            return d2 == null ? 0 : -1;
-        } else {
-            return d2 == null ? 1 : d1.compareTo(d2);
-        }
-    }
-
     public static String durationToString(Duration duration) {
         if (duration == null) {
             return "";

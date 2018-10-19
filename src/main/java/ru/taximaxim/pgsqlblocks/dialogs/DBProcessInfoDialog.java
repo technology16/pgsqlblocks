@@ -89,7 +89,7 @@ public class DBProcessInfoDialog extends Dialog{
         createProcessArea(container, textGd, "user_name", dbProcess.getQueryCaller().getUserName());
         createProcessArea(container, textGd, "query_start", dateUtils.dateToString(dbProcess.getQuery().getQueryStart()));
         createProcessArea(container, textGd, "xact_start", dateUtils.dateToString(dbProcess.getQuery().getXactStart()));
-        createProcessArea(container, textGd, "duration", DateUtils.durationToString(dbProcess.getQuery().getDuration()));
+        createProcessArea(container, textGd, "duration", dbProcess.getQuery().getDuration());
         createProcessArea(container, textGd, "state", dbProcess.getState());
         createQueryArea(container, dbProcess.getQuery().getQueryString());
         createButtonArea(container);

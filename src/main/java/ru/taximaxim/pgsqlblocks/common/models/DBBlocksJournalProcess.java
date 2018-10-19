@@ -22,6 +22,9 @@ package ru.taximaxim.pgsqlblocks.common.models;
 import ru.taximaxim.treeviewer.models.IObject;
 
 import java.util.Collections;
+import ru.taximaxim.pgsqlblocks.utils.DateUtils;
+
+import java.time.Duration;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
@@ -69,6 +72,10 @@ public class DBBlocksJournalProcess implements IObject {
 
     public Date getCloseDate() {
         return closeDate;
+    }
+
+    public String getDuration() {
+        return process.getQuery().getDuration();
     }
 
     @Override
