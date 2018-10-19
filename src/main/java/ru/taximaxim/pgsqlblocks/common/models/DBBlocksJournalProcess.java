@@ -71,12 +71,8 @@ public class DBBlocksJournalProcess {
         return closeDate;
     }
 
-    public String getDuration(){
-        if (isClosed()) {
-            return DateUtils.durationToString(Duration.ofMillis(closeDate.getTime() - createDate.getTime()));
-        } else {
-            return process.getQuery().getDuration();
-        }
+    public String getDuration() {
+        return process.getQuery().getDuration();
     }
 
     @Override

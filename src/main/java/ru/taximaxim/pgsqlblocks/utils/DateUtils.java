@@ -26,7 +26,6 @@ import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.util.Date;
 
-
 public final class DateUtils {
 
     private static final Logger LOG = Logger.getLogger(DateUtils.class);
