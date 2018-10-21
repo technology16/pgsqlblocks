@@ -159,8 +159,7 @@
                         <includes>**/*.sql</includes>
                     </includes>
                     <excludes>
-                        <exclude>**/*query.sql</exclude>
-                        <exclude>**/*query_with_idle.sql</exclude>
+                        <exclude>**/*.sql</exclude>
                     </excludes>
                 </configuration>
 

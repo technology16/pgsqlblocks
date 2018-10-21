@@ -115,6 +115,7 @@ public class DBController implements DBBlocksJournalListener {
                 listeners.forEach(listener -> listener.dbControllerDidConnect(this));
             } catch (UserCancelException e) {
                 LOG.info(String.format(resourceBundle.getString("user_cancelled_on_connection"), model.getName()));
+                stopProcessesUpdater();
             } catch (SQLException e) {
                 setStatus(DBStatus.CONNECTION_ERROR);
                 listeners.forEach(listener -> listener.dbControllerConnectionFailed(this, e));
