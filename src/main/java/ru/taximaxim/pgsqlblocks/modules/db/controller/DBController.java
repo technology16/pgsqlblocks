@@ -116,6 +116,7 @@ public class DBController implements DBBlocksJournalListener {
             } catch (UserCancelException e) {
                 LOG.info(String.format(resourceBundle.getString("user_cancelled_on_connection"), model.getName()));
                 stopProcessesUpdater();
+                setStatus(DBStatus.DISABLED);
             } catch (SQLException e) {
                 setStatus(DBStatus.CONNECTION_ERROR);
                 listeners.forEach(listener -> listener.dbControllerConnectionFailed(this, e));
@@ -248,6 +249,7 @@ public class DBController implements DBBlocksJournalListener {
 
     public void updateProcesses() {
         if (!isConnected()) {
+            setStatus(DBStatus.CONNECTION_ERROR);
             connectAsync();
         } else {
             executor.execute(this::loadProcesses);
