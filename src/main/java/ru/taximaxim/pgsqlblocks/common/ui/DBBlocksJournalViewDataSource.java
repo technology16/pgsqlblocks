@@ -41,11 +41,6 @@ public class DBBlocksJournalViewDataSource extends DBProcessesViewDataSource {
     }
 
     @Override
-    public boolean columnIsSortable() {
-        return false;
-    }
-
-    @Override
     public List<Columns> getColumns() {
         return Arrays.asList(Columns.values());
     }

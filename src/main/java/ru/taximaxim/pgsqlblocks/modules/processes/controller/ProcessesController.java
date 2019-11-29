@@ -133,7 +133,6 @@ public class ProcessesController implements DBControllerListener, UserInputPassw
         DBProcessesViewDataSource dbProcessesViewDataSource = new DBProcessesViewDataSource(resourceBundle);
         dbProcessView = new ExtendedTreeViewer<>(processesViewComposite, SWT.NONE, null,
                 dbProcessesViewDataSource, settings.getLocale());
-        dbProcessView.setComparator(new DBProcessesViewComparator());
         dbProcessView.getTreeViewer().addSelectionChangedListener(this::dbProcessesViewSelectionChanged);
         dbProcessView.setUpdateButtonAction(this::updateProcessesInSelectedDatabase);
         dbProcessView.getTreeViewer().getTree().addTraverseListener(e -> {

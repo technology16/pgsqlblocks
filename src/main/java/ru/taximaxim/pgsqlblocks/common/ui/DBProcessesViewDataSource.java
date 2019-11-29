@@ -42,11 +42,6 @@ public class DBProcessesViewDataSource extends DataSource<DBProcess> {
     }
 
     @Override
-    public boolean columnIsSortable() {
-        return true;
-    }
-
-    @Override
     public List<? extends IColumn> getColumns() {
         List<Columns> list = new ArrayList<>(Arrays.asList(Columns.values()));
         list.remove(Columns.BLOCK_CREATE_DATE);

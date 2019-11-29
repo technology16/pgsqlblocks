@@ -36,7 +36,6 @@ import java.util.ResourceBundle;
  * hasChildren должен возвращать true если у объекта есть дочерние объекты;
  * **********************************************************************
  * getColumns возвращает список объектов, где объект колонки имплементит IColumn;
- * columnIsSortable если содержимое колонки может сортироваться
  * getColumnImage получить для строки объекта изображение для определенной колонки
  * getColumnText получить значение для определенной ячейки. сделать метод getRowText(element, getColumns().get(columnIndex))
  * для возможно проходить не по индексу колонки, а по самой колонке
@@ -45,8 +44,6 @@ import java.util.ResourceBundle;
 public abstract class DataSource<T extends IObject> implements ITableLabelProvider, ITreeContentProvider {
 
     protected List<ILabelProviderListener> listeners = new ArrayList<>();
-
-    public abstract boolean columnIsSortable();
 
     public abstract List<? extends IColumn> getColumns();
 
