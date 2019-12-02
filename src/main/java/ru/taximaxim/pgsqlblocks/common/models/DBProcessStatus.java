@@ -37,13 +37,19 @@ public enum DBProcessStatus {
     }
 
     public static DBProcessStatus getInstanceForDescr(String descr) {
-        if (descr == null || descr.isEmpty())
+        if (descr == null || descr.isEmpty()) {
             return WORKING;
+        }
+
         switch (descr) {
-            case "Working": return WORKING;
-            case "Blocking": return BLOCKING;
-            case "Blocked": return BLOCKED;
-            default: return WORKING;
+        case "Working":
+            return WORKING;
+        case "Blocking":
+            return BLOCKING;
+        case "Blocked":
+            return BLOCKED;
+        default:
+            return WORKING;
         }
     }
 
@@ -52,14 +58,12 @@ public enum DBProcessStatus {
      */
     public Images getStatusImage() {
         switch(this) {
-            case WORKING:
-                return Images.PROC_WORKING;
-            case BLOCKING:
-                return Images.PROC_BLOCKING;
-            case BLOCKED:
-                return Images.PROC_BLOCKED;
-            default:
-                return Images.DEFAULT;
+        case BLOCKING:
+            return Images.PROC_BLOCKING;
+        case BLOCKED:
+            return Images.PROC_BLOCKED;
+        default:
+            return Images.PROC_WORKING;
         }
     }
 }
