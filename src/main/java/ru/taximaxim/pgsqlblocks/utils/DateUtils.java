@@ -19,16 +19,20 @@
  */
 package ru.taximaxim.pgsqlblocks.utils;
 
-import org.apache.log4j.Logger;
-
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
+
+import org.apache.log4j.Logger;
 
 public final class DateUtils {
 
     private static final Logger LOG = Logger.getLogger(DateUtils.class);
+
+    private static final DateTimeFormatter FILE_DATE = DateTimeFormatter.ofPattern("yyyy-MM-dd HH''mm''ss");
 
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ssX");
     private final SimpleDateFormat dateFormatWithoutTimeZone = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -51,6 +55,13 @@ public final class DateUtils {
             return "";
         }
         return dateFormatWithoutTimeZone.format(date);
+    }
+
+    public synchronized String dateToString(LocalDateTime date) {
+        if (date == null) {
+            return "";
+        }
+        return FILE_DATE.format(date);
     }
 
     public synchronized String dateToStringWithTz(Date date) {
