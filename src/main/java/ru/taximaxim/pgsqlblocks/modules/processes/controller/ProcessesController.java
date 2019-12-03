@@ -222,30 +222,30 @@ public class ProcessesController implements DBControllerListener, UserInputPassw
     private void createToolItems() {
         addDatabaseToolItem = new ToolItem(view.getToolBar(), SWT.PUSH);
         addDatabaseToolItem.setImage(ImageUtils.getImage(Images.ADD_DATABASE));
-        addDatabaseToolItem.setToolTipText(Images.ADD_DATABASE.getDescription(resourceBundle));
+        addDatabaseToolItem.setToolTipText(l10n("add_db"));
         addDatabaseToolItem.addListener(SWT.Selection, event -> openAddNewDatabaseDialog());
 
         deleteDatabaseToolItem = new ToolItem(view.getToolBar(), SWT.PUSH);
         deleteDatabaseToolItem.setImage(ImageUtils.getImage(Images.DELETE_DATABASE));
-        deleteDatabaseToolItem.setToolTipText(Images.DELETE_DATABASE.getDescription(resourceBundle));
+        deleteDatabaseToolItem.setToolTipText(l10n("delete_db"));
         deleteDatabaseToolItem.setEnabled(false);
         deleteDatabaseToolItem.addListener(SWT.Selection, event -> deleteSelectedDatabase());
 
         editDatabaseToolItem = new ToolItem(view.getToolBar(), SWT.PUSH);
         editDatabaseToolItem.setImage(ImageUtils.getImage(Images.EDIT_DATABASE));
-        editDatabaseToolItem.setToolTipText(Images.EDIT_DATABASE.getDescription(resourceBundle));
+        editDatabaseToolItem.setToolTipText(l10n("edit_db"));
         editDatabaseToolItem.setEnabled(false);
         editDatabaseToolItem.addListener(SWT.Selection, event -> openEditSelectedDatabaseDialog());
 
         connectDatabaseToolItem = new ToolItem(view.getToolBar(), SWT.PUSH);
         connectDatabaseToolItem.setImage(ImageUtils.getImage(Images.CONNECT_DATABASE));
-        connectDatabaseToolItem.setToolTipText(Images.CONNECT_DATABASE.getDescription(resourceBundle));
+        connectDatabaseToolItem.setToolTipText(l10n("connect"));
         connectDatabaseToolItem.setEnabled(false);
         connectDatabaseToolItem.addListener(SWT.Selection, event -> connectToSelectedDatabase());
 
         disconnectDatabaseToolItem = new ToolItem(view.getToolBar(), SWT.PUSH);
         disconnectDatabaseToolItem.setImage(ImageUtils.getImage(Images.DISCONNECT_DATABASE));
-        disconnectDatabaseToolItem.setToolTipText(Images.DISCONNECT_DATABASE.getDescription(resourceBundle));
+        disconnectDatabaseToolItem.setToolTipText(l10n("disconnect"));
         disconnectDatabaseToolItem.setEnabled(false);
         disconnectDatabaseToolItem.addListener(SWT.Selection, event -> disconnectSelectedDatabase());
 
@@ -253,12 +253,12 @@ public class ProcessesController implements DBControllerListener, UserInputPassw
 
         ToolItem showSettingsDialogToolItem = new ToolItem(view.getToolBar(), SWT.PUSH);
         showSettingsDialogToolItem.setImage(ImageUtils.getImage(Images.SETTINGS));
-        showSettingsDialogToolItem.setToolTipText(Images.SETTINGS.getDescription(resourceBundle));
+        showSettingsDialogToolItem.setToolTipText(l10n("settings"));
         showSettingsDialogToolItem.addListener(SWT.Selection, event -> showSettingsDialog());
 
         ToolItem toggleLogsPanelVisibilityToolItem = new ToolItem(view.getToolBar(), SWT.CHECK);
         toggleLogsPanelVisibilityToolItem.setImage(ImageUtils.getImage(Images.SHOW_LOG_PANEL));
-        toggleLogsPanelVisibilityToolItem.setToolTipText(Images.SHOW_LOG_PANEL.getDescription(resourceBundle));
+        toggleLogsPanelVisibilityToolItem.setToolTipText(l10n("show_logs_panel"));
         toggleLogsPanelVisibilityToolItem.setSelection(true);
         toggleLogsPanelVisibilityToolItem.addListener(SWT.Selection, event -> toggleLogsPanelVisibility(toggleLogsPanelVisibilityToolItem));
 
@@ -266,13 +266,13 @@ public class ProcessesController implements DBControllerListener, UserInputPassw
 
         autoUpdateToolItem = new ToolItem(view.getToolBar(), SWT.CHECK);
         autoUpdateToolItem.setImage(ImageUtils.getImage(Images.AUTOUPDATE));
-        autoUpdateToolItem.setToolTipText(Images.AUTOUPDATE.getDescription(resourceBundle));
+        autoUpdateToolItem.setToolTipText(l10n("autoupdate"));
         autoUpdateToolItem.addListener(SWT.Selection, event -> setAutoUpdate(autoUpdateToolItem.getSelection()));
         autoUpdateToolItem.setSelection(settings.isAutoUpdate());
 
         showOnlyBlockedProcessesToolItem = new ToolItem(view.getToolBar(), SWT.CHECK);
         showOnlyBlockedProcessesToolItem.setImage(ImageUtils.getImage(Images.VIEW_ONLY_BLOCKED));
-        showOnlyBlockedProcessesToolItem.setToolTipText(Images.VIEW_ONLY_BLOCKED.getDescription(resourceBundle));
+        showOnlyBlockedProcessesToolItem.setToolTipText(l10n("view_only_blocked"));
         showOnlyBlockedProcessesToolItem.addListener(SWT.Selection, event -> {
             if (showOnlyBlockedProcessesToolItem.getSelection()) {
                 onlyBlockedFilter = new OnlyBlockedFilter();
@@ -288,7 +288,7 @@ public class ProcessesController implements DBControllerListener, UserInputPassw
 
         ToolItem openBlocksJournalToolItem = new ToolItem(view.getToolBar(), SWT.PUSH);
         openBlocksJournalToolItem.setImage(ImageUtils.getImage(Images.BLOCKS_JOURNAL_FOLDER));
-        openBlocksJournalToolItem.setToolTipText(Images.BLOCKS_JOURNAL_FOLDER.getDescription(resourceBundle));
+        openBlocksJournalToolItem.setToolTipText(l10n("show_saved_blocks_journals"));
         openBlocksJournalToolItem.addListener(SWT.Selection, event -> {
             BlocksJournalView blocksJournalView = new BlocksJournalView(settings);
             blocksJournalView.open();
@@ -310,11 +310,11 @@ public class ProcessesController implements DBControllerListener, UserInputPassw
         boolean isShow = toolItem.getSelection();
         if (isShow) {
             toolItem.setImage(ImageUtils.getImage(Images.SHOW_LOG_PANEL));
-            toolItem.setToolTipText(Images.SHOW_LOG_PANEL.getDescription(resourceBundle));
+            toolItem.setToolTipText(l10n("show_logs_panel"));
             PgSqlBlocks.getInstance().getApplicationController().getApplicationView().showBottomPanel();
         } else {
             toolItem.setImage(ImageUtils.getImage(Images.HIDE_LOG_PANEL));
-            toolItem.setToolTipText(Images.HIDE_LOG_PANEL.getDescription(resourceBundle));
+            toolItem.setToolTipText(l10n("hide_logs_panel"));
             PgSqlBlocks.getInstance().getApplicationController().getApplicationView().hideBottomPanel();
         }
     }
@@ -646,7 +646,7 @@ public class ProcessesController implements DBControllerListener, UserInputPassw
         }
         DBController selectedController = (DBController) dbModelsView.getTableViewer().getStructuredSelection().getFirstElement();
         if (selectedController.isConnected()) {
-            Action disconnectAction = new Action(Images.DISCONNECT_DATABASE.getDescription(resourceBundle),
+            Action disconnectAction = new Action(l10n("disconnect"),
                     ImageDescriptor.createFromImage(ImageUtils.getImage(Images.DISCONNECT_DATABASE))) {
                 @Override
                 public void run() {
@@ -655,7 +655,7 @@ public class ProcessesController implements DBControllerListener, UserInputPassw
             };
             menuManager.add(disconnectAction);
         } else {
-            Action connectAction = new Action(Images.CONNECT_DATABASE.getDescription(resourceBundle),
+            Action connectAction = new Action(l10n("connect"),
                     ImageDescriptor.createFromImage(ImageUtils.getImage(Images.CONNECT_DATABASE))) {
                 @Override
                 public void run() {
@@ -663,7 +663,7 @@ public class ProcessesController implements DBControllerListener, UserInputPassw
                 }
             };
             menuManager.add(connectAction);
-            Action editAction = new Action(Images.EDIT_DATABASE.getDescription(resourceBundle),
+            Action editAction = new Action(l10n("edit_db"),
                     ImageDescriptor.createFromImage(ImageUtils.getImage(Images.EDIT_DATABASE))) {
                 @Override
                 public void run() {
@@ -672,7 +672,7 @@ public class ProcessesController implements DBControllerListener, UserInputPassw
             };
             menuManager.add(editAction);
         }
-        Action updateProcessesAction = new Action(Images.UPDATE.getDescription(resourceBundle),
+        Action updateProcessesAction = new Action(l10n("update"),
                 ImageDescriptor.createFromImage(ImageUtils.getImage(Images.UPDATE))) {
             @Override
             public void run() {
