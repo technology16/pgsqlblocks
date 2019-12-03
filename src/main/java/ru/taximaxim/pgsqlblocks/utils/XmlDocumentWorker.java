@@ -19,26 +19,28 @@
  */
 package ru.taximaxim.pgsqlblocks.utils;
 
-import org.apache.log4j.Logger;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.xml.sax.SAXException;
+import java.io.File;
+import java.io.IOException;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.*;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-import java.io.File;
-import java.io.IOException;
+
+import org.apache.log4j.Logger;
+import org.w3c.dom.Document;
+import org.xml.sax.SAXException;
 
 public class XmlDocumentWorker {
-    
-    private static final Logger LOG = Logger.getLogger(XmlDocumentWorker.class);
-    private static final String SERVERS = "servers";
 
-    public void save(Document doc, File xmlFile) {
+    private static final Logger LOG = Logger.getLogger(XmlDocumentWorker.class);
+
+    public static void save(Document doc, File xmlFile) {
         TransformerFactory transformerFactory = TransformerFactory.newInstance();
         Transformer transformer;
         try {
@@ -47,54 +49,31 @@ public class XmlDocumentWorker {
             transformer.setOutputProperty(OutputKeys.METHOD, "xml");
             transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
             transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
-
-            DOMSource source = new DOMSource(doc);
-            StreamResult result = new StreamResult(xmlFile);
-            try {
-                transformer.transform(source, result);
-            } catch (TransformerException e) {
-                LOG.error(e);
-            }
-        } catch (TransformerConfigurationException e) {
+            transformer.transform(new DOMSource(doc), new StreamResult(xmlFile));
+        } catch (TransformerException e) {
             LOG.error(e);
         }
     }
-    
-    public Document open(File xmlFile) {
-        DocumentBuilderFactory df = DocumentBuilderFactory.newInstance();
-        Document doc = null;
-        try {
-            DocumentBuilder db = df.newDocumentBuilder();
-            try {
-                doc = db.parse(xmlFile);
-            } catch (SAXException | IOException e) {
-                LOG.info("Не найден файл конфигураци servers.xml", e);
-                createConfFile(xmlFile);
-            }
-        } catch (ParserConfigurationException e) {
-            LOG.error(String.format("Ошибка парсинга файла %s!", xmlFile), e);
+
+    public static Document open(File xmlFile) {
+        if (!xmlFile.exists()) {
+            return null;
         }
-        
-        return doc;
+
+        try {
+            return openFile(xmlFile);
+        } catch (ParserConfigurationException | SAXException | IOException e) {
+            LOG.error(String.format("Ошибка парсинга файла %s!", xmlFile), e);
+            return null;
+        }
     }
 
-    public Document openJournalFile(File file) throws ParserConfigurationException, IOException, SAXException {
+    public static Document openFile(File file)
+            throws ParserConfigurationException, IOException, SAXException {
         DocumentBuilderFactory df = DocumentBuilderFactory.newInstance();
         DocumentBuilder db = df.newDocumentBuilder();
         return db.parse(file);
     }
-    
-    private void createConfFile(File xmlFile) {
-        DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
-        try {
-            DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
-            Document doc = docBuilder.newDocument();
-            Element rootElement = doc.createElement(SERVERS);
-            doc.appendChild(rootElement);
-            save(doc, xmlFile);
-        } catch (ParserConfigurationException e) {
-            LOG.error(e);
-        }
-        LOG.info(String.format("Создан файл %s...", xmlFile));
-    }
+
+    private XmlDocumentWorker() {}
 }
