@@ -19,8 +19,23 @@
  */
 package ru.taximaxim.pgsqlblocks.modules.blocksjournal.view;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
+import java.util.ResourceBundle;
+
+import javax.xml.parsers.ParserConfigurationException;
+
 import org.apache.log4j.Logger;
-import org.eclipse.jface.viewers.*;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.window.ApplicationWindow;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
@@ -35,20 +50,19 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
-import ru.taximaxim.pgsqlblocks.common.models.*;
+
+import ru.taximaxim.pgsqlblocks.common.models.DBBlocksJournal;
+import ru.taximaxim.pgsqlblocks.common.models.DBBlocksJournalListener;
+import ru.taximaxim.pgsqlblocks.common.models.DBBlocksJournalProcess;
+import ru.taximaxim.pgsqlblocks.common.models.DBBlocksJournalProcessSerializer;
+import ru.taximaxim.pgsqlblocks.common.models.DBProcess;
 import ru.taximaxim.pgsqlblocks.common.ui.DBBlocksJournalViewDataSource;
 import ru.taximaxim.pgsqlblocks.common.ui.DBProcessInfoView;
+import ru.taximaxim.pgsqlblocks.dialogs.DBProcessInfoDialog;
 import ru.taximaxim.pgsqlblocks.utils.PathBuilder;
 import ru.taximaxim.pgsqlblocks.utils.Settings;
 import ru.taximaxim.pgsqlblocks.utils.XmlDocumentWorker;
 import ru.taximaxim.treeviewer.ExtendedTreeViewer;
-import ru.taximaxim.pgsqlblocks.dialogs.DBProcessInfoDialog;
-
-import javax.xml.parsers.ParserConfigurationException;
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Path;
-import java.util.*;
 
 public class BlocksJournalView extends ApplicationWindow implements DBBlocksJournalListener {
 
@@ -63,8 +77,6 @@ public class BlocksJournalView extends ApplicationWindow implements DBBlocksJour
     private final ResourceBundle resourceBundle;
 
     private final List<File> journalFiles = new ArrayList<>();
-
-    private XmlDocumentWorker xmlDocumentWorker = new XmlDocumentWorker();
 
     private final DBBlocksJournal blocksJournal = new DBBlocksJournal();
 
@@ -149,7 +161,7 @@ public class BlocksJournalView extends ApplicationWindow implements DBBlocksJour
 
     private void openJournalFile(File journalFile) {
         try {
-            Document document = xmlDocumentWorker.openJournalFile(journalFile);
+            Document document = XmlDocumentWorker.openFile(journalFile);
             List<DBBlocksJournalProcess> processes = new ArrayList<>();
             NodeList journalElements = document.getElementsByTagName(DBBlocksJournalProcessSerializer.JOURNAL_PROCESS_ROOT_ELEMENT_TAG_NAME);
             for (int i = 0; i < journalElements.getLength(); i++) {

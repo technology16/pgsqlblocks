@@ -481,8 +481,7 @@ public class DBController implements DBBlocksJournalListener {
         if (!fileExists) {
             document.appendChild(rootElement);
         }
-        XmlDocumentWorker documentWorker = new XmlDocumentWorker();
-        documentWorker.save(document, currentJournalFile);
+        XmlDocumentWorker.save(document, currentJournalFile);
     }
 
     private void saveUnclosedBlockedProcessesToFile() {

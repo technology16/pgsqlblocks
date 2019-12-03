@@ -19,13 +19,13 @@
  */
 package ru.taximaxim.pgsqlblocks.utils;
 
-import org.apache.log4j.Logger;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+
+import org.apache.log4j.Logger;
 
 public final class PathBuilder {
 
@@ -59,7 +59,7 @@ public final class PathBuilder {
     }
 
     public Path getBlocksJournalsDir() {
-        Path blocksJournalsDir = Paths.get(path.toString(), "blocksJournals");
+        Path blocksJournalsDir = path.resolve("blocksJournals");
         if (!blocksJournalsDir.toFile().exists()) {
             try {
                 Files.createDirectory(blocksJournalsDir);
@@ -71,19 +71,12 @@ public final class PathBuilder {
     }
 
     public Path getServersPath() {
-        Path serversPath = Paths.get(path.toString(), "servers.xml");
-        if (!serversPath.toFile().exists()) {
-            try {
-                Files.createFile(serversPath);
-            } catch (IOException e) {
-                LOG.error(String.format("Ошибка создания файла %s: %s", serversPath, e.getMessage()));
-            }
-        }
-        return serversPath;
+        return path.resolve("servers.xml");
     }
+
     // TODO разные конфиги log4j.propertires для разных ОС
     Path getPropertiesPath() {
-        Path propPath = Paths.get(path.toString(), "pgsqlblocks.properties");
+        Path propPath = path.resolve("pgsqlblocks.properties");
         if (!propPath.toFile().exists()) {
             try {
                 Files.createFile(propPath);
