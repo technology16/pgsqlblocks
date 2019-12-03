@@ -428,6 +428,11 @@ public class DBController implements DBBlocksJournalListener {
         return processCanceled;
     }
 
+    public void clear() {
+        processes.clear();
+        blocksJournal.clear();
+    }
+
     @Override
     public void dbBlocksJournalDidAddProcesses() {
         listeners.forEach(listener -> listener.dbControllerBlocksJournalChanged(this));
