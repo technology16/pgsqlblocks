@@ -559,6 +559,9 @@ public class ProcessesController implements DBControllerListener, UserInputPassw
             LOG.info(l10n("db_disconnected", controller.getModel().getName()));
         }
         changeToolItemsStateForController(controller);
+        controller.clear();
+        dbProcessView.getTreeViewer().refresh();
+        dbBlocksJournalView.getTreeViewer().refresh();
     }
 
     @Override
@@ -718,7 +721,7 @@ public class ProcessesController implements DBControllerListener, UserInputPassw
             dbProcessInfoView.hide();
         } else {
             IStructuredSelection structuredSelection = (IStructuredSelection) selection;
-            selectedProcesses = (List<DBProcess>) structuredSelection.toList();
+            selectedProcesses = structuredSelection.toList();
             dbProcessInfoView.show(selectedProcesses.get(0));
         }
     }
