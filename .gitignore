@@ -6,5 +6,4 @@
 /.classpath
 /.project
 /.settings/
-/src/test/resources/application.conf
 github.token
