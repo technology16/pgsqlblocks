@@ -39,9 +39,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.TreeColumn;
 import org.eclipse.swt.widgets.TreeItem;
 
-import ru.taximaxim.pgsqlblocks.common.models.DBProcess;
 import ru.taximaxim.pgsqlblocks.utils.Columns;
-import ru.taximaxim.pgsqlblocks.utils.DateUtils;
 import ru.taximaxim.treeviewer.models.DataSource;
 import ru.taximaxim.treeviewer.models.IColumn;
 import ru.taximaxim.treeviewer.models.IObject;
@@ -233,85 +231,10 @@ public class ExtendedTreeViewerComponent<T extends IObject> extends TreeViewer {
 
         @Override
         public int compare(Viewer viewer, Object e1, Object e2) {
-            DBProcess process1 = (DBProcess) e1;
-            DBProcess process2 = (DBProcess) e2;
-
             Iterator<SortingColumn> it = sortOrder.descendingIterator();
             while (it.hasNext()) {
                 SortingColumn c = it.next();
-                int compareResult = 0;
-
-                switch (c.col) {
-                case PID:
-                    compareResult = Integer.compare(process1.getPid(), process2.getPid());
-                    break;
-                case BLOCKED_COUNT:
-                    compareResult = Integer.compare(process1.getChildren().size(),
-                            process2.getChildren().size());
-                    break;
-                case APPLICATION_NAME:
-                    compareResult = compareStringValues(process1.getQueryCaller().getApplicationName(),
-                            process2.getQueryCaller().getApplicationName());
-                    break;
-                case DATABASE_NAME:
-                    compareResult = compareStringValues(process1.getQueryCaller().getDatabaseName(),
-                            process2.getQueryCaller().getDatabaseName());
-                    break;
-                case USER_NAME:
-                    compareResult = compareStringValues(process1.getQueryCaller().getUserName(),
-                            process2.getQueryCaller().getUserName());
-                    break;
-                case CLIENT:
-                    compareResult = compareStringValues(process1.getQueryCaller().getClient(),
-                            process2.getQueryCaller().getClient());
-                    break;
-                case BACKEND_START:
-                    compareResult = DateUtils.compareDates(process1.getQuery().getBackendStart(),
-                            process2.getQuery().getBackendStart());
-                    break;
-                case QUERY_START:
-                    compareResult = DateUtils.compareDates(process1.getQuery().getQueryStart(),
-                            process2.getQuery().getQueryStart());
-                    break;
-                case XACT_START:
-                    compareResult = DateUtils.compareDates(process1.getQuery().getXactStart(),
-                            process2.getQuery().getXactStart());
-                    break;
-                case DURATION:
-                    compareResult = compareStringValues(process1.getQuery().getDuration(),
-                            process2.getQuery().getDuration());
-                    break;
-                case STATE:
-                    compareResult = compareStringValues(process1.getState(),
-                            process2.getState());
-                    break;
-                case STATE_CHANGE:
-                    compareResult = DateUtils.compareDates(process1.getStateChange(),
-                            process2.getStateChange());
-                    break;
-                case BLOCKED:
-                    compareResult = compareStringValues(process1.getBlocksPidsString(),
-                            process2.getBlocksPidsString());
-                    break;
-                case LOCK_TYPE:
-                    compareResult = compareStringValues(process1.getBlocksLocktypesString(),
-                            process2.getBlocksLocktypesString());
-                    break;
-                case RELATION:
-                    compareResult = compareStringValues(process1.getBlocksRelationsString(),
-                            process2.getBlocksRelationsString());
-                    break;
-                case QUERY:
-                    compareResult = compareStringValues(process1.getQuery().getQueryString(),
-                            process2.getQuery().getQueryString());
-                    break;
-                case SLOW_QUERY:
-                    compareResult = Boolean.compare(process1.getQuery().isSlowQuery(),
-                            process2.getQuery().isSlowQuery());
-                    break;
-                default:
-                    break;
-                }
+                int compareResult = dataSource.compare(e1, e2, c.col);
 
                 if (compareResult != 0) {
                     if (c.desc) {
@@ -322,10 +245,6 @@ public class ExtendedTreeViewerComponent<T extends IObject> extends TreeViewer {
             }
 
             return 0;
-        }
-
-        private int compareStringValues(String s1, String s2) {
-            return s1.compareTo(s2);
         }
     }
 

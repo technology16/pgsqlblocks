@@ -19,7 +19,13 @@
  */
 package ru.taximaxim.pgsqlblocks.common.ui;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.ResourceBundle;
+
 import org.eclipse.swt.graphics.Image;
+
 import ru.taximaxim.pgsqlblocks.common.models.DBProcess;
 import ru.taximaxim.pgsqlblocks.utils.Columns;
 import ru.taximaxim.pgsqlblocks.utils.DateUtils;
@@ -27,15 +33,10 @@ import ru.taximaxim.pgsqlblocks.utils.ImageUtils;
 import ru.taximaxim.treeviewer.models.DataSource;
 import ru.taximaxim.treeviewer.models.IColumn;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.ResourceBundle;
-
 public class DBProcessesViewDataSource extends DataSource<DBProcess> {
 
     private final DateUtils dateUtils = new DateUtils();
-    private ResourceBundle bundle;
+    private final ResourceBundle bundle;
 
     public DBProcessesViewDataSource(ResourceBundle bundle) {
         this.bundle = bundle;
@@ -68,57 +69,58 @@ public class DBProcessesViewDataSource extends DataSource<DBProcess> {
 
     @Override
     public String getRowText(Object element, IColumn column) {
-        DBProcess process = (DBProcess)element;
+        DBProcess process = (DBProcess) element;
         Columns columns = Columns.getColumn(column);
         switch (columns) {
-            case PID:
-                return String.valueOf(process.getPid());
-            case BACKEND_TYPE:
-                return process.getBackendType();
-            case BLOCKED_COUNT:
-                return String.valueOf(process.getChildren().size());
-            case APPLICATION_NAME:
-                return process.getQueryCaller().getApplicationName();
-            case DATABASE_NAME:
-                return process.getQueryCaller().getDatabaseName();
-            case USER_NAME:
-                return process.getQueryCaller().getUserName();
-            case CLIENT:
-                return process.getQueryCaller().getClient();
-            case BACKEND_START:
-                return dateUtils.dateToString(process.getQuery().getBackendStart());
-            case QUERY_START:
-                return dateUtils.dateToString(process.getQuery().getQueryStart());
-            case XACT_START:
-                return dateUtils.dateToString(process.getQuery().getXactStart());
-            case DURATION:
-                return process.getQuery().getDuration();
-            case STATE:
-                return process.getState();
-            case STATE_CHANGE:
-                return dateUtils.dateToString(process.getStateChange());
-            case BLOCKED:
-                return process.getBlocksPidsString();
-            case LOCK_TYPE:
-                return process.getBlocksLocktypesString();
-            case RELATION:
-                return process.getBlocksRelationsString();
-            case SLOW_QUERY:
-                return String.valueOf(process.getQuery().isSlowQuery());
-            case QUERY:
-                return process.getQuery().getQueryFirstLine();
-            default:
-                return "UNDEFINED";
+        case PID:
+            return String.valueOf(process.getPid());
+        case BACKEND_TYPE:
+            return process.getBackendType();
+        case BLOCKED_COUNT:
+            return String.valueOf(process.getChildren().size());
+        case APPLICATION_NAME:
+            return process.getQueryCaller().getApplicationName();
+        case DATABASE_NAME:
+            return process.getQueryCaller().getDatabaseName();
+        case USER_NAME:
+            return process.getQueryCaller().getUserName();
+        case CLIENT:
+            return process.getQueryCaller().getClient();
+        case BACKEND_START:
+            return dateUtils.dateToString(process.getQuery().getBackendStart());
+        case QUERY_START:
+            return dateUtils.dateToString(process.getQuery().getQueryStart());
+        case XACT_START:
+            return dateUtils.dateToString(process.getQuery().getXactStart());
+        case DURATION:
+            return process.getQuery().getDuration();
+        case STATE:
+            return process.getState();
+        case STATE_CHANGE:
+            return dateUtils.dateToString(process.getStateChange());
+        case BLOCKED:
+            return process.getBlocksPidsString();
+        case LOCK_TYPE:
+            return process.getBlocksLocktypesString();
+        case RELATION:
+            return process.getBlocksRelationsString();
+        case SLOW_QUERY:
+            return String.valueOf(process.getQuery().isSlowQuery());
+        case QUERY:
+            return process.getQuery().getQueryFirstLine();
+        default:
+            return "";
         }
     }
 
     @Override
     public Image getColumnImage(Object element, int columnIndex) {
-        DBProcess process = (DBProcess)element;
-        if (columnIndex == 0) {
-            return ImageUtils.getImage(process.getStatus().getStatusImage());
+        if (columnIndex != 0) {
+            return null;
         }
-        return null;
+
+        DBProcess process = (DBProcess) element;
+        return ImageUtils.getImage(process.getStatus().getStatusImage());
     }
 
     @Override
@@ -142,5 +144,64 @@ public class DBProcessesViewDataSource extends DataSource<DBProcess> {
     public boolean hasChildren(Object element) {
         DBProcess process = (DBProcess)element;
         return process.hasChildren();
+    }
+
+    @Override
+    public int compare(Object e1, Object e2, IColumn column) {
+        DBProcess process1 = (DBProcess) e1;
+        DBProcess process2 = (DBProcess) e2;
+
+        switch (Columns.getColumn(column)) {
+        case PID:
+            return Integer.compare(process1.getPid(), process2.getPid());
+        case BLOCKED_COUNT:
+            return Integer.compare(process1.getChildren().size(), process2.getChildren().size());
+        case APPLICATION_NAME:
+            return process1.getQueryCaller().getApplicationName().compareTo(
+                    process2.getQueryCaller().getApplicationName());
+        case DATABASE_NAME:
+            return process1.getQueryCaller().getDatabaseName().compareTo(
+                    process2.getQueryCaller().getDatabaseName());
+        case USER_NAME:
+            return process1.getQueryCaller().getUserName().compareTo(
+                    process2.getQueryCaller().getUserName());
+        case CLIENT:
+            return process1.getQueryCaller().getClient().compareTo(
+                    process2.getQueryCaller().getClient());
+        case BACKEND_START:
+            return DateUtils.compareDates(process1.getQuery().getBackendStart(),
+                    process2.getQuery().getBackendStart());
+        case QUERY_START:
+            return DateUtils.compareDates(process1.getQuery().getQueryStart(),
+                    process2.getQuery().getQueryStart());
+        case XACT_START:
+            return DateUtils.compareDates(process1.getQuery().getXactStart(),
+                    process2.getQuery().getXactStart());
+        case DURATION:
+            return process1.getQuery().getDuration().compareTo(
+                    process2.getQuery().getDuration());
+        case STATE:
+            return process1.getState().compareTo(process2.getState());
+        case STATE_CHANGE:
+            return DateUtils.compareDates(process1.getStateChange(),
+                    process2.getStateChange());
+        case BLOCKED:
+            return process1.getBlocksPidsString().compareTo(
+                    process2.getBlocksPidsString());
+        case LOCK_TYPE:
+            return process1.getBlocksLocktypesString().compareTo(
+                    process2.getBlocksLocktypesString());
+        case RELATION:
+            return process1.getBlocksRelationsString().compareTo(
+                    process2.getBlocksRelationsString());
+        case QUERY:
+            return process1.getQuery().getQueryString().compareTo(
+                    process2.getQuery().getQueryString());
+        case SLOW_QUERY:
+            return Boolean.compare(process1.getQuery().isSlowQuery(),
+                    process2.getQuery().isSlowQuery());
+        default:
+            return 0;
+        }
     }
 }

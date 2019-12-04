@@ -19,17 +19,17 @@
  */
 package ru.taximaxim.pgsqlblocks.common.ui;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.ResourceBundle;
+
 import org.eclipse.swt.graphics.Image;
+
 import ru.taximaxim.pgsqlblocks.common.models.DBBlocksJournalProcess;
 import ru.taximaxim.pgsqlblocks.common.models.DBProcess;
 import ru.taximaxim.pgsqlblocks.utils.Columns;
 import ru.taximaxim.pgsqlblocks.utils.DateUtils;
-import ru.taximaxim.pgsqlblocks.utils.ImageUtils;
 import ru.taximaxim.treeviewer.models.IColumn;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.ResourceBundle;
 
 // FIXME seems wrong to inherit from DBProcessesViewDataSource which is DBProcess-related
 public class DBBlocksJournalViewDataSource extends DBProcessesViewDataSource {
@@ -47,40 +47,29 @@ public class DBBlocksJournalViewDataSource extends DBProcessesViewDataSource {
 
     @Override
     public Image getColumnImage(Object element, int columnIndex) {
-        if (columnIndex != 0) {
-            return null;
-        }
         if (element instanceof DBBlocksJournalProcess) {
-            DBBlocksJournalProcess process = (DBBlocksJournalProcess)element;
-            return ImageUtils.getImage(process.getProcess().getStatus().getStatusImage());
-        } else {
-            DBProcess process = (DBProcess)element;
-            return ImageUtils.getImage(process.getStatus().getStatusImage());
+            DBBlocksJournalProcess process = (DBBlocksJournalProcess) element;
+            return super.getColumnImage(process.getProcess(), columnIndex);
         }
+
+        return super.getColumnImage(element, columnIndex);
     }
 
     @Override
     public String getRowText(Object element, IColumn column) {
-        Columns columns = Columns.getColumn(column);
-        DBProcess process;
-        DBBlocksJournalProcess parentProcess = null;
         if (element instanceof DBBlocksJournalProcess) {
-            parentProcess = (DBBlocksJournalProcess)element;
-            process = parentProcess.getProcess();
-        } else {
-            process = (DBProcess)element;
+            DBBlocksJournalProcess process = (DBBlocksJournalProcess) element;
+            switch (Columns.getColumn(column)) {
+            case BLOCK_CREATE_DATE:
+                return dateUtils.dateToString(process.getCreateDate());
+            case BLOCK_END_DATE:
+                return dateUtils.dateToString(process.getCloseDate());
+            default:
+                return super.getRowText(process.getProcess(), column);
+            }
         }
 
-        switch (columns) {
-            case DURATION:
-                return parentProcess != null ? parentProcess.getDuration() : process.getQuery().getDuration();
-            case BLOCK_CREATE_DATE:
-                return parentProcess != null ? dateUtils.dateToString(parentProcess.getCreateDate()) : "";
-            case BLOCK_END_DATE:
-                return parentProcess != null ? dateUtils.dateToString(parentProcess.getCloseDate()) : "";
-            default:
-                return super.getRowText(process, columns);
-        }
+        return super.getRowText(element, column);
     }
 
     @Override
@@ -105,5 +94,23 @@ public class DBBlocksJournalViewDataSource extends DBProcessesViewDataSource {
         } else {
             return element instanceof DBBlocksJournalProcess;
         }
+    }
+
+    @Override
+    public int compare(Object e1, Object e2, IColumn column) {
+        if (e1 instanceof DBBlocksJournalProcess) {
+            DBBlocksJournalProcess process1 = (DBBlocksJournalProcess) e1;
+            DBBlocksJournalProcess process2 = (DBBlocksJournalProcess) e2;
+            switch (Columns.getColumn(column)) {
+            case BLOCK_CREATE_DATE:
+                return DateUtils.compareDates(process1.getCreateDate(), process2.getCreateDate());
+            case BLOCK_END_DATE:
+                return DateUtils.compareDates(process1.getCloseDate(), process2.getCloseDate());
+            default:
+                return super.compare(process1.getProcess(), process2.getProcess(), column);
+            }
+        }
+
+        return super.compare(e1, e2, column);
     }
 }

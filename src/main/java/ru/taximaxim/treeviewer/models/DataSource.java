@@ -53,12 +53,14 @@ public abstract class DataSource<T extends IObject> implements ITableLabelProvid
 
     public abstract String getRowText(Object element, IColumn column);
 
+    public abstract int compare(Object e1, Object e2, IColumn column);
+
     public String getLocalizeString(String name) {
         if (getResourceBundle() == null || !getResourceBundle().containsKey(name)) {
             return name;
-        } else {
-            return getResourceBundle().getString(name);
         }
+
+        return getResourceBundle().getString(name);
     }
 
     @Override
