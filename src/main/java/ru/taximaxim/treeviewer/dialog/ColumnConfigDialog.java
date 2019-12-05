@@ -19,34 +19,39 @@
  */
 package ru.taximaxim.treeviewer.dialog;
 
+import java.util.ResourceBundle;
+import java.util.Set;
+
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.CheckboxTableViewer;
+import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
-import ru.taximaxim.treeviewer.models.IColumn;
-import ru.taximaxim.treeviewer.models.IObject;
-import ru.taximaxim.treeviewer.models.DataSource;
-import ru.taximaxim.treeviewer.tree.ExtendedTreeViewerComponent;
 
-import java.util.*;
+import ru.taximaxim.treeviewer.models.DataSource;
+import ru.taximaxim.treeviewer.models.IColumn;
+import ru.taximaxim.treeviewer.tree.ExtendedTreeViewerComponent;
 
 public class ColumnConfigDialog extends Dialog {
 
-    private ExtendedTreeViewerComponent<? extends IObject> treeViewer;
-    private ResourceBundle bundle;
-    private final Set<IColumn> invisibleColumn = new HashSet<>();
+    private final ExtendedTreeViewerComponent<?> tree;
+    private final ResourceBundle bundle;
+    private final Set<IColumn> visibleColumn;
 
-    public ColumnConfigDialog(ResourceBundle resourceBundle, ExtendedTreeViewerComponent<? extends IObject> tree, Shell parent) {
+    private CheckboxTableViewer viewer;
+
+    public ColumnConfigDialog(ResourceBundle resourceBundle,
+            ExtendedTreeViewerComponent<?> tree, Shell parent) {
         super(parent);
-        this.treeViewer = tree;
+        this.tree = tree;
         this.bundle = resourceBundle;
-        Set<IColumn> columns = this.treeViewer.getInvisibleColumns();
-        if (columns != null) {
-            this.invisibleColumn.addAll(columns);
-        }
+        this.visibleColumn = tree.getVisibleColumns();
     }
 
     @Override
@@ -57,34 +62,44 @@ public class ColumnConfigDialog extends Dialog {
 
     @Override
     protected Control createDialogArea(Composite parent) {
-        Composite container = (Composite) super.createDialogArea(parent);
+        Composite container = new Composite(parent, SWT.NONE);
+        container.setLayout(new GridLayout());
+        container.setLayoutData(new GridData(GridData.FILL_BOTH));
 
-        GridLayout layout = new GridLayout(2, false);
-        layout.marginRight = 5;
-        layout.marginLeft = 10;
-        layout.marginTop = 10;
-        container.setLayout(layout);
+        DataSource<?> dataSource = tree.getDataSource();
+        viewer = CheckboxTableViewer.newCheckList(container, SWT.BORDER);
+        viewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+        viewer.setContentProvider(ArrayContentProvider.getInstance());
+        viewer.setLabelProvider(new LabelProvider() {
 
-        DataSource<? extends IObject> dataSource = treeViewer.getDataSource();
+            @Override
+            public String getText(Object element) {
+                IColumn column = (IColumn) element;
+                return dataSource.getLocalizeString(column.getColumnName());
+            }
+        });
 
-        for (IColumn column : dataSource.getColumns()) {
-            Button checkBoxButton = new Button(container, SWT.CHECK);
-            checkBoxButton.setText(dataSource.getLocalizeString(column.getColumnName()));
-            checkBoxButton.setSelection(!invisibleColumn.contains(column));
-            checkBoxButton.addListener(SWT.Selection, event -> {
-                if (invisibleColumn.contains(column)) {
-                   invisibleColumn.remove(column);
-                } else {
-                    invisibleColumn.add(column);
-                }
-            });
-        }
+        viewer.setInput(dataSource.getColumns());
+        viewer.setCheckedElements(visibleColumn.toArray());
+
         return container;
     }
 
     @Override
+    protected Point getInitialSize() {
+        Point size = super.getInitialSize();
+        return new Point(size.x, size.y + 25);
+    }
+
+    @Override
     protected void okPressed() {
-        this.treeViewer.setInvisibleColumns(invisibleColumn);
+        visibleColumn.clear();
+
+        for (Object obj : viewer.getCheckedElements()) {
+            visibleColumn.add((IColumn) obj);
+        }
+
+        tree.showColumns();
         super.okPressed();
     }
 }

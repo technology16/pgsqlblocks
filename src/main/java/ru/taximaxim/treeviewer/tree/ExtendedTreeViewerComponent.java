@@ -20,6 +20,7 @@
 package ru.taximaxim.treeviewer.tree;
 
 import java.util.Deque;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Set;
@@ -50,7 +51,7 @@ import ru.taximaxim.treeviewer.models.IObject;
 public class ExtendedTreeViewerComponent<T extends IObject> extends TreeViewer {
 
     private DataSource<T> dataSource;
-    private Set<IColumn> invisibleColumns;
+    private final Set<IColumn> visibleColumns = new HashSet<>();
     private final DBProcessesViewComparator comparator = new DBProcessesViewComparator();
 
     public ExtendedTreeViewerComponent(Composite parent, int style) {
@@ -99,6 +100,7 @@ public class ExtendedTreeViewerComponent<T extends IObject> extends TreeViewer {
                     selectSortColumn(swtColumn, (e.stateMask & SWT.CTRL) != 0);
                 }
             });
+            visibleColumns.add(column);
         }
     }
 
@@ -113,6 +115,22 @@ public class ExtendedTreeViewerComponent<T extends IObject> extends TreeViewer {
         refresh();
     }
 
+    public void showColumns() {
+        TreeColumn[] columns = getTree().getColumns();
+        for (TreeColumn treeColumn : columns) {
+            IColumn column = (IColumn) treeColumn.getData();
+            if (visibleColumns.contains(column)) {
+                if (!treeColumn.getResizable()) {
+                    treeColumn.setWidth(column.getColumnWidth());
+                    treeColumn.setResizable(true);
+                }
+            } else if (treeColumn.getResizable()) {
+                treeColumn.setWidth(0);
+                treeColumn.setResizable(false);
+            }
+        }
+    }
+
     private void setColumnHeaders() {
         for (TreeColumn s : getTree().getColumns()) {
             Columns col = (Columns) s.getData();
@@ -120,57 +138,8 @@ public class ExtendedTreeViewerComponent<T extends IObject> extends TreeViewer {
         }
     }
 
-    public Set<IColumn> getInvisibleColumns() {
-        return invisibleColumns;
-    }
-
-    /**
-     * The list comes from the column configuration dialog
-     */
-    public void setInvisibleColumns(Set<IColumn> invisible) {
-        if (invisibleColumns != null) {
-            if (invisible != null) {
-                invisibleColumns.removeAll(invisible);
-            }
-            showColumns(invisibleColumns);
-        }
-        invisibleColumns = invisible;
-        hideColumns(invisibleColumns);
-    }
-
-    /**
-     * set invisibility of columns
-     */
-    private void hideColumns(Set<IColumn> shownColumns) {
-        if (shownColumns == null || shownColumns.isEmpty()) {
-            return;
-        }
-        TreeColumn[] columns = getTree().getColumns();
-        for (TreeColumn treeColumn : columns) {
-            IColumn column = (IColumn) treeColumn.getData();
-            if (!shownColumns.contains(column)) {
-                continue;
-            }
-            treeColumn.setWidth(0);
-            treeColumn.setResizable(false);
-        }
-    }
-
-    /**
-     * Set visibility of columns
-     */
-    private void showColumns(Set<IColumn> shownColumns) {
-        if (shownColumns != null && !shownColumns.isEmpty()) {
-            TreeColumn[] columns = getTree().getColumns();
-
-            for (TreeColumn treeColumn : columns) {
-                IColumn column = (IColumn) treeColumn.getData();
-                if (shownColumns.contains(column)) {
-                    treeColumn.setWidth(column.getColumnWidth());
-                    treeColumn.setResizable(true);
-                }
-            }
-        }
+    public Set<IColumn> getVisibleColumns() {
+        return visibleColumns;
     }
 
     private class DoubleClickListener implements IDoubleClickListener {
