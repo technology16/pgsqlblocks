@@ -38,8 +38,8 @@ public class DBProcessQuery {
     private final Date xactStart; //старт транзакции
     private final String duration; //длительность запроса
 
-    DBProcessQuery(String queryString, boolean slowQuery, Date backendStart, Date queryStart,
-                   Date xactStart, String duration) {
+    public DBProcessQuery(String queryString, boolean slowQuery, Date backendStart,
+            Date queryStart, Date xactStart, String duration) {
         this.queryString = queryString == null ? "" : queryString;
         int indexOfNewLine = this.queryString.indexOf('\n');
         String substring = this.queryString.substring(0, indexOfNewLine >= 0 ? indexOfNewLine : this.queryString.length());

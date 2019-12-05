@@ -20,7 +20,6 @@
 package ru.taximaxim.pgsqlblocks.modules.blocksjournal.view;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -28,9 +27,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.ResourceBundle;
 
-import javax.xml.parsers.ParserConfigurationException;
-
-import org.apache.log4j.Logger;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
@@ -45,28 +41,20 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
 
 import ru.taximaxim.pgsqlblocks.common.models.DBBlocksJournal;
 import ru.taximaxim.pgsqlblocks.common.models.DBBlocksJournalListener;
 import ru.taximaxim.pgsqlblocks.common.models.DBBlocksJournalProcess;
-import ru.taximaxim.pgsqlblocks.common.models.DBBlocksJournalProcessSerializer;
 import ru.taximaxim.pgsqlblocks.common.models.DBProcess;
 import ru.taximaxim.pgsqlblocks.common.ui.DBBlocksJournalViewDataSource;
 import ru.taximaxim.pgsqlblocks.common.ui.DBProcessInfoView;
 import ru.taximaxim.pgsqlblocks.dialogs.DBProcessInfoDialog;
 import ru.taximaxim.pgsqlblocks.utils.PathBuilder;
 import ru.taximaxim.pgsqlblocks.utils.Settings;
-import ru.taximaxim.pgsqlblocks.utils.XmlDocumentWorker;
+import ru.taximaxim.pgsqlblocks.xmlstore.DBBlocksXmlStore;
 import ru.taximaxim.treeviewer.ExtendedTreeViewer;
 
 public class BlocksJournalView extends ApplicationWindow implements DBBlocksJournalListener {
-
-    private static final Logger LOG = Logger.getLogger(BlocksJournalView.class);
 
     private TableViewer filesTable;
 
@@ -79,8 +67,6 @@ public class BlocksJournalView extends ApplicationWindow implements DBBlocksJour
     private final List<File> journalFiles = new ArrayList<>();
 
     private final DBBlocksJournal blocksJournal = new DBBlocksJournal();
-
-    private static DBBlocksJournalProcessSerializer serializer = new DBBlocksJournalProcessSerializer();
 
     public BlocksJournalView(Settings settings) {
         super(null);
@@ -129,7 +115,7 @@ public class BlocksJournalView extends ApplicationWindow implements DBBlocksJour
         processesView.getTreeViewer().getTree().addTraverseListener(e -> {
             if (e.detail == SWT.TRAVERSE_RETURN) {
                 IStructuredSelection structuredSelection = processesView.getTreeViewer().getStructuredSelection();
-                List<DBBlocksJournalProcess> selectedProcesses = (List<DBBlocksJournalProcess>) structuredSelection.toList();
+                List<DBBlocksJournalProcess> selectedProcesses = structuredSelection.toList();
                 openProcessDialogInfo(selectedProcesses.get(0));
             }
         });
@@ -155,25 +141,9 @@ public class BlocksJournalView extends ApplicationWindow implements DBBlocksJour
         } else {
             IStructuredSelection selection = (IStructuredSelection) event.getSelection();
             File selectedFile = (File) selection.getFirstElement();
-            openJournalFile(selectedFile);
-        }
-    }
-
-    private void openJournalFile(File journalFile) {
-        try {
-            Document document = XmlDocumentWorker.openFile(journalFile);
-            List<DBBlocksJournalProcess> processes = new ArrayList<>();
-            NodeList journalElements = document.getElementsByTagName(DBBlocksJournalProcessSerializer.JOURNAL_PROCESS_ROOT_ELEMENT_TAG_NAME);
-            for (int i = 0; i < journalElements.getLength(); i++) {
-                Node journalNode = journalElements.item(i);
-                if (journalNode.getNodeType() == Node.ELEMENT_NODE) {
-                    DBBlocksJournalProcess journalProcess = serializer.deserialize((Element)journalNode);
-                    processes.add(journalProcess);
-                }
-            }
+            DBBlocksXmlStore store = new DBBlocksXmlStore(selectedFile.getName());
+            List<DBBlocksJournalProcess> processes = store.readObjects();
             blocksJournal.setJournalProcesses(processes);
-        } catch (ParserConfigurationException | IOException | SAXException e) {
-            LOG.warn("Ошибка открытия файла журнала: " + e.getMessage());
         }
     }
 
