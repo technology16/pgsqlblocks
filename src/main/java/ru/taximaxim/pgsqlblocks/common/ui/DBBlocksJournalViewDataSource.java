@@ -34,8 +34,6 @@ import java.util.ResourceBundle;
 // FIXME seems wrong to inherit from DBProcessesViewDataSource which is DBProcess-related
 public class DBBlocksJournalViewDataSource extends DBProcessesViewDataSource {
 
-    private final DateUtils dateUtils = new DateUtils();
-
     public DBBlocksJournalViewDataSource(ResourceBundle resourceBundle) {
         super(resourceBundle);
     }
@@ -75,9 +73,9 @@ public class DBBlocksJournalViewDataSource extends DBProcessesViewDataSource {
             case DURATION:
                 return parentProcess != null ? parentProcess.getDuration() : process.getQuery().getDuration();
             case BLOCK_CREATE_DATE:
-                return parentProcess != null ? dateUtils.dateToString(parentProcess.getCreateDate()) : "";
+                return parentProcess != null ? DateUtils.dateToString(parentProcess.getCreateDate()) : "";
             case BLOCK_END_DATE:
-                return parentProcess != null ? dateUtils.dateToString(parentProcess.getCloseDate()) : "";
+                return parentProcess != null ? DateUtils.dateToString(parentProcess.getCloseDate()) : "";
             default:
                 return super.getRowText(process, columns);
         }
