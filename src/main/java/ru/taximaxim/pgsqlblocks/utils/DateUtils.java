@@ -57,7 +57,7 @@ public final class DateUtils {
         return dateFormatWithoutTimeZone.format(date);
     }
 
-    public synchronized String dateToString(LocalDateTime date) {
+    public String dateToString(LocalDateTime date) {
         if (date == null) {
             return "";
         }
