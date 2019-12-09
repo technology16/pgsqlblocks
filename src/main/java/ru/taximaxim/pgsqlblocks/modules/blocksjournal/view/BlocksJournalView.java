@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -51,6 +51,7 @@ import ru.taximaxim.pgsqlblocks.common.ui.DBProcessInfoView;
 import ru.taximaxim.pgsqlblocks.dialogs.DBProcessInfoDialog;
 import ru.taximaxim.pgsqlblocks.utils.PathBuilder;
 import ru.taximaxim.pgsqlblocks.utils.Settings;
+import ru.taximaxim.pgsqlblocks.xmlstore.ColumnLayoutsXmlStore;
 import ru.taximaxim.pgsqlblocks.xmlstore.DBBlocksXmlStore;
 import ru.taximaxim.treeviewer.ExtendedTreeViewer;
 
@@ -109,8 +110,9 @@ public class BlocksJournalView extends ApplicationWindow implements DBBlocksJour
         processesContentContainer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
         DBBlocksJournalViewDataSource dbBlocksJournalViewDataSource = new DBBlocksJournalViewDataSource(resourceBundle);
-        processesView = new ExtendedTreeViewer<>(processesContentContainer, SWT.NONE, blocksJournal.getProcesses(),
-               dbBlocksJournalViewDataSource , resourceBundle.getLocale());
+        processesView = new ExtendedTreeViewer<>(processesContentContainer, SWT.NONE,
+                blocksJournal.getProcesses(), dbBlocksJournalViewDataSource,
+                resourceBundle.getLocale(), new ColumnLayoutsXmlStore("blocksJournal"));
         processesView.getTreeViewer().addSelectionChangedListener(this::processesViewSelectionChanged);
         processesView.getTreeViewer().getTree().addTraverseListener(e -> {
             if (e.detail == SWT.TRAVERSE_RETURN) {
@@ -131,8 +133,7 @@ public class BlocksJournalView extends ApplicationWindow implements DBBlocksJour
     }
 
     private void openProcessDialogInfo(Object dbProcess){
-        DBProcessInfoDialog dbProcessInfoView = new DBProcessInfoDialog(resourceBundle, this.getShell(), dbProcess, true);
-        dbProcessInfoView.open();
+        new DBProcessInfoDialog(resourceBundle, this.getShell(), dbProcess, true).open();
     }
 
     private void filesTableSelectionChanged(SelectionChangedEvent event) {

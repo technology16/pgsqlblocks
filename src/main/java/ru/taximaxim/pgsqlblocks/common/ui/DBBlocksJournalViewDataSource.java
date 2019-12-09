@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -29,7 +29,6 @@ import ru.taximaxim.pgsqlblocks.common.models.DBBlocksJournalProcess;
 import ru.taximaxim.pgsqlblocks.common.models.DBProcess;
 import ru.taximaxim.pgsqlblocks.utils.Columns;
 import ru.taximaxim.pgsqlblocks.utils.DateUtils;
-import ru.taximaxim.treeviewer.models.IColumn;
 
 // FIXME seems wrong to inherit from DBProcessesViewDataSource which is DBProcess-related
 public class DBBlocksJournalViewDataSource extends DBProcessesViewDataSource {
@@ -56,10 +55,10 @@ public class DBBlocksJournalViewDataSource extends DBProcessesViewDataSource {
     }
 
     @Override
-    public String getRowText(Object element, IColumn column) {
+    public String getRowText(Object element, Columns column) {
         if (element instanceof DBBlocksJournalProcess) {
             DBBlocksJournalProcess process = (DBBlocksJournalProcess) element;
-            switch (Columns.getColumn(column)) {
+            switch (column) {
             case BLOCK_CREATE_DATE:
                 return dateUtils.dateToString(process.getCreateDate());
             case BLOCK_END_DATE:
@@ -97,11 +96,11 @@ public class DBBlocksJournalViewDataSource extends DBProcessesViewDataSource {
     }
 
     @Override
-    public int compare(Object e1, Object e2, IColumn column) {
+    public int compare(Object e1, Object e2, Columns column) {
         if (e1 instanceof DBBlocksJournalProcess) {
             DBBlocksJournalProcess process1 = (DBBlocksJournalProcess) e1;
             DBBlocksJournalProcess process2 = (DBBlocksJournalProcess) e2;
-            switch (Columns.getColumn(column)) {
+            switch (column) {
             case BLOCK_CREATE_DATE:
                 return DateUtils.compareDates(process1.getCreateDate(), process2.getCreateDate());
             case BLOCK_END_DATE:

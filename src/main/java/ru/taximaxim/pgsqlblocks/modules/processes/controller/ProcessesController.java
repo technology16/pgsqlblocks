@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -80,6 +80,7 @@ import ru.taximaxim.pgsqlblocks.utils.Settings;
 import ru.taximaxim.pgsqlblocks.utils.SettingsListener;
 import ru.taximaxim.pgsqlblocks.utils.SupportedVersion;
 import ru.taximaxim.pgsqlblocks.utils.UserCancelException;
+import ru.taximaxim.pgsqlblocks.xmlstore.ColumnLayoutsXmlStore;
 import ru.taximaxim.pgsqlblocks.xmlstore.DBModelXmlStore;
 import ru.taximaxim.treeviewer.ExtendedTreeViewer;
 
@@ -160,8 +161,9 @@ SettingsListener, DBProcessInfoViewListener {
         processesViewSash.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
 
         DBProcessesViewDataSource dbProcessesViewDataSource = new DBProcessesViewDataSource(resourceBundle);
-        dbProcessView = new ExtendedTreeViewer<>(processesViewComposite, SWT.NONE, null,
-                dbProcessesViewDataSource, settings.getLocale());
+        dbProcessView = new ExtendedTreeViewer<>(processesViewComposite, SWT.NONE,
+                null, dbProcessesViewDataSource, settings.getLocale(),
+                new ColumnLayoutsXmlStore("dbProcess.xml"));
         dbProcessView.getTreeViewer().addSelectionChangedListener(this::dbProcessesViewSelectionChanged);
         dbProcessView.setUpdateButtonAction(this::updateProcessesInSelectedDatabase);
         dbProcessView.getTreeViewer().getTree().addTraverseListener(e -> {
@@ -229,8 +231,9 @@ SettingsListener, DBProcessInfoViewListener {
         dbBlocksJournalViewComposite.setLayout(gl);
 
         DBBlocksJournalViewDataSource dbBlocksJournalViewDataSource = new DBBlocksJournalViewDataSource(resourceBundle);
-        dbBlocksJournalView = new ExtendedTreeViewer<>(dbBlocksJournalViewComposite, SWT.NONE, null,
-                dbBlocksJournalViewDataSource, settings.getLocale());
+        dbBlocksJournalView = new ExtendedTreeViewer<>(dbBlocksJournalViewComposite,
+                SWT.NONE, null, dbBlocksJournalViewDataSource, settings.getLocale(),
+                new ColumnLayoutsXmlStore("dbBlocksJournal"));
         dbBlocksJournalView.getTreeViewer().addSelectionChangedListener(this::dbBlocksJournalViewSelectionChanged);
         dbBlocksJournalView.getTreeViewer().getTree().addTraverseListener(e -> {
             if (e.detail == SWT.TRAVERSE_RETURN) {

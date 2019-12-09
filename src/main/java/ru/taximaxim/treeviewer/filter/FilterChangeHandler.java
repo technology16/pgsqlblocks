@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,31 +19,31 @@
  */
 package ru.taximaxim.treeviewer.filter;
 
-import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.jface.viewers.ViewerFilter;
-import ru.taximaxim.treeviewer.models.DataSource;
-import ru.taximaxim.treeviewer.models.IColumn;
-import ru.taximaxim.treeviewer.models.IObject;
-import ru.taximaxim.treeviewer.tree.ExtendedTreeViewerComponent;
-import ru.taximaxim.treeviewer.utils.ColumnType;
-
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerFilter;
+
+import ru.taximaxim.pgsqlblocks.utils.Columns;
+import ru.taximaxim.treeviewer.models.DataSource;
+import ru.taximaxim.treeviewer.models.IObject;
+import ru.taximaxim.treeviewer.tree.ExtendedTreeViewerComponent;
+
 public class FilterChangeHandler {
 
-    private DataSource<? extends IObject> dataSource;
-    private ExtendedTreeViewerComponent tree;
-    private Map<IColumn, ViewerFilter> columnFilters = new HashMap<>();
+    private final DataSource<? extends IObject> dataSource;
+    private ExtendedTreeViewerComponent<?> tree;
+    private final Map<Columns, ViewerFilter> columnFilters = new EnumMap<>(Columns.class);
     private ViewerFilter allTextFilter;
 
     public FilterChangeHandler(DataSource<? extends IObject> dataSource) {
         this.dataSource = dataSource;
     }
 
-    public void setTree(ExtendedTreeViewerComponent tree) {
+    public void setTree(ExtendedTreeViewerComponent<?> tree) {
         this.tree = tree;
     }
 
@@ -62,7 +62,7 @@ public class FilterChangeHandler {
                     } else {
                         return dataSource.getColumnsToFilter().stream()
                                 .anyMatch(column -> matches(column, (IObject)element, searchText,
-                                        FilterOperation.CONTAINS, ColumnType.STRING));
+                                        FilterOperation.CONTAINS));
                     }
                 }
             };
@@ -70,7 +70,7 @@ public class FilterChangeHandler {
         updateFilters();
     }
 
-    void filter(String searchText, FilterOperation value, IColumn column) {
+    void filter(String searchText, FilterOperation value, Columns column) {
         if (searchText.isEmpty() || value == FilterOperation.NONE) {
             columnFilters.remove(column);
         } else {
@@ -83,7 +83,7 @@ public class FilterChangeHandler {
                         // his children will not be shown anyway.
                         return true;
                     } else {
-                        return matches(column, (IObject) element, searchText, value, column.getColumnType());
+                        return matches(column, (IObject) element, searchText, value);
                     }
                 }
             };
@@ -98,17 +98,31 @@ public class FilterChangeHandler {
         updateFilters();
     }
 
-    private boolean matches(IColumn column, IObject element, String searchText,
-                            FilterOperation value, ColumnType columnType) {
+    private boolean matches(Columns column, IObject element, String searchText,
+            FilterOperation value) {
         if (element.hasChildren()) {
             for (IObject child : element.getChildren()) {
-                if (matches(column, child, searchText, value, columnType)) {
+                if (matches(column, child, searchText, value)) {
                     return true;
                 }
             }
         }
         String textFromObject = dataSource.getRowText(element, column);
-        return value.matchesForType(textFromObject, searchText, columnType);
+        return value.matchesForType(textFromObject, searchText, getColumnType(column));
+    }
+
+    private ColumnType getColumnType(Columns column) {
+        switch (column) {
+        case PID: return ColumnType.INTEGER;
+        case BLOCK_CREATE_DATE:
+        case BLOCK_END_DATE:
+        case BACKEND_START:
+        case QUERY_START:
+        case XACT_START:
+        case DURATION:
+        case STATE_CHANGE: return ColumnType.DATE;
+        default: return ColumnType.STRING;
+        }
     }
 
     private void updateFilters() {

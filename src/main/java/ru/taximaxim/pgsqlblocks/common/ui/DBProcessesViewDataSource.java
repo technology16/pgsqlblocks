@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -21,8 +21,10 @@ package ru.taximaxim.pgsqlblocks.common.ui;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.Set;
 
 import org.eclipse.swt.graphics.Image;
 
@@ -31,7 +33,6 @@ import ru.taximaxim.pgsqlblocks.utils.Columns;
 import ru.taximaxim.pgsqlblocks.utils.DateUtils;
 import ru.taximaxim.pgsqlblocks.utils.ImageUtils;
 import ru.taximaxim.treeviewer.models.DataSource;
-import ru.taximaxim.treeviewer.models.IColumn;
 
 public class DBProcessesViewDataSource extends DataSource<DBProcess> {
 
@@ -43,7 +44,7 @@ public class DBProcessesViewDataSource extends DataSource<DBProcess> {
     }
 
     @Override
-    public List<? extends IColumn> getColumns() {
+    public List<Columns> getColumns() {
         List<Columns> list = new ArrayList<>(Arrays.asList(Columns.values()));
         list.remove(Columns.BLOCK_CREATE_DATE);
         list.remove(Columns.BLOCK_END_DATE);
@@ -51,15 +52,9 @@ public class DBProcessesViewDataSource extends DataSource<DBProcess> {
     }
 
     @Override
-    public List<? extends IColumn> getColumnsToFilter() {
-        List<IColumn> list = new ArrayList<>();
-        list.add(Columns.PID);
-        list.add(Columns.APPLICATION_NAME);
-        list.add(Columns.DATABASE_NAME);
-        list.add(Columns.QUERY);
-        list.add(Columns.USER_NAME);
-        list.add(Columns.CLIENT);
-        return list;
+    public Set<Columns> getColumnsToFilter() {
+        return EnumSet.of(Columns.PID, Columns.APPLICATION_NAME,
+                Columns.DATABASE_NAME, Columns.QUERY, Columns.USER_NAME, Columns.CLIENT);
     }
 
     @Override
@@ -68,10 +63,9 @@ public class DBProcessesViewDataSource extends DataSource<DBProcess> {
     }
 
     @Override
-    public String getRowText(Object element, IColumn column) {
+    public String getRowText(Object element, Columns column) {
         DBProcess process = (DBProcess) element;
-        Columns columns = Columns.getColumn(column);
-        switch (columns) {
+        switch (column) {
         case PID:
             return String.valueOf(process.getPid());
         case BACKEND_TYPE:
@@ -147,11 +141,11 @@ public class DBProcessesViewDataSource extends DataSource<DBProcess> {
     }
 
     @Override
-    public int compare(Object e1, Object e2, IColumn column) {
+    public int compare(Object e1, Object e2, Columns column) {
         DBProcess process1 = (DBProcess) e1;
         DBProcess process2 = (DBProcess) e2;
 
-        switch (Columns.getColumn(column)) {
+        switch (column) {
         case PID:
             return Integer.compare(process1.getPid(), process2.getPid());
         case BLOCKED_COUNT:
