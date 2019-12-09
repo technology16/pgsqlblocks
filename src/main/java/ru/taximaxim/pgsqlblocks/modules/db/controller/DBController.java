@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,25 +19,49 @@
  */
 package ru.taximaxim.pgsqlblocks.modules.db.controller;
 
-import org.apache.log4j.Logger;
-import ru.taximaxim.pgpass.PgPass;
-import ru.taximaxim.pgpass.PgPassException;
-import ru.taximaxim.pgsqlblocks.common.DBQueries;
-import ru.taximaxim.pgsqlblocks.common.models.*;
-import ru.taximaxim.pgsqlblocks.modules.db.model.DBStatus;
-import ru.taximaxim.pgsqlblocks.utils.*;
-import ru.taximaxim.pgsqlblocks.xmlstore.DBBlocksXmlStore;
+import static ru.taximaxim.pgsqlblocks.PgSqlBlocks.APP_NAME;
 
-import java.sql.*;
-import java.util.*;
-import java.util.Date;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Properties;
+import java.util.ResourceBundle;
+import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import static ru.taximaxim.pgsqlblocks.PgSqlBlocks.APP_NAME;
+import org.apache.log4j.Logger;
+
+import ru.taximaxim.pgpass.PgPass;
+import ru.taximaxim.pgpass.PgPassException;
+import ru.taximaxim.pgsqlblocks.common.DBQueries;
+import ru.taximaxim.pgsqlblocks.common.models.DBBlock;
+import ru.taximaxim.pgsqlblocks.common.models.DBBlockDeserializer;
+import ru.taximaxim.pgsqlblocks.common.models.DBBlocksJournal;
+import ru.taximaxim.pgsqlblocks.common.models.DBBlocksJournalListener;
+import ru.taximaxim.pgsqlblocks.common.models.DBBlocksJournalProcess;
+import ru.taximaxim.pgsqlblocks.common.models.DBModel;
+import ru.taximaxim.pgsqlblocks.common.models.DBProcess;
+import ru.taximaxim.pgsqlblocks.common.models.DBProcessStatus;
+import ru.taximaxim.pgsqlblocks.modules.db.model.DBStatus;
+import ru.taximaxim.pgsqlblocks.utils.DateUtils;
+import ru.taximaxim.pgsqlblocks.utils.Settings;
+import ru.taximaxim.pgsqlblocks.utils.SupportedVersion;
+import ru.taximaxim.pgsqlblocks.utils.UserCancelException;
+import ru.taximaxim.pgsqlblocks.xmlstore.DBBlocksXmlStore;
 
 public class DBController implements DBBlocksJournalListener {
 
@@ -53,9 +77,8 @@ public class DBController implements DBBlocksJournalListener {
     private final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
     private final ScheduledExecutorService journalsSaveExecutor = Executors.newSingleThreadScheduledExecutor();
     private final DBBlocksJournal blocksJournal = new DBBlocksJournal();
-    private final DateUtils dateUtils = new DateUtils();
     private DBModel model;
-    private List<DBControllerListener> listeners = new ArrayList<>();
+    private final List<DBControllerListener> listeners = new ArrayList<>();
     private DBStatus status = DBStatus.DISABLED;
 
     private boolean blocked = false;
@@ -64,14 +87,14 @@ public class DBController implements DBBlocksJournalListener {
 
     private Connection connection;
     private ScheduledFuture<?> updater;
-    private Date blocksJournalCreateDate;
+    private final LocalDateTime blocksJournalCreateDate;
 
     public DBController(Settings settings, DBModel model, UserInputPasswordProvider userInputPasswordProvider) {
         this.settings = settings;
         this.resourceBundle = settings.getResourceBundle();
         this.model = model;
         this.userInputPasswordProvider = userInputPasswordProvider;
-        blocksJournalCreateDate = new Date();
+        blocksJournalCreateDate = LocalDateTime.now();
         blocksJournal.addListener(this);
     }
 
@@ -85,7 +108,7 @@ public class DBController implements DBBlocksJournalListener {
 
     private String getConnectionUrl() {
         return String.format("jdbc:postgresql://%1$s:%2$s/%3$s?ApplicationName=%4$s",
-                                model.getHost(), model.getPort(), model.getDatabaseName(), APP_NAME);
+                model.getHost(), model.getPort(), model.getDatabaseName(), APP_NAME);
     }
 
     public boolean isEnabledAutoConnection() {
@@ -164,11 +187,8 @@ public class DBController implements DBBlocksJournalListener {
 
     private int getPgBackendPid() throws SQLException {
         try (Statement stBackendPid = connection.createStatement();
-             ResultSet resultSet = stBackendPid.executeQuery(DBQueries.PG_BACKEND_PID_QUERY)) {
-            if (resultSet.next()) {
-                return resultSet.getInt(PG_BACKEND_PID);
-            }
-            return 0;
+                ResultSet resultSet = stBackendPid.executeQuery(DBQueries.PG_BACKEND_PID_QUERY)) {
+            return resultSet.next() ? resultSet.getInt(PG_BACKEND_PID) : 0;
         }
     }
 
@@ -225,7 +245,7 @@ public class DBController implements DBBlocksJournalListener {
     public void startProcessesUpdater(long initDelay) {
         stopProcessesUpdater();
         updater = executor.scheduleWithFixedDelay(this::updateProcesses,
-                                                    initDelay, settings.getUpdatePeriodSeconds(), TimeUnit.SECONDS);
+                initDelay, settings.getUpdatePeriodSeconds(), TimeUnit.SECONDS);
     }
 
     public void startProcessesUpdater() {
@@ -256,10 +276,8 @@ public class DBController implements DBBlocksJournalListener {
 
     private void loadProcesses() {
         listeners.forEach(listener -> listener.dbControllerWillUpdateProcesses(this));
-        try (
-                PreparedStatement preparedStatement = connection.prepareStatement(getProcessesQuery());
-                ResultSet resultSet = preparedStatement.executeQuery()
-        ) {
+        try (PreparedStatement preparedStatement = connection.prepareStatement(getProcessesQuery());
+                ResultSet resultSet = preparedStatement.executeQuery()) {
             Map<Integer, DBProcess> tmpProcesses = new HashMap<>();
             Map<Integer, Set<DBBlock>> tmpBlocks = new HashMap<>();
             DBBlockDeserializer blockDeserializer = new DBBlockDeserializer();
@@ -291,31 +309,31 @@ public class DBController implements DBBlocksJournalListener {
             int blockedPid = entry.getKey();
             Set<DBBlock> blocks = entry.getValue();
             blocks.stream()
-                    .filter(DBBlock::isGranted)
-                    .forEach(block -> {
-                        int blockingPid = block.getBlockingPid();
-                        if (tmpBlocks.containsKey(blockingPid)) {
-                            Set<DBBlock> blockingIsBlockedBy = tmpBlocks.get(blockingPid);
-                            Optional<DBBlock> cycleBlock = blockingIsBlockedBy.stream()
-                                    .filter(b -> b.getBlockingPid() == blockedPid)
-                                    .filter(b -> b.getRelation().equals(block.getRelation()))
-                                    .filter(b -> b.getLocktype().equals(block.getLocktype()))
-                                    .filter(DBBlock::isGranted)
-                                    .findFirst();
-                            if (cycleBlock.isPresent()) {
-                                proceedBlocksWithCycle(tmpProcesses, blockedPid, blockingPid, block, cycleBlock.get());
-                            } else {
-                                tmpProcesses.get(blockedPid).addBlock(block);
-                            }
-                        } else {
-                            tmpProcesses.get(blockedPid).addBlock(block);
-                        }
-                    });
+            .filter(DBBlock::isGranted)
+            .forEach(block -> {
+                int blockingPid = block.getBlockingPid();
+                if (tmpBlocks.containsKey(blockingPid)) {
+                    Set<DBBlock> blockingIsBlockedBy = tmpBlocks.get(blockingPid);
+                    Optional<DBBlock> cycleBlock = blockingIsBlockedBy.stream()
+                            .filter(b -> b.getBlockingPid() == blockedPid)
+                            .filter(b -> b.getRelation().equals(block.getRelation()))
+                            .filter(b -> b.getLocktype().equals(block.getLocktype()))
+                            .filter(DBBlock::isGranted)
+                            .findFirst();
+                    if (cycleBlock.isPresent()) {
+                        proceedBlocksWithCycle(tmpProcesses, blockedPid, blockingPid, block, cycleBlock.get());
+                    } else {
+                        tmpProcesses.get(blockedPid).addBlock(block);
+                    }
+                } else {
+                    tmpProcesses.get(blockedPid).addBlock(block);
+                }
+            });
         }
     }
 
     private void proceedBlocksWithCycle(Map<Integer, DBProcess> tmpProcesses,
-                                        int blockedPid, int blockingPid, DBBlock b, DBBlock reversedBlock) {
+            int blockedPid, int blockingPid, DBBlock b, DBBlock reversedBlock) {
         DBProcess blockedProcess = tmpProcesses.get(blockedPid);
         DBProcess blockingProcess = tmpProcesses.get(blockingPid);
         if (b.isGranted()) {
@@ -378,8 +396,12 @@ public class DBController implements DBBlocksJournalListener {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof DBController)) return false;
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof DBController)) {
+            return false;
+        }
 
         DBController that = (DBController) o;
 
@@ -444,7 +466,7 @@ public class DBController implements DBBlocksJournalListener {
 
     private void saveBlockedProcessesToFile(List<DBBlocksJournalProcess> processes) {
         String fileName = String.format("%s-%s.xml", this.model.getName(),
-                dateUtils.dateToString(blocksJournalCreateDate));
+                DateUtils.dateToString(blocksJournalCreateDate));
         DBBlocksXmlStore store = new DBBlocksXmlStore(fileName);
         List<DBBlocksJournalProcess> oldProcesses = store.readObjects();
         oldProcesses.addAll(processes);

@@ -33,8 +33,6 @@ import ru.taximaxim.pgsqlblocks.utils.DateUtils;
 // FIXME seems wrong to inherit from DBProcessesViewDataSource which is DBProcess-related
 public class DBBlocksJournalViewDataSource extends DBProcessesViewDataSource {
 
-    private final DateUtils dateUtils = new DateUtils();
-
     public DBBlocksJournalViewDataSource(ResourceBundle resourceBundle) {
         super(resourceBundle);
     }
@@ -60,9 +58,9 @@ public class DBBlocksJournalViewDataSource extends DBProcessesViewDataSource {
             DBBlocksJournalProcess process = (DBBlocksJournalProcess) element;
             switch (column) {
             case BLOCK_CREATE_DATE:
-                return dateUtils.dateToString(process.getCreateDate());
+                return DateUtils.dateToString(process.getCreateDate());
             case BLOCK_END_DATE:
-                return dateUtils.dateToString(process.getCloseDate());
+                return DateUtils.dateToString(process.getCloseDate());
             default:
                 return super.getRowText(process.getProcess(), column);
             }

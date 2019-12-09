@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -71,8 +71,6 @@ public class DBBlocksXmlStore extends XmlStore<DBBlocksJournalProcess> {
     private static final String CLIENT = "client";
     private static final String PROCESS_STATUS = "processStatus";
 
-    private final DateUtils dateUtils = new DateUtils();
-
     private final String fileName;
 
     public DBBlocksXmlStore(String fileName) {
@@ -90,8 +88,8 @@ public class DBBlocksXmlStore extends XmlStore<DBBlocksJournalProcess> {
         Element element = (Element) node;
         String createDateString = element.getElementsByTagName(CREATE_DATE_ELEMENT_TAG_NAME).item(0).getTextContent();
         String closeDateString = element.getElementsByTagName(CLOSE_DATE_ELEMENT_TAG_NAME).item(0).getTextContent();
-        Date createDate = dateUtils.dateFromString(createDateString);
-        Date closeDate = dateUtils.dateFromString(closeDateString);
+        Date createDate = DateUtils.dateFromString(createDateString);
+        Date closeDate = DateUtils.dateFromString(closeDateString);
         DBProcess process = parseProcess(element.getElementsByTagName(PROCESS_ROOT_TAG).item(0));
         return new DBBlocksJournalProcess(createDate, closeDate, process);
     }
@@ -111,16 +109,16 @@ public class DBBlocksXmlStore extends XmlStore<DBBlocksJournalProcess> {
         DBProcessQueryCaller caller = new DBProcessQueryCaller(appName, databaseName, userName, client);
         String queryString = rootElement.getElementsByTagName(QUERY_SQL).item(0).getTextContent();
         boolean slowQuery = Boolean.parseBoolean(rootElement.getElementsByTagName(SLOW_QUERY).item(0).getTextContent());
-        Date backendStart = dateUtils.dateFromString(rootElement.getElementsByTagName(BACKEND_START).item(0).getTextContent());
-        Date queryStart = dateUtils.dateFromString(rootElement.getElementsByTagName(QUERY_START).item(0).getTextContent());
-        Date xactStart = dateUtils.dateFromString(rootElement.getElementsByTagName(XACT_START).item(0).getTextContent());
+        Date backendStart = DateUtils.dateFromString(rootElement.getElementsByTagName(BACKEND_START).item(0).getTextContent());
+        Date queryStart = DateUtils.dateFromString(rootElement.getElementsByTagName(QUERY_START).item(0).getTextContent());
+        Date xactStart = DateUtils.dateFromString(rootElement.getElementsByTagName(XACT_START).item(0).getTextContent());
         String duration = "";
         if (hasDuration(rootElement)) {
             duration = rootElement.getElementsByTagName(DURATION).item(0).getTextContent();
         }
         DBProcessQuery query = new DBProcessQuery(queryString, slowQuery, backendStart, queryStart, xactStart, duration);
         String state = rootElement.getElementsByTagName(STATE).item(0).getTextContent();
-        Date stateChange = dateUtils.dateFromString(rootElement.getElementsByTagName(STATE_CHANGE).item(0).getTextContent());
+        Date stateChange = DateUtils.dateFromString(rootElement.getElementsByTagName(STATE_CHANGE).item(0).getTextContent());
         DBProcess process = new DBProcess(pid, backendType, caller, state, stateChange, query);
         Element childrenRootElement = (Element)rootElement.getElementsByTagName(CHILDREN_ELEMENT_TAG_NAME).item(0);
         NodeList childrenElements = childrenRootElement.getElementsByTagName(PROCESS_ROOT_TAG);
@@ -144,9 +142,9 @@ public class DBBlocksXmlStore extends XmlStore<DBBlocksJournalProcess> {
             root.appendChild(rootElement);
 
             createSubElement(xml, rootElement, CREATE_DATE_ELEMENT_TAG_NAME,
-                    dateUtils.dateToStringWithTz(process.getCreateDate()));
+                    DateUtils.dateToStringWithTz(process.getCreateDate()));
             createSubElement(xml, rootElement, CLOSE_DATE_ELEMENT_TAG_NAME,
-                    dateUtils.dateToStringWithTz(process.getCloseDate()));
+                    DateUtils.dateToStringWithTz(process.getCloseDate()));
             appendProcess(xml, rootElement, process.getProcess());
         }
     }
@@ -157,12 +155,12 @@ public class DBBlocksXmlStore extends XmlStore<DBBlocksJournalProcess> {
         createSubElement(xml, rootElement, PID, String.valueOf(process.getPid()));
         createSubElement(xml, rootElement, BACKEND_TYPE, process.getBackendType());
         createSubElement(xml, rootElement, STATE, process.getState());
-        createSubElement(xml, rootElement, STATE_CHANGE, dateUtils.dateToStringWithTz(process.getStateChange()));
+        createSubElement(xml, rootElement, STATE_CHANGE, DateUtils.dateToStringWithTz(process.getStateChange()));
         createSubElement(xml, rootElement, QUERY_SQL, process.getQuery().getQueryString());
-        createSubElement(xml, rootElement, BACKEND_START, dateUtils.dateToStringWithTz(process.getQuery().getBackendStart()));
+        createSubElement(xml, rootElement, BACKEND_START, DateUtils.dateToStringWithTz(process.getQuery().getBackendStart()));
         createSubElement(xml, rootElement, SLOW_QUERY, String.valueOf(process.getQuery().isSlowQuery()));
-        createSubElement(xml, rootElement, QUERY_START, dateUtils.dateToStringWithTz(process.getQuery().getQueryStart()));
-        createSubElement(xml, rootElement, XACT_START, dateUtils.dateToStringWithTz(process.getQuery().getXactStart()));
+        createSubElement(xml, rootElement, QUERY_START, DateUtils.dateToStringWithTz(process.getQuery().getQueryStart()));
+        createSubElement(xml, rootElement, XACT_START, DateUtils.dateToStringWithTz(process.getQuery().getXactStart()));
         createSubElement(xml, rootElement, DURATION, process.getQuery().getDuration());
         createSubElement(xml, rootElement, APPLICATION_NAME, process.getQueryCaller().getApplicationName());
         createSubElement(xml, rootElement, DAT_NAME, process.getQueryCaller().getDatabaseName());
@@ -183,16 +181,15 @@ public class DBBlocksXmlStore extends XmlStore<DBBlocksJournalProcess> {
     }
 
     public static DBProcess readFromResultSet(ResultSet resultSet) throws SQLException {
-        DateUtils dateUtils = new DateUtils();
         int pid = resultSet.getInt(PID);
         String backendType = hasBackendType(resultSet.getMetaData()) ? resultSet.getString(BACKEND_TYPE) : "";
         String state = resultSet.getString(STATE) == null ? "" : resultSet.getString(STATE);
-        Date stateChangeDate = dateUtils.dateFromString(resultSet.getString(STATE_CHANGE));
+        Date stateChangeDate = DateUtils.dateFromString(resultSet.getString(STATE_CHANGE));
 
         String queryString = resultSet.getString(QUERY_SQL);
-        Date backendStart = dateUtils.dateFromString(resultSet.getString(BACKEND_START));
-        Date queryStart = dateUtils.dateFromString(resultSet.getString(QUERY_START));
-        Date xactStart = dateUtils.dateFromString(resultSet.getString(XACT_START));
+        Date backendStart = DateUtils.dateFromString(resultSet.getString(BACKEND_START));
+        Date queryStart = DateUtils.dateFromString(resultSet.getString(QUERY_START));
+        Date xactStart = DateUtils.dateFromString(resultSet.getString(XACT_START));
         Duration duration = xactStart != null ? Duration.ofMillis(System.currentTimeMillis() - xactStart.getTime()) : null;
         boolean slowQuery = resultSet.getBoolean(SLOW_QUERY);
 

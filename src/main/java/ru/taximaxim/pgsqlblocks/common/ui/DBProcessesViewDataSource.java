@@ -36,7 +36,6 @@ import ru.taximaxim.treeviewer.models.DataSource;
 
 public class DBProcessesViewDataSource extends DataSource<DBProcess> {
 
-    private final DateUtils dateUtils = new DateUtils();
     private final ResourceBundle bundle;
 
     public DBProcessesViewDataSource(ResourceBundle bundle) {
@@ -81,17 +80,17 @@ public class DBProcessesViewDataSource extends DataSource<DBProcess> {
         case CLIENT:
             return process.getQueryCaller().getClient();
         case BACKEND_START:
-            return dateUtils.dateToString(process.getQuery().getBackendStart());
+            return DateUtils.dateToString(process.getQuery().getBackendStart());
         case QUERY_START:
-            return dateUtils.dateToString(process.getQuery().getQueryStart());
+            return DateUtils.dateToString(process.getQuery().getQueryStart());
         case XACT_START:
-            return dateUtils.dateToString(process.getQuery().getXactStart());
+            return DateUtils.dateToString(process.getQuery().getXactStart());
         case DURATION:
             return process.getQuery().getDuration();
         case STATE:
             return process.getState();
         case STATE_CHANGE:
-            return dateUtils.dateToString(process.getStateChange());
+            return DateUtils.dateToString(process.getStateChange());
         case BLOCKED:
             return process.getBlocksPidsString();
         case LOCK_TYPE:
