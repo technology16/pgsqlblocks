@@ -19,56 +19,52 @@
  */
 package ru.taximaxim.pgsqlblocks.utils;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.Duration;
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
-import org.apache.log4j.Logger;
-
 public final class DateUtils {
 
-    private static final Logger LOG = Logger.getLogger(DateUtils.class);
+    private static final DateTimeFormatter FILE_DATE =
+            DateTimeFormatter.ofPattern("yyyy-MM-dd HH''mm''ss");
 
-    private static final DateTimeFormatter FILE_DATE = DateTimeFormatter.ofPattern("yyyy-MM-dd HH''mm''ss");
+    private static final DateTimeFormatter DATE_WITH_TZ =
+            DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ssX");
 
-    private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ssX");
-    private final SimpleDateFormat dateFormatWithoutTimeZone = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    private static final DateTimeFormatter DATE_WITHOUT_TZ =
+            DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneId.systemDefault());
 
-    public synchronized Date dateFromString(String dateString) {
+    public static Date dateFromString(String dateString) {
         if (dateString == null || dateString.isEmpty()) {
             return null;
         }
-        Date result = null;
-        try {
-            result = dateFormat.parse(dateString);
-        } catch (ParseException exception) {
-            LOG.error(exception.getMessage(), exception);
-        }
-        return result;
+
+        return Date.from(Instant.from(DATE_WITH_TZ.parse(dateString)));
     }
 
-    public synchronized String dateToString(Date date) {
+    public static String dateToString(Date date) {
         if (date == null) {
             return "";
         }
-        return dateFormatWithoutTimeZone.format(date);
+
+        return DATE_WITHOUT_TZ.format(date.toInstant());
     }
 
-    public String dateToString(LocalDateTime date) {
+    public static String dateToStringWithTz(Date date) {
+        if (date == null) {
+            return "";
+        }
+        return DATE_WITH_TZ.format(date.toInstant());
+    }
+
+    public static String dateToString(LocalDateTime date) {
         if (date == null) {
             return "";
         }
         return FILE_DATE.format(date);
-    }
-
-    public synchronized String dateToStringWithTz(Date date) {
-        if (date == null) {
-            return "";
-        }
-        return dateFormat.format(date);
     }
 
     public static int compareDates(Date d1, Date d2) {
@@ -89,4 +85,6 @@ public final class DateUtils {
             return seconds < 0 ? "-" + positive : positive;
         }
     }
+
+    private DateUtils() {}
 }

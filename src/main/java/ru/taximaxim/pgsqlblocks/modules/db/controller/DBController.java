@@ -90,7 +90,6 @@ public class DBController implements DBBlocksJournalListener {
     private final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
     private final ScheduledExecutorService journalsSaveExecutor = Executors.newSingleThreadScheduledExecutor();
     private final DBBlocksJournal blocksJournal = new DBBlocksJournal();
-    private final DateUtils dateUtils = new DateUtils();
     private DBModel model;
     private final List<DBControllerListener> listeners = new ArrayList<>();
     private DBStatus status = DBStatus.DISABLED;
@@ -488,7 +487,7 @@ public class DBController implements DBBlocksJournalListener {
     private void saveBlockedProcessesToFile(List<DBBlocksJournalProcess> processes)
             throws ParserConfigurationException, IOException, SAXException {
         String fileName = String.format("%s-%s.xml", this.model.getName(),
-                dateUtils.dateToString(blocksJournalCreateDate));
+                DateUtils.dateToString(blocksJournalCreateDate));
         Path blocksJournalsDirPath = PathBuilder.getInstance().getBlocksJournalsDir();
         Path currentJournalPath = blocksJournalsDirPath.resolve(fileName);
         File currentJournalFile = currentJournalPath.toFile();

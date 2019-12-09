@@ -44,7 +44,6 @@ public class DBProcessInfoDialog extends Dialog{
     private ProcessInfoListener processInfoListener;
     private boolean disabledButton;
     private static final int TEXT_WIDTH = 200;
-    private final DateUtils dateUtils = new DateUtils();
 
     public DBProcessInfoDialog(ResourceBundle resourceBundle, Shell parentShell, Object process, boolean disabledButton) {
         super(parentShell);
@@ -87,8 +86,8 @@ public class DBProcessInfoDialog extends Dialog{
         createProcessArea(container, textGd, "db_name", dbProcess.getQueryCaller().getDatabaseName());
         createProcessArea(container, textGd, "application", dbProcess.getQueryCaller().getApplicationName());
         createProcessArea(container, textGd, "user_name", dbProcess.getQueryCaller().getUserName());
-        createProcessArea(container, textGd, "query_start", dateUtils.dateToString(dbProcess.getQuery().getQueryStart()));
-        createProcessArea(container, textGd, "xact_start", dateUtils.dateToString(dbProcess.getQuery().getXactStart()));
+        createProcessArea(container, textGd, "query_start", DateUtils.dateToString(dbProcess.getQuery().getQueryStart()));
+        createProcessArea(container, textGd, "xact_start", DateUtils.dateToString(dbProcess.getQuery().getXactStart()));
         createProcessArea(container, textGd, "duration", dbProcess.getQuery().getDuration());
         createProcessArea(container, textGd, "state", dbProcess.getState());
         createQueryArea(container, dbProcess.getQuery().getQueryString());

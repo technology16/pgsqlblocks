@@ -19,11 +19,12 @@
  */
 package ru.taximaxim.pgsqlblocks.common.models;
 
+import java.util.Date;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import ru.taximaxim.pgsqlblocks.utils.DateUtils;
 
-import java.util.Date;
+import ru.taximaxim.pgsqlblocks.utils.DateUtils;
 
 public class DBBlocksJournalProcessSerializer {
 
@@ -34,7 +35,6 @@ public class DBBlocksJournalProcessSerializer {
     private static final String CLOSE_DATE_ELEMENT_TAG_NAME = "closeDate";
 
     private static DBProcessSerializer processSerializer = new DBProcessSerializer();
-    private final DateUtils dateUtils = new DateUtils();
 
     public Element serialize(Document document, DBBlocksJournalProcess journalProcess) {
 
@@ -43,11 +43,11 @@ public class DBBlocksJournalProcessSerializer {
         Element rootElement = document.createElement(JOURNAL_PROCESS_ROOT_ELEMENT_TAG_NAME);
 
         Element createDateElement = document.createElement(CREATE_DATE_ELEMENT_TAG_NAME);
-        createDateElement.setTextContent(dateUtils.dateToStringWithTz(journalProcess.getCreateDate()));
+        createDateElement.setTextContent(DateUtils.dateToStringWithTz(journalProcess.getCreateDate()));
         rootElement.appendChild(createDateElement);
 
         Element closeDateElement = document.createElement(CLOSE_DATE_ELEMENT_TAG_NAME);
-        closeDateElement.setTextContent(dateUtils.dateToStringWithTz(journalProcess.getCloseDate()));
+        closeDateElement.setTextContent(DateUtils.dateToStringWithTz(journalProcess.getCloseDate()));
         rootElement.appendChild(closeDateElement);
 
         Element processElement = processSerializer.serialize(document, journalProcess.getProcess());
@@ -59,8 +59,8 @@ public class DBBlocksJournalProcessSerializer {
         String createDateString = xmlElement.getElementsByTagName(CREATE_DATE_ELEMENT_TAG_NAME).item(0).getTextContent();
         String closeDateString = xmlElement.getElementsByTagName(CLOSE_DATE_ELEMENT_TAG_NAME).item(0).getTextContent();
         DBProcess process = processSerializer.deserialize(xmlElement, false);
-        Date createDate = dateUtils.dateFromString(createDateString);
-        Date closeDate = dateUtils.dateFromString(closeDateString);
+        Date createDate = DateUtils.dateFromString(createDateString);
+        Date closeDate = DateUtils.dateFromString(closeDateString);
         return new DBBlocksJournalProcess(createDate, closeDate, process);
     }
 }
