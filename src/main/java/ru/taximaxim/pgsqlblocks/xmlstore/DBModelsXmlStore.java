@@ -32,9 +32,9 @@ import ru.taximaxim.pgsqlblocks.common.models.DBModel;
 import ru.taximaxim.pgsqlblocks.utils.PathBuilder;
 import ru.taximaxim.pgsqlblocks.utils.SupportedVersion;
 
-public class DBModelXmlStore extends XmlStore<DBModel> {
+public class DBModelsXmlStore extends XmlStore<DBModel> {
 
-    private static final Logger LOG = Logger.getLogger(DBModelXmlStore.class);
+    private static final Logger LOG = Logger.getLogger(DBModelsXmlStore.class);
 
     private static final String ROOT_TAG = "servers";
 
@@ -48,7 +48,7 @@ public class DBModelXmlStore extends XmlStore<DBModel> {
     private static final String ELEMENT_PASSWORD_TAG_NAME     = "passwd";
     private static final String ELEMENT_ENABLED_TAG_NAME      = "enabled";
 
-    public DBModelXmlStore() {
+    public DBModelsXmlStore() {
         super(ROOT_TAG);
     }
 

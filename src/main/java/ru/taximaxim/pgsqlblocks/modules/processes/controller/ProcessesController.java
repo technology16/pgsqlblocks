@@ -81,7 +81,7 @@ import ru.taximaxim.pgsqlblocks.utils.SettingsListener;
 import ru.taximaxim.pgsqlblocks.utils.SupportedVersion;
 import ru.taximaxim.pgsqlblocks.utils.UserCancelException;
 import ru.taximaxim.pgsqlblocks.xmlstore.ColumnLayoutsXmlStore;
-import ru.taximaxim.pgsqlblocks.xmlstore.DBModelXmlStore;
+import ru.taximaxim.pgsqlblocks.xmlstore.DBModelsXmlStore;
 import ru.taximaxim.treeviewer.ExtendedTreeViewer;
 
 public class ProcessesController implements DBControllerListener, UserInputPasswordProvider, DBModelsViewListener,
@@ -111,7 +111,7 @@ SettingsListener, DBProcessInfoViewListener {
     private ToolItem autoUpdateToolItem;
     private ToolItem showOnlyBlockedProcessesToolItem;
 
-    private final DBModelXmlStore store = new DBModelXmlStore();
+    private final DBModelsXmlStore store = new DBModelsXmlStore();
 
     private OnlyBlockedFilter onlyBlockedFilter;
 
