@@ -59,6 +59,7 @@ import ru.taximaxim.treeviewer.utils.AggregatingListener;
  */
 public class ExtendedTreeViewerComponent<T extends IObject> extends TreeViewer {
 
+    boolean inRefresh;
     private DataSource<T> dataSource;
     private ColumnLayoutsXmlStore columnLayoutsStore;
 
@@ -124,6 +125,19 @@ public class ExtendedTreeViewerComponent<T extends IObject> extends TreeViewer {
         }
 
         getTree().setColumnOrder(order);
+    }
+
+    public void refreshWithoutSelection() {
+        inRefresh = true;
+        refresh();
+        inRefresh = false;
+    }
+
+    @Override
+    protected void setSelectionToWidget(List v, boolean reveal) {
+        if (!inRefresh) {
+            super.setSelectionToWidget(v, reveal);
+        }
     }
 
     private int getColumnIndex(TreeColumn swtColumn, int[] order) {

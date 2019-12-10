@@ -182,7 +182,7 @@ public class BlocksJournalView extends ApplicationWindow implements DBBlocksJour
 
     @Override
     public void dbBlocksJournalDidAddProcesses() {
-        processesView.getTreeViewer().refresh();
+        processesView.getTreeViewer().refreshWithoutSelection();
     }
 
     @Override

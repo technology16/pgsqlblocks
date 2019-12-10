@@ -102,10 +102,8 @@ public class ExtendedTreeViewer<T extends IObject> extends Composite {
         updateToolItem.addListener(SWT.Selection, event -> {
             if (updateToolItemAction != null) {
                 updateToolItemAction.run();
-                tree.refresh();
-            } else {
-                tree.refresh();
             }
+            tree.refreshWithoutSelection();
         });
 
         filterToolItem = new ToolItem(toolBar, SWT.CHECK);
