@@ -121,10 +121,11 @@ public class DBBlocksXmlStore extends XmlStore<DBBlocksJournalProcess> {
         Date stateChange = DateUtils.dateFromString(rootElement.getElementsByTagName(STATE_CHANGE).item(0).getTextContent());
         DBProcess process = new DBProcess(pid, backendType, caller, state, stateChange, query);
         Element childrenRootElement = (Element)rootElement.getElementsByTagName(CHILDREN_ELEMENT_TAG_NAME).item(0);
-        NodeList childrenElements = childrenRootElement.getElementsByTagName(PROCESS_ROOT_TAG);
+        NodeList childrenElements = childrenRootElement.getChildNodes();
         for (int i = 0; i < childrenElements.getLength(); i++) {
             Node childNode = childrenElements.item(i);
-            if (childNode.getNodeType() == Node.ELEMENT_NODE) {
+            if (childNode.getNodeType() == Node.ELEMENT_NODE
+                    && childNode.getNodeName().equals(PROCESS_ROOT_TAG)) {
                 process.addChild(parseProcess(childNode));
             }
         }
