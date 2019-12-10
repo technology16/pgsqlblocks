@@ -271,6 +271,11 @@ public class DBController implements DBBlocksJournalListener {
         stopProcessesUpdater();
         executor.shutdownNow();
         journalsSaveExecutor.shutdown();
+        try {
+            journalsSaveExecutor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
         saveUnclosedBlockedProcessesToFile();
     }
 
@@ -457,10 +462,6 @@ public class DBController implements DBBlocksJournalListener {
 
     @Override
     public void dbBlocksJournalDidCloseProcesses(List<DBBlocksJournalProcess> processes) {
-        asyncSaveClosedBlockedProcessesToFile(processes);
-    }
-
-    private void asyncSaveClosedBlockedProcessesToFile(List<DBBlocksJournalProcess> processes) {
         journalsSaveExecutor.execute(() -> saveBlockedProcessesToFile(processes));
     }
 
