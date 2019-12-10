@@ -57,7 +57,7 @@ public final class DateUtils {
         if (date == null) {
             return "";
         }
-        return DATE_WITH_TZ.format(date.toInstant());
+        return DATE_WITH_TZ.format(date.toInstant().atZone(ZoneId.systemDefault()));
     }
 
     public static String dateToString(LocalDateTime date) {
