@@ -610,7 +610,7 @@ SettingsListener, DBProcessInfoViewListener {
             if (dbModelsView.getTableViewer().getStructuredSelection().getFirstElement() != null) {
                 DBController selectedController = (DBController) dbModelsView.getTableViewer().getStructuredSelection().getFirstElement();
                 if (controller.equals(selectedController)) {
-                    dbProcessView.getTreeViewer().refresh();
+                    dbProcessView.getTreeViewer().refreshWithoutSelection();
                 }
             }
         });
@@ -634,7 +634,7 @@ SettingsListener, DBProcessInfoViewListener {
             if (dbModelsView.getTableViewer().getStructuredSelection().getFirstElement() != null) {
                 DBController selectedController = (DBController) dbModelsView.getTableViewer().getStructuredSelection().getFirstElement();
                 if (controller.equals(selectedController)) {
-                    dbBlocksJournalView.getTreeViewer().refresh();
+                    dbBlocksJournalView.getTreeViewer().refreshWithoutSelection();
                 }
             }
         });
