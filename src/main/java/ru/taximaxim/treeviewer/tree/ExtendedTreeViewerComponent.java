@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,10 +19,16 @@
  */
 package ru.taximaxim.treeviewer.tree;
 
+import java.util.ArrayList;
 import java.util.Deque;
+import java.util.EnumMap;
+import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
+import java.util.Map.Entry;
 import java.util.Set;
+import java.util.stream.IntStream;
 
 import org.eclipse.jface.viewers.AbstractTreeViewer;
 import org.eclipse.jface.viewers.DoubleClickEvent;
@@ -32,6 +38,8 @@ import org.eclipse.jface.viewers.TreeViewerColumn;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.ControlAdapter;
+import org.eclipse.swt.events.ControlEvent;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
@@ -39,12 +47,12 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.TreeColumn;
 import org.eclipse.swt.widgets.TreeItem;
 
-import ru.taximaxim.pgsqlblocks.common.models.DBProcess;
+import ru.taximaxim.pgsqlblocks.utils.ColumnLayout;
 import ru.taximaxim.pgsqlblocks.utils.Columns;
-import ru.taximaxim.pgsqlblocks.utils.DateUtils;
+import ru.taximaxim.pgsqlblocks.xmlstore.ColumnLayoutsXmlStore;
 import ru.taximaxim.treeviewer.models.DataSource;
-import ru.taximaxim.treeviewer.models.IColumn;
 import ru.taximaxim.treeviewer.models.IObject;
+import ru.taximaxim.treeviewer.utils.AggregatingListener;
 
 /**
  * Class for TreeViewer
@@ -52,7 +60,10 @@ import ru.taximaxim.treeviewer.models.IObject;
 public class ExtendedTreeViewerComponent<T extends IObject> extends TreeViewer {
 
     private DataSource<T> dataSource;
-    private Set<IColumn> invisibleColumns;
+    private ColumnLayoutsXmlStore columnLayoutsStore;
+
+    private final Set<Columns> visibleColumns = EnumSet.noneOf(Columns.class);
+    private final EnumMap<Columns, TreeColumn> columns = new EnumMap<>(Columns.class);
     private final DBProcessesViewComparator comparator = new DBProcessesViewComparator();
 
     public ExtendedTreeViewerComponent(Composite parent, int style) {
@@ -68,39 +79,174 @@ public class ExtendedTreeViewerComponent<T extends IObject> extends TreeViewer {
         return dataSource;
     }
 
-    public void setDataSource(DataSource<T> dataSource) {
+    public void setData(DataSource<T> dataSource, ColumnLayoutsXmlStore columnLayoutsStore) {
         if (this.dataSource != null) {
             throw new IllegalStateException("ExtendedTreeViewerComponent already contains data source");
         }
         this.dataSource = dataSource;
+        this.columnLayoutsStore = columnLayoutsStore;
         createColumns();
+        loadColumnsFromStore(columnLayoutsStore.readObjects());
+        addListeners();
         setLabelProvider(this.dataSource);
         setContentProvider(this.dataSource);
         addDoubleClickListener(new DoubleClickListener());
     }
 
+    private void loadColumnsFromStore(List<ColumnLayout> layouts) {
+        int[] order = IntStream.range(0, columns.size()).toArray();
+
+        // errors protection if columns count will changed
+        for (int i = 0; i < layouts.size() && i < columns.size(); i++) {
+            ColumnLayout layout = layouts.get(i);
+            Columns column = layout.getColumn();
+            TreeColumn swtColumn = columns.get(column);
+            if (swtColumn != null) {
+                // search column index or array
+                int columnOrder = getColumnIndex(swtColumn, order);
+
+                if (columnOrder != -1) {
+                    int temp = order[columnOrder];
+
+                    order[columnOrder] = order[i];
+                    order[i] = temp;
+
+                    Integer width = layout.getWidth();
+                    if (width == null) {
+                        swtColumn.setWidth(0);
+                        swtColumn.setResizable(false);
+                        visibleColumns.remove(column);
+                    } else {
+                        swtColumn.setWidth(width);
+                    }
+                }
+            }
+        }
+
+        getTree().setColumnOrder(order);
+    }
+
+    private int getColumnIndex(TreeColumn swtColumn, int[] order) {
+        int columnOrder = getTree().indexOf(swtColumn);
+        for (int i = 0; i < order.length; i++) {
+            if (columnOrder == order[i]) {
+                return i;
+            }
+        }
+
+        return -1;
+    }
+
     private void createColumns() {
-        for (IColumn column : dataSource.getColumns()) {
-            TreeViewerColumn treeColumn = new TreeViewerColumn(this, SWT.NONE);
-            TreeColumn swtColumn = treeColumn.getColumn();
+        for (Columns column : dataSource.getColumns()) {
+            TreeColumn swtColumn = createColumn(column);
+            swtColumn.setWidth(getColumnWidth(column));
+            visibleColumns.add(column);
+            columns.put(column, swtColumn);
+        }
+    }
 
-            swtColumn.setText(dataSource.getLocalizeString(column.getColumnName()));
-            swtColumn.setMoveable(true);
-            swtColumn.setToolTipText(dataSource.getLocalizeString(column.getColumnTooltip()));
-            swtColumn.setWidth(column.getColumnWidth());
-            swtColumn.setData(column);
-            swtColumn.addSelectionListener(new SelectionListener() {
+    private TreeColumn createColumn(Columns column) {
+        TreeViewerColumn treeColumn = new TreeViewerColumn(this, SWT.NONE);
+        TreeColumn swtColumn = treeColumn.getColumn();
 
-                @Override
-                public void widgetSelected(SelectionEvent e) {
-                    selectSortColumn(swtColumn, (e.stateMask & SWT.CTRL) != 0);
-                }
+        swtColumn.setData(column);
+        swtColumn.setMoveable(true);
+        swtColumn.setText(dataSource.getLocalizeString(column.getColumnName()));
+        swtColumn.setToolTipText(dataSource.getLocalizeString(getColumnTooltip(column)));
+        swtColumn.addSelectionListener(new SelectionListener() {
 
-                @Override
-                public void widgetDefaultSelected(SelectionEvent e) {
-                    selectSortColumn(swtColumn, (e.stateMask & SWT.CTRL) != 0);
-                }
-            });
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                selectSortColumn(swtColumn, (e.stateMask & SWT.CTRL) != 0);
+            }
+
+            @Override
+            public void widgetDefaultSelected(SelectionEvent e) {
+                selectSortColumn(swtColumn, (e.stateMask & SWT.CTRL) != 0);
+            }
+        });
+
+        return swtColumn;
+    }
+
+    private void addListeners() {
+        AggregatingListener al = new AggregatingListener(new ControlAdapter() {
+
+            @Override
+            public void controlResized(ControlEvent e) {
+                saveLayouts();
+            }
+
+            @Override
+            public void controlMoved(ControlEvent e) {
+                saveLayouts();
+            }
+        });
+
+        for (TreeColumn swtColumn : columns.values()) {
+            swtColumn.addListener(SWT.Resize | SWT.Move, al);
+        }
+    }
+
+
+    private void saveLayouts() {
+        List<ColumnLayout> list = new ArrayList<>();
+
+        int[] order = getTree().getColumnOrder();
+        TreeColumn[] columns = getTree().getColumns();
+        for (int i = 0; i < columns.length; i++) {
+
+            TreeColumn col = columns[order[i]];
+            Integer width = null;
+            if (col.getResizable()) {
+                width = col.getWidth();
+            }
+            list.add(new ColumnLayout(i, (Columns) col.getData(), width));
+        }
+
+        columnLayoutsStore.writeObjects(list);
+    }
+
+    private String getColumnTooltip(Columns column) {
+        switch(column) {
+        case PID:
+        case BACKEND_TYPE:
+        case APPLICATION_NAME:
+        case DATABASE_NAME:
+        case USER_NAME:
+        case CLIENT:
+        case BACKEND_START:
+        case QUERY_START:
+        case XACT_START:
+        case STATE:
+        case STATE_CHANGE:
+        case BLOCKED:
+        case LOCK_TYPE:
+        case RELATION:
+        case SLOW_QUERY:
+        case QUERY: return column.name();
+        case DURATION: return "now - XACT_START";
+        default : return "";
+        }
+    }
+
+    private int getColumnWidth(Columns column) {
+        switch(column) {
+        case PID:
+        case BACKEND_TYPE: return 80;
+        case BLOCKED_COUNT:
+        case STATE:
+        case DURATION: return 70;
+        case CLIENT:
+        case APPLICATION_NAME:
+        case QUERY: return 100;
+        case RELATION: return 130;
+        case XACT_START:
+        case STATE_CHANGE:
+        case BLOCK_END_DATE:
+        case SLOW_QUERY: return 150;
+        default: return 110;
         }
     }
 
@@ -109,10 +255,27 @@ public class ExtendedTreeViewerComponent<T extends IObject> extends TreeViewer {
             comparator.clearSortList();
             setColumnHeaders();
         }
-        comparator.setColumn(column);
+        comparator.addSort(column);
 
         updateSortIndexes();
         refresh();
+    }
+
+    public void showColumns() {
+        for (Entry<Columns, TreeColumn> entry : columns.entrySet()) {
+            Columns column = entry.getKey();
+            TreeColumn treeColumn = entry.getValue();
+            if (visibleColumns.contains(column)) {
+                if (!treeColumn.getResizable()) {
+                    treeColumn.setWidth(getColumnWidth(column));
+                    treeColumn.setResizable(true);
+                }
+            } else if (treeColumn.getResizable()) {
+                treeColumn.setWidth(0);
+                treeColumn.setResizable(false);
+            }
+        }
+        saveLayouts();
     }
 
     private void setColumnHeaders() {
@@ -122,57 +285,8 @@ public class ExtendedTreeViewerComponent<T extends IObject> extends TreeViewer {
         }
     }
 
-    public Set<IColumn> getInvisibleColumns() {
-        return invisibleColumns;
-    }
-
-    /**
-     * The list comes from the column configuration dialog
-     */
-    public void setInvisibleColumns(Set<IColumn> invisible) {
-        if (invisibleColumns != null) {
-            if (invisible != null) {
-                invisibleColumns.removeAll(invisible);
-            }
-            showColumns(invisibleColumns);
-        }
-        invisibleColumns = invisible;
-        hideColumns(invisibleColumns);
-    }
-
-    /**
-     * set invisibility of columns
-     */
-    private void hideColumns(Set<IColumn> shownColumns) {
-        if (shownColumns == null || shownColumns.isEmpty()) {
-            return;
-        }
-        TreeColumn[] columns = getTree().getColumns();
-        for (TreeColumn treeColumn : columns) {
-            IColumn column = (IColumn) treeColumn.getData();
-            if (!shownColumns.contains(column)) {
-                continue;
-            }
-            treeColumn.setWidth(0);
-            treeColumn.setResizable(false);
-        }
-    }
-
-    /**
-     * Set visibility of columns
-     */
-    private void showColumns(Set<IColumn> shownColumns) {
-        if (shownColumns != null && !shownColumns.isEmpty()) {
-            TreeColumn[] columns = getTree().getColumns();
-
-            for (TreeColumn treeColumn : columns) {
-                IColumn column = (IColumn) treeColumn.getData();
-                if (shownColumns.contains(column)) {
-                    treeColumn.setWidth(column.getColumnWidth());
-                    treeColumn.setResizable(true);
-                }
-            }
-        }
+    public Set<Columns> getVisibleColumns() {
+        return visibleColumns;
     }
 
     private class DoubleClickListener implements IDoubleClickListener {
@@ -202,11 +316,7 @@ public class ExtendedTreeViewerComponent<T extends IObject> extends TreeViewer {
 
             sb.append(dataSource.getLocalizeString(col.col.getColumnName()));
 
-            for (TreeColumn s : getTree().getColumns()) {
-                if (col.col == s.getData()) {
-                    s.setText(sb.toString());
-                }
-            }
+            columns.get(col.col).setText(sb.toString());
         }
     }
 
@@ -218,7 +328,7 @@ public class ExtendedTreeViewerComponent<T extends IObject> extends TreeViewer {
             sortOrder.clear();
         }
 
-        public void setColumn(TreeColumn column) {
+        public void addSort(TreeColumn column) {
             Columns col = (Columns) column.getData();
 
             if (!sortOrder.isEmpty() && col.equals(sortOrder.getLast().col)) {
@@ -233,85 +343,10 @@ public class ExtendedTreeViewerComponent<T extends IObject> extends TreeViewer {
 
         @Override
         public int compare(Viewer viewer, Object e1, Object e2) {
-            DBProcess process1 = (DBProcess) e1;
-            DBProcess process2 = (DBProcess) e2;
-
             Iterator<SortingColumn> it = sortOrder.descendingIterator();
             while (it.hasNext()) {
                 SortingColumn c = it.next();
-                int compareResult = 0;
-
-                switch (c.col) {
-                case PID:
-                    compareResult = Integer.compare(process1.getPid(), process2.getPid());
-                    break;
-                case BLOCKED_COUNT:
-                    compareResult = Integer.compare(process1.getChildren().size(),
-                            process2.getChildren().size());
-                    break;
-                case APPLICATION_NAME:
-                    compareResult = compareStringValues(process1.getQueryCaller().getApplicationName(),
-                            process2.getQueryCaller().getApplicationName());
-                    break;
-                case DATABASE_NAME:
-                    compareResult = compareStringValues(process1.getQueryCaller().getDatabaseName(),
-                            process2.getQueryCaller().getDatabaseName());
-                    break;
-                case USER_NAME:
-                    compareResult = compareStringValues(process1.getQueryCaller().getUserName(),
-                            process2.getQueryCaller().getUserName());
-                    break;
-                case CLIENT:
-                    compareResult = compareStringValues(process1.getQueryCaller().getClient(),
-                            process2.getQueryCaller().getClient());
-                    break;
-                case BACKEND_START:
-                    compareResult = DateUtils.compareDates(process1.getQuery().getBackendStart(),
-                            process2.getQuery().getBackendStart());
-                    break;
-                case QUERY_START:
-                    compareResult = DateUtils.compareDates(process1.getQuery().getQueryStart(),
-                            process2.getQuery().getQueryStart());
-                    break;
-                case XACT_START:
-                    compareResult = DateUtils.compareDates(process1.getQuery().getXactStart(),
-                            process2.getQuery().getXactStart());
-                    break;
-                case DURATION:
-                    compareResult = compareStringValues(process1.getQuery().getDuration(),
-                            process2.getQuery().getDuration());
-                    break;
-                case STATE:
-                    compareResult = compareStringValues(process1.getState(),
-                            process2.getState());
-                    break;
-                case STATE_CHANGE:
-                    compareResult = DateUtils.compareDates(process1.getStateChange(),
-                            process2.getStateChange());
-                    break;
-                case BLOCKED:
-                    compareResult = compareStringValues(process1.getBlocksPidsString(),
-                            process2.getBlocksPidsString());
-                    break;
-                case LOCK_TYPE:
-                    compareResult = compareStringValues(process1.getBlocksLocktypesString(),
-                            process2.getBlocksLocktypesString());
-                    break;
-                case RELATION:
-                    compareResult = compareStringValues(process1.getBlocksRelationsString(),
-                            process2.getBlocksRelationsString());
-                    break;
-                case QUERY:
-                    compareResult = compareStringValues(process1.getQuery().getQueryString(),
-                            process2.getQuery().getQueryString());
-                    break;
-                case SLOW_QUERY:
-                    compareResult = Boolean.compare(process1.getQuery().isSlowQuery(),
-                            process2.getQuery().isSlowQuery());
-                    break;
-                default:
-                    break;
-                }
+                int compareResult = dataSource.compare(e1, e2, c.col);
 
                 if (compareResult != 0) {
                     if (c.desc) {
@@ -322,10 +357,6 @@ public class ExtendedTreeViewerComponent<T extends IObject> extends TreeViewer {
             }
 
             return 0;
-        }
-
-        private int compareStringValues(String s1, String s2) {
-            return s1.compareTo(s2);
         }
     }
 

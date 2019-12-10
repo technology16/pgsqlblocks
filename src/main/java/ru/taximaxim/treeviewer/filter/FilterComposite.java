@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,6 +19,12 @@
  */
 package ru.taximaxim.treeviewer.filter;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.ResourceBundle;
+import java.util.Set;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -26,35 +32,31 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
-import ru.taximaxim.treeviewer.models.DataSource;
-import ru.taximaxim.treeviewer.models.IColumn;
-import ru.taximaxim.treeviewer.models.IObject;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.ResourceBundle;
+import ru.taximaxim.pgsqlblocks.utils.Columns;
+import ru.taximaxim.treeviewer.models.DataSource;
 
 /**
  * GUI of Filters
  */
 public class FilterComposite extends Composite {
 
-    private List<? extends IColumn> filterList;
-    private ResourceBundle innerResourceBundle;
-    private DataSource<? extends IObject> dataSource;
-    private int numberOfColumns;
-    private FilterChangeHandler filterChangeHandler;
-    private List<Text> filterTextList = new ArrayList<>();
+    private final Set<Columns> filterList;
+    private final ResourceBundle innerResourceBundle;
+    private final DataSource<?> dataSource;
+    private final int numberOfColumns;
+    private final FilterChangeHandler filterChangeHandler;
+    private final List<Text> filterTextList = new ArrayList<>();
 
     public FilterComposite(Composite parent, int style, ResourceBundle innerResourceBundle,
-                           DataSource<? extends IObject> dataSource, FilterChangeHandler filterChangeHandler) {
+            DataSource<?> dataSource, FilterChangeHandler filterChangeHandler) {
         super(parent, style);
         this.innerResourceBundle = innerResourceBundle;
         this.dataSource = dataSource;
         this.filterList = dataSource.getColumnsToFilter();
         this.filterChangeHandler = filterChangeHandler;
 
+        // label, combo, text
         numberOfColumns = findColumnNumber() * 3;
         GridLayout glayout = new GridLayout();
         glayout.numColumns = numberOfColumns;
@@ -79,7 +81,7 @@ public class FilterComposite extends Composite {
         label.setToolTipText(innerResourceBundle.getString("all-filter-tooltip"));
 
         Text filterText = new Text(this, SWT.FILL | SWT.BORDER);
-        int horizontalSpan = numberOfColumns - 1 > 0 ? numberOfColumns - 1 : 1;
+        int horizontalSpan = Math.max(numberOfColumns - 1, 1);
         GridData textLayoutData = new GridData(SWT.FILL, SWT.FILL, true, false, horizontalSpan, 1);
         filterText.setLayoutData(textLayoutData);
         filterText.setToolTipText(innerResourceBundle.getString("all-filter-tooltip"));
@@ -87,7 +89,7 @@ public class FilterComposite extends Composite {
         filterText.addModifyListener(e -> filterChangeHandler.filterAllColumns(filterText.getText()));
     }
 
-    private void createFilterView(IColumn column) {
+    private void createFilterView(Columns column) {
         GridData comboLayoutData = new GridData(SWT.CENTER, SWT.CENTER, false,false);
         comboLayoutData.widthHint = 60;
         GridData textLayoutData = new GridData(SWT.FILL, SWT.FILL, true, false);
@@ -107,8 +109,10 @@ public class FilterComposite extends Composite {
         filterText.setLayoutData(textLayoutData);
         filterTextList.add(filterText);
 
-        combo.addModifyListener(e -> filterChangeHandler.filter(filterText.getText(), FilterOperation.find(combo.getText()), column));
-        filterText.addModifyListener(e -> filterChangeHandler.filter(filterText.getText(), FilterOperation.find(combo.getText()), column));
+        combo.addModifyListener(e -> filterChangeHandler.filter(
+                filterText.getText(), FilterOperation.find(combo.getText()), column));
+        filterText.addModifyListener(e -> filterChangeHandler.filter(
+                filterText.getText(), FilterOperation.find(combo.getText()), column));
     }
 
     /**
@@ -116,13 +120,12 @@ public class FilterComposite extends Composite {
      */
     private int findColumnNumber() {
         int i = filterList.size();
-        if (i == 1) {
-            return 1;
-        }else if (i==4 || i == 2) {
+
+        if (i == 4) {
             return 2;
-        } else {
-            return 3;
         }
+
+        return Math.min(i, 3);
     }
 
     public void show() {

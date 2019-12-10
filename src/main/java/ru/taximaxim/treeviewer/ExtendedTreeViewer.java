@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -29,6 +29,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 
+import ru.taximaxim.pgsqlblocks.xmlstore.ColumnLayoutsXmlStore;
 import ru.taximaxim.treeviewer.dialog.ColumnConfigDialog;
 import ru.taximaxim.treeviewer.filter.FilterChangeHandler;
 import ru.taximaxim.treeviewer.filter.FilterComposite;
@@ -50,22 +51,21 @@ public class ExtendedTreeViewer<T extends IObject> extends Composite {
     private ExtendedTreeViewerComponent<T> tree;
     private FilterComposite filterComposite;
     private final FilterChangeHandler filterChangeHandler;
-    private final DataSource<T> dataSource;
     private ToolItem filterToolItem;
     private Runnable updateToolItemAction;
 
     public ExtendedTreeViewer(Composite parent, int style, Object userData,
-            DataSource<T> dataSource, Locale locale) {
+            DataSource<T> dataSource, Locale locale,
+            ColumnLayoutsXmlStore columnLayoutsStore) {
         super(parent, style);
-        this.dataSource = dataSource;
         initResourceBundle(locale);
         GridLayout mainLayout = new GridLayout();
         GridData data = new GridData(SWT.FILL, SWT.FILL, true, true);
         setLayout(mainLayout);
         setLayoutData(data);
         filterChangeHandler = new FilterChangeHandler(dataSource);
-        createContent();
-        tree.setDataSource(dataSource);
+        createContent(dataSource);
+        tree.setData(dataSource, columnLayoutsStore);
         getTreeViewer().setInput(userData);
     }
 
@@ -78,7 +78,7 @@ public class ExtendedTreeViewer<T extends IObject> extends Composite {
         return tree;
     }
 
-    private void createContent() {
+    private void createContent(DataSource<T> dataSource) {
         createToolItems();
         filterComposite = new FilterComposite(this, SWT.TOP | SWT.BORDER,
                 resourceBundle, dataSource, filterChangeHandler);

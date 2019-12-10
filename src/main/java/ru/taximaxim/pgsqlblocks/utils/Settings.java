@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,11 +19,18 @@
  */
 package ru.taximaxim.pgsqlblocks.utils;
 
-import org.apache.log4j.Logger;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+import java.util.Properties;
+import java.util.ResourceBundle;
 
-import java.io.*;
-import java.util.*;
-import java.util.stream.Collectors;
+import org.apache.log4j.Logger;
 
 /**
  * Класс для работы с настройка пользователя
@@ -42,14 +49,13 @@ public final class Settings {
     private static final String SHOW_IDLE = "show_idle";
     private static final String SHOW_TOOL_TIP = "show_tool_tip";
     private static final String SHOW_BACKEND_PID = "show_backend_pid";
-    private static final String COLUMNS_LIST = "columns_list";
     private static final String CONFIRM_REQUIRED = "confirm_required";
     private static final String CONFIRM_EXIT = "confirm_exit";
     private static final String SHOW_LOG_MESSAGES = "show_log_messages";
     private static final String CURRENT_LOCALE = "current_locale";
 
     private int updatePeriodSeconds;
-    private int loginTimeout;
+    private final int loginTimeout;
 
     private boolean autoUpdate;
 
@@ -59,8 +65,8 @@ public final class Settings {
     private boolean showBackendPid;
     private boolean confirmExit;
 
-    private Properties properties;
-    private File propFile;
+    private final Properties properties;
+    private final File propFile;
     private final Locale locale;
     private final ResourceBundle resources;
 
@@ -75,7 +81,6 @@ public final class Settings {
         defaults.put(SHOW_IDLE, "true");
         defaults.put(SHOW_TOOL_TIP, "false");
         defaults.put(SHOW_BACKEND_PID, "true");
-        defaults.put(COLUMNS_LIST, Arrays.stream(Columns.values()).map(Enum::name).collect(Collectors.joining(",")));
         defaults.put(CONFIRM_REQUIRED, "true");
         defaults.put(CONFIRM_EXIT, "true");
         defaults.put(SHOW_LOG_MESSAGES, "true");

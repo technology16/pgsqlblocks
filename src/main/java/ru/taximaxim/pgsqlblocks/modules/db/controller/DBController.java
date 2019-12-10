@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -21,9 +21,6 @@ package ru.taximaxim.pgsqlblocks.modules.db.controller;
 
 import static ru.taximaxim.pgsqlblocks.PgSqlBlocks.APP_NAME;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -46,14 +43,7 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-
 import org.apache.log4j.Logger;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.xml.sax.SAXException;
 
 import ru.taximaxim.pgpass.PgPass;
 import ru.taximaxim.pgpass.PgPassException;
@@ -63,18 +53,15 @@ import ru.taximaxim.pgsqlblocks.common.models.DBBlockDeserializer;
 import ru.taximaxim.pgsqlblocks.common.models.DBBlocksJournal;
 import ru.taximaxim.pgsqlblocks.common.models.DBBlocksJournalListener;
 import ru.taximaxim.pgsqlblocks.common.models.DBBlocksJournalProcess;
-import ru.taximaxim.pgsqlblocks.common.models.DBBlocksJournalProcessSerializer;
 import ru.taximaxim.pgsqlblocks.common.models.DBModel;
 import ru.taximaxim.pgsqlblocks.common.models.DBProcess;
-import ru.taximaxim.pgsqlblocks.common.models.DBProcessSerializer;
 import ru.taximaxim.pgsqlblocks.common.models.DBProcessStatus;
 import ru.taximaxim.pgsqlblocks.modules.db.model.DBStatus;
 import ru.taximaxim.pgsqlblocks.utils.DateUtils;
-import ru.taximaxim.pgsqlblocks.utils.PathBuilder;
 import ru.taximaxim.pgsqlblocks.utils.Settings;
 import ru.taximaxim.pgsqlblocks.utils.SupportedVersion;
 import ru.taximaxim.pgsqlblocks.utils.UserCancelException;
-import ru.taximaxim.pgsqlblocks.utils.XmlDocumentWorker;
+import ru.taximaxim.pgsqlblocks.xmlstore.DBBlocksXmlStore;
 
 public class DBController implements DBBlocksJournalListener {
 
@@ -284,6 +271,11 @@ public class DBController implements DBBlocksJournalListener {
         stopProcessesUpdater();
         executor.shutdownNow();
         journalsSaveExecutor.shutdown();
+        try {
+            journalsSaveExecutor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
         saveUnclosedBlockedProcessesToFile();
     }
 
@@ -293,10 +285,9 @@ public class DBController implements DBBlocksJournalListener {
                 ResultSet resultSet = preparedStatement.executeQuery()) {
             Map<Integer, DBProcess> tmpProcesses = new HashMap<>();
             Map<Integer, Set<DBBlock>> tmpBlocks = new HashMap<>();
-            DBProcessSerializer processDeserializer = new DBProcessSerializer();
             DBBlockDeserializer blockDeserializer = new DBBlockDeserializer();
             while (resultSet.next()) {
-                DBProcess process = processDeserializer.deserialize(resultSet);
+                DBProcess process = DBBlocksXmlStore.readFromResultSet(resultSet);
                 int blockedBy = resultSet.getInt(BLOCKED_BY);
                 if (blockedBy != 0) {
                     DBBlock block = blockDeserializer.deserialize(resultSet);
@@ -471,49 +462,16 @@ public class DBController implements DBBlocksJournalListener {
 
     @Override
     public void dbBlocksJournalDidCloseProcesses(List<DBBlocksJournalProcess> processes) {
-        asyncSaveClosedBlockedProcessesToFile(processes);
+        journalsSaveExecutor.execute(() -> saveBlockedProcessesToFile(processes));
     }
 
-    private void asyncSaveClosedBlockedProcessesToFile(List<DBBlocksJournalProcess> processes) {
-        journalsSaveExecutor.execute(() -> {
-            try {
-                saveBlockedProcessesToFile(processes);
-            } catch (ParserConfigurationException | IOException | SAXException e) {
-                LOG.error("Error while saving blocked processes to journal", e);
-            }
-        });
-    }
-
-    private void saveBlockedProcessesToFile(List<DBBlocksJournalProcess> processes)
-            throws ParserConfigurationException, IOException, SAXException {
+    private void saveBlockedProcessesToFile(List<DBBlocksJournalProcess> processes) {
         String fileName = String.format("%s-%s.xml", this.model.getName(),
                 DateUtils.dateToString(blocksJournalCreateDate));
-        Path blocksJournalsDirPath = PathBuilder.getInstance().getBlocksJournalsDir();
-        Path currentJournalPath = blocksJournalsDirPath.resolve(fileName);
-        File currentJournalFile = currentJournalPath.toFile();
-
-        DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
-        DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
-
-        boolean fileExists = currentJournalFile.exists();
-        Document document;
-        Element rootElement;
-        if (fileExists) {
-            document = documentBuilder.parse(currentJournalFile);
-            rootElement = document.getDocumentElement();
-        } else {
-            document = documentBuilder.newDocument();
-            rootElement = document.createElement("blocksJournal");
-        }
-        DBBlocksJournalProcessSerializer serializer = new DBBlocksJournalProcessSerializer();
-        processes.forEach(journalProcess -> {
-            Element el = serializer.serialize(document, journalProcess);
-            rootElement.appendChild(el);
-        });
-        if (!fileExists) {
-            document.appendChild(rootElement);
-        }
-        XmlDocumentWorker.save(document, currentJournalFile);
+        DBBlocksXmlStore store = new DBBlocksXmlStore(fileName);
+        List<DBBlocksJournalProcess> oldProcesses = store.readObjects();
+        oldProcesses.addAll(processes);
+        store.writeObjects(oldProcesses);
     }
 
     private void saveUnclosedBlockedProcessesToFile() {
@@ -524,11 +482,8 @@ public class DBController implements DBBlocksJournalListener {
         if (openedBlockedProcesses.isEmpty()) {
             return;
         }
-        try {
-            saveBlockedProcessesToFile(openedBlockedProcesses);
-        } catch (ParserConfigurationException | IOException | SAXException e) {
-            LOG.error(e.getMessage(), e);
-        }
+
+        saveBlockedProcessesToFile(openedBlockedProcesses);
     }
 
     public Optional<SupportedVersion> getVersion() {

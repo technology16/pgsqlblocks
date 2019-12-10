@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,45 +19,78 @@
  */
 package ru.taximaxim.pgsqlblocks.modules.processes.controller;
 
+import java.lang.reflect.InvocationTargetException;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.ResourceBundle;
+import java.util.stream.Collectors;
+
 import org.apache.log4j.Logger;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.viewers.*;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.*;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.TabFolder;
+import org.eclipse.swt.widgets.TabItem;
+import org.eclipse.swt.widgets.ToolItem;
+import org.eclipse.swt.widgets.ToolTip;
+import org.eclipse.swt.widgets.Tray;
+import org.eclipse.swt.widgets.TrayItem;
+
 import ru.taximaxim.pgsqlblocks.PgSqlBlocks;
-import ru.taximaxim.pgsqlblocks.common.DBModelsProvider;
 import ru.taximaxim.pgsqlblocks.common.models.DBBlocksJournalProcess;
 import ru.taximaxim.pgsqlblocks.common.models.DBModel;
 import ru.taximaxim.pgsqlblocks.common.models.DBProcess;
-import ru.taximaxim.pgsqlblocks.common.ui.*;
-import ru.taximaxim.pgsqlblocks.dialogs.*;
+import ru.taximaxim.pgsqlblocks.common.ui.DBBlocksJournalViewDataSource;
+import ru.taximaxim.pgsqlblocks.common.ui.DBModelsView;
+import ru.taximaxim.pgsqlblocks.common.ui.DBModelsViewListener;
+import ru.taximaxim.pgsqlblocks.common.ui.DBProcessInfoView;
+import ru.taximaxim.pgsqlblocks.common.ui.DBProcessInfoViewListener;
+import ru.taximaxim.pgsqlblocks.common.ui.DBProcessesViewDataSource;
+import ru.taximaxim.pgsqlblocks.dialogs.AddDatabaseDialog;
+import ru.taximaxim.pgsqlblocks.dialogs.DBProcessInfoDialog;
+import ru.taximaxim.pgsqlblocks.dialogs.EditDatabaseDialog;
+import ru.taximaxim.pgsqlblocks.dialogs.PasswordDialog;
+import ru.taximaxim.pgsqlblocks.dialogs.SettingsDialog;
 import ru.taximaxim.pgsqlblocks.modules.blocksjournal.view.BlocksJournalView;
 import ru.taximaxim.pgsqlblocks.modules.db.controller.DBController;
 import ru.taximaxim.pgsqlblocks.modules.db.controller.DBControllerListener;
 import ru.taximaxim.pgsqlblocks.modules.db.controller.UserInputPasswordProvider;
 import ru.taximaxim.pgsqlblocks.modules.db.model.DBStatus;
 import ru.taximaxim.pgsqlblocks.modules.processes.view.ProcessesView;
-import ru.taximaxim.pgsqlblocks.utils.*;
+import ru.taximaxim.pgsqlblocks.utils.ImageUtils;
+import ru.taximaxim.pgsqlblocks.utils.Images;
+import ru.taximaxim.pgsqlblocks.utils.Settings;
+import ru.taximaxim.pgsqlblocks.utils.SettingsListener;
+import ru.taximaxim.pgsqlblocks.utils.SupportedVersion;
+import ru.taximaxim.pgsqlblocks.utils.UserCancelException;
+import ru.taximaxim.pgsqlblocks.xmlstore.ColumnLayoutsXmlStore;
+import ru.taximaxim.pgsqlblocks.xmlstore.DBModelsXmlStore;
 import ru.taximaxim.treeviewer.ExtendedTreeViewer;
 
-import java.lang.reflect.InvocationTargetException;
-import java.sql.SQLException;
-import java.util.*;
-import java.util.List;
-import java.util.stream.Collectors;
-
 public class ProcessesController implements DBControllerListener, UserInputPasswordProvider, DBModelsViewListener,
-        SettingsListener, DBProcessInfoViewListener {
+SettingsListener, DBProcessInfoViewListener {
 
     private static final Logger LOG = Logger.getLogger(ProcessesController.class);
+
+    private static final String DB_PROCESS_COLUMNS = "dbProcessColumns.xml";
+    private static final String DB_BLOCKS_JOURNAL_COLUMNS = "dbBlocksJournalColumns.xml";
 
     private final Settings settings;
     private final ResourceBundle resourceBundle;
@@ -81,17 +114,17 @@ public class ProcessesController implements DBControllerListener, UserInputPassw
     private ToolItem autoUpdateToolItem;
     private ToolItem showOnlyBlockedProcessesToolItem;
 
-    private DBModelsProvider dbModelsProvider;
+    private final DBModelsXmlStore store = new DBModelsXmlStore();
+
     private OnlyBlockedFilter onlyBlockedFilter;
 
-    private List<DBController> dbControllers = new ArrayList<>();
+    private final List<DBController> dbControllers = new ArrayList<>();
 
     private List<DBProcess> selectedProcesses = new ArrayList<>();
 
-    public ProcessesController(Settings settings, DBModelsProvider dbModelsProvider) {
+    public ProcessesController(Settings settings) {
         this.settings = settings;
         this.resourceBundle = settings.getResourceBundle();
-        this.dbModelsProvider = dbModelsProvider;
         settings.addListener(this);
     }
 
@@ -131,8 +164,9 @@ public class ProcessesController implements DBControllerListener, UserInputPassw
         processesViewSash.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
 
         DBProcessesViewDataSource dbProcessesViewDataSource = new DBProcessesViewDataSource(resourceBundle);
-        dbProcessView = new ExtendedTreeViewer<>(processesViewComposite, SWT.NONE, null,
-                dbProcessesViewDataSource, settings.getLocale());
+        dbProcessView = new ExtendedTreeViewer<>(processesViewComposite, SWT.NONE,
+                null, dbProcessesViewDataSource, settings.getLocale(),
+                new ColumnLayoutsXmlStore(DB_PROCESS_COLUMNS));
         dbProcessView.getTreeViewer().addSelectionChangedListener(this::dbProcessesViewSelectionChanged);
         dbProcessView.setUpdateButtonAction(this::updateProcessesInSelectedDatabase);
         dbProcessView.getTreeViewer().getTree().addTraverseListener(e -> {
@@ -200,8 +234,9 @@ public class ProcessesController implements DBControllerListener, UserInputPassw
         dbBlocksJournalViewComposite.setLayout(gl);
 
         DBBlocksJournalViewDataSource dbBlocksJournalViewDataSource = new DBBlocksJournalViewDataSource(resourceBundle);
-        dbBlocksJournalView = new ExtendedTreeViewer<>(dbBlocksJournalViewComposite, SWT.NONE, null,
-                dbBlocksJournalViewDataSource, settings.getLocale());
+        dbBlocksJournalView = new ExtendedTreeViewer<>(dbBlocksJournalViewComposite,
+                SWT.NONE, null, dbBlocksJournalViewDataSource, settings.getLocale(),
+                new ColumnLayoutsXmlStore(DB_BLOCKS_JOURNAL_COLUMNS));
         dbBlocksJournalView.getTreeViewer().addSelectionChangedListener(this::dbBlocksJournalViewSelectionChanged);
         dbBlocksJournalView.getTreeViewer().getTree().addTraverseListener(e -> {
             if (e.detail == SWT.TRAVERSE_RETURN) {
@@ -320,15 +355,14 @@ public class ProcessesController implements DBControllerListener, UserInputPassw
     }
 
     private void loadDatabases() {
-        List<DBModel> dbModels = dbModelsProvider.get();
-
+        List<DBModel> dbModels = store.readObjects();
         List<DBModel> modelsWithDefault = dbModels.stream()
                 .filter(m -> m.getVersion() == SupportedVersion.VERSION_DEFAULT)
                 .collect(Collectors.toList());
         List<String> connectionNames = modelsWithDefault.stream().map(DBModel::getName).collect(Collectors.toList());
         if (!modelsWithDefault.isEmpty() && openUpdateDialog(connectionNames)) {
             updateVersions(modelsWithDefault);
-            dbModelsProvider.save(dbModels);
+            store.writeObjects(dbModels);
         }
 
         dbModels.forEach(this::addDatabase);
@@ -349,7 +383,7 @@ public class ProcessesController implements DBControllerListener, UserInputPassw
                         DBController dbController = new DBController(settings, dbModel, this);
                         dbController.getVersion().ifPresent(v -> {
                             LOG.info("Обновлена версия сервера для подключения \"" + dbModel.getName()
-                                        + "\". Новая версия: " + v.getVersion());
+                            + "\". Новая версия: " + v.getVersion());
                             dbModel.setVersion(v);
                         });
                         progressMonitor.worked(1);
@@ -383,7 +417,7 @@ public class ProcessesController implements DBControllerListener, UserInputPassw
 
     private void saveDatabases() {
         List<DBModel> models = dbControllers.stream().map(DBController::getModel).collect(Collectors.toList());
-        dbModelsProvider.save(models);
+        store.writeObjects(models);
     }
 
     private boolean openUpdateDialog(List<String> connectionNames) {

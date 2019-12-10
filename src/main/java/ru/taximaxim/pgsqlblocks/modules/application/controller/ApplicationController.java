@@ -20,7 +20,7 @@
 package ru.taximaxim.pgsqlblocks.modules.application.controller;
 
 import org.eclipse.swt.SWT;
-import ru.taximaxim.pgsqlblocks.common.DBModelsLocalProvider;
+
 import ru.taximaxim.pgsqlblocks.modules.application.view.ApplicationView;
 import ru.taximaxim.pgsqlblocks.modules.application.view.ApplicationViewListener;
 import ru.taximaxim.pgsqlblocks.modules.logs.view.LogsView;
@@ -48,7 +48,7 @@ public class ApplicationController implements ApplicationViewListener {
     @Override
     public void applicationViewDidLoad() {
         new LogsView(applicationView.getBottomPanelComposite(), settings, SWT.NONE);
-        processesController = new ProcessesController(settings, new DBModelsLocalProvider());
+        processesController = new ProcessesController(settings);
         ProcessesView processesView = new ProcessesView(applicationView.getTopPanelComposite(), SWT.NONE);
         processesController.setView(processesView);
         processesController.load();

@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -18,6 +18,11 @@
  * =========================LICENSE_END==================================
  */
 package ru.taximaxim.pgsqlblocks.modules.application.view;
+
+import static ru.taximaxim.pgsqlblocks.PgSqlBlocks.APP_NAME;
+
+import java.text.MessageFormat;
+import java.util.ResourceBundle;
 
 import org.apache.log4j.Logger;
 import org.eclipse.jface.action.ToolBarManager;
@@ -28,22 +33,25 @@ import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.*;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.ToolTip;
+import org.eclipse.swt.widgets.Tray;
+import org.eclipse.swt.widgets.TrayItem;
+
 import ru.taximaxim.pgsqlblocks.ui.AboutDlg;
 import ru.taximaxim.pgsqlblocks.utils.ImageUtils;
 import ru.taximaxim.pgsqlblocks.utils.Images;
 import ru.taximaxim.pgsqlblocks.utils.Settings;
 
-import java.text.MessageFormat;
-import java.util.ResourceBundle;
-
-import static ru.taximaxim.pgsqlblocks.PgSqlBlocks.APP_NAME;
-
 public class ApplicationView extends ApplicationWindow {
 
     private static final Logger LOG = Logger.getLogger(ApplicationView.class);
 
-    private Composite composite;
     private Composite topPanelComposite;
     private Composite bottomPanelComposite;
 
@@ -51,7 +59,7 @@ public class ApplicationView extends ApplicationWindow {
 
     private ToolBarManager toolBarManager;
 
-    private static Display display;
+    private Display display;
 
     private Tray tray;
 
@@ -76,7 +84,7 @@ public class ApplicationView extends ApplicationWindow {
             open();
             display.dispose();
         } catch (Exception exception) {
-            LOG.error("An error has occurred:"+ exception);
+            LOG.error("An error has occurred:" + exception);
         }
     }
 
@@ -90,9 +98,8 @@ public class ApplicationView extends ApplicationWindow {
     private Image[] loadIcons() {
         Image[] icons = new Image[ICON_SIZES.length];
         for (int i = 0; i < ICON_SIZES.length; ++i) {
-            icons[i] = new Image(null,
-                    getClass().getClassLoader().getResourceAsStream(MessageFormat.format("images/block-{0}x{0}.png",
-                            ICON_SIZES[i])));
+            icons[i] = new Image(null, getClass().getClassLoader().getResourceAsStream(
+                    MessageFormat.format("images/block-{0}x{0}.png", ICON_SIZES[i])));
         }
         return icons;
     }
@@ -109,9 +116,7 @@ public class ApplicationView extends ApplicationWindow {
     }
 
     @Override
-    protected Control createContents(Composite mainComposite) {
-        this.composite = mainComposite;
-
+    protected Control createContents(Composite parent) {
         initTray();
 
         createApplicationMenu();
@@ -120,10 +125,10 @@ public class ApplicationView extends ApplicationWindow {
         layout.marginHeight = 0;
         layout.marginWidth = 0;
         GridData layoutData = new GridData(SWT.FILL, SWT.FILL, true, true);
-        sashForm = new SashForm(mainComposite, SWT.VERTICAL);
+        sashForm = new SashForm(parent, SWT.VERTICAL);
         sashForm.setLayout(layout);
         sashForm.setLayoutData(layoutData);
-        sashForm.setBackground(composite.getDisplay().getSystemColor(SWT.COLOR_WIDGET_BACKGROUND));
+        sashForm.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_WIDGET_BACKGROUND));
 
         createTopPanel(sashForm);
 
@@ -136,7 +141,7 @@ public class ApplicationView extends ApplicationWindow {
             viewListener.applicationViewDidLoad();
         }
 
-        return  mainComposite;
+        return parent;
     }
 
     private void createApplicationMenu() {
