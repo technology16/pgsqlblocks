@@ -57,6 +57,8 @@ import ru.taximaxim.treeviewer.ExtendedTreeViewer;
 
 public class BlocksJournalView extends ApplicationWindow implements DBBlocksJournalListener {
 
+    private static final String BLOCKS_JOURNAL_COLUMNS = "blocksJournalColumns.xml";
+
     private TableViewer filesTable;
 
     private ExtendedTreeViewer<DBProcess> processesView;
@@ -112,12 +114,12 @@ public class BlocksJournalView extends ApplicationWindow implements DBBlocksJour
         DBBlocksJournalViewDataSource dbBlocksJournalViewDataSource = new DBBlocksJournalViewDataSource(resourceBundle);
         processesView = new ExtendedTreeViewer<>(processesContentContainer, SWT.NONE,
                 blocksJournal.getProcesses(), dbBlocksJournalViewDataSource,
-                resourceBundle.getLocale(), new ColumnLayoutsXmlStore("blocksJournal"));
+                resourceBundle.getLocale(), new ColumnLayoutsXmlStore(BLOCKS_JOURNAL_COLUMNS));
         processesView.getTreeViewer().addSelectionChangedListener(this::processesViewSelectionChanged);
         processesView.getTreeViewer().getTree().addTraverseListener(e -> {
             if (e.detail == SWT.TRAVERSE_RETURN) {
                 IStructuredSelection structuredSelection = processesView.getTreeViewer().getStructuredSelection();
-                List<DBBlocksJournalProcess> selectedProcesses = structuredSelection.toList();
+                List<?> selectedProcesses = structuredSelection.toList();
                 openProcessDialogInfo(selectedProcesses.get(0));
             }
         });

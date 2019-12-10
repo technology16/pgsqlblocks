@@ -89,6 +89,9 @@ SettingsListener, DBProcessInfoViewListener {
 
     private static final Logger LOG = Logger.getLogger(ProcessesController.class);
 
+    private static final String DB_PROCESS_COLUMNS = "dbProcessColumns.xml";
+    private static final String DB_BLOCKS_JOURNAL_COLUMNS = "dbBlocksJournalColumns.xml";
+
     private final Settings settings;
     private final ResourceBundle resourceBundle;
 
@@ -163,7 +166,7 @@ SettingsListener, DBProcessInfoViewListener {
         DBProcessesViewDataSource dbProcessesViewDataSource = new DBProcessesViewDataSource(resourceBundle);
         dbProcessView = new ExtendedTreeViewer<>(processesViewComposite, SWT.NONE,
                 null, dbProcessesViewDataSource, settings.getLocale(),
-                new ColumnLayoutsXmlStore("dbProcess.xml"));
+                new ColumnLayoutsXmlStore(DB_PROCESS_COLUMNS));
         dbProcessView.getTreeViewer().addSelectionChangedListener(this::dbProcessesViewSelectionChanged);
         dbProcessView.setUpdateButtonAction(this::updateProcessesInSelectedDatabase);
         dbProcessView.getTreeViewer().getTree().addTraverseListener(e -> {
@@ -233,7 +236,7 @@ SettingsListener, DBProcessInfoViewListener {
         DBBlocksJournalViewDataSource dbBlocksJournalViewDataSource = new DBBlocksJournalViewDataSource(resourceBundle);
         dbBlocksJournalView = new ExtendedTreeViewer<>(dbBlocksJournalViewComposite,
                 SWT.NONE, null, dbBlocksJournalViewDataSource, settings.getLocale(),
-                new ColumnLayoutsXmlStore("dbBlocksJournal"));
+                new ColumnLayoutsXmlStore(DB_BLOCKS_JOURNAL_COLUMNS));
         dbBlocksJournalView.getTreeViewer().addSelectionChangedListener(this::dbBlocksJournalViewSelectionChanged);
         dbBlocksJournalView.getTreeViewer().getTree().addTraverseListener(e -> {
             if (e.detail == SWT.TRAVERSE_RETURN) {
@@ -380,7 +383,7 @@ SettingsListener, DBProcessInfoViewListener {
                         DBController dbController = new DBController(settings, dbModel, this);
                         dbController.getVersion().ifPresent(v -> {
                             LOG.info("Обновлена версия сервера для подключения \"" + dbModel.getName()
-                                        + "\". Новая версия: " + v.getVersion());
+                            + "\". Новая версия: " + v.getVersion());
                             dbModel.setVersion(v);
                         });
                         progressMonitor.worked(1);
