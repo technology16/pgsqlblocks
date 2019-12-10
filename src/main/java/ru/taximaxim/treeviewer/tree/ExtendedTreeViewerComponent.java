@@ -60,7 +60,7 @@ import ru.taximaxim.treeviewer.utils.AggregatingListener;
 public class ExtendedTreeViewerComponent<T extends IObject> extends TreeViewer {
 
     private DataSource<T> dataSource;
-    private ColumnLayoutsXmlStore store;
+    private ColumnLayoutsXmlStore columnLayoutsStore;
 
     private final Set<Columns> visibleColumns = EnumSet.noneOf(Columns.class);
     private final EnumMap<Columns, TreeColumn> columns = new EnumMap<>(Columns.class);
@@ -79,14 +79,14 @@ public class ExtendedTreeViewerComponent<T extends IObject> extends TreeViewer {
         return dataSource;
     }
 
-    public void setData(DataSource<T> dataSource, ColumnLayoutsXmlStore store) {
+    public void setData(DataSource<T> dataSource, ColumnLayoutsXmlStore columnLayoutsStore) {
         if (this.dataSource != null) {
             throw new IllegalStateException("ExtendedTreeViewerComponent already contains data source");
         }
         this.dataSource = dataSource;
-        this.store = store;
+        this.columnLayoutsStore = columnLayoutsStore;
         createColumns();
-        loadColumnsFromStore(store.readObjects());
+        loadColumnsFromStore(columnLayoutsStore.readObjects());
         addListeners();
         setLabelProvider(this.dataSource);
         setContentProvider(this.dataSource);
@@ -205,7 +205,7 @@ public class ExtendedTreeViewerComponent<T extends IObject> extends TreeViewer {
             list.add(new ColumnLayout(i, (Columns) col.getData(), width));
         }
 
-        store.writeObjects(list);
+        columnLayoutsStore.writeObjects(list);
     }
 
     private String getColumnTooltip(Columns column) {
@@ -255,7 +255,7 @@ public class ExtendedTreeViewerComponent<T extends IObject> extends TreeViewer {
             comparator.clearSortList();
             setColumnHeaders();
         }
-        comparator.setColumn(column);
+        comparator.addSort(column);
 
         updateSortIndexes();
         refresh();
@@ -328,7 +328,7 @@ public class ExtendedTreeViewerComponent<T extends IObject> extends TreeViewer {
             sortOrder.clear();
         }
 
-        public void setColumn(TreeColumn column) {
+        public void addSort(TreeColumn column) {
             Columns col = (Columns) column.getData();
 
             if (!sortOrder.isEmpty() && col.equals(sortOrder.getLast().col)) {

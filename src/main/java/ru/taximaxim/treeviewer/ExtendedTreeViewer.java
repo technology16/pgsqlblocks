@@ -55,7 +55,8 @@ public class ExtendedTreeViewer<T extends IObject> extends Composite {
     private Runnable updateToolItemAction;
 
     public ExtendedTreeViewer(Composite parent, int style, Object userData,
-            DataSource<T> dataSource, Locale locale, ColumnLayoutsXmlStore store) {
+            DataSource<T> dataSource, Locale locale,
+            ColumnLayoutsXmlStore columnLayoutsStore) {
         super(parent, style);
         initResourceBundle(locale);
         GridLayout mainLayout = new GridLayout();
@@ -64,7 +65,7 @@ public class ExtendedTreeViewer<T extends IObject> extends Composite {
         setLayoutData(data);
         filterChangeHandler = new FilterChangeHandler(dataSource);
         createContent(dataSource);
-        tree.setData(dataSource, store);
+        tree.setData(dataSource, columnLayoutsStore);
         getTreeViewer().setInput(userData);
     }
 
