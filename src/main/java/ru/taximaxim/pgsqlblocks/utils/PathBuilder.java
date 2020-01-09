@@ -25,11 +25,12 @@ import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public final class PathBuilder {
 
-    private static final Logger LOG = Logger.getLogger(PathBuilder.class);
+    private static final Logger LOG = LogManager.getLogger(PathBuilder.class);
 
     private static PathBuilder instance;
 

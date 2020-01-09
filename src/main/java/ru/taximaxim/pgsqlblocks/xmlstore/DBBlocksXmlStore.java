@@ -27,7 +27,8 @@ import java.time.Duration;
 import java.util.Date;
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -43,7 +44,7 @@ import ru.taximaxim.pgsqlblocks.utils.PathBuilder;
 
 public class DBBlocksXmlStore extends XmlStore<DBBlocksJournalProcess> {
 
-    private static final Logger LOG = Logger.getLogger(DBBlocksXmlStore.class);
+    private static final Logger LOG = LogManager.getLogger(DBBlocksXmlStore.class);
 
     private static final String ROOT_TAG = "blocksJournal";
 

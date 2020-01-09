@@ -24,7 +24,8 @@ import static ru.taximaxim.pgsqlblocks.PgSqlBlocks.APP_NAME;
 import java.text.MessageFormat;
 import java.util.ResourceBundle;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.window.ApplicationWindow;
@@ -50,7 +51,7 @@ import ru.taximaxim.pgsqlblocks.utils.Settings;
 
 public class ApplicationView extends ApplicationWindow {
 
-    private static final Logger LOG = Logger.getLogger(ApplicationView.class);
+    private static final Logger LOG = LogManager.getLogger(ApplicationView.class);
 
     private Composite topPanelComposite;
     private Composite bottomPanelComposite;

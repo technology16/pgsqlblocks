@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,17 +19,19 @@
  */
 package ru.taximaxim.pgsqlblocks.common.models;
 
-import org.apache.log4j.Logger;
+import java.util.Optional;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
-import ru.taximaxim.pgsqlblocks.utils.SupportedVersion;
 
-import java.util.Optional;
+import ru.taximaxim.pgsqlblocks.utils.SupportedVersion;
 
 public class DBModelSerializer {
 
-    private static final Logger LOG = Logger.getLogger(DBModelSerializer.class);
+    private static final Logger LOG = LogManager.getLogger(DBModelSerializer.class);
 
     private static final String ROOT_ELEMENT_TAG_NAME       = "server";
     private static final String ELEMENT_NAME_TAG_NAME         = "name";
