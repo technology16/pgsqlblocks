@@ -19,6 +19,9 @@
  */
 package ru.taximaxim.pgsqlblocks.ui;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.logging.log4j.core.Appender;
 import org.apache.logging.log4j.core.Core;
 import org.apache.logging.log4j.core.Filter;
@@ -31,13 +34,23 @@ import org.apache.logging.log4j.core.config.plugins.PluginAttribute;
 import org.apache.logging.log4j.core.config.plugins.PluginElement;
 import org.apache.logging.log4j.core.config.plugins.PluginFactory;
 import org.apache.logging.log4j.core.layout.PatternLayout;
-
-import ru.taximaxim.pgsqlblocks.modules.logs.view.LogsView;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Listener;
 
 @Plugin(name = UIAppender.PLUGIN_NAME, category = Core.CATEGORY_NAME, elementType = Appender.ELEMENT_TYPE, printObject = true)
 public final class UIAppender extends AbstractAppender {
 
     public static final String PLUGIN_NAME = "TextComposite";
+
+    private static final List<Listener> LISTENERS = new ArrayList<>();
+
+    public static void addListener(Listener e) {
+        LISTENERS.add(e);
+    }
+
+    public static void removeListener(Listener e) {
+        LISTENERS.remove(e);
+    }
 
     private UIAppender(String name, Layout<?> layout, Filter filter, boolean ignoreExceptions) {
         super(name, filter, layout, ignoreExceptions, Property.EMPTY_ARRAY);
@@ -45,8 +58,12 @@ public final class UIAppender extends AbstractAppender {
 
     @Override
     public void append(LogEvent event) {
-        final byte[] bytes = getLayout().toByteArray(event);
-        LogsView.appendText(new String(bytes));
+        String text = new String(getLayout().toByteArray(event));
+        Event ev = new Event();
+        ev.data = text;
+        for (Listener listener : LISTENERS) {
+            listener.handleEvent(ev);
+        }
     }
 
     @PluginFactory

@@ -28,10 +28,11 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Listener;
+
+import ru.taximaxim.pgsqlblocks.ui.UIAppender;
 
 public class LogsView extends Composite {
-
-    private static LogsView instance;
 
     private static final int TEXT_LIMIT = 20000;
     private StyledText text;
@@ -48,7 +49,18 @@ public class LogsView extends Composite {
         }
     };
 
-    private LogsView(Composite parent, int style) {
+    private final Listener logListener = e -> {
+        Display display = getDisplay();
+        if (display != null && !display.isDisposed()) {
+            display.asyncExec(() -> {
+                if (text != null && !text.isDisposed()) {
+                    text.append(e.data.toString());
+                }
+            });
+        }
+    };
+
+    public LogsView(Composite parent, int style) {
         super(parent, style);
         GridLayout layout = new GridLayout();
         layout.marginTop = 0;
@@ -56,6 +68,7 @@ public class LogsView extends Composite {
         setLayout(layout);
         setLayoutData(layoutData);
         createContent();
+        UIAppender.addListener(logListener);
     }
 
     private void createContent() {
@@ -84,26 +97,9 @@ public class LogsView extends Composite {
         styledTextContent = text.getContent();
     }
 
-    private void updateText(String string) {
-        if (text == null) {
-            return;
-        }
-
-        Display display = getDisplay();
-        if (display != null && !display.isDisposed()) {
-            display.asyncExec(() -> {
-                if (!text.isDisposed()) {
-                    text.append(string);
-                }
-            });
-        }
-    }
-
-    public static void init(Composite parent, int style) {
-        instance = new LogsView(parent, style);
-    }
-
-    public static void appendText(String string) {
-        instance.updateText(string);
+    @Override
+    public void dispose() {
+        UIAppender.removeListener(logListener);
+        super.dispose();
     }
 }

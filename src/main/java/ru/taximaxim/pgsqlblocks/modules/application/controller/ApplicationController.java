@@ -47,7 +47,7 @@ public class ApplicationController implements ApplicationViewListener {
 
     @Override
     public void applicationViewDidLoad() {
-        LogsView.init(applicationView.getBottomPanelComposite(), SWT.NONE);
+        new LogsView(applicationView.getBottomPanelComposite(), SWT.NONE);
         processesController = new ProcessesController(settings);
         ProcessesView processesView = new ProcessesView(applicationView.getTopPanelComposite(), SWT.NONE);
         processesController.setView(processesView);
