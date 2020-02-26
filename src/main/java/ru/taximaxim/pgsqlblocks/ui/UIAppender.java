@@ -19,6 +19,7 @@
  */
 package ru.taximaxim.pgsqlblocks.ui;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -58,7 +59,7 @@ public final class UIAppender extends AbstractAppender {
 
     @Override
     public void append(LogEvent event) {
-        String text = new String(getLayout().toByteArray(event));
+        String text = new String(getLayout().toByteArray(event), StandardCharsets.UTF_8);
         Event ev = new Event();
         ev.data = text;
         for (Listener listener : LISTENERS) {
