@@ -15,7 +15,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <swt.artifactId>org.eclipse.swt.gtk.linux.x86_64</swt.artifactId>
         <swt.id>Linux-x86_64</swt.id>
-        <swt.version>3.105.3</swt.version>
+        <swt.version>3.113.0</swt.version>
         <mainClass>ru.taximaxim.pgsqlblocks.PgSqlBlocks</mainClass>
         <license.licenseName>apache_v2</license.licenseName>
     </properties>
@@ -228,7 +228,7 @@
         <dependency>
             <groupId>org.eclipse.platform</groupId>
             <artifactId>org.eclipse.jface</artifactId>
-            <version>3.12.2</version>
+            <version>3.18.0</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.eclipse.platform</groupId>
@@ -239,7 +239,7 @@
          <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>[42.2.9]</version>
+            <version>[42.2.10]</version>
         </dependency>
         <dependency>
             <groupId>com.typesafe</groupId>
