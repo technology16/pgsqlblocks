@@ -43,7 +43,8 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import ru.taximaxim.pgpass.PgPass;
 import ru.taximaxim.pgpass.PgPassException;
@@ -65,7 +66,7 @@ import ru.taximaxim.pgsqlblocks.xmlstore.DBBlocksXmlStore;
 
 public class DBController implements DBBlocksJournalListener {
 
-    private static final Logger LOG = Logger.getLogger(DBController.class);
+    private static final Logger LOG = LogManager.getLogger(DBController.class);
 
     private static final String PG_BACKEND_PID = "pg_backend_pid";
     private static final String BLOCKED_BY = "blockedBy";

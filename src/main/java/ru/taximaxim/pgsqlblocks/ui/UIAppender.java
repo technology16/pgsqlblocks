@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,103 +19,69 @@
  */
 package ru.taximaxim.pgsqlblocks.ui;
 
-import org.apache.log4j.WriterAppender;
-import org.apache.log4j.spi.LoggingEvent;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.StyledText;
-import org.eclipse.swt.custom.StyledTextContent;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 
-import java.text.DateFormat;
-import java.util.Date;
-import java.util.Locale;
+import org.apache.logging.log4j.core.Appender;
+import org.apache.logging.log4j.core.Core;
+import org.apache.logging.log4j.core.Filter;
+import org.apache.logging.log4j.core.Layout;
+import org.apache.logging.log4j.core.LogEvent;
+import org.apache.logging.log4j.core.appender.AbstractAppender;
+import org.apache.logging.log4j.core.config.Property;
+import org.apache.logging.log4j.core.config.plugins.Plugin;
+import org.apache.logging.log4j.core.config.plugins.PluginAttribute;
+import org.apache.logging.log4j.core.config.plugins.PluginElement;
+import org.apache.logging.log4j.core.config.plugins.PluginFactory;
+import org.apache.logging.log4j.core.layout.PatternLayout;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Listener;
 
-public class UIAppender extends WriterAppender {
+@Plugin(name = UIAppender.PLUGIN_NAME, category = Core.CATEGORY_NAME, elementType = Appender.ELEMENT_TYPE, printObject = true)
+public final class UIAppender extends AbstractAppender {
 
-    private static final int TEXT_LIMIT = 20000;
-    private Composite parent;
-    private StyledText text;
-    private StyledTextContent styledTextContent;
-    private Display display;
-    private final Locale locale;
-    private boolean autoScrollEnabled = true;
+    public static final String PLUGIN_NAME = "TextComposite";
 
-    private ModifyListener modifyListener = (ModifyEvent e) -> {
-        if (text.getText().length() > TEXT_LIMIT) {
-            styledTextContent.replaceTextRange(0, text.getText().length() - TEXT_LIMIT - 1, "");
-            styledTextContent.replaceTextRange(0, styledTextContent.getLine(0).length(), "");
-        }
-        if (autoScrollEnabled) {
-            text.setTopIndex(text.getLineCount() - 1);
-        }
-    };
+    private static final List<Listener> LISTENERS = new ArrayList<>();
 
-    public UIAppender(Composite parent, Locale locale) {
-        this.parent = parent;
-        this.display = parent.getDisplay();
-        this.locale = locale;
-        createControl();
+    public static void addListener(Listener e) {
+        LISTENERS.add(e);
     }
 
-    private void createControl() {
-        GridLayout layout = new GridLayout();
-        layout.marginTop = 0;
-        text = new StyledText(parent, SWT.MULTI | SWT.READ_ONLY | SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER);
-        text.setLayout(layout);
-        text.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-        text.setMargins(3, 3, 3, 3);
-        text.layout(true);
-        text.addModifyListener(modifyListener);
-        parent.layout(true, true);
+    public static void removeListener(Listener e) {
+        LISTENERS.remove(e);
+    }
 
-        // add empty string on ENTER pressed
-        text.addTraverseListener(e -> {
-            switch (e.detail) {
-                case SWT.TRAVERSE_RETURN:
-                    if (!text.isDisposed()) {
-                        text.append("\n");
-                        text.setTopIndex(text.getLineCount() - 1);
-                        text.setCaretOffset(text.getCharCount() - 1);
-                    }
-                    break;
-                default:
-                    break;
-            }
-        });
-
-        // wheel up and down
-        text.addMouseWheelListener(e -> autoScrollEnabled = e.count <= 0);
-
-        styledTextContent = text.getContent();
+    private UIAppender(String name, Layout<?> layout, Filter filter, boolean ignoreExceptions) {
+        super(name, filter, layout, ignoreExceptions, Property.EMPTY_ARRAY);
     }
 
     @Override
-    public void append(LoggingEvent event) {
-        boolean displayIsFine = display == null || display.isDisposed();
-        boolean parentIsFine = parent == null || parent.isDisposed();
-        if(displayIsFine || parentIsFine || text == null) {
-            return;
+    public void append(LogEvent event) {
+        String text = new String(getLayout().toByteArray(event), StandardCharsets.UTF_8);
+        Event ev = new Event();
+        ev.data = text;
+        for (Listener listener : LISTENERS) {
+            listener.handleEvent(ev);
         }
-        DateFormat dateTimeFormat = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.FULL, locale);
-        Date time = new Date(event.getTimeStamp());
-        String dateTime = dateTimeFormat.format(time);
-        String excMessage;
-        Object message = event.getMessage();
-        if (message instanceof String) {
-            excMessage = (String) message;
-        } else {
-            return;
+    }
+
+    @PluginFactory
+    public static UIAppender createAppender(
+            @PluginAttribute("name") String name,
+            @PluginAttribute("ignoreExceptions") boolean ignoreExceptions,
+            @PluginElement("Layout") Layout<?> layout,
+            @PluginElement("Filters") Filter filter) {
+        if (name == null) {
+            LOGGER.error("No name provided for UIAppender");
+            return null;
         }
-        final String logMessage = String.format("[%s] %s%n", dateTime, excMessage);
-        parent.getDisplay().asyncExec(() -> {
-            if (!text.isDisposed()) {
-                text.append(logMessage);
-            }
-        });
+
+        if (layout == null) {
+            layout = PatternLayout.createDefaultLayout();
+        }
+
+        return new UIAppender(name, layout, filter, ignoreExceptions);
     }
 }

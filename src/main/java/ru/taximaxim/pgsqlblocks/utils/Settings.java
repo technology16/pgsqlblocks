@@ -30,7 +30,8 @@ import java.util.Locale;
 import java.util.Properties;
 import java.util.ResourceBundle;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Класс для работы с настройка пользователя
@@ -40,7 +41,7 @@ public final class Settings {
     private final List<SettingsListener> listeners = new ArrayList<>();
 
     public static final String[] SUPPORTED_LANGUAGES = {"ru", "en"};
-    private static final Logger LOG = Logger.getLogger(Settings.class);
+    private static final Logger LOG = LogManager.getLogger(Settings.class);
 
     private static final String UPDATE_PERIOD = "update_period";
     private static final String LOGIN_TIMEOUT = "login_timeout";

@@ -122,7 +122,7 @@ fi
 
 echo
 
-platformArray=("Linux-32" "Linux-64" "Macosx-64" "Windows-32" "Windows-64")
+platformArray=( "Linux-64" "Macosx-64" "Windows-64")
 
 # Build files for release
 mvn clean -q

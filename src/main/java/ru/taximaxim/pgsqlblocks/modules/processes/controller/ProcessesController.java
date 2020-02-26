@@ -28,7 +28,8 @@ import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -87,7 +88,7 @@ import ru.taximaxim.treeviewer.ExtendedTreeViewer;
 public class ProcessesController implements DBControllerListener, UserInputPasswordProvider, DBModelsViewListener,
 SettingsListener, DBProcessInfoViewListener {
 
-    private static final Logger LOG = Logger.getLogger(ProcessesController.class);
+    private static final Logger LOG = LogManager.getLogger(ProcessesController.class);
 
     private static final String DB_PROCESS_COLUMNS = "dbProcessColumns.xml";
     private static final String DB_BLOCKS_JOURNAL_COLUMNS = "dbBlocksJournalColumns.xml";
