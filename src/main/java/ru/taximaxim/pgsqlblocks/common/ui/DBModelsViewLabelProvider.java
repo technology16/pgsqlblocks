@@ -55,7 +55,7 @@ public class DBModelsViewLabelProvider extends TreeLabelProvider {
         DBController controller = (DBController) element;
         switch (columnIndex) {
             case 0:
-                return controller.getModel().getName();
+                return controller.getModelName();
             case 1:
                 return String.valueOf(controller.getProcessesCount());
             default:
