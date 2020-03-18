@@ -20,9 +20,6 @@
 package ru.taximaxim.pgsqlblocks.common.ui;
 
 import java.util.ArrayList;
-import java.util.Deque;
-import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.ResourceBundle;
 
@@ -40,6 +37,8 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.widgets.TableColumn;
 
 import ru.taximaxim.pgsqlblocks.modules.db.controller.DBController;
 
@@ -49,9 +48,6 @@ public class DBModelsView extends Composite {
 
     private static final int COUNT_COLUMN_WIDTH = 50;
     private static final int NAME_COLUMN_WIDTH = 150;
-
-    private TableViewerColumn dbNameColumn;
-    private TableViewerColumn processesCountColumn;
 
     private TableViewer tableViewer;
 
@@ -79,15 +75,15 @@ public class DBModelsView extends Composite {
         GridData layoutData = new GridData(SWT.FILL, SWT.FILL, true, true);
         tableViewer.getControl().setLayoutData(layoutData);
         tableViewer.getTable().setHeaderVisible(true);
-        dbNameColumn = new TableViewerColumn(tableViewer, SWT.NONE);
+        TableViewerColumn dbNameColumn = new TableViewerColumn(tableViewer, SWT.NONE);
         dbNameColumn.getColumn().setWidth(NAME_COLUMN_WIDTH);
         dbNameColumn.getColumn().addSelectionListener(getHeaderSelectionAdapter(Columns.NAME));
+        dbNameColumn.getColumn().setText(resourceBundle.getString("database"));
 
-        processesCountColumn = new TableViewerColumn(tableViewer, SWT.NONE);
+        TableViewerColumn processesCountColumn = new TableViewerColumn(tableViewer, SWT.NONE);
         processesCountColumn.getColumn().setWidth(COUNT_COLUMN_WIDTH);
         processesCountColumn.getColumn().addSelectionListener(getHeaderSelectionAdapter(Columns.COUNT));
-
-        setColumnHeaders();
+        processesCountColumn.getColumn().setText(resourceBundle.getString("processes"));
 
         tableViewer.setContentProvider(new DBModelsViewContentProvider());
         tableViewer.setLabelProvider(new DBModelsViewLabelProvider(resourceBundle));
@@ -116,46 +112,33 @@ public class DBModelsView extends Composite {
 
     }
 
-    private SelectionAdapter getHeaderSelectionAdapter(final Columns index) {
+    private SelectionAdapter getHeaderSelectionAdapter(final Columns name) {
         return new SelectionAdapter() {
 
             @Override
             public void widgetSelected(SelectionEvent e) {
-                if ((e.stateMask & SWT.CTRL) != 0){
-                    comparator.clearSortList();
-                    setColumnHeaders();
+                TableColumn column = (TableColumn) e.getSource();
+                Table table = tableViewer.getTable();
+                TableColumn prevSortColumn = table.getSortColumn();
+                boolean desc = true;
+                if (prevSortColumn != null) {
+                    int prevSortDir = table.getSortDirection();
+                    if (column.equals(prevSortColumn)) {
+                        desc = prevSortDir == SWT.UP;
+                        table.setSortDirection(desc ? SWT.DOWN : SWT.UP);
+                    } else {
+                        table.setSortColumn(column);
+                        table.setSortDirection(SWT.DOWN);
+                    }
+                } else {
+                    table.setSortColumn(column);
+                    table.setSortDirection(SWT.DOWN);
                 }
-                sortViewer(index);
+
+                comparator.setColumn(name, desc);
+                tableViewer.refresh();
             }
         };
-    }
-
-    private void sortViewer(Columns index) {
-        comparator.addSort(index);
-        updateSortIndexes();
-        tableViewer.refresh();
-    }
-
-    private void updateSortIndexes(){
-        int i = 0;
-        StringBuilder sb = new StringBuilder();
-        for (SortingColumn col : comparator.sortOrder) {
-            sb.setLength(0);
-            sb.append(comparator.sortOrder.size() - i++)
-            .append(!col.desc ? '\u25BF' : '\u25B5')
-            .append('\t');
-
-            switch (col.col) {
-            case NAME:
-                dbNameColumn.getColumn().setText(sb.append(resourceBundle.getString("database")).toString());
-                break;
-            case COUNT:
-                processesCountColumn.getColumn().setText(sb.append(resourceBundle.getString("processes")).toString());
-                break;
-            default:
-                break;
-            }
-        }
     }
 
     private void menuDidShow(IMenuManager manager) {
@@ -165,7 +148,6 @@ public class DBModelsView extends Composite {
     }
 
     public void refresh() {
-        updateSortIndexes();
         tableViewer.refresh();
     }
 
@@ -190,55 +172,36 @@ public class DBModelsView extends Composite {
         listeners.remove(listener);
     }
 
-    private void setColumnHeaders(){
-        dbNameColumn.getColumn().setText(resourceBundle.getString("database"));
-        processesCountColumn.getColumn().setText(resourceBundle.getString("processes"));
-    }
-
     private class TableViewerComparator extends ViewerComparator {
 
-        private final Deque<SortingColumn> sortOrder = new LinkedList<>();
+        private SortingColumn column;
 
-        public void clearSortList() {
-            sortOrder.clear();
-        }
-
-        public void addSort(Columns column) {
-            if (!sortOrder.isEmpty() && column.equals(sortOrder.getLast().col)) {
-                SortingColumn oldCol = sortOrder.pollLast();
-                sortOrder.addLast(new SortingColumn(column, !oldCol.desc));
-            } else {
-                SortingColumn c = new SortingColumn(column, false);
-                sortOrder.remove(c);
-                sortOrder.addLast(c);
-            }
+        public void setColumn(Columns col, boolean desc) {
+            this.column = new SortingColumn(col, desc);
         }
 
         @Override
         public int compare(Viewer v, Object e1, Object e2) {
+            if (column == null) {
+                return 0;
+            }
+
             DBController el1 = (DBController) e1;
             DBController el2 = (DBController) e2;
 
-            Iterator<SortingColumn> it = sortOrder.descendingIterator();
-            while (it.hasNext()) {
-                SortingColumn c = it.next();
-                int res = 0;
-                switch (c.col) {
-                case NAME:
-                    res = el1.getModelName().compareTo(el2.getModelName());
-                    break;
-                case COUNT:
-                    res = Integer.compare(el1.getProcessesCount(), el2.getProcessesCount());
-                    break;
-                default:
-                    break;
-                }
-                if (res != 0) {
-                    return c.desc ? -res : res;
-                }
+            int res = 0;
+            switch (column.col) {
+            case NAME:
+                res = el1.getModelName().compareTo(el2.getModelName());
+                break;
+            case COUNT:
+                res = Integer.compare(el1.getProcessesCount(), el2.getProcessesCount());
+                break;
+            default:
+                break;
             }
 
-            return 0;
+            return column.desc ? -res : res;
         }
     }
 
