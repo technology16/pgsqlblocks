@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,21 +19,28 @@
  */
 package ru.taximaxim.pgsqlblocks.common.ui;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.ResourceBundle;
+
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Menu;
-import ru.taximaxim.pgsqlblocks.modules.db.controller.DBController;
+import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.widgets.TableColumn;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.ResourceBundle;
+import ru.taximaxim.pgsqlblocks.modules.db.controller.DBController;
 
 public class DBModelsView extends Composite {
 
@@ -44,7 +51,12 @@ public class DBModelsView extends Composite {
 
     private TableViewer tableViewer;
 
-    private List<DBModelsViewListener> listeners = new ArrayList<>();
+    private final List<DBModelsViewListener> listeners = new ArrayList<>();
+    private final TableViewerComparator comparator = new TableViewerComparator();
+
+    private enum Columns {
+        NAME, COUNT
+    }
 
     public DBModelsView(ResourceBundle resourceBundle, Composite parent, int style) {
         super(parent, style);
@@ -63,13 +75,15 @@ public class DBModelsView extends Composite {
         GridData layoutData = new GridData(SWT.FILL, SWT.FILL, true, true);
         tableViewer.getControl().setLayoutData(layoutData);
         tableViewer.getTable().setHeaderVisible(true);
-        TableViewerColumn column = new TableViewerColumn(tableViewer, SWT.NONE);
-        column.getColumn().setText(resourceBundle.getString("database"));
-        column.getColumn().setWidth(NAME_COLUMN_WIDTH);
+        TableViewerColumn dbNameColumn = new TableViewerColumn(tableViewer, SWT.NONE);
+        dbNameColumn.getColumn().setText(resourceBundle.getString("database"));
+        dbNameColumn.getColumn().setWidth(NAME_COLUMN_WIDTH);
+        dbNameColumn.getColumn().addSelectionListener(getHeaderSelectionAdapter(Columns.NAME));
 
         TableViewerColumn processesCountColumn = new TableViewerColumn(tableViewer, SWT.NONE);
         processesCountColumn.getColumn().setText(resourceBundle.getString("processes"));
         processesCountColumn.getColumn().setWidth(COUNT_COLUMN_WIDTH);
+        processesCountColumn.getColumn().addSelectionListener(getHeaderSelectionAdapter(Columns.COUNT));
 
         tableViewer.setContentProvider(new DBModelsViewContentProvider());
         tableViewer.setLabelProvider(new DBModelsViewLabelProvider(resourceBundle));
@@ -88,6 +102,8 @@ public class DBModelsView extends Composite {
             }
         });
 
+        tableViewer.setComparator(comparator);
+
         MenuManager menuManager = new MenuManager();
         Menu menu = menuManager.createContextMenu(tableViewer.getControl());
         menuManager.setRemoveAllWhenShown(true);
@@ -96,14 +112,56 @@ public class DBModelsView extends Composite {
 
     }
 
+    private SelectionAdapter getHeaderSelectionAdapter(final Columns name) {
+        return new SelectionAdapter() {
+
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                TableColumn column = (TableColumn) e.getSource();
+                Table table = tableViewer.getTable();
+                TableColumn prevSortColumn = table.getSortColumn();
+                boolean desc = true;
+                if (prevSortColumn != null) {
+                    int prevSortDir = table.getSortDirection();
+                    if (column.equals(prevSortColumn)) {
+                        desc = prevSortDir == SWT.UP;
+                        table.setSortDirection(desc ? SWT.DOWN : SWT.UP);
+                    } else {
+                        table.setSortColumn(column);
+                        table.setSortDirection(SWT.DOWN);
+                    }
+                } else {
+                    table.setSortColumn(column);
+                    table.setSortDirection(SWT.DOWN);
+                }
+
+                comparator.setColumn(name, desc);
+                tableViewer.refresh();
+            }
+        };
+    }
+
     private void menuDidShow(IMenuManager manager) {
         if (tableViewer.getSelection() instanceof IStructuredSelection) {
             listeners.forEach(listener -> listener.dbModelsViewDidShowMenu(manager));
         }
     }
 
-    public TableViewer getTableViewer() {
-        return tableViewer;
+    public void refresh() {
+        tableViewer.refresh();
+    }
+
+    public void setInput(List<DBController> dbControllers) {
+        tableViewer.setInput(dbControllers);
+    }
+
+    public DBController getSelection() {
+        Object element = tableViewer.getStructuredSelection().getFirstElement();
+        if (element instanceof DBController) {
+            return (DBController) element;
+        }
+
+        return null;
     }
 
     public void addListener(DBModelsViewListener listener) {
@@ -112,5 +170,60 @@ public class DBModelsView extends Composite {
 
     public void removeListener(DBModelsViewListener listener) {
         listeners.remove(listener);
+    }
+
+    private class TableViewerComparator extends ViewerComparator {
+
+        private SortingColumn column;
+
+        public void setColumn(Columns col, boolean desc) {
+            this.column = new SortingColumn(col, desc);
+        }
+
+        @Override
+        public int compare(Viewer v, Object e1, Object e2) {
+            if (column == null) {
+                return 0;
+            }
+
+            DBController el1 = (DBController) e1;
+            DBController el2 = (DBController) e2;
+
+            int res = 0;
+            switch (column.col) {
+            case NAME:
+                res = el1.getModelName().compareTo(el2.getModelName());
+                break;
+            case COUNT:
+                res = Integer.compare(el1.getProcessesCount(), el2.getProcessesCount());
+                break;
+            default:
+                break;
+            }
+
+            return column.desc ? -res : res;
+        }
+    }
+
+    private static class SortingColumn {
+
+        private final Columns col;
+        private final boolean desc;
+
+        public SortingColumn(Columns col, boolean desc) {
+            this.col = col;
+            this.desc = desc;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            return obj instanceof SortingColumn
+                    && ((SortingColumn) obj).col == col;
+        }
+
+        @Override
+        public int hashCode() {
+            return col.hashCode();
+        }
     }
 }

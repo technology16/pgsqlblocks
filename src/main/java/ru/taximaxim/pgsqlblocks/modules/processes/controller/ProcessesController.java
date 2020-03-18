@@ -137,7 +137,7 @@ SettingsListener, DBProcessInfoViewListener {
         createToolItems();
 
         dbModelsView = new DBModelsView(resourceBundle, view.getLeftPanelComposite(), SWT.NONE);
-        dbModelsView.getTableViewer().setInput(dbControllers);
+        dbModelsView.setInput(dbControllers);
         dbModelsView.addListener(this);
         tabFolder = new TabFolder(view.getRightPanelComposite(), SWT.NONE);
 
@@ -203,21 +203,21 @@ SettingsListener, DBProcessInfoViewListener {
     }
 
     private void cancelButtonClicked(DBProcess dbProcess) {
-        Object selectedController = dbModelsView.getTableViewer().getStructuredSelection().getFirstElement();
+        DBController selectedController = dbModelsView.getSelection();
         if (selectedController == null || dbProcess == null) {
             return;
         }
         List<Integer> pidProcessesList = Collections.singletonList(dbProcess.getPid());
-        cancelProcessesByPid((DBController) selectedController, pidProcessesList);
+        cancelProcessesByPid(selectedController, pidProcessesList);
     }
 
     private void terminateButtonClicked(DBProcess dbProcess) {
-        Object selectedController = dbModelsView.getTableViewer().getStructuredSelection().getFirstElement();
+        DBController selectedController = dbModelsView.getSelection();
         if (selectedController == null || dbProcess == null) {
             return;
         }
         List<Integer> pidProcessesList = Collections.singletonList(dbProcess.getPid());
-        terminateProcessesByPid((DBController) selectedController, pidProcessesList);
+        terminateProcessesByPid(selectedController, pidProcessesList);
     }
 
     private void createBlocksJournalTab() {
@@ -367,7 +367,7 @@ SettingsListener, DBProcessInfoViewListener {
         }
 
         dbModels.forEach(this::addDatabase);
-        dbModelsView.getTableViewer().refresh();
+        dbModelsView.refresh();
     }
 
     private void updateVersions(List<DBModel> dbModelsWithDefault) {
@@ -438,7 +438,7 @@ SettingsListener, DBProcessInfoViewListener {
         AddDatabaseDialog addDatabaseDialog = new AddDatabaseDialog(resourceBundle, view.getShell(), reservedConnectionNames);
         if (addDatabaseDialog.open() == Window.OK) {
             DBController controller = addDatabase(addDatabaseDialog.getCreatedModel());
-            dbModelsView.getTableViewer().refresh();
+            dbModelsView.refresh();
             if (controller.isEnabledAutoConnection()) {
                 controller.connectAsync();
             }
@@ -450,7 +450,7 @@ SettingsListener, DBProcessInfoViewListener {
         Optional<DBController> opt = dbControllers.stream().filter(dbc -> dbc.getModel().equals(oldModel)).findFirst();
         opt.ifPresent(controller -> {
             controller.setModel(newModel);
-            dbModelsView.getTableViewer().refresh(true, true);
+            dbModelsView.refresh();
             saveDatabases();
             if (controller.isEnabledAutoConnection()) {
                 controller.connectAsync();
@@ -459,13 +459,12 @@ SettingsListener, DBProcessInfoViewListener {
     }
 
     private void openEditSelectedDatabaseDialog() {
-        if (dbModelsView.getTableViewer().getStructuredSelection().getFirstElement() == null) {
+        DBController selectedController = dbModelsView.getSelection();
+        if (selectedController == null) {
             return;
         }
-        DBController selectedController = (DBController) dbModelsView.getTableViewer().getStructuredSelection().getFirstElement();
         List<String> reservedConnectionNames = dbControllers.stream()
-                .map(DBController::getModel)
-                .map(DBModel::getName)
+                .map(DBController::getModelName)
                 .collect(Collectors.toList());
         EditDatabaseDialog editDatabaseDialog =
                 new EditDatabaseDialog(resourceBundle, view.getShell(), reservedConnectionNames, selectedController.getModel());
@@ -475,32 +474,31 @@ SettingsListener, DBProcessInfoViewListener {
     }
 
     private void deleteSelectedDatabase() {
-        if (dbModelsView.getTableViewer().getStructuredSelection().getFirstElement() == null) {
-            return;
+        DBController selectedController = dbModelsView.getSelection();
+        if (selectedController != null) {
+            deleteDatabase(selectedController);
+            dbModelsView.refresh();
+            saveDatabases();
         }
-        DBController selectedController = (DBController) dbModelsView.getTableViewer().getStructuredSelection().getFirstElement();
-        deleteDatabase(selectedController);
-        dbModelsView.getTableViewer().refresh();
-        saveDatabases();
     }
 
     private void connectToSelectedDatabase() {
-        if (dbModelsView.getTableViewer().getStructuredSelection().getFirstElement() != null) {
-            DBController selectedController = (DBController) dbModelsView.getTableViewer().getStructuredSelection().getFirstElement();
+        DBController selectedController = dbModelsView.getSelection();
+        if (selectedController != null) {
             selectedController.connectAsync();
         }
     }
 
     private void disconnectSelectedDatabase() {
-        if (dbModelsView.getTableViewer().getStructuredSelection().getFirstElement() != null) {
-            DBController selectedController = (DBController) dbModelsView.getTableViewer().getStructuredSelection().getFirstElement();
+        DBController selectedController = dbModelsView.getSelection();
+        if (selectedController != null) {
             selectedController.disconnect(true);
         }
     }
 
     private void updateProcessesInSelectedDatabase() {
-        if (dbModelsView.getTableViewer().getStructuredSelection().getFirstElement() != null) {
-            DBController selectedController = (DBController) dbModelsView.getTableViewer().getStructuredSelection().getFirstElement();
+        DBController selectedController = dbModelsView.getSelection();
+        if (selectedController != null) {
             selectedController.updateProcesses();
         }
     }
@@ -516,7 +514,7 @@ SettingsListener, DBProcessInfoViewListener {
                 TrayItem trayItem = tray.getItem(0);
                 trayItem.setImage(ImageUtils.getImage(Images.BLOCKED));
                 ToolTip toolTip = trayItem.getToolTip();
-                toolTip.setMessage(l10n("db_has_lock", controller.getModel().getName()));
+                toolTip.setMessage(l10n("db_has_lock", controller.getModelName()));
                 toolTip.setVisible(true);
             } else {
                 LOG.error("Tray is not available");
@@ -549,7 +547,7 @@ SettingsListener, DBProcessInfoViewListener {
 
     @Override
     public void dbControllerStatusChanged(DBController controller, DBStatus newStatus) {
-        view.getDisplay().asyncExec(() -> dbModelsView.getTableViewer().refresh(controller, true, true));
+        view.getDisplay().asyncExec(() -> dbModelsView.refresh());
     }
 
     @Override
@@ -564,22 +562,22 @@ SettingsListener, DBProcessInfoViewListener {
 
     @Override
     public void dbControllerWillConnect(DBController controller) {
-        LOG.info(l10n("db_connecting", controller.getModel().getName()));
+        LOG.info(l10n("db_connecting", controller.getModelName()));
     }
 
     @Override
     public void dbControllerConnectionFailed(DBController controller, SQLException exception) {
-        LOG.error(controller.getModel().getName() + " " + exception.getMessage(), exception);
+        LOG.error(controller.getModelName() + " " + exception.getMessage(), exception);
     }
 
     @Override
     public void dbControllerDisconnectFailed(DBController controller, boolean forcedByUser, SQLException exception) {
         if (!forcedByUser && settings.isAutoUpdate()) {
             LOG.info(l10n("db_disconnected_will_reconnect",
-                    controller.getModel().getName(), settings.getUpdatePeriodSeconds()));
+                    controller.getModelName(), settings.getUpdatePeriodSeconds()));
             controller.startProcessesUpdater(settings.getUpdatePeriodSeconds());
         } else {
-            LOG.error(controller.getModel().getName() + " " + exception.getMessage(), exception);
+            LOG.error(controller.getModelName() + " " + exception.getMessage(), exception);
         }
         changeToolItemsStateForController(controller);
     }
@@ -588,10 +586,10 @@ SettingsListener, DBProcessInfoViewListener {
     public void dbControllerDidDisconnect(DBController controller, boolean forcedByUser) {
         if (!forcedByUser && settings.isAutoUpdate()) {
             LOG.info(l10n("db_disconnected_will_reconnect",
-                    controller.getModel().getName(), settings.getUpdatePeriodSeconds()));
+                    controller.getModelName(), settings.getUpdatePeriodSeconds()));
             controller.startProcessesUpdater(settings.getUpdatePeriodSeconds());
         } else {
-            LOG.info(l10n("db_disconnected", controller.getModel().getName()));
+            LOG.info(l10n("db_disconnected", controller.getModelName()));
         }
         changeToolItemsStateForController(controller);
         controller.clear();
@@ -601,18 +599,16 @@ SettingsListener, DBProcessInfoViewListener {
 
     @Override
     public void dbControllerWillUpdateProcesses(DBController controller) {
-        LOG.info(l10n("db_updating", controller.getModel().getName()));
+        LOG.info(l10n("db_updating", controller.getModelName()));
     }
 
     @Override
     public void dbControllerProcessesUpdated(DBController controller) {
         view.getDisplay().asyncExec(() -> {
-            dbModelsView.getTableViewer().refresh(controller);
-            if (dbModelsView.getTableViewer().getStructuredSelection().getFirstElement() != null) {
-                DBController selectedController = (DBController) dbModelsView.getTableViewer().getStructuredSelection().getFirstElement();
-                if (controller.equals(selectedController)) {
-                    dbProcessView.getTreeViewer().refreshWithoutSelection();
-                }
+            dbModelsView.refresh();
+            DBController selectedController = dbModelsView.getSelection();
+            if (selectedController != null && controller.equals(selectedController)) {
+                dbProcessView.getTreeViewer().refreshWithoutSelection();
             }
         });
     }
@@ -620,7 +616,7 @@ SettingsListener, DBProcessInfoViewListener {
     @Override
     public void dbControllerBlockedChanged(DBController controller) {
         if (settings.getShowToolTip()) {
-            view.getDisplay().asyncExec(() -> dbModelsView.getTableViewer().refresh(controller));
+            view.getDisplay().asyncExec(() -> dbModelsView.refresh());
             if (controller.isBlocked()) {
                 showDBBlockedMessageInTray(controller);
             } else {
@@ -632,11 +628,9 @@ SettingsListener, DBProcessInfoViewListener {
     @Override
     public void dbControllerBlocksJournalChanged(DBController controller) {
         view.getDisplay().asyncExec(() -> {
-            if (dbModelsView.getTableViewer().getStructuredSelection().getFirstElement() != null) {
-                DBController selectedController = (DBController) dbModelsView.getTableViewer().getStructuredSelection().getFirstElement();
-                if (controller.equals(selectedController)) {
-                    dbBlocksJournalView.getTreeViewer().refreshWithoutSelection();
-                }
+            DBController selectedController = dbModelsView.getSelection();
+            if (selectedController != null && controller.equals(selectedController)) {
+                dbBlocksJournalView.getTreeViewer().refreshWithoutSelection();
             }
         });
     }
@@ -679,10 +673,10 @@ SettingsListener, DBProcessInfoViewListener {
 
     @Override
     public void dbModelsViewDidShowMenu(IMenuManager menuManager) {
-        if (dbModelsView.getTableViewer().getStructuredSelection().getFirstElement() == null) {
+        DBController selectedController = dbModelsView.getSelection();
+        if (selectedController == null) {
             return;
         }
-        DBController selectedController = (DBController) dbModelsView.getTableViewer().getStructuredSelection().getFirstElement();
         if (selectedController.isConnected()) {
             Action disconnectAction = new Action(l10n("disconnect"),
                     ImageDescriptor.createFromImage(ImageUtils.getImage(Images.DISCONNECT_DATABASE))) {
@@ -781,12 +775,12 @@ SettingsListener, DBProcessInfoViewListener {
 
     @Override
     public void dbProcessInfoViewTerminateProcessButtonClicked() {
-        Object selectedController = dbModelsView.getTableViewer().getStructuredSelection().getFirstElement();
+        DBController selectedController = dbModelsView.getSelection();
         if (selectedController == null || selectedProcesses.isEmpty()) {
             return;
         }
         List<Integer> pidProcessesList = selectedProcesses.stream().map(DBProcess::getPid).collect(Collectors.toList());
-        terminateProcessesByPid((DBController) selectedController, pidProcessesList);
+        terminateProcessesByPid(selectedController, pidProcessesList);
     }
 
     private void terminateProcessesByPid(DBController selectedController, List<Integer> pidProcessesList) {
@@ -821,23 +815,23 @@ SettingsListener, DBProcessInfoViewListener {
         try {
             boolean result = dbController.terminateProcessWithPid(pid);
             if (result) {
-                LOG.info(l10n("process_terminated", dbController.getModel().getName(), pid));
+                LOG.info(l10n("process_terminated", dbController.getModelName(), pid));
             } else {
-                LOG.info(l10n("process_not_terminated", dbController.getModel().getName(), pid, ""));
+                LOG.info(l10n("process_not_terminated", dbController.getModelName(), pid, ""));
             }
         } catch (SQLException e) {
-            LOG.error(l10n("process_not_terminated", dbController.getModel().getName(), pid, e.getMessage()), e);
+            LOG.error(l10n("process_not_terminated", dbController.getModelName(), pid, e.getMessage()), e);
         }
     }
 
     @Override
     public void dbProcessInfoViewCancelProcessButtonClicked() {
-        Object selectedController = dbModelsView.getTableViewer().getStructuredSelection().getFirstElement();
+        DBController selectedController = dbModelsView.getSelection();
         if (selectedController == null || selectedProcesses.isEmpty()) {
             return;
         }
         List<Integer> pidProcessesList = selectedProcesses.stream().map(DBProcess::getPid).collect(Collectors.toList());
-        cancelProcessesByPid((DBController) selectedController, pidProcessesList);
+        cancelProcessesByPid(selectedController, pidProcessesList);
     }
 
     private void cancelProcessesByPid(DBController selectedController, List<Integer> pidProcessesList) {
@@ -872,12 +866,12 @@ SettingsListener, DBProcessInfoViewListener {
         try {
             boolean result = dbController.cancelProcessWithPid(pid);
             if (result) {
-                LOG.info(l10n("process_cancelled", dbController.getModel().getName(), pid));
+                LOG.info(l10n("process_cancelled", dbController.getModelName(), pid));
             } else {
-                LOG.info(l10n("process_not_cancelled", dbController.getModel().getName(), pid, ""));
+                LOG.info(l10n("process_not_cancelled", dbController.getModelName(), pid, ""));
             }
         } catch (SQLException e) {
-            LOG.error(l10n("process_not_cancelled", dbController.getModel().getName(), pid, e.getMessage()), e);
+            LOG.error(l10n("process_not_cancelled", dbController.getModelName(), pid, e.getMessage()), e);
         }
     }
 

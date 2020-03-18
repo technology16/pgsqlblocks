@@ -99,6 +99,10 @@ public class DBController implements DBBlocksJournalListener {
         blocksJournal.addListener(this);
     }
 
+    public String getModelName() {
+        return model.getName();
+    }
+
     public DBModel getModel() {
         return model.copy();
     }
