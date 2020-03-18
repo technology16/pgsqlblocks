@@ -76,14 +76,14 @@ public class DBModelsView extends Composite {
         tableViewer.getControl().setLayoutData(layoutData);
         tableViewer.getTable().setHeaderVisible(true);
         TableViewerColumn dbNameColumn = new TableViewerColumn(tableViewer, SWT.NONE);
+        dbNameColumn.getColumn().setText(resourceBundle.getString("database"));
         dbNameColumn.getColumn().setWidth(NAME_COLUMN_WIDTH);
         dbNameColumn.getColumn().addSelectionListener(getHeaderSelectionAdapter(Columns.NAME));
-        dbNameColumn.getColumn().setText(resourceBundle.getString("database"));
 
         TableViewerColumn processesCountColumn = new TableViewerColumn(tableViewer, SWT.NONE);
+        processesCountColumn.getColumn().setText(resourceBundle.getString("processes"));
         processesCountColumn.getColumn().setWidth(COUNT_COLUMN_WIDTH);
         processesCountColumn.getColumn().addSelectionListener(getHeaderSelectionAdapter(Columns.COUNT));
-        processesCountColumn.getColumn().setText(resourceBundle.getString("processes"));
 
         tableViewer.setContentProvider(new DBModelsViewContentProvider());
         tableViewer.setLabelProvider(new DBModelsViewLabelProvider(resourceBundle));
