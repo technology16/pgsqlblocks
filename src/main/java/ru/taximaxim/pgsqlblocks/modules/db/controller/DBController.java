@@ -231,6 +231,9 @@ public class DBController implements DBBlocksJournalListener {
     }
 
     private int countChildren(DBProcess process) {
+        if (process == null) {
+            return 0;
+        }
         return process.getChildren().size() + process.getChildren().stream().mapToInt(this::countChildren).sum();
     }
 
