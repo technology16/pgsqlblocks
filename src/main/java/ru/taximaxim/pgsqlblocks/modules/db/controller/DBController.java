@@ -37,6 +37,7 @@ import java.util.Optional;
 import java.util.Properties;
 import java.util.ResourceBundle;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -70,7 +71,7 @@ public class DBController implements DBBlocksJournalListener {
 
     private static final String PG_BACKEND_PID = "pg_backend_pid";
     private static final String BLOCKED_BY = "blockedBy";
-    private final List<DBProcess> processes = new ArrayList<>();
+    private final List<DBProcess> processes = new CopyOnWriteArrayList<>();
     private final UserInputPasswordProvider userInputPasswordProvider;
 
     private final Settings settings;
@@ -227,14 +228,11 @@ public class DBController implements DBBlocksJournalListener {
 
     // TODO possible duplicate processes with same pid
     public int getProcessesCount() {
-        return processes.size() + processes.stream().mapToInt(this::countChildren).sum();
+        return processes.size() + processes.stream().mapToInt(DBController::countChildren).sum();
     }
 
-    private int countChildren(DBProcess process) {
-        if (process == null) {
-            return 0;
-        }
-        return process.getChildren().size() + process.getChildren().stream().mapToInt(this::countChildren).sum();
+    private static int countChildren(DBProcess process) {
+        return process.getChildren().size() + process.getChildren().stream().mapToInt(DBController::countChildren).sum();
     }
 
     public DBBlocksJournal getBlocksJournal() {
