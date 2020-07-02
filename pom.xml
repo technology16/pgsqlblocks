@@ -15,7 +15,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <swt.artifactId>org.eclipse.swt.gtk.linux.x86_64</swt.artifactId>
         <swt.id>Linux-x86_64</swt.id>
-        <swt.version>3.113.0</swt.version>
+        <swt.version>3.114.100</swt.version>
         <mainClass>ru.taximaxim.pgsqlblocks.PgSqlBlocks</mainClass>
         <license.licenseName>apache_v2</license.licenseName>
     </properties>
@@ -105,7 +105,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-assembly-plugin</artifactId>
-                <version>3.1.1</version>
+                <version>3.3.0</version>
                 <executions>
                     <execution>
                         <id>bundle</id>
@@ -189,12 +189,12 @@
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-api</artifactId>
-            <version>2.13.0</version>
+            <version>2.13.3</version>
         </dependency>
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-core</artifactId>
-            <version>2.13.0</version>
+            <version>2.13.3</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.platform</groupId>
@@ -210,7 +210,7 @@
         <dependency>
             <groupId>org.eclipse.platform</groupId>
             <artifactId>org.eclipse.jface</artifactId>
-            <version>3.18.0</version>
+            <version>3.20.0</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.eclipse.platform</groupId>
@@ -221,7 +221,7 @@
          <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>[42.2.10]</version>
+            <version>42.2.14</version>
         </dependency>
         <dependency>
             <groupId>com.typesafe</groupId>
