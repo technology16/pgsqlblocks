@@ -61,13 +61,6 @@
         </profile>
     </profiles>
 
-    <repositories>
-        <repository>
-            <id>jitpack.io</id>
-            <url>https://jitpack.io</url>
-        </repository>
-    </repositories>
-
     <build>
         <plugins>
             <plugin>
@@ -230,8 +223,8 @@
         </dependency>
         <dependency>
             <groupId>com.github.technology16</groupId>
-            <artifactId>pgpass</artifactId>
-            <version>0.0.2</version>
+            <artifactId>PgPass</artifactId>
+            <version>1.0.0</version>
         </dependency>
     </dependencies>
 </project>
