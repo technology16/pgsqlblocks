@@ -89,7 +89,6 @@ public class DBModelsXmlStore extends XmlStore<DBModel> {
             root.appendChild(rootElement);
 
             createSubElement(xml, rootElement, ELEMENT_NAME_TAG_NAME,  model.getName());
-            createSubElement(xml, rootElement, ELEMENT_NAME_TAG_NAME, model.getName());
             createSubElement(xml, rootElement, ELEMENT_HOST_TAG_NAME, model.getHost());
             createSubElement(xml, rootElement, ELEMENT_PORT_TAG_NAME, model.getPort());
             if (model.getVersion() != SupportedVersion.VERSION_DEFAULT) {
