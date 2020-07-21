@@ -79,7 +79,6 @@ import ru.taximaxim.pgsqlblocks.utils.ImageUtils;
 import ru.taximaxim.pgsqlblocks.utils.Images;
 import ru.taximaxim.pgsqlblocks.utils.Settings;
 import ru.taximaxim.pgsqlblocks.utils.SettingsListener;
-import ru.taximaxim.pgsqlblocks.utils.SupportedVersion;
 import ru.taximaxim.pgsqlblocks.utils.UserCancelException;
 import ru.taximaxim.pgsqlblocks.xmlstore.ColumnLayoutsXmlStore;
 import ru.taximaxim.pgsqlblocks.xmlstore.DBModelsXmlStore;
@@ -356,44 +355,8 @@ SettingsListener, DBProcessInfoViewListener {
     }
 
     private void loadDatabases() {
-        List<DBModel> dbModels = store.readObjects();
-        List<DBModel> modelsWithDefault = dbModels.stream()
-                .filter(m -> m.getVersion() == SupportedVersion.VERSION_DEFAULT)
-                .collect(Collectors.toList());
-        List<String> connectionNames = modelsWithDefault.stream().map(DBModel::getName).collect(Collectors.toList());
-        if (!modelsWithDefault.isEmpty() && openUpdateDialog(connectionNames)) {
-            updateVersions(modelsWithDefault);
-            store.writeObjects(dbModels);
-        }
-
-        dbModels.forEach(this::addDatabase);
+        store.readObjects().forEach(this::addDatabase);
         dbModelsView.refresh();
-    }
-
-    private void updateVersions(List<DBModel> dbModelsWithDefault) {
-        ProgressMonitorDialog dialog = new ProgressMonitorDialog(Display.getDefault().getActiveShell());
-        try {
-            dialog.run(true, true, progressMonitor -> {
-                progressMonitor.beginTask(l10n("update_version_dialog"), dbModelsWithDefault.size());
-                for (DBModel dbModel : dbModelsWithDefault) {
-                    if (progressMonitor.isCanceled()) {
-                        LOG.info(l10n("update_version_cancelled_message"));
-                        progressMonitor.done();
-                        break;
-                    } else {
-                        DBController dbController = new DBController(settings, dbModel, this);
-                        dbController.getVersion().ifPresent(v -> {
-                            LOG.info("Обновлена версия сервера для подключения \"" + dbModel.getName()
-                            + "\". Новая версия: " + v.getVersion());
-                            dbModel.setVersion(v);
-                        });
-                        progressMonitor.worked(1);
-                    }
-                }
-            });
-        } catch (InvocationTargetException | InterruptedException e) {
-            LOG.error(l10n("update_version_error_message", e.getMessage()), e);
-        }
     }
 
     private DBController addDatabase(DBModel dbModel) {
@@ -419,15 +382,6 @@ SettingsListener, DBProcessInfoViewListener {
     private void saveDatabases() {
         List<DBModel> models = dbControllers.stream().map(DBController::getModel).collect(Collectors.toList());
         store.writeObjects(models);
-    }
-
-    private boolean openUpdateDialog(List<String> connectionNames) {
-        MessageDialog dialog = new MessageDialog(view.getShell(),
-                resourceBundle.getString("warning_title"),
-                null,
-                l10n("warning_text", connectionNames.stream().collect(Collectors.joining("\n*", "*", ""))),
-                MessageDialog.WARNING, new String[]{"Ok", "Cancel"}, 0);
-        return dialog.open() == 0;
     }
 
     private void openAddNewDatabaseDialog() {

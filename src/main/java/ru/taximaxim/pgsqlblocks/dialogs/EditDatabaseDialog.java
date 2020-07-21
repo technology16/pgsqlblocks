@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,21 +19,21 @@
  */
 package ru.taximaxim.pgsqlblocks.dialogs;
 
-import org.eclipse.jface.viewers.StructuredSelection;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Shell;
-import ru.taximaxim.pgsqlblocks.common.models.DBModel;
-import ru.taximaxim.pgsqlblocks.utils.SupportedVersion;
-
 import java.util.List;
 import java.util.ResourceBundle;
 
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Shell;
+
+import ru.taximaxim.pgsqlblocks.common.models.DBModel;
+
 public class EditDatabaseDialog extends AddDatabaseDialog {
 
-    private DBModel editedModel;
+    private final DBModel editedModel;
 
-    public EditDatabaseDialog(ResourceBundle resourceBundle, Shell shell, List<String> reservedConnectionNames, DBModel editedModel) {
+    public EditDatabaseDialog(ResourceBundle resourceBundle, Shell shell,
+            List<String> reservedConnectionNames, DBModel editedModel) {
         super(resourceBundle, shell, reservedConnectionNames);
         reservedConnectionNames.remove(editedModel.getName());
         this.editedModel = editedModel;
@@ -55,11 +55,10 @@ public class EditDatabaseDialog extends AddDatabaseDialog {
         nameText.setText(editedModel.getName());
         hostText.setText(editedModel.getHost());
         portText.setText(editedModel.getPort());
-        versionCombo.setInput(SupportedVersion.values());
-        versionCombo.setSelection(new StructuredSelection(editedModel.getVersion()));
         databaseNameText.setText(editedModel.getDatabaseName());
         userText.setText(editedModel.getUser());
         passwordText.setText(editedModel.getPassword());
+        readBackendTypeButton.setSelection(editedModel.isReadBackendType());
         enabledButton.setSelection(editedModel.isEnabled());
         return dialogArea;
     }

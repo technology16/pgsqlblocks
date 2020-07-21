@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -21,16 +21,11 @@ package ru.taximaxim.pgsqlblocks.dialogs;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.viewers.ArrayContentProvider;
-import org.eclipse.jface.viewers.ComboViewer;
-import org.eclipse.jface.viewers.LabelProvider;
-import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.*;
 import ru.taximaxim.pgsqlblocks.common.models.DBModel;
-import ru.taximaxim.pgsqlblocks.utils.SupportedVersion;
 
 import java.util.List;
 import java.util.ResourceBundle;
@@ -46,16 +41,16 @@ public class AddDatabaseDialog extends Dialog {
     Text nameText;
     Text hostText;
     Text portText;
-    ComboViewer versionCombo;
     Text userText;
     Text passwordText;
     Text databaseNameText;
+    Button readBackendTypeButton;
     Button enabledButton;
 
     private static final String DEFAULT_PORT = "5432";
     private static final int TEXT_WIDTH = 200;
 
-    private List<String> reservedConnectionNames;
+    private final List<String> reservedConnectionNames;
 
     public AddDatabaseDialog(ResourceBundle resourceBundle, Shell shell, List<String> reservedConnectionNames) {
         super(shell);
@@ -102,24 +97,6 @@ public class AddDatabaseDialog extends Dialog {
         portText.setText(DEFAULT_PORT);
         portText.setLayoutData(textGd);
 
-        Label versionLabel = new Label(container, SWT.HORIZONTAL);
-        versionLabel.setText(resourceBundle.getString("version"));
-        versionCombo = new ComboViewer(container, SWT.BORDER | SWT.DROP_DOWN | SWT.READ_ONLY);
-        versionCombo.setContentProvider(ArrayContentProvider.getInstance());
-        versionCombo.setInput(SupportedVersion.getValuesNoDefault());
-        versionCombo.setSelection(new StructuredSelection(SupportedVersion.VERSION_10));
-        versionCombo.setLabelProvider(new LabelProvider() {
-            @Override
-            public String getText(Object element) {
-                if (element instanceof SupportedVersion) {
-                    SupportedVersion version = (SupportedVersion) element;
-                    return version.getVersionText();
-                } else {
-                    return super.getText(element);
-                }
-            }
-        });
-
         Label userLabel = new Label(container, SWT.HORIZONTAL);
         userLabel.setText(resourceBundle.getString("user"));
         userText = new Text(container, SWT.BORDER);
@@ -142,9 +119,15 @@ public class AddDatabaseDialog extends Dialog {
         databaseNameText = new Text(container, SWT.BORDER);
         databaseNameText.setLayoutData(textGd);
 
-        Label enabledLabel = new Label(container, SWT.HORIZONTAL);
-        enabledLabel.setText(resourceBundle.getString("connect_automatically"));
+        GridData checkGd = new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1);
+
+        readBackendTypeButton = new Button(container, SWT.CHECK);
+        readBackendTypeButton.setText(resourceBundle.getString("read_backend_type"));
+        readBackendTypeButton.setLayoutData(checkGd);
+
         enabledButton = new Button(container, SWT.CHECK);
+        enabledButton.setText(resourceBundle.getString("connect_automatically"));
+        enabledButton.setLayoutData(checkGd);
 
         return container;
     }
@@ -154,10 +137,10 @@ public class AddDatabaseDialog extends Dialog {
         String name = nameText.getText();
         String host = hostText.getText();
         String port = portText.getText();
-        SupportedVersion version = (SupportedVersion) versionCombo.getStructuredSelection().getFirstElement();
         String databaseName = databaseNameText.getText();
         String user = userText.getText();
         String password = passwordText.getText();
+        boolean readBackendType = readBackendTypeButton.getSelection();
         boolean enabled = enabledButton.getSelection();
         if (name.isEmpty()) {
             displayError("missing_connection_name");
@@ -171,18 +154,16 @@ public class AddDatabaseDialog extends Dialog {
         } else if (databaseName.isEmpty() || user.isEmpty()) {
             displayError("missing_database_user");
             return;
-        } else if (version == SupportedVersion.VERSION_DEFAULT || version == null){
-            displayError("missing_database_version");
-            return;
         }
 
-        createdModel = new DBModel(name, host, port, version, databaseName, user, password, enabled);
+        createdModel = new DBModel(name, host, port, databaseName, user,
+                password, readBackendType, enabled);
 
         super.okPressed();
     }
-    
+
     private void displayError(String msg, String... args) {
         MessageDialog.openError(null, resourceBundle.getString(ATTENTION),
-                                String.format(resourceBundle.getString(msg), (Object[]) args));
+                String.format(resourceBundle.getString(msg), (Object[]) args));
     }
 }

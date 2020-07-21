@@ -61,7 +61,6 @@ import ru.taximaxim.pgsqlblocks.common.models.DBProcessStatus;
 import ru.taximaxim.pgsqlblocks.modules.db.model.DBStatus;
 import ru.taximaxim.pgsqlblocks.utils.DateUtils;
 import ru.taximaxim.pgsqlblocks.utils.Settings;
-import ru.taximaxim.pgsqlblocks.utils.SupportedVersion;
 import ru.taximaxim.pgsqlblocks.utils.UserCancelException;
 import ru.taximaxim.pgsqlblocks.xmlstore.DBBlocksXmlStore;
 
@@ -385,7 +384,7 @@ public class DBController implements DBBlocksJournalListener {
     }
 
     private String getProcessesQuery() {
-        boolean isTen = model.getVersion() == SupportedVersion.VERSION_10;
+        boolean isTen = model.isReadBackendType();
         if (settings.getShowIdle()) {
             return isTen ? DBQueries.getProcessesQueryWithIdleForTen() : DBQueries.getProcessesQueryWithIdle();
         } else {
@@ -490,27 +489,5 @@ public class DBController implements DBBlocksJournalListener {
         }
 
         saveBlockedProcessesToFile(openedBlockedProcesses);
-    }
-
-    public Optional<SupportedVersion> getVersion() {
-        try {
-            createConnection();
-            PreparedStatement preparedStatement = connection.prepareStatement(DBQueries.getVersionQuery());
-            ResultSet resultSet = preparedStatement.executeQuery();
-            if (resultSet.next()) {
-                int ver = resultSet.getInt(1);
-                return SupportedVersion.getByVersionNumber(ver);
-            }
-        } catch (UserCancelException e) {
-            LOG.info(String.format(resourceBundle.getString("user_cancelled_on_update_version"), model.getName()));
-        } catch (Exception e) {
-            LOG.warn(String.format(resourceBundle.getString("update_version_error"), model.getName(), e.getMessage()), e);
-        } finally {
-            if (connection != null) {
-                disconnect(true);
-            }
-            shutdown();
-        }
-        return Optional.empty();
     }
 }

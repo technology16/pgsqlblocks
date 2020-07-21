@@ -21,33 +21,27 @@ package ru.taximaxim.pgsqlblocks.xmlstore;
 
 import java.nio.file.Path;
 import java.util.List;
-import java.util.Optional;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
 import ru.taximaxim.pgsqlblocks.common.models.DBModel;
 import ru.taximaxim.pgsqlblocks.utils.PathBuilder;
-import ru.taximaxim.pgsqlblocks.utils.SupportedVersion;
 
 public class DBModelsXmlStore extends XmlStore<DBModel> {
 
-    private static final Logger LOG = LogManager.getLogger(DBModelsXmlStore.class);
-
     private static final String ROOT_TAG = "servers";
 
-    private static final String ROOT_ELEMENT_TAG_NAME       = "server";
-    private static final String ELEMENT_NAME_TAG_NAME         = "name";
-    private static final String ELEMENT_HOST_TAG_NAME         = "host";
-    private static final String ELEMENT_PORT_TAG_NAME         = "port";
-    private static final String ELEMENT_VERSION_TAG_NAME      = "version";
+    private static final String ROOT_ELEMENT_TAG_NAME          = "server";
+    private static final String ELEMENT_NAME_TAG_NAME          = "name";
+    private static final String ELEMENT_HOST_TAG_NAME          = "host";
+    private static final String ELEMENT_PORT_TAG_NAME          = "port";
     private static final String ELEMENT_DATABASE_NAME_TAG_NAME = "dbname";
-    private static final String ELEMENT_USER_TAG_NAME         = "user";
-    private static final String ELEMENT_PASSWORD_TAG_NAME     = "passwd";
-    private static final String ELEMENT_ENABLED_TAG_NAME      = "enabled";
+    private static final String ELEMENT_USER_TAG_NAME          = "user";
+    private static final String ELEMENT_PASSWORD_TAG_NAME      = "passwd";
+    private static final String ELEMENT_READ_BACKEND_TAG_NAME  = "readbt";
+    private static final String ELEMENT_ENABLED_TAG_NAME       = "enabled";
 
     public DBModelsXmlStore() {
         super(ROOT_TAG);
@@ -64,22 +58,22 @@ public class DBModelsXmlStore extends XmlStore<DBModel> {
         Node nameNode = element.getElementsByTagName(ELEMENT_NAME_TAG_NAME).item(0);
         Node hostNode = element.getElementsByTagName(ELEMENT_HOST_TAG_NAME).item(0);
         Node portNode = element.getElementsByTagName(ELEMENT_PORT_TAG_NAME).item(0);
-        Node versionNode = element.getElementsByTagName(ELEMENT_VERSION_TAG_NAME).item(0);
         Node databaseNameNode = element.getElementsByTagName(ELEMENT_DATABASE_NAME_TAG_NAME).item(0);
         Node userNode = element.getElementsByTagName(ELEMENT_USER_TAG_NAME).item(0);
         Node passwordNode = element.getElementsByTagName(ELEMENT_PASSWORD_TAG_NAME).item(0);
+        Node readBackendNode = element.getElementsByTagName(ELEMENT_READ_BACKEND_TAG_NAME).item(0);
         Node enabledNode = element.getElementsByTagName(ELEMENT_ENABLED_TAG_NAME).item(0);
 
         String name = getTextContentFromNode(nameNode);
         String host = getTextContentFromNode(hostNode);
         String port = getTextContentFromNode(portNode);
-        SupportedVersion version = getVersionFromNode(versionNode, name);
         String databaseName = getTextContentFromNode(databaseNameNode);
         String user = getTextContentFromNode(userNode);
         String password = getTextContentFromNode(passwordNode);
+        boolean readBackend = readBackendNode != null && Boolean.parseBoolean(getTextContentFromNode(readBackendNode));
         boolean enabled = enabledNode != null && Boolean.parseBoolean(getTextContentFromNode(enabledNode));
 
-        return new DBModel(name, host, port, version, databaseName, user, password, enabled);
+        return new DBModel(name, host, port, databaseName, user, password, readBackend, enabled);
     }
 
     @Override
@@ -91,12 +85,10 @@ public class DBModelsXmlStore extends XmlStore<DBModel> {
             createSubElement(xml, rootElement, ELEMENT_NAME_TAG_NAME,  model.getName());
             createSubElement(xml, rootElement, ELEMENT_HOST_TAG_NAME, model.getHost());
             createSubElement(xml, rootElement, ELEMENT_PORT_TAG_NAME, model.getPort());
-            if (model.getVersion() != SupportedVersion.VERSION_DEFAULT) {
-                createSubElement(xml, rootElement, ELEMENT_VERSION_TAG_NAME, model.getVersion().getVersion());
-            }
             createSubElement(xml, rootElement, ELEMENT_DATABASE_NAME_TAG_NAME, model.getDatabaseName());
             createSubElement(xml, rootElement, ELEMENT_USER_TAG_NAME, model.getUser());
             createSubElement(xml, rootElement, ELEMENT_PASSWORD_TAG_NAME, model.getPassword());
+            createSubElement(xml, rootElement, ELEMENT_READ_BACKEND_TAG_NAME, String.valueOf(model.isReadBackendType()));
             createSubElement(xml, rootElement, ELEMENT_ENABLED_TAG_NAME, String.valueOf(model.isEnabled()));
         }
     }
@@ -106,21 +98,5 @@ public class DBModelsXmlStore extends XmlStore<DBModel> {
             return node.getTextContent();
         }
         return "";
-    }
-
-    private SupportedVersion getVersionFromNode(Node node, String name) {
-        if (node != null) {
-            String version = node.getTextContent();
-            Optional<SupportedVersion> versionOpt = SupportedVersion.getByVersionName(version);
-            if (versionOpt.isPresent()) {
-                return versionOpt.get();
-            } else {
-                LOG.warn("Запрошена незнакомая версия PostgreSQL для \"" + name + "\":" + version);
-                return SupportedVersion.VERSION_DEFAULT;
-            }
-        } else {
-            LOG.warn("Версия сервера PostgreSQL не задана для \"" + name + "\"");
-            return SupportedVersion.VERSION_DEFAULT;
-        }
     }
 }

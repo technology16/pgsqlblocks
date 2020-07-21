@@ -132,7 +132,7 @@ public class PgSqlBlocks_en extends ListResourceBundle {
                 {"name", "Connection name*"},
                 {"host", "Host*"},
                 {"port", "Port*"},
-                {"version", "Version*"},
+                {"read_backend_type", "Read backed type (required PostgreSQL 10+)"},
                 {"user", "User*"},
                 {"password", "Password"},
                 {"use_pgpass_file", "Password will be stored in insecure storage. Use .pgpass file instead."},
@@ -144,24 +144,12 @@ public class PgSqlBlocks_en extends ListResourceBundle {
                 {"already_exists", "Connection %s already exists!"},
                 {"missing_host_port", "Missing required field: host and/or port!"},
                 {"missing_database_user", "Missing required field: database and/or user!"},
-                {"missing_database_version", "Missing required field: database version!"},
                 {"attention", "Attention!"},
                 {"process_info", "Process information"},
-
-                //create update version dialog
-                {"warning_title","Changes"},
-                {"warning_text","Need to add the PostgreSQL version for connections.\n" +
-                        "Try to automatically determine the version for the following connections?\n" +
-                        "Default version (10) will be used in case of error or if you cancel now.\n\n%s"},
-                {"update_version_dialog", "Updating of versions"},
-                {"update_version_cancelled_message", "Updating of versions was cancelled"},
-                {"update_version_error_message", "Error in updating of versions  %s"},
 
                 //password dialog
                 {"type_password_for", "Type password for database "},
                 {"user_cancelled_on_connection", "User cancelled password entry for %s and connection was cancelled"},
-                {"user_cancelled_on_update_version", "User cancelled password entry for %s, server version was not updated"},
-                {"update_version_error", "Could not update version for %s due to error: %s"},
 
                 // tooltips
                 {"PID", "PID"},

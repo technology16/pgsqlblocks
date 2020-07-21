@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,28 +19,28 @@
  */
 package ru.taximaxim.pgsqlblocks.common.models;
 
-import ru.taximaxim.pgsqlblocks.utils.SupportedVersion;
+import java.util.Objects;
 
-public class DBModel implements Cloneable {
+public class DBModel {
 
-    private String name;
-    private String host;
-    private String port;
-    private SupportedVersion version;
-    private String databaseName;
-    private String user;
-    private String password;
-    private boolean enabled;
+    private final String name;
+    private final String host;
+    private final String port;
+    private final String databaseName;
+    private final String user;
+    private final String password;
+    private final boolean readBackendType;
+    private final boolean enabled;
 
-    public DBModel(String name, String host, String port, SupportedVersion version, String databaseName,
-                   String user, String password, boolean enabled) {
+    public DBModel(String name, String host, String port, String databaseName,
+            String user, String password, boolean readBackendType, boolean enabled) {
         this.name = name;
         this.host = host;
         this.port = port;
-        this.version = version;
         this.databaseName = databaseName;
         this.user = user;
         this.password = password;
+        this.readBackendType = readBackendType;
         this.enabled = enabled;
     }
 
@@ -56,12 +56,8 @@ public class DBModel implements Cloneable {
         return port;
     }
 
-    public SupportedVersion getVersion() {
-        return version;
-    }
-
-    public void setVersion(SupportedVersion version){
-        this.version = version;
+    public boolean isReadBackendType() {
+        return readBackendType;
     }
 
     public String getDatabaseName() {
@@ -85,8 +81,8 @@ public class DBModel implements Cloneable {
     }
 
     public DBModel copy() {
-        return new DBModel(this.name, this.host, this.port, this.version, this.databaseName,
-                this.user, this.password, this.enabled);
+        return new DBModel(this.name, this.host, this.port, this.databaseName,
+                this.user, this.password, this.readBackendType, this.enabled);
     }
 
     @Override
@@ -95,42 +91,48 @@ public class DBModel implements Cloneable {
                 "name='" + name + '\'' +
                 ", host='" + host + '\'' +
                 ", port='" + port + '\'' +
-                ", version='" + version + '\'' +
                 ", databaseName='" + databaseName + '\'' +
                 ", user='" + user + '\'' +
                 ", password='" + password + '\'' +
+                ", readBackendType='" + readBackendType + '\'' +
                 ", enabled=" + enabled +
                 '}';
     }
 
+
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
 
-        DBModel dbModel = (DBModel) o;
-
-        if (enabled != dbModel.enabled) return false;
-        if (name != null ? !name.equals(dbModel.name) : dbModel.name != null) return false;
-        if (host != null ? !host.equals(dbModel.host) : dbModel.host != null) return false;
-        if (port != null ? !port.equals(dbModel.port) : dbModel.port != null) return false;
-        if (version != null ? !version.equals(dbModel.version) : dbModel.version != null) return false;
-        if (databaseName != null ? !databaseName.equals(dbModel.databaseName) : dbModel.databaseName != null)
+        if (!(obj instanceof DBModel)) {
             return false;
-        if (user != null ? !user.equals(dbModel.user) : dbModel.user != null) return false;
-        return password != null ? password.equals(dbModel.password) : dbModel.password == null;
+        }
+
+        DBModel other = (DBModel) obj;
+        return Objects.equals(databaseName, other.databaseName)
+                && enabled == other.enabled && Objects.equals(host, other.host)
+                && Objects.equals(name, other.name)
+                && Objects.equals(password, other.password)
+                && Objects.equals(port, other.port)
+                && readBackendType == other.readBackendType
+                && Objects.equals(user, other.user);
     }
 
     @Override
     public int hashCode() {
-        int result = name != null ? name.hashCode() : 0;
-        result = 31 * result + (host != null ? host.hashCode() : 0);
-        result = 31 * result + (port != null ? port.hashCode() : 0);
-        result = 31 * result + (version != null ? version.hashCode() : 0);
-        result = 31 * result + (databaseName != null ? databaseName.hashCode() : 0);
-        result = 31 * result + (user != null ? user.hashCode() : 0);
-        result = 31 * result + (password != null ? password.hashCode() : 0);
-        result = 31 * result + (enabled ? 1 : 0);
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((databaseName == null) ? 0 : databaseName.hashCode());
+        result = prime * result + (enabled ? 1231 : 1237);
+        result = prime * result + ((host == null) ? 0 : host.hashCode());
+        result = prime * result + ((name == null) ? 0 : name.hashCode());
+        result = prime * result + ((password == null) ? 0 : password.hashCode());
+        result = prime * result + ((port == null) ? 0 : port.hashCode());
+        result = prime * result + (readBackendType ? 1231 : 1237);
+        result = prime * result + ((user == null) ? 0 : user.hashCode());
         return result;
     }
+
 }
