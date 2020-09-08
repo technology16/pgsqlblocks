@@ -132,7 +132,7 @@ public class PgSqlBlocks_en extends ListResourceBundle {
                 {"name", "Connection name*"},
                 {"host", "Host*"},
                 {"port", "Port*"},
-                {"read_backend_type", "Read backed type (required PostgreSQL 10+)"},
+                {"read_backend_type", "Read backed type (requires PostgreSQL 10+)"},
                 {"user", "User*"},
                 {"password", "Password"},
                 {"use_pgpass_file", "Password will be stored in insecure storage. Use .pgpass file instead."},
