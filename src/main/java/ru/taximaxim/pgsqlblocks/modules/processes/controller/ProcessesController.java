@@ -58,6 +58,7 @@ import ru.taximaxim.pgsqlblocks.PgSqlBlocks;
 import ru.taximaxim.pgsqlblocks.common.models.DBBlocksJournalProcess;
 import ru.taximaxim.pgsqlblocks.common.models.DBModel;
 import ru.taximaxim.pgsqlblocks.common.models.DBProcess;
+import ru.taximaxim.pgsqlblocks.common.models.DBProcessStatus;
 import ru.taximaxim.pgsqlblocks.common.ui.DBBlocksJournalViewDataSource;
 import ru.taximaxim.pgsqlblocks.common.ui.DBModelsView;
 import ru.taximaxim.pgsqlblocks.common.ui.DBModelsViewListener;
@@ -312,10 +313,8 @@ SettingsListener, DBProcessInfoViewListener {
             if (showOnlyBlockedProcessesToolItem.getSelection()) {
                 onlyBlockedFilter = new OnlyBlockedFilter();
                 dbProcessView.getTreeViewer().addFilter(onlyBlockedFilter);
-            } else {
-                if (onlyBlockedFilter != null) {
-                    dbProcessView.getTreeViewer().removeFilter(onlyBlockedFilter);
-                }
+            } else if (onlyBlockedFilter != null) {
+                dbProcessView.getTreeViewer().removeFilter(onlyBlockedFilter);
             }
         });
 
@@ -837,9 +836,9 @@ SettingsListener, DBProcessInfoViewListener {
 
         @Override
         public boolean select(Viewer viewer, Object parentElement, Object element) {
-            if (parentElement instanceof ArrayList) {
+            if (element instanceof DBProcess) {
                 DBProcess process = (DBProcess) element;
-                return process.hasChildren();
+                return DBProcessStatus.WORKING != process.getStatus();
             }
             return true;
         }
