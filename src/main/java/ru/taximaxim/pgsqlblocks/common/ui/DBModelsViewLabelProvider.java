@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,21 +19,15 @@
  */
 package ru.taximaxim.pgsqlblocks.common.ui;
 
-import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.viewers.IDecoration;
+import java.util.ResourceBundle;
+
 import org.eclipse.swt.graphics.Image;
+
 import ru.taximaxim.pgsqlblocks.modules.db.controller.DBController;
 import ru.taximaxim.pgsqlblocks.utils.ImageUtils;
-import ru.taximaxim.pgsqlblocks.utils.Images;
-
-import java.util.ResourceBundle;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
 public class DBModelsViewLabelProvider extends TreeLabelProvider {
 
-    private static final int BLOCKED_ICON_QUADRANT = IDecoration.TOP_RIGHT;
-    private ConcurrentMap<String, ImageDescriptor> decoratorsMap = new ConcurrentHashMap<>();
     private final ResourceBundle bundle;
 
     public DBModelsViewLabelProvider(ResourceBundle bundle) {
@@ -54,26 +48,20 @@ public class DBModelsViewLabelProvider extends TreeLabelProvider {
     public String getColumnText(Object element, int columnIndex) {
         DBController controller = (DBController) element;
         switch (columnIndex) {
-            case 0:
-                return controller.getModelName();
-            case 1:
-                return String.valueOf(controller.getProcessesCount());
-            default:
-                return bundle.getString("undefined");
+        case 0:
+            return controller.getModelName();
+        case 1:
+            return String.valueOf(controller.getProcessesCount());
+        default:
+            return bundle.getString("undefined");
         }
     }
 
     private Image getImage(DBController controller) {
-        Image image = ImageUtils.getImage(controller.getStatus().getStatusImage());
-
         if (controller.isBlocked()) {
-            String decoratorBlockedPath = Images.DECORATOR_BLOCKED.getImageAddr();
-            ImageDescriptor decoratorBlockedImageDesc = decoratorsMap.computeIfAbsent(decoratorBlockedPath, path -> {
-                Image blockedImage = new Image(null, getClass().getClassLoader().getResourceAsStream(path));
-                return ImageDescriptor.createFromImage(blockedImage);
-            });
-            image = ImageUtils.decorateImage(image, decoratorBlockedImageDesc, BLOCKED_ICON_QUADRANT);
+            return ImageUtils.getDecoratedBlockedImage(controller.getStatus().getStatusImage());
         }
-        return image;
+
+        return ImageUtils.getImage(controller.getStatus().getStatusImage());
     }
 }
