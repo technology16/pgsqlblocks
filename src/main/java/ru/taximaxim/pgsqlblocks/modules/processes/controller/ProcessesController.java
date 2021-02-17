@@ -100,7 +100,7 @@ SettingsListener, DBProcessInfoViewListener {
     private DBModelsView dbModelsView;
     private ExtendedTreeViewer<DBProcess> dbProcessView;
     private DBProcessInfoView dbProcessInfoView;
-
+    private DBController controller;
     private ExtendedTreeViewer<DBProcess> dbBlocksJournalView;
 
     private DBProcessInfoView dbBlocksJournalProcessInfoView;
@@ -234,10 +234,10 @@ SettingsListener, DBProcessInfoViewListener {
 
         dbBlocksJournalViewComposite.setLayout(gl);
 
-        DBBlocksJournalViewDataSource dbBlocksJournalViewDataSource = new DBBlocksJournalViewDataSource(resourceBundle);
+        DBBlocksJournalViewDataSource dbBlocksJournalViewDataSource = new DBBlocksJournalViewDataSource(resourceBundle, true);
         dbBlocksJournalView = new ExtendedTreeViewer<>(dbBlocksJournalViewComposite,
                 SWT.NONE, null, dbBlocksJournalViewDataSource, settings.getLocale(),
-                new ColumnLayoutsXmlStore(DB_BLOCKS_JOURNAL_COLUMNS));
+                new ColumnLayoutsXmlStore(DB_BLOCKS_JOURNAL_COLUMNS), true);
         dbBlocksJournalView.getTreeViewer().addSelectionChangedListener(this::dbBlocksJournalViewSelectionChanged);
         dbBlocksJournalView.getTreeViewer().getTree().addTraverseListener(e -> {
             if (e.detail == SWT.TRAVERSE_RETURN) {
@@ -613,6 +613,7 @@ SettingsListener, DBProcessInfoViewListener {
         dbProcessView.getTreeViewer().setInput(controller.getProcesses());
         dbBlocksJournalView.getTreeViewer().setInput(controller.getBlocksJournal().getProcesses());
         changeToolItemsStateForController(controller);
+        dbBlocksJournalView.setController(controller);
     }
 
     @Override
