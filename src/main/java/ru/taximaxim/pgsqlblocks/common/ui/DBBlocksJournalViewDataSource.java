@@ -20,9 +20,7 @@
 package ru.taximaxim.pgsqlblocks.common.ui;
 
 import java.util.Arrays;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Queue;
 import java.util.ResourceBundle;
 
 import org.eclipse.swt.graphics.Image;
@@ -34,16 +32,14 @@ import ru.taximaxim.pgsqlblocks.utils.DateUtils;
 
 // FIXME seems wrong to inherit from DBProcessesViewDataSource which is DBProcess-related
 public class DBBlocksJournalViewDataSource extends DBProcessesViewDataSource {
+
+    private static final int PROC_LIMIT = 10000;
+
     private final boolean isModeProcLimit;
-    private static final int PROCLIMIT = 10000;
 
     public DBBlocksJournalViewDataSource(ResourceBundle resourceBundle, boolean isModeProcLimit) {
         super(resourceBundle);
         this.isModeProcLimit = isModeProcLimit;
-    }
-
-    public DBBlocksJournalViewDataSource(ResourceBundle resourceBundle) {
-        this(resourceBundle, false);
     }
 
     @Override
@@ -81,41 +77,29 @@ public class DBBlocksJournalViewDataSource extends DBProcessesViewDataSource {
     @Override
     public Object[] getElements(Object inputElement) {
         List<DBBlocksJournalProcess> input = (List<DBBlocksJournalProcess>) inputElement;
-        if (isModeProcLimit) {
-            Queue<DBBlocksJournalProcess> blockProcess = new LinkedList<>();
-            blockProcess.addAll(input);
-            return getLimitProcess(blockProcess).toArray();
-        } else {
-            return input.toArray();
+        if (isModeProcLimit && input.size() > PROC_LIMIT) {
+            return input.subList(input.size() - PROC_LIMIT, input.size()).toArray();
         }
-    }
 
-    private static Queue<DBBlocksJournalProcess> getLimitProcess(Queue<DBBlocksJournalProcess> blockProcess) {
-        if (blockProcess.size() <= PROCLIMIT) {
-            return blockProcess;
-        }
-        else {
-            blockProcess.poll();
-            return getLimitProcess(blockProcess);
-        }
+        return input.toArray();
     }
 
     @Override
     public Object[] getChildren(Object parentElement) {
         if (parentElement instanceof DBBlocksJournalProcess) {
-            return ((DBBlocksJournalProcess)parentElement).getProcess().getChildren().toArray();
-        } else {
-            return ((DBProcess)parentElement).getChildren().toArray();
+            return ((DBBlocksJournalProcess) parentElement).getProcess().getChildren().toArray();
         }
+
+        return ((DBProcess) parentElement).getChildren().toArray();
     }
 
     @Override
     public boolean hasChildren(Object element) {
         if (element instanceof DBProcess) {
             return ((DBProcess) element).hasChildren();
-        } else {
-            return element instanceof DBBlocksJournalProcess;
         }
+
+        return element instanceof DBBlocksJournalProcess;
     }
 
     @Override

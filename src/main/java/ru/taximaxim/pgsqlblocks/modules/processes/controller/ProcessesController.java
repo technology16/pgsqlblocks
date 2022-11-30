@@ -100,7 +100,6 @@ SettingsListener, DBProcessInfoViewListener {
     private DBModelsView dbModelsView;
     private ExtendedTreeViewer<DBProcess> dbProcessView;
     private DBProcessInfoView dbProcessInfoView;
-    private DBController controller;
     private ExtendedTreeViewer<DBProcess> dbBlocksJournalView;
 
     private DBProcessInfoView dbBlocksJournalProcessInfoView;
@@ -234,7 +233,8 @@ SettingsListener, DBProcessInfoViewListener {
 
         dbBlocksJournalViewComposite.setLayout(gl);
 
-        DBBlocksJournalViewDataSource dbBlocksJournalViewDataSource = new DBBlocksJournalViewDataSource(resourceBundle, true);
+        DBBlocksJournalViewDataSource dbBlocksJournalViewDataSource = 
+                new DBBlocksJournalViewDataSource(resourceBundle, true);
         dbBlocksJournalView = new ExtendedTreeViewer<>(dbBlocksJournalViewComposite,
                 SWT.NONE, null, dbBlocksJournalViewDataSource, settings.getLocale(),
                 new ColumnLayoutsXmlStore(DB_BLOCKS_JOURNAL_COLUMNS), true);
