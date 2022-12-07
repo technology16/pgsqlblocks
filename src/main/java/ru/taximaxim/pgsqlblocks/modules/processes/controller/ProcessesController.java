@@ -117,6 +117,7 @@ SettingsListener, DBProcessInfoViewListener {
     private final DBModelsXmlStore store = new DBModelsXmlStore();
 
     private OnlyBlockedFilter onlyBlockedFilter;
+    private DBBlocksJournalViewDataSource dbBlocksJournalViewDataSource;
 
     private final List<DBController> dbControllers = new ArrayList<>();
 
@@ -233,7 +234,7 @@ SettingsListener, DBProcessInfoViewListener {
 
         dbBlocksJournalViewComposite.setLayout(gl);
 
-        DBBlocksJournalViewDataSource dbBlocksJournalViewDataSource = 
+        dbBlocksJournalViewDataSource =
                 new DBBlocksJournalViewDataSource(resourceBundle, true);
         dbBlocksJournalView = new ExtendedTreeViewer<>(dbBlocksJournalViewComposite,
                 SWT.NONE, null, dbBlocksJournalViewDataSource, settings.getLocale(),
@@ -843,5 +844,11 @@ SettingsListener, DBProcessInfoViewListener {
             }
             return true;
         }
+    }
+
+    @Override
+    public void settingsLimitBlocksChanged(int limitBlocks) {
+        dbBlocksJournalViewDataSource.setLimitBlocks(limitBlocks);
+        dbControllers.stream().filter(DBController::isConnected).forEach(controller -> controller.setProcLimit(limitBlocks));
     }
 }

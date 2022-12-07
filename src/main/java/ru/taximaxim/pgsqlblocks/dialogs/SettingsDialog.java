@@ -42,6 +42,7 @@ public class SettingsDialog extends Dialog {
     private final ResourceBundle resourceBundle;
 
     private Spinner updatePeriod;
+    private Spinner limitBlock;
     private Button showIdleButton;
     private Button showBackendPidButton;
     private Button showToolTip;
@@ -118,6 +119,18 @@ public class SettingsDialog extends Dialog {
 
         showBackendPidButton = new Button(processGroup, SWT.CHECK);
         showBackendPidButton.setSelection(settings.getShowBackendPid());
+
+        Label limitBlocksLabel = new Label(processGroup, SWT.HORIZONTAL);
+        limitBlocksLabel.setText(resourceBundle.getString("limit_block_process"));
+
+        GridData blockGd = new GridData(GridData.FILL_HORIZONTAL);
+        blockGd.horizontalSpan = 2;
+        blockGd.horizontalIndent = 50;
+        limitBlock = new Spinner(processGroup, SWT.BORDER);
+        limitBlock.setLayoutData(textGd);
+        limitBlock.setMinimum(0);
+        limitBlock.setMaximum(10000);
+        limitBlock.setSelection(settings.getLimitBlocks());
     }
 
     private void populateNotificationGroup(Composite container) {
@@ -156,6 +169,7 @@ public class SettingsDialog extends Dialog {
         settings.setUpdatePeriodSeconds(updatePeriod.getSelection());
         settings.setShowIdle(showIdleButton.getSelection());
         settings.setShowToolTip(showToolTip.getSelection());
+        settings.setLimitBlocks(limitBlock.getSelection());
         settings.setConfirmRequired(confirmRequiredButton.getSelection());
         settings.setConfirmExit(confirmExitButton.getSelection());
         settings.setLanguage(languageCombo.getText());

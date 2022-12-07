@@ -70,7 +70,7 @@ public class DBController implements DBBlocksJournalListener {
 
     private static final String PG_BACKEND_PID = "pg_backend_pid";
     private static final String BLOCKED_BY = "blockedBy";
-    private static final int PROCESSLIMIT = 10000;
+    private int procLimit;
     private final List<DBProcess> processes = new CopyOnWriteArrayList<>();
     private final UserInputPasswordProvider userInputPasswordProvider;
 
@@ -86,6 +86,7 @@ public class DBController implements DBBlocksJournalListener {
     private boolean blocked = false;
 
     private int backendPid;
+    private int part = 0;
 
     private Connection connection;
     private ScheduledFuture<?> updater;
@@ -119,6 +120,10 @@ public class DBController implements DBBlocksJournalListener {
 
     public boolean isEnabledAutoConnection() {
         return model.isEnabled();
+    }
+
+    public void setProcLimit(int procLimit) {
+        this.procLimit = procLimit;
     }
 
     /**
@@ -472,25 +477,22 @@ public class DBController implements DBBlocksJournalListener {
     }
 
     private void saveBlockedProcessesToFile(List<DBBlocksJournalProcess> processes) {
-        int i = 0;
-        String fileName = String.format("%s-%s-part-%s.xml", this.model.getName(),
-                DateUtils.dateToString(blocksJournalCreateDate), i);
-        saveInFile(fileName, processes, i);
-    }
-
-    private void saveInFile(String fileName, List<DBBlocksJournalProcess>  processes, int i) {
-        DBBlocksXmlStore store = new DBBlocksXmlStore(fileName);
+        DBBlocksXmlStore store = getXmlStore();
         List<DBBlocksJournalProcess> oldProcesses = store.readObjects();
         oldProcesses.addAll(processes);
 
-        if (oldProcesses.size()<= PROCESSLIMIT) {
+        if (procLimit != 0 && oldProcesses.size() > procLimit) {
+            part++;
+            getXmlStore().writeObjects(oldProcesses.subList(oldProcesses.size() - procLimit, oldProcesses.size()));
+        } else {
             store.writeObjects(oldProcesses);
         }
-        else {
-            String fileName1 = String.format("%s-%s-part-%s.xml", this.model.getName(),
-                    DateUtils.dateToString(blocksJournalCreateDate), i++);
-            saveInFile(fileName1, processes, i);
-        }
+    }
+
+    private DBBlocksXmlStore getXmlStore() {
+        String fileName = String.format("%s-%s-%s.xml", this.model.getName(),
+                DateUtils.dateToString(blocksJournalCreateDate), part);
+        return new DBBlocksXmlStore(fileName);
     }
 
     private void saveUnclosedBlockedProcessesToFile() {

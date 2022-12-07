@@ -33,9 +33,12 @@ import ru.taximaxim.pgsqlblocks.utils.DateUtils;
 // FIXME seems wrong to inherit from DBProcessesViewDataSource which is DBProcess-related
 public class DBBlocksJournalViewDataSource extends DBProcessesViewDataSource {
 
-    private static final int PROC_LIMIT = 10000;
-
     private final boolean isModeProcLimit;
+    private int limitBlocks;
+
+    public void setLimitBlocks(int limitBlocks) {
+        this.limitBlocks = limitBlocks;
+    }
 
     public DBBlocksJournalViewDataSource(ResourceBundle resourceBundle, boolean isModeProcLimit) {
         super(resourceBundle);
@@ -77,8 +80,8 @@ public class DBBlocksJournalViewDataSource extends DBProcessesViewDataSource {
     @Override
     public Object[] getElements(Object inputElement) {
         List<DBBlocksJournalProcess> input = (List<DBBlocksJournalProcess>) inputElement;
-        if (isModeProcLimit && input.size() > PROC_LIMIT) {
-            return input.subList(input.size() - PROC_LIMIT, input.size()).toArray();
+        if (isModeProcLimit && limitBlocks != 0 && input.size() > limitBlocks) {
+            return input.subList(input.size() - limitBlocks, input.size()).toArray();
         }
 
         return input.toArray();

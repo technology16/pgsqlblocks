@@ -44,6 +44,8 @@ public final class Settings {
     private static final Logger LOG = LogManager.getLogger(Settings.class);
 
     private static final String UPDATE_PERIOD = "update_period";
+    private static final String PROC_LIMIT = "limit_process";
+
     private static final String LOGIN_TIMEOUT = "login_timeout";
     private static final String AUTO_UPDATE = "auto_update";
     private static final String ONLY_BLOCKED = "only_blocked";
@@ -56,6 +58,7 @@ public final class Settings {
     private static final String CURRENT_LOCALE = "current_locale";
 
     private int updatePeriodSeconds;
+    private int limitBlocks;
     private final int loginTimeout;
 
     private boolean autoUpdate;
@@ -76,6 +79,7 @@ public final class Settings {
     private Settings() {
         Properties defaults = new Properties();
         defaults.put(UPDATE_PERIOD, "10");
+        defaults.put(PROC_LIMIT, "10000");
         defaults.put(AUTO_UPDATE, "true");
         defaults.put(ONLY_BLOCKED, "false");
         defaults.put(LOGIN_TIMEOUT, "10");
@@ -148,6 +152,24 @@ public final class Settings {
         return updatePeriodSeconds;
     }
 
+    /**
+     * Устанавливаем количество заблоченных процессов
+     */
+    public void setLimitBlocks(int limitBlocks) {
+        if (this.limitBlocks != limitBlocks) {
+            this.limitBlocks = limitBlocks;
+            saveProperties(PROC_LIMIT, Integer.toString(limitBlocks));
+            listeners.forEach(listener -> listener.settingsLimitBlocksChanged(limitBlocks));
+        }
+    }
+
+    /**
+     * Получаем количество заблокированных процессов
+     * @return the limitBlocks
+     */
+    public int getLimitBlocks() {
+        return limitBlocks;
+    }
     /**
      * Gets the maximum time in seconds that a driver can wait
      * when attempting to log in to a database.
