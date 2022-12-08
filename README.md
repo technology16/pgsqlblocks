@@ -17,9 +17,7 @@ CREATE ROLE pgsqlblocks_test LOGIN CREATEDB PASSWORD 'pgsqlblocks_test_user_pass
 
 2. В случае необходимости, отредактировать файл application.conf в директории src/test/resources.
 
-3. Выполните команду указав профиль, к примеру: ```mvn package -P Linux-64```, либо без указания профиля, если требуется собрать для всех платформ ```./package.sh```
-
-* Перед каждой сборкой рекомендуется выполнить команду ```mvn clean```
+3. Выполните команду указав профиль, к примеру: ```mvn clean package -P Linux-64```.
 
 ##### Запуск приложения
 
