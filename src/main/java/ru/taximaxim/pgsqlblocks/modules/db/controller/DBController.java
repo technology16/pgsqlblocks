@@ -481,12 +481,25 @@ public class DBController implements DBBlocksJournalListener {
         List<DBBlocksJournalProcess> oldProcesses = store.readObjects();
         oldProcesses.addAll(processes);
 
-        if (procLimit != 0 && oldProcesses.size() > procLimit) {
-            part++;
-            getXmlStore().writeObjects(oldProcesses.subList(oldProcesses.size() - procLimit, oldProcesses.size()));
+        if (procLimit != 0) {
+            for (List<DBBlocksJournalProcess> subList : chopped(oldProcesses, procLimit)) {
+                getXmlStore().writeObjects(subList);
+                part++;
+            }
+            part--;
         } else {
             store.writeObjects(oldProcesses);
         }
+    }
+
+    // chops a list into non-view sublists of length L
+    private <T> List<List<T>> chopped(List<T> list, final int L) {
+        List<List<T>> parts = new ArrayList<>();
+        final int N = list.size();
+        for (int i = 0; i < N; i += L) {
+            parts.add(new ArrayList<>(list.subList(i, Math.min(N, i + L))));
+        }
+        return parts;
     }
 
     private DBBlocksXmlStore getXmlStore() {
@@ -499,7 +512,8 @@ public class DBController implements DBBlocksJournalListener {
         if (blocksJournal.isEmpty()) {
             return;
         }
-        List<DBBlocksJournalProcess> openedBlockedProcesses = blocksJournal.getProcesses().stream().filter(DBBlocksJournalProcess::isOpened).collect(Collectors.toList());
+        List<DBBlocksJournalProcess> openedBlockedProcesses = blocksJournal.getProcesses().stream()
+            .filter(DBBlocksJournalProcess::isOpened).collect(Collectors.toList());
         if (openedBlockedProcesses.isEmpty()) {
             return;
         }
