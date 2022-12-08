@@ -6,7 +6,7 @@
 
     <groupId>ru.taximaxim</groupId>
     <artifactId>pgSqlBlocks</artifactId>
-    <version>1.7.6</version>
+    <version>1.8.0</version>
     <packaging>jar</packaging>
 
     <name>pgSqlBlocks</name>
@@ -19,7 +19,6 @@
         <swt.id>Linux-x86_64</swt.id>
         <swt.version>3.114.100</swt.version>
         <mainClass>ru.taximaxim.pgsqlblocks.PgSqlBlocks</mainClass>
-        <license.licenseName>apache_v2</license.licenseName>
     </properties>
 
     <organization>
