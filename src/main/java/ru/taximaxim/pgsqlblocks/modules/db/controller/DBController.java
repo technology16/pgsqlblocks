@@ -70,6 +70,7 @@ public class DBController implements DBBlocksJournalListener {
 
     private static final String PG_BACKEND_PID = "pg_backend_pid";
     private static final String BLOCKED_BY = "blockedBy";
+    private int procLimit;
     private final List<DBProcess> processes = new CopyOnWriteArrayList<>();
     private final UserInputPasswordProvider userInputPasswordProvider;
 
@@ -85,6 +86,7 @@ public class DBController implements DBBlocksJournalListener {
     private boolean blocked = false;
 
     private int backendPid;
+    private int part = 0;
 
     private Connection connection;
     private ScheduledFuture<?> updater;
@@ -118,6 +120,10 @@ public class DBController implements DBBlocksJournalListener {
 
     public boolean isEnabledAutoConnection() {
         return model.isEnabled();
+    }
+
+    public void setProcLimit(int procLimit) {
+        this.procLimit = procLimit;
     }
 
     /**
@@ -471,19 +477,43 @@ public class DBController implements DBBlocksJournalListener {
     }
 
     private void saveBlockedProcessesToFile(List<DBBlocksJournalProcess> processes) {
-        String fileName = String.format("%s-%s.xml", this.model.getName(),
-                DateUtils.dateToString(blocksJournalCreateDate));
-        DBBlocksXmlStore store = new DBBlocksXmlStore(fileName);
+        DBBlocksXmlStore store = getXmlStore();
         List<DBBlocksJournalProcess> oldProcesses = store.readObjects();
         oldProcesses.addAll(processes);
-        store.writeObjects(oldProcesses);
+
+        if (procLimit != 0) {
+            for (List<DBBlocksJournalProcess> subList : chopped(oldProcesses, procLimit)) {
+                getXmlStore().writeObjects(subList);
+                part++;
+            }
+            part--;
+        } else {
+            store.writeObjects(oldProcesses);
+        }
+    }
+
+    // chops a list into non-view sublists of length L
+    private <T> List<List<T>> chopped(List<T> list, final int L) {
+        List<List<T>> parts = new ArrayList<>();
+        final int N = list.size();
+        for (int i = 0; i < N; i += L) {
+            parts.add(new ArrayList<>(list.subList(i, Math.min(N, i + L))));
+        }
+        return parts;
+    }
+
+    private DBBlocksXmlStore getXmlStore() {
+        String fileName = String.format("%s-%s-%s.xml", this.model.getName(),
+                DateUtils.dateToString(blocksJournalCreateDate), part);
+        return new DBBlocksXmlStore(fileName);
     }
 
     private void saveUnclosedBlockedProcessesToFile() {
         if (blocksJournal.isEmpty()) {
             return;
         }
-        List<DBBlocksJournalProcess> openedBlockedProcesses = blocksJournal.getProcesses().stream().filter(DBBlocksJournalProcess::isOpened).collect(Collectors.toList());
+        List<DBBlocksJournalProcess> openedBlockedProcesses = blocksJournal.getProcesses().stream()
+            .filter(DBBlocksJournalProcess::isOpened).collect(Collectors.toList());
         if (openedBlockedProcesses.isEmpty()) {
             return;
         }

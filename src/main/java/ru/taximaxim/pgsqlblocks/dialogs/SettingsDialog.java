@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,14 +19,22 @@
  */
 package ru.taximaxim.pgsqlblocks.dialogs;
 
+import java.util.ResourceBundle;
+
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.*;
-import ru.taximaxim.pgsqlblocks.utils.Settings;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Combo;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Spinner;
 
-import java.util.ResourceBundle;
+import ru.taximaxim.pgsqlblocks.utils.Settings;
 
 public class SettingsDialog extends Dialog {
 
@@ -34,6 +42,7 @@ public class SettingsDialog extends Dialog {
     private final ResourceBundle resourceBundle;
 
     private Spinner updatePeriod;
+    private Spinner limitBlock;
     private Button showIdleButton;
     private Button showBackendPidButton;
     private Button showToolTip;
@@ -110,6 +119,18 @@ public class SettingsDialog extends Dialog {
 
         showBackendPidButton = new Button(processGroup, SWT.CHECK);
         showBackendPidButton.setSelection(settings.getShowBackendPid());
+
+        Label limitBlocksLabel = new Label(processGroup, SWT.HORIZONTAL);
+        limitBlocksLabel.setText(resourceBundle.getString("limit_block_process"));
+
+        GridData blockGd = new GridData(GridData.FILL_HORIZONTAL);
+        blockGd.horizontalSpan = 2;
+        blockGd.horizontalIndent = 50;
+        limitBlock = new Spinner(processGroup, SWT.BORDER);
+        limitBlock.setLayoutData(textGd);
+        limitBlock.setMinimum(0);
+        limitBlock.setMaximum(10000);
+        limitBlock.setSelection(settings.getLimitBlocks());
     }
 
     private void populateNotificationGroup(Composite container) {
@@ -148,6 +169,7 @@ public class SettingsDialog extends Dialog {
         settings.setUpdatePeriodSeconds(updatePeriod.getSelection());
         settings.setShowIdle(showIdleButton.getSelection());
         settings.setShowToolTip(showToolTip.getSelection());
+        settings.setLimitBlocks(limitBlock.getSelection());
         settings.setConfirmRequired(confirmRequiredButton.getSelection());
         settings.setConfirmExit(confirmExitButton.getSelection());
         settings.setLanguage(languageCombo.getText());

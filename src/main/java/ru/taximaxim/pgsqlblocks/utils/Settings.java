@@ -40,10 +40,12 @@ public final class Settings {
 
     private final List<SettingsListener> listeners = new ArrayList<>();
 
-    public static final String[] SUPPORTED_LANGUAGES = {"ru", "en"};
+    public static final String[] SUPPORTED_LANGUAGES = { "ru", "en" };
     private static final Logger LOG = LogManager.getLogger(Settings.class);
 
     private static final String UPDATE_PERIOD = "update_period";
+    private static final String LIMIT_BLOCKS = "limit_blocks";
+
     private static final String LOGIN_TIMEOUT = "login_timeout";
     private static final String AUTO_UPDATE = "auto_update";
     private static final String ONLY_BLOCKED = "only_blocked";
@@ -56,6 +58,7 @@ public final class Settings {
     private static final String CURRENT_LOCALE = "current_locale";
 
     private int updatePeriodSeconds;
+    private int limitBlocks;
     private final int loginTimeout;
 
     private boolean autoUpdate;
@@ -76,6 +79,7 @@ public final class Settings {
     private Settings() {
         Properties defaults = new Properties();
         defaults.put(UPDATE_PERIOD, "10");
+        defaults.put(LIMIT_BLOCKS, "10000");
         defaults.put(AUTO_UPDATE, "true");
         defaults.put(ONLY_BLOCKED, "false");
         defaults.put(LOGIN_TIMEOUT, "10");
@@ -98,6 +102,7 @@ public final class Settings {
         }
 
         this.updatePeriodSeconds = Integer.parseInt(properties.getProperty(UPDATE_PERIOD));
+        this.limitBlocks = Integer.parseInt(properties.getProperty(LIMIT_BLOCKS));
         this.autoUpdate = Boolean.parseBoolean(properties.getProperty(AUTO_UPDATE));
         this.loginTimeout = Integer.parseInt(properties.getProperty(LOGIN_TIMEOUT));
         this.showIdle = Boolean.parseBoolean(properties.getProperty(SHOW_IDLE));
@@ -148,6 +153,24 @@ public final class Settings {
         return updatePeriodSeconds;
     }
 
+    /**
+     * Устанавливаем количество заблоченных процессов
+     */
+    public void setLimitBlocks(int limitBlocks) {
+        if (this.limitBlocks != limitBlocks) {
+            this.limitBlocks = limitBlocks;
+            saveProperties(LIMIT_BLOCKS, Integer.toString(limitBlocks));
+            listeners.forEach(listener -> listener.settingsLimitBlocksChanged(limitBlocks));
+        }
+    }
+
+    /**
+     * Получаем количество заблокированных процессов
+     * @return the limitBlocks
+     */
+    public int getLimitBlocks() {
+        return limitBlocks;
+    }
     /**
      * Gets the maximum time in seconds that a driver can wait
      * when attempting to log in to a database.

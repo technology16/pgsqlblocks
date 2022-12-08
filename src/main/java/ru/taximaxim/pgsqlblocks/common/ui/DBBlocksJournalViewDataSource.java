@@ -33,8 +33,16 @@ import ru.taximaxim.pgsqlblocks.utils.DateUtils;
 // FIXME seems wrong to inherit from DBProcessesViewDataSource which is DBProcess-related
 public class DBBlocksJournalViewDataSource extends DBProcessesViewDataSource {
 
-    public DBBlocksJournalViewDataSource(ResourceBundle resourceBundle) {
+    private final boolean isModeProcLimit;
+    private int limitBlocks;
+
+    public void setLimitBlocks(int limitBlocks) {
+        this.limitBlocks = limitBlocks;
+    }
+
+    public DBBlocksJournalViewDataSource(ResourceBundle resourceBundle, boolean isModeProcLimit) {
         super(resourceBundle);
+        this.isModeProcLimit = isModeProcLimit;
     }
 
     @Override
@@ -72,25 +80,29 @@ public class DBBlocksJournalViewDataSource extends DBProcessesViewDataSource {
     @Override
     public Object[] getElements(Object inputElement) {
         List<DBBlocksJournalProcess> input = (List<DBBlocksJournalProcess>) inputElement;
+        if (isModeProcLimit && limitBlocks != 0 && input.size() > limitBlocks) {
+            return input.subList(input.size() - limitBlocks, input.size()).toArray();
+        }
+
         return input.toArray();
     }
 
     @Override
     public Object[] getChildren(Object parentElement) {
         if (parentElement instanceof DBBlocksJournalProcess) {
-            return ((DBBlocksJournalProcess)parentElement).getProcess().getChildren().toArray();
-        } else {
-            return ((DBProcess)parentElement).getChildren().toArray();
+            return ((DBBlocksJournalProcess) parentElement).getProcess().getChildren().toArray();
         }
+
+        return ((DBProcess) parentElement).getChildren().toArray();
     }
 
     @Override
     public boolean hasChildren(Object element) {
         if (element instanceof DBProcess) {
             return ((DBProcess) element).hasChildren();
-        } else {
-            return element instanceof DBBlocksJournalProcess;
         }
+
+        return element instanceof DBBlocksJournalProcess;
     }
 
     @Override

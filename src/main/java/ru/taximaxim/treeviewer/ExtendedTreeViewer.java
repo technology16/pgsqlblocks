@@ -29,6 +29,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 
+import ru.taximaxim.pgsqlblocks.modules.db.controller.DBController;
 import ru.taximaxim.pgsqlblocks.xmlstore.ColumnLayoutsXmlStore;
 import ru.taximaxim.treeviewer.dialog.ColumnConfigDialog;
 import ru.taximaxim.treeviewer.filter.FilterChangeHandler;
@@ -53,11 +54,14 @@ public class ExtendedTreeViewer<T extends IObject> extends Composite {
     private final FilterChangeHandler filterChangeHandler;
     private ToolItem filterToolItem;
     private Runnable updateToolItemAction;
+    private final boolean isBlockJournalTab;
+    private DBController controller;
 
     public ExtendedTreeViewer(Composite parent, int style, Object userData,
             DataSource<T> dataSource, Locale locale,
-            ColumnLayoutsXmlStore columnLayoutsStore) {
+            ColumnLayoutsXmlStore columnLayoutsStore, boolean isBlockJournalTab) {
         super(parent, style);
+        this.isBlockJournalTab = isBlockJournalTab;
         initResourceBundle(locale);
         GridLayout mainLayout = new GridLayout();
         GridData data = new GridData(SWT.FILL, SWT.FILL, true, true);
@@ -67,6 +71,16 @@ public class ExtendedTreeViewer<T extends IObject> extends Composite {
         createContent(dataSource);
         tree.setData(dataSource, columnLayoutsStore);
         getTreeViewer().setInput(userData);
+    }
+
+    public ExtendedTreeViewer(Composite parent, int style, Object userData,
+            DataSource<T> dataSource, Locale locale,
+            ColumnLayoutsXmlStore columnLayoutsStore) {
+        this(parent, style, userData, dataSource, locale, columnLayoutsStore, false);
+    }
+
+    public void setController(DBController controller) {
+        this.controller = controller;
     }
 
     private void initResourceBundle(Locale locale) {
@@ -105,6 +119,12 @@ public class ExtendedTreeViewer<T extends IObject> extends Composite {
             }
             tree.refreshWithoutSelection();
         });
+        if (isBlockJournalTab) {
+            ToolItem clearButton = new ToolItem(toolBar, SWT.PUSH);
+            clearButton.setImage(ImageUtils.getImage(Images.CLEAN));
+            clearButton.setToolTipText(Images.CLEAN.getDescription(resourceBundle));
+            clearButton.addListener(SWT.Selection, event -> clean());
+        }
 
         filterToolItem = new ToolItem(toolBar, SWT.CHECK);
         filterToolItem.setSelection(false);
@@ -130,5 +150,12 @@ public class ExtendedTreeViewer<T extends IObject> extends Composite {
 
     private void openConfigColumnDialog() {
         new ColumnConfigDialog(resourceBundle, tree, this.getShell()).open();
+    }
+
+    public void clean() {
+        if (controller != null) {
+            controller.getBlocksJournal().getProcesses().clear();
+        }
+        tree.getTree().removeAll();
     }
 }

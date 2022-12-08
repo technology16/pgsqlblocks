@@ -111,7 +111,8 @@ public class BlocksJournalView extends ApplicationWindow implements DBBlocksJour
         processesContentContainer.setLayout(new GridLayout());
         processesContentContainer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
-        DBBlocksJournalViewDataSource dbBlocksJournalViewDataSource = new DBBlocksJournalViewDataSource(resourceBundle);
+        DBBlocksJournalViewDataSource dbBlocksJournalViewDataSource =
+                new DBBlocksJournalViewDataSource(resourceBundle, false);
         processesView = new ExtendedTreeViewer<>(processesContentContainer, SWT.NONE,
                 blocksJournal.getProcesses(), dbBlocksJournalViewDataSource,
                 resourceBundle.getLocale(), new ColumnLayoutsXmlStore(BLOCKS_JOURNAL_COLUMNS));
