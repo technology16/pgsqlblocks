@@ -40,11 +40,11 @@ public final class Settings {
 
     private final List<SettingsListener> listeners = new ArrayList<>();
 
-    public static final String[] SUPPORTED_LANGUAGES = {"ru", "en"};
+    public static final String[] SUPPORTED_LANGUAGES = { "ru", "en" };
     private static final Logger LOG = LogManager.getLogger(Settings.class);
 
     private static final String UPDATE_PERIOD = "update_period";
-    private static final String PROC_LIMIT = "limit_process";
+    private static final String LIMIT_BLOCKS = "limit_blocks";
 
     private static final String LOGIN_TIMEOUT = "login_timeout";
     private static final String AUTO_UPDATE = "auto_update";
@@ -79,7 +79,7 @@ public final class Settings {
     private Settings() {
         Properties defaults = new Properties();
         defaults.put(UPDATE_PERIOD, "10");
-        defaults.put(PROC_LIMIT, "10000");
+        defaults.put(LIMIT_BLOCKS, "10000");
         defaults.put(AUTO_UPDATE, "true");
         defaults.put(ONLY_BLOCKED, "false");
         defaults.put(LOGIN_TIMEOUT, "10");
@@ -102,6 +102,7 @@ public final class Settings {
         }
 
         this.updatePeriodSeconds = Integer.parseInt(properties.getProperty(UPDATE_PERIOD));
+        this.limitBlocks = Integer.parseInt(properties.getProperty(LIMIT_BLOCKS));
         this.autoUpdate = Boolean.parseBoolean(properties.getProperty(AUTO_UPDATE));
         this.loginTimeout = Integer.parseInt(properties.getProperty(LOGIN_TIMEOUT));
         this.showIdle = Boolean.parseBoolean(properties.getProperty(SHOW_IDLE));
@@ -158,7 +159,7 @@ public final class Settings {
     public void setLimitBlocks(int limitBlocks) {
         if (this.limitBlocks != limitBlocks) {
             this.limitBlocks = limitBlocks;
-            saveProperties(PROC_LIMIT, Integer.toString(limitBlocks));
+            saveProperties(LIMIT_BLOCKS, Integer.toString(limitBlocks));
             listeners.forEach(listener -> listener.settingsLimitBlocksChanged(limitBlocks));
         }
     }
