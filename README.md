@@ -23,6 +23,8 @@ CREATE ROLE pgsqlblocks_test LOGIN CREATEDB PASSWORD 'pgsqlblocks_test_user_pass
 
 Запуск jar-файла через консоль командой ```java -jar pgSqlBlocks-1.3.6-Linux-64.jar```
 
+* Для пользователей MacOS необходим дополнительный параметр ```-XstartOnFirstThread```.
+
 * Для пользователей Gtk3, если возникают сложности с отображаемыми всплывающими сообщениями, рекомендуется запускать приложение с ключом *SWT_GTK3=0*.
 
 ### Запросы
