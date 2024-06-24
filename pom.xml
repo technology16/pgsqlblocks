@@ -29,7 +29,7 @@
         <log4j.api.version>2.23.1</log4j.api.version>
         <log4j.core.version>2.23.1</log4j.core.version>
         <log4j.slf4j.iml.version>2.23.1</log4j.slf4j.iml.version>
-        <org.eclipse.jface.version>3.33.0</org.eclipse.jface.version>
+        <org.eclipse.jface.version>3.26.0</org.eclipse.jface.version>
         <postgresql.version>42.7.3</postgresql.version>
         <config.version>1.4.3</config.version>
         <org.eclipse.core.commands.version>3.12.100</org.eclipse.core.commands.version>
