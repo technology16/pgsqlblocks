@@ -19,7 +19,7 @@
 
         <swt.artifactId>org.eclipse.swt.gtk.linux.x86_64</swt.artifactId>
         <swt.id>Linux-x86_64</swt.id>
-        <swt.version>3.126.0</swt.version>
+        <swt.version>3.120.0</swt.version>
         <maven.jar.version>3.4.2</maven.jar.version>
         <maven.compiler.version>3.13.0</maven.compiler.version>
         <maven.surefire.version>3.3.0</maven.surefire.version>
