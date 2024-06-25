@@ -17,7 +17,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <swt.artifactId>org.eclipse.swt.gtk.linux.x86_64</swt.artifactId>
         <swt.id>Linux-x86_64</swt.id>
-        <swt.version>3.114.100</swt.version>
+        <swt.version>3.117.0</swt.version>
         <mainClass>ru.taximaxim.pgsqlblocks.PgSqlBlocks</mainClass>
     </properties>
 
@@ -241,12 +241,12 @@
             <dependency>
                 <groupId>org.eclipse.platform</groupId>
                 <artifactId>org.eclipse.core.commands</artifactId>
-                <version>3.9.600</version>
+                <version>3.10.0</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.platform</groupId>
                 <artifactId>org.eclipse.equinox.common</artifactId>
-                <version>3.10.600</version>
+                <version>3.14.100</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
