@@ -26,9 +26,7 @@
         <maven.assembly.version>3.7.1</maven.assembly.version>
         <pgpass.version>2.0.1</pgpass.version>
         <junit.version>4.13.2</junit.version>
-        <log4j.api.version>2.23.1</log4j.api.version>
-        <log4j.core.version>2.23.1</log4j.core.version>
-        <log4j.slf4j.iml.version>2.23.1</log4j.slf4j.iml.version>
+        <log4j.version>2.23.0</log4j.version>
         <org.eclipse.jface.version>3.21.0</org.eclipse.jface.version>
         <postgresql.version>42.7.3</postgresql.version>
         <config.version>1.4.3</config.version>
@@ -154,17 +152,17 @@
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-api</artifactId>
-            <version>${log4j.api.version}</version>
+            <version>${log4j.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-core</artifactId>
-            <version>${log4j.core.version}</version>
+            <version>${log4j.version}</version>
         </dependency>
         <dependency>
           <groupId>org.apache.logging.log4j</groupId>
           <artifactId>log4j-slf4j-impl</artifactId>
-          <version>${log4j.slf4j.iml.version}</version>
+          <version>${log4j.version}</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.platform</groupId>
