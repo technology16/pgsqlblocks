@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>ru.taximaxim</groupId>
-    <artifactId>pgSqlBlocks</artifactId>
+    <artifactId>pgsqlblocks</artifactId>
     <version>1.8.0</version>
     <packaging>jar</packaging>
 
@@ -15,23 +15,36 @@
     <properties>
         <java.version>1.8</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <mainClass>ru.taximaxim.pgsqlblocks.PgSqlBlocks</mainClass>
+
         <swt.artifactId>org.eclipse.swt.gtk.linux.x86_64</swt.artifactId>
         <swt.id>Linux-x86_64</swt.id>
-        <swt.version>3.117.0</swt.version>
-        <mainClass>ru.taximaxim.pgsqlblocks.PgSqlBlocks</mainClass>
+        <swt.version>3.116.100</swt.version>
+        <maven.jar.version>3.4.2</maven.jar.version>
+        <maven.compiler.version>3.13.0</maven.compiler.version>
+        <maven.surefire.version>3.3.0</maven.surefire.version>
+        <maven.assembly.version>3.7.1</maven.assembly.version>
+        <pgpass.version>2.0.1</pgpass.version>
+        <junit.version>4.13.2</junit.version>
+        <log4j.version>2.23.0</log4j.version>
+        <jface.version>3.21.0</jface.version>
+        <postgresql.version>42.7.3</postgresql.version>
+        <config.version>1.4.3</config.version>
+        <commands.version>3.9.600</commands.version>
+        <equinox.version>3.10.600</equinox.version>
     </properties>
 
-    <organization>
-        <name>"Technology" LLC</name>
-    </organization>
-    <inceptionYear>2017</inceptionYear>
+    <developers>
+        <developer>
+            <organization>TAXTELECOM, LLC</organization>
+            <organizationUrl>https://maxim-technology.com</organizationUrl>
+        </developer>
+    </developers>
 
     <licenses>
         <license>
-            <name>apache_v2</name>
+            <name>The Apache Software License, Version 2.0</name>
             <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-            <distribution>repo</distribution>
-            <comments>A business-friendly OSS license</comments>
         </license>
     </licenses>
 
@@ -67,7 +80,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
-                <version>3.3.0</version>
+                <version>${maven.jar.version}</version>
                 <configuration>
                     <archive>
                         <manifest>
@@ -84,12 +97,12 @@
                     <source>${java.version}</source>
                     <target>${java.version}</target>
                 </configuration>
-                <version>3.10.1</version>
+                <version>${maven.compiler.version}</version>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.22.2</version>
+                <version>${maven.surefire.version}</version>
                 <configuration>
                     <includes>
                         <include>**/*.java</include>
@@ -99,7 +112,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-assembly-plugin</artifactId>
-                <version>3.4.2</version>
+                <version>${maven.assembly.version}</version>
                 <executions>
                     <execution>
                         <id>bundle</id>
@@ -123,44 +136,6 @@
                     <finalName>${project.artifactId}-${project.version}-${project.activeProfiles[0].id}</finalName>
                 </configuration>
             </plugin>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>license-maven-plugin</artifactId>
-                <version>2.0.0</version>
-
-                <configuration>
-                    <addJavaLicenseAfterPackage>false</addJavaLicenseAfterPackage>
-                    <sectionDelimiter>%</sectionDelimiter>
-                    <processStartTag>========================LICENSE_START=================================</processStartTag>
-                    <processEndTag>=========================LICENSE_END==================================</processEndTag>
-                    <verbose>false</verbose>
-                    <includes>
-                        <includes>**/*.java</includes>
-                        <includes>**/*.properties</includes>
-                        <includes>**/*.sql</includes>
-                    </includes>
-                    <excludes>
-                        <exclude>**/*.sql</exclude>
-                    </excludes>
-                </configuration>
-
-                <executions>
-                    <execution>
-                        <id>generate-license-headers</id>
-                        <goals>
-                            <goal>update-file-header</goal>
-                        </goals>
-                        <phase>process-sources</phase>
-                        <configuration>
-                            <licenseName>apache_v2</licenseName>
-                            <roots>
-                                <root>src/main/</root>
-                                <root>src/test</root>
-                            </roots>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
         </plugins>
 
         <testResources>
@@ -177,17 +152,17 @@
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-api</artifactId>
-            <version>2.19.0</version>
+            <version>${log4j.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-core</artifactId>
-            <version>2.19.0</version>
+            <version>${log4j.version}</version>
         </dependency>
         <dependency>
           <groupId>org.apache.logging.log4j</groupId>
           <artifactId>log4j-slf4j-impl</artifactId>
-          <version>2.19.0</version>
+          <version>${log4j.version}</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.platform</groupId>
@@ -203,7 +178,7 @@
         <dependency>
             <groupId>org.eclipse.platform</groupId>
             <artifactId>org.eclipse.jface</artifactId>
-            <version>3.20.0</version>
+            <version>${jface.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.eclipse.platform</groupId>
@@ -214,23 +189,23 @@
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>42.5.1</version>
+            <version>${postgresql.version}</version>
         </dependency>
         <dependency>
             <groupId>com.github.technology16</groupId>
-            <artifactId>PgPass</artifactId>
-            <version>1.0.0</version>
+            <artifactId>pgpass</artifactId>
+            <version>${pgpass.version}</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>4.13.2</version>
+            <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.typesafe</groupId>
             <artifactId>config</artifactId>
-            <version>1.4.2</version>
+            <version>${config.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -241,12 +216,12 @@
             <dependency>
                 <groupId>org.eclipse.platform</groupId>
                 <artifactId>org.eclipse.core.commands</artifactId>
-                <version>3.10.0</version>
+                <version>${commands.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.platform</groupId>
                 <artifactId>org.eclipse.equinox.common</artifactId>
-                <version>3.14.100</version>
+                <version>${equinox.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
