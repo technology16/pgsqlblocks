@@ -27,11 +27,11 @@
         <pgpass.version>2.0.1</pgpass.version>
         <junit.version>4.13.2</junit.version>
         <log4j.version>2.23.0</log4j.version>
-        <org.eclipse.jface.version>3.21.0</org.eclipse.jface.version>
+        <jface.version>3.21.0</jface.version>
         <postgresql.version>42.7.3</postgresql.version>
         <config.version>1.4.3</config.version>
-        <org.eclipse.core.commands.version>3.9.600</org.eclipse.core.commands.version>
-        <org.eclipse.equinox.common.version>3.10.600</org.eclipse.equinox.common.version>
+        <commands.version>3.9.600</commands.version>
+        <equinox.version>3.10.600</equinox.version>
         <testcontainers.version>1.19.8</testcontainers.version>
     </properties>
 
@@ -179,7 +179,7 @@
         <dependency>
             <groupId>org.eclipse.platform</groupId>
             <artifactId>org.eclipse.jface</artifactId>
-            <version>${org.eclipse.jface.version}</version>
+            <version>${jface.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.eclipse.platform</groupId>
@@ -222,12 +222,12 @@
             <dependency>
                 <groupId>org.eclipse.platform</groupId>
                 <artifactId>org.eclipse.core.commands</artifactId>
-                <version>${org.eclipse.core.commands.version}</version>
+                <version>${commands.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.platform</groupId>
                 <artifactId>org.eclipse.equinox.common</artifactId>
-                <version>${org.eclipse.equinox.common.version}</version>
+                <version>${equinox.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.testcontainers</groupId>
@@ -235,7 +235,7 @@
                 <version>${testcontainers.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
-        </dependency>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 </project>
