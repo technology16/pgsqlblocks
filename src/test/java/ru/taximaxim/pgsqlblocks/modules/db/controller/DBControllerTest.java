@@ -42,6 +42,8 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.utility.DockerImageName;
 
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
@@ -108,9 +110,14 @@ public class DBControllerTest {
     private static List<Thread> threadList = new ArrayList<>();
     private static Listener listener = new Listener();
 
+    private static GenericContainer postgres = new GenericContainer(DockerImageName.parse("postgres:15-bullseye"))
+            .withEnv("POSTGRES_USER", REMOTE_USERNAME).withEnv("POSTGRES_PASSWORD", REMOTE_PASSWORD)
+            .withEnv("POSTGRES_DB", REMOTE_DB).withExposedPorts(5432);
+
     @BeforeClass
     public static void initialize() throws IOException {
-        DBModel model = new DBModel("TestDbc", REMOTE_HOST, REMOTE_PORT,
+        postgres.start();
+        DBModel model = new DBModel("TestDbc", REMOTE_HOST, postgres.getFirstMappedPort().toString(),
                 REMOTE_DB, REMOTE_USERNAME, REMOTE_PASSWORD, true, true);
         testDbc = new DBController(Settings.getInstance(), model, null);
         testDbc.connectAsync();
@@ -120,17 +127,19 @@ public class DBControllerTest {
     @AfterClass
     public static void terminate() throws SQLException {
         testDbc.disconnect(true);
+        postgres.close();
     }
 
     @Before
     public void beforeTest() throws IOException, SQLException {
-        Connection conn1 = getNewConnector();
+        Integer port = postgres.getFirstMappedPort();
+        Connection conn1 = getNewConnector(port);
         connectionList.add(new ConnInfo(getPid(conn1), conn1));
 
-        Connection conn2 = getNewConnector();
+        Connection conn2 = getNewConnector(port);
         connectionList.add(new ConnInfo(getPid(conn2), conn2));
 
-        Connection conn3 = getNewConnector();
+        Connection conn3 = getNewConnector(port);
         connectionList.add(new ConnInfo(getPid(conn3), conn3));
 
         /* prepare db */
@@ -298,10 +307,10 @@ public class DBControllerTest {
         assertTrue(proc3.get().getParents().stream().anyMatch(x -> x.getPid() == proc2.get().getPid()));
     }
 
-    private Connection getNewConnector() throws SQLException {
+    private Connection getNewConnector(Integer port) throws SQLException {
         DriverManager.setLoginTimeout(10);
         return DriverManager.getConnection(
-                String.format("jdbc:postgresql://%1$s:%2$s/%3$s", REMOTE_HOST, REMOTE_PORT, REMOTE_DB),
+                String.format("jdbc:postgresql://%1$s:%2$s/%3$s", REMOTE_HOST, port, REMOTE_DB),
                 REMOTE_USERNAME,
                 REMOTE_PASSWORD);
     }

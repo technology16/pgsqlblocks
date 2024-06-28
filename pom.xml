@@ -32,6 +32,7 @@
         <config.version>1.4.3</config.version>
         <commands.version>3.9.600</commands.version>
         <equinox.version>3.10.600</equinox.version>
+        <testcontainers.version>1.19.8</testcontainers.version>
     </properties>
 
     <developers>
@@ -208,6 +209,11 @@
             <version>${config.version}</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>postgresql</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <dependencyManagement>
@@ -222,6 +228,13 @@
                 <groupId>org.eclipse.platform</groupId>
                 <artifactId>org.eclipse.equinox.common</artifactId>
                 <version>${equinox.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.testcontainers</groupId>
+                <artifactId>testcontainers-bom</artifactId>
+                <version>${testcontainers.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
         </dependencies>
     </dependencyManagement>
