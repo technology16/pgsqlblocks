@@ -394,10 +394,6 @@ public class DBController implements DBBlocksJournalListener {
         }
     }
 
-    Connection getConnection() {
-        return connection;
-    }
-
     public void addListener(DBControllerListener listener) {
         listeners.add(listener);
     }

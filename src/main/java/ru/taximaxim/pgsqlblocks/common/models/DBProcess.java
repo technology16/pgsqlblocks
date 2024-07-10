@@ -141,9 +141,7 @@ public class DBProcess implements IObject {
         if (this == o) return true;
         if (!(o instanceof DBProcess)) return false;
 
-        DBProcess process = (DBProcess) o;
-
-        return pid == process.pid;
+        return pid == ((DBProcess) o).pid;
     }
 
     @Override
