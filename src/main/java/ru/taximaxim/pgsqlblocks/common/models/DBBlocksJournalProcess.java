@@ -82,8 +82,6 @@ public class DBBlocksJournalProcess implements IObject {
         Date xactStart = process.getQuery().getXactStart();
         Date otherXactStart = other.getProcess().getQuery().getXactStart();
 
-        Objects.equals(xactStart, otherXactStart);
-
         boolean isSameXactStart = Objects.equals(xactStart, otherXactStart);
         boolean isSamePid = process.getPid() == other.getProcess().getPid();
 
