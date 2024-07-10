@@ -108,7 +108,8 @@ public class DBModel {
 
         DBModel other = (DBModel) obj;
         return Objects.equals(databaseName, other.databaseName)
-                && enabled == other.enabled && Objects.equals(host, other.host)
+                && enabled == other.enabled 
+                && Objects.equals(host, other.host)
                 && Objects.equals(name, other.name)
                 && Objects.equals(password, other.password)
                 && Objects.equals(port, other.port)
@@ -118,17 +119,6 @@ public class DBModel {
 
     @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((databaseName == null) ? 0 : databaseName.hashCode());
-        result = prime * result + (enabled ? 1231 : 1237);
-        result = prime * result + ((host == null) ? 0 : host.hashCode());
-        result = prime * result + ((name == null) ? 0 : name.hashCode());
-        result = prime * result + ((password == null) ? 0 : password.hashCode());
-        result = prime * result + ((port == null) ? 0 : port.hashCode());
-        result = prime * result + (readBackendType ? 1231 : 1237);
-        result = prime * result + ((user == null) ? 0 : user.hashCode());
-        return result;
+        return Objects.hash(databaseName, enabled, host, name, password, port, readBackendType, user);
     }
-
 }

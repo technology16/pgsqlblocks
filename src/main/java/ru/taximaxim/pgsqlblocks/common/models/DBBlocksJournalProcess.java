@@ -18,6 +18,7 @@ package ru.taximaxim.pgsqlblocks.common.models;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -69,15 +70,19 @@ public class DBBlocksJournalProcess implements IObject {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof DBBlocksJournalProcess)) return false;
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof DBBlocksJournalProcess)) {
+            return false;
+        }
 
         DBBlocksJournalProcess other = (DBBlocksJournalProcess) o;
 
         Date xactStart = process.getQuery().getXactStart();
         Date otherXactStart = other.getProcess().getQuery().getXactStart();
 
-        boolean isSameXactStart = xactStart == null ? otherXactStart == null : xactStart.equals(otherXactStart);
+        boolean isSameXactStart = Objects.equals(xactStart, otherXactStart);
         boolean isSamePid = process.getPid() == other.getProcess().getPid();
 
         return isSameXactStart && isSamePid && childrenEquals(process.getChildren(), other.getProcess().getChildren());

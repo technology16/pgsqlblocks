@@ -16,6 +16,7 @@
 package ru.taximaxim.pgsqlblocks.common.models;
 
 import java.util.Date;
+import java.util.Objects;
 
 /**
  * Когда DBProcessQuery создается внутри десериализации resultSet, невозможно
@@ -89,25 +90,23 @@ public class DBProcessQuery {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof DBProcessQuery)) return false;
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof DBProcessQuery)) {
+            return false;
+        }
 
         DBProcessQuery that = (DBProcessQuery) o;
-
-        if (slowQuery != that.slowQuery) return false;
-        if (!queryString.equals(that.queryString)) return false;
-        if (backendStart != null ? !backendStart.equals(that.backendStart) : that.backendStart != null) return false;
-        if (queryStart != null ? !queryStart.equals(that.queryStart) : that.queryStart != null) return false;
-        return xactStart != null ? xactStart.equals(that.xactStart) : that.xactStart == null;
+        return Objects.equals(queryString, that.queryString)
+                && slowQuery == that.slowQuery
+                && Objects.equals(backendStart, that.backendStart)
+                && Objects.equals(queryStart, that.queryStart)
+                && Objects.equals(xactStart, that.xactStart);
     }
 
     @Override
     public int hashCode() {
-        int result = queryString.hashCode();
-        result = 31 * result + (slowQuery ? 1 : 0);
-        result = 31 * result + (backendStart != null ? backendStart.hashCode() : 0);
-        result = 31 * result + (queryStart != null ? queryStart.hashCode() : 0);
-        result = 31 * result + (xactStart != null ? xactStart.hashCode() : 0);
-        return result;
+        return Objects.hash(queryString, slowQuery, backendStart, queryStart, xactStart);
     }
 }
