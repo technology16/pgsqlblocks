@@ -10,14 +10,8 @@ pgSqlBlocks - это standalone приложение, написанное на 
 Выполните команду с использованием флага -DskipTests, к примеру: ```mvn package -P Linux-64 -DskipTests```
 
 ##### Для запуска тестов требуется:
-1. Создать роль для тестового пользователя в БД:
-```
-CREATE ROLE pgsqlblocks_test LOGIN CREATEDB PASSWORD 'pgsqlblocks_test_user_password';
-```
-
-2. В случае необходимости, отредактировать файл application.conf в директории src/test/resources.
-
-3. Выполните команду указав профиль, к примеру: ```mvn clean package -P Linux-64```.
+1. Наличие [docker](https://docs.docker.com/engine/install/).
+2. Выполните команду: ```mvn test```.
 
 ##### Запуск приложения
 
