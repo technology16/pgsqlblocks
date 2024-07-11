@@ -111,7 +111,7 @@ public class DBControllerTest {
     @BeforeClass
     public static void initialize() throws IOException {
         DBModel model = new DBModel("TestDbc", REMOTE_HOST, REMOTE_PORT,
-                REMOTE_DB, REMOTE_USERNAME, REMOTE_PASSWORD, true, true);
+                REMOTE_DB, "", REMOTE_USERNAME, REMOTE_PASSWORD, true, true);
         testDbc = new DBController(Settings.getInstance(), model, null);
         testDbc.connectAsync();
         testDbc.addListener(listener);

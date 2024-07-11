@@ -17,9 +17,12 @@ package ru.taximaxim.pgsqlblocks.dialogs;
 
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.Set;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -40,22 +43,26 @@ public class AddDatabaseDialog extends Dialog {
 
     private DBModel createdModel;
 
-    Text nameText;
-    Text hostText;
-    Text portText;
-    Text userText;
-    Text passwordText;
-    Text databaseNameText;
-    Button readBackendTypeButton;
-    Button enabledButton;
+    protected Text nameText;
+    protected Text hostText;
+    protected Text portText;
+    protected Text userText;
+    protected Text passwordText;
+    protected Text databaseNameText;
+    protected Button readBackendTypeButton;
+    protected Button enabledButton;
+    protected ComboViewer cmdDbGroup;
+    private final Set<String> dbGroup;
 
     private static final String DEFAULT_PORT = "5432";
     private static final int TEXT_WIDTH = 200;
 
     private final List<String> reservedConnectionNames;
 
-    public AddDatabaseDialog(ResourceBundle resourceBundle, Shell shell, List<String> reservedConnectionNames) {
+    public AddDatabaseDialog(ResourceBundle resourceBundle, Set<String> dbGroup, Shell shell,
+            List<String> reservedConnectionNames) {
         super(shell);
+        this.dbGroup = dbGroup;
         this.resourceBundle = resourceBundle;
         this.reservedConnectionNames = reservedConnectionNames;
     }
@@ -121,6 +128,14 @@ public class AddDatabaseDialog extends Dialog {
         databaseNameText = new Text(container, SWT.BORDER);
         databaseNameText.setLayoutData(textGd);
 
+        Label DbGroupLabel = new Label(container, SWT.HORIZONTAL);
+        DbGroupLabel.setText(resourceBundle.getString("db_group"));
+        cmdDbGroup = new ComboViewer(container, SWT.DROP_DOWN);
+        cmdDbGroup.getCombo().setLayoutData(textGd);
+        cmdDbGroup.setContentProvider(ArrayContentProvider.getInstance());
+        dbGroup.removeIf(String::isEmpty);
+        cmdDbGroup.setInput(dbGroup);
+
         GridData checkGd = new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1);
 
         readBackendTypeButton = new Button(container, SWT.CHECK);
@@ -140,6 +155,7 @@ public class AddDatabaseDialog extends Dialog {
         String host = hostText.getText();
         String port = portText.getText();
         String databaseName = databaseNameText.getText();
+        String dbGroup = cmdDbGroup.getCombo().getText();
         String user = userText.getText();
         String password = passwordText.getText();
         boolean readBackendType = readBackendTypeButton.getSelection();
@@ -158,7 +174,7 @@ public class AddDatabaseDialog extends Dialog {
             return;
         }
 
-        createdModel = new DBModel(name, host, port, databaseName, user,
+        createdModel = new DBModel(name, host, port, databaseName, dbGroup, user,
                 password, readBackendType, enabled);
 
         super.okPressed();

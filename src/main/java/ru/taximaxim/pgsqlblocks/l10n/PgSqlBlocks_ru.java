@@ -134,6 +134,7 @@ public class PgSqlBlocks_ru extends ListResourceBundle {
             {"password", "Пароль"},
             {"use_pgpass_file", "Указание пароля здесь небезопасно. Используйте .pgpass файл."},
             {"database_name", "Имя БД*"},
+            {"db_group", "группа БД"},
             {"connect_automatically", "Подкл. автоматически"},
             {"add_new_connection", "Добавить новое соединение"},
             {"edit_connection", "Редактировать соединение"},

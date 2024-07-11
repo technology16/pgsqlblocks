@@ -34,6 +34,7 @@ public class DBModelsXmlStore extends XmlStore<DBModel> {
     private static final String ELEMENT_HOST_TAG_NAME          = "host";
     private static final String ELEMENT_PORT_TAG_NAME          = "port";
     private static final String ELEMENT_DATABASE_NAME_TAG_NAME = "dbname";
+    private static final String ELEMENT_DB_GROUP_NAME          = "dbgroup";
     private static final String ELEMENT_USER_TAG_NAME          = "user";
     private static final String ELEMENT_PASSWORD_TAG_NAME      = "passwd";
     private static final String ELEMENT_READ_BACKEND_TAG_NAME  = "readbt";
@@ -55,6 +56,7 @@ public class DBModelsXmlStore extends XmlStore<DBModel> {
         Node hostNode = element.getElementsByTagName(ELEMENT_HOST_TAG_NAME).item(0);
         Node portNode = element.getElementsByTagName(ELEMENT_PORT_TAG_NAME).item(0);
         Node databaseNameNode = element.getElementsByTagName(ELEMENT_DATABASE_NAME_TAG_NAME).item(0);
+        Node dbGroupNode = element.getElementsByTagName(ELEMENT_DB_GROUP_NAME).item(0);
         Node userNode = element.getElementsByTagName(ELEMENT_USER_TAG_NAME).item(0);
         Node passwordNode = element.getElementsByTagName(ELEMENT_PASSWORD_TAG_NAME).item(0);
         Node readBackendNode = element.getElementsByTagName(ELEMENT_READ_BACKEND_TAG_NAME).item(0);
@@ -64,12 +66,13 @@ public class DBModelsXmlStore extends XmlStore<DBModel> {
         String host = getTextContentFromNode(hostNode);
         String port = getTextContentFromNode(portNode);
         String databaseName = getTextContentFromNode(databaseNameNode);
+        String dbGroup = getTextContentFromNode(dbGroupNode);
         String user = getTextContentFromNode(userNode);
         String password = getTextContentFromNode(passwordNode);
         boolean readBackend = readBackendNode != null && Boolean.parseBoolean(getTextContentFromNode(readBackendNode));
         boolean enabled = enabledNode != null && Boolean.parseBoolean(getTextContentFromNode(enabledNode));
 
-        return new DBModel(name, host, port, databaseName, user, password, readBackend, enabled);
+        return new DBModel(name, host, port, databaseName, dbGroup, user, password, readBackend, enabled);
     }
 
     @Override
@@ -82,6 +85,10 @@ public class DBModelsXmlStore extends XmlStore<DBModel> {
             createSubElement(xml, rootElement, ELEMENT_HOST_TAG_NAME, model.getHost());
             createSubElement(xml, rootElement, ELEMENT_PORT_TAG_NAME, model.getPort());
             createSubElement(xml, rootElement, ELEMENT_DATABASE_NAME_TAG_NAME, model.getDatabaseName());
+            String dbGroup = model.getDbGroup();
+            if (dbGroup != null) {
+                createSubElement(xml, rootElement, ELEMENT_DB_GROUP_NAME, dbGroup);
+            }
             createSubElement(xml, rootElement, ELEMENT_USER_TAG_NAME, model.getUser());
             createSubElement(xml, rootElement, ELEMENT_PASSWORD_TAG_NAME, model.getPassword());
             createSubElement(xml, rootElement, ELEMENT_READ_BACKEND_TAG_NAME, String.valueOf(model.isReadBackendType()));

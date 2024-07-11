@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
@@ -385,7 +386,12 @@ SettingsListener, DBProcessInfoViewListener {
                 .map(DBController::getModel)
                 .map(DBModel::getName)
                 .collect(Collectors.toList());
-        AddDatabaseDialog addDatabaseDialog = new AddDatabaseDialog(resourceBundle, view.getShell(), reservedConnectionNames);
+        Set<String> dbGroupNames = dbControllers.stream()
+                .map(DBController::getModel)
+                .map(DBModel::getDbGroup)
+                .collect(Collectors.toSet());
+        AddDatabaseDialog addDatabaseDialog = new AddDatabaseDialog(resourceBundle, dbGroupNames, view.getShell(),
+                reservedConnectionNames);
         if (addDatabaseDialog.open() == Window.OK) {
             DBController controller = addDatabase(addDatabaseDialog.getCreatedModel());
             dbModelsView.refresh();
@@ -416,8 +422,12 @@ SettingsListener, DBProcessInfoViewListener {
         List<String> reservedConnectionNames = dbControllers.stream()
                 .map(DBController::getModelName)
                 .collect(Collectors.toList());
-        EditDatabaseDialog editDatabaseDialog =
-                new EditDatabaseDialog(resourceBundle, view.getShell(), reservedConnectionNames, selectedController.getModel());
+        Set<String> DbGroupNames = dbControllers.stream()
+                .map(DBController::getModel)
+                .map(DBModel::getDbGroup)
+                .collect(Collectors.toSet());
+        EditDatabaseDialog editDatabaseDialog = new EditDatabaseDialog(resourceBundle, view.getShell(),
+                reservedConnectionNames, DbGroupNames, selectedController.getModel());
         if (editDatabaseDialog.open() == Window.OK) {
             editDatabase(editDatabaseDialog.getEditedModel(), editDatabaseDialog.getCreatedModel());
         }
