@@ -116,11 +116,13 @@ public class DBModel {
         DBModel other = (DBModel) obj;
         return Objects.equals(databaseName, other.databaseName)
                 && Objects.equals(dbGroup, other.dbGroup)
-                && enabled == other.enabled && Objects.equals(host, other.host)
+                && enabled == other.enabled
+                && Objects.equals(host, other.host)
                 && Objects.equals(name, other.name)
                 && Objects.equals(password, other.password)
                 && Objects.equals(port, other.port)
-                && readBackendType == other.readBackendType;
+                && readBackendType == other.readBackendType
+                && Objects.equals(user, other.user);
     }
 
     @Override

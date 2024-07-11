@@ -15,6 +15,8 @@
  *******************************************************************************/
 package ru.taximaxim.pgsqlblocks.common.models;
 
+import java.util.Objects;
+
 public class DBBlock {
 
     private final int blockingPid;
@@ -47,23 +49,23 @@ public class DBBlock {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof DBBlock)) return false;
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof DBBlock)) {
+            return false;
+        }
 
         DBBlock dbBlock = (DBBlock) o;
 
-        if (blockingPid != dbBlock.blockingPid) return false;
-        if (granted != dbBlock.granted) return false;
-        if (!relation.equals(dbBlock.relation)) return false;
-        return locktype.equals(dbBlock.locktype);
+        return blockingPid == dbBlock.blockingPid
+                && relation.equals(dbBlock.relation)
+                && locktype.equals(dbBlock.locktype)
+                && granted == dbBlock.granted;
     }
 
     @Override
     public int hashCode() {
-        int result = blockingPid;
-        result = 31 * result + relation.hashCode();
-        result = 31 * result + locktype.hashCode();
-        result = 31 * result + (granted ? 1 : 0);
-        return result;
+        return Objects.hash(blockingPid, relation, locktype, granted);
     }
 }

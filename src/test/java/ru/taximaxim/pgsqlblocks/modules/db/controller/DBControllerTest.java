@@ -42,6 +42,8 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.containers.PostgreSQLContainer;
 
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
@@ -93,7 +95,6 @@ public class DBControllerTest {
     private static final Config CONFIG = ConfigFactory.load();
     private static final long DELAY_MS = CONFIG.getLong("pgsqlblocks-test-configs.delay-ms");
     private static final String REMOTE_HOST = CONFIG.getString("pgsqlblocks-test-configs.remote-host");
-    private static final String REMOTE_PORT = CONFIG.getString("pgsqlblocks-test-configs.remote-port");
     private static final String REMOTE_DB = CONFIG.getString("pgsqlblocks-test-configs.remote-db");
     private static final String REMOTE_USERNAME = CONFIG.getString("pgsqlblocks-test-configs.remote-username");
     private static final String REMOTE_PASSWORD = CONFIG.getString("pgsqlblocks-test-configs.remote-password");
@@ -104,44 +105,62 @@ public class DBControllerTest {
     private static final String TEST_CREATE_INDEX_SQL = CONFIG.getString("pgsqlblocks-test-configs.create-index-sql");
 
     private static DBController testDbc;
-    private static List<ConnInfo> connectionList = new ArrayList<>();
-    private static List<Thread> threadList = new ArrayList<>();
-    private static Listener listener = new Listener();
+    private final List<ConnInfo> connectionList = new ArrayList<>();
+    private final List<Thread> threadList = new ArrayList<>();
+    private static final Listener LISTENER = new Listener();
+    private static GenericContainer<?> postgres;
+    private static Connection conn;
 
     @BeforeClass
-    public static void initialize() throws IOException {
-        DBModel model = new DBModel("TestDbc", REMOTE_HOST, REMOTE_PORT,
+    public static void initialize() {
+        postgres = new PostgreSQLContainer("postgres:15.2-alpine")
+                .withUsername(REMOTE_USERNAME)
+                .withPassword(REMOTE_PASSWORD)
+                .withDatabaseName(REMOTE_DB)
+                .withExposedPorts(5432);
+        postgres.start();
+        DBModel model = new DBModel("TestDbc", REMOTE_HOST, postgres.getFirstMappedPort().toString(),
                 REMOTE_DB, "", REMOTE_USERNAME, REMOTE_PASSWORD, true, true);
         testDbc = new DBController(Settings.getInstance(), model, null);
         testDbc.connectAsync();
-        testDbc.addListener(listener);
+        testDbc.addListener(LISTENER);
     }
 
     @AfterClass
     public static void terminate() throws SQLException {
         testDbc.disconnect(true);
+        conn.close();
+        postgres.close();
+
     }
 
     @Before
     public void beforeTest() throws IOException, SQLException {
-        Connection conn1 = getNewConnector();
+        Integer port = postgres.getFirstMappedPort();
+        Connection conn1 = getNewConnector(port);
         connectionList.add(new ConnInfo(getPid(conn1), conn1));
 
-        Connection conn2 = getNewConnector();
+        Connection conn2 = getNewConnector(port);
         connectionList.add(new ConnInfo(getPid(conn2), conn2));
 
-        Connection conn3 = getNewConnector();
+        Connection conn3 = getNewConnector(port);
         connectionList.add(new ConnInfo(getPid(conn3), conn3));
 
         /* prepare db */
-        testDbc.getConnection().prepareStatement(loadQuery(CONFIG.getString("pgsqlblocks-test-configs.testing-dump-sql"))).execute();
+        String query = loadQuery(CONFIG.getString("pgsqlblocks-test-configs.testing-dump-sql"));
+        try (PreparedStatement prSt = getSingleConnection().prepareStatement(query)) {
+            prSt.execute();
+        }
         /* create rule */
-        testDbc.getConnection().prepareStatement(loadQuery(CREATE_RULE_SQL)).execute();
+        query = loadQuery(CREATE_RULE_SQL);
+        try (PreparedStatement prSt = getSingleConnection().prepareStatement(query)) {
+            prSt.execute();
+        }
     }
 
     @After
     public void afterTest() throws SQLException {
-        try (PreparedStatement termPs = testDbc.getConnection().prepareStatement(CONFIG.getString("pgsqlblocks-test-configs.pg-terminate-backend"))) {
+        try (PreparedStatement termPs = getSingleConnection().prepareStatement(CONFIG.getString("pgsqlblocks-test-configs.pg-terminate-backend"))) {
             for (ConnInfo connInfo : connectionList) {
                 termPs.setInt(1, connInfo.getPid());
                 ResultSet result = termPs.executeQuery();
@@ -169,7 +188,7 @@ public class DBControllerTest {
         runThreads(statement2, statement3, statement1);
 
         // wait until processes are updated
-        CompletableFuture<DBController> lock = listener.lock;
+        CompletableFuture<DBController> lock = LISTENER.lock;
         testDbc.updateProcesses();
         lock.get();
 
@@ -203,7 +222,7 @@ public class DBControllerTest {
         runThreads(statement1, statement2);
 
         // wait until processes are updated
-        CompletableFuture<DBController> lock = listener.lock;
+        CompletableFuture<DBController> lock = LISTENER.lock;
         testDbc.updateProcesses();
         lock.get();
 
@@ -226,7 +245,9 @@ public class DBControllerTest {
     @Test
     public void testOrderedLocks() throws IOException, SQLException, InterruptedException, ExecutionException {
         /* create rule */
-        testDbc.getConnection().prepareStatement(loadQuery(CREATE_RULE_SQL)).execute();
+        try (PreparedStatement prSt = getSingleConnection().prepareStatement(loadQuery(CREATE_RULE_SQL))) {
+            prSt.execute();
+        }
 
         assertTrue(connectionList.get(0).getPid() < connectionList.get(1).getPid());
 
@@ -236,7 +257,7 @@ public class DBControllerTest {
         runThreads(statement2, statement1);
 
         // wait until processes are updated
-        CompletableFuture<DBController> lock = listener.lock;
+        CompletableFuture<DBController> lock = LISTENER.lock;
         testDbc.updateProcesses();
         lock.get();
 
@@ -260,7 +281,9 @@ public class DBControllerTest {
     @Test
     public void testTripleLocks() throws IOException, SQLException, InterruptedException, ExecutionException {
         /* create rule */
-        testDbc.getConnection().prepareStatement(loadQuery(CREATE_RULE_SQL)).execute();
+        try (PreparedStatement prSt = getSingleConnection().prepareStatement(loadQuery(CREATE_RULE_SQL))) {
+            prSt.execute();
+        }
 
         PreparedStatement statement1 = connectionList.get(0).getConnection().prepareStatement(loadQuery(TEST_SELECT_1000_SQL));
         PreparedStatement statement2 = connectionList.get(1).getConnection().prepareStatement(loadQuery(TEST_DROP_RULE_SQL));
@@ -269,7 +292,7 @@ public class DBControllerTest {
         runThreads(statement1, statement2, statement3);
 
         // wait until processes are updated
-        CompletableFuture<DBController> lock = listener.lock;
+        CompletableFuture<DBController> lock = LISTENER.lock;
         testDbc.updateProcesses();
         lock.get();
 
@@ -298,15 +321,22 @@ public class DBControllerTest {
         assertTrue(proc3.get().getParents().stream().anyMatch(x -> x.getPid() == proc2.get().getPid()));
     }
 
-    private Connection getNewConnector() throws SQLException {
+    private Connection getSingleConnection() throws SQLException {
+        if (conn == null) {
+            conn = getNewConnector(postgres.getFirstMappedPort());
+        }
+        return conn;
+    }
+
+    private Connection getNewConnector(Integer port) throws SQLException {
         DriverManager.setLoginTimeout(10);
         return DriverManager.getConnection(
-                String.format("jdbc:postgresql://%1$s:%2$s/%3$s", REMOTE_HOST, REMOTE_PORT, REMOTE_DB),
+                String.format("jdbc:postgresql://%1$s:%2$s/%3$s", REMOTE_HOST, port, REMOTE_DB),
                 REMOTE_USERNAME,
                 REMOTE_PASSWORD);
     }
 
-    private void runThreads(PreparedStatement... statements) throws SQLException, InterruptedException {
+    private void runThreads(PreparedStatement... statements) throws InterruptedException {
         for (PreparedStatement statement : statements) {
             Thread thread = getNewThread(statement);
             threadList.add(thread);
@@ -315,7 +345,7 @@ public class DBControllerTest {
         }
     }
 
-    private Thread getNewThread(PreparedStatement statement) throws SQLException {
+    private Thread getNewThread(PreparedStatement statement) {
         return new Thread(() -> {
             try {
                 statement.execute();

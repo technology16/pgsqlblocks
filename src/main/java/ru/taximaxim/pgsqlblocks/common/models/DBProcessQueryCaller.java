@@ -15,6 +15,8 @@
  *******************************************************************************/
 package ru.taximaxim.pgsqlblocks.common.models;
 
+import java.util.Objects;
+
 public class DBProcessQueryCaller {
 
     private final String applicationName;
@@ -57,23 +59,22 @@ public class DBProcessQueryCaller {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof DBProcessQueryCaller)) return false;
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof DBProcessQueryCaller)) {
+            return false;
+        }
 
         DBProcessQueryCaller that = (DBProcessQueryCaller) o;
-
-        if (!applicationName.equals(that.applicationName)) return false;
-        if (!databaseName.equals(that.databaseName)) return false;
-        if (!userName.equals(that.userName)) return false;
-        return client.equals(that.client);
+        return Objects.equals(applicationName, that.applicationName)
+                && Objects.equals(databaseName, that.databaseName)
+                && Objects.equals(userName, that.userName)
+                && Objects.equals(client, that.client);
     }
 
     @Override
     public int hashCode() {
-        int result = applicationName.hashCode();
-        result = 31 * result + databaseName.hashCode();
-        result = 31 * result + userName.hashCode();
-        result = 31 * result + client.hashCode();
-        return result;
+        return Objects.hash(applicationName, databaseName, userName, client);
     }
 }
