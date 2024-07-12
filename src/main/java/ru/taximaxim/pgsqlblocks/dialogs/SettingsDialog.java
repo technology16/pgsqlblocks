@@ -19,17 +19,24 @@ import java.util.ResourceBundle;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Spinner;
+import org.eclipse.swt.widgets.Text;
 
+import ru.taximaxim.pgsqlblocks.utils.ImageUtils;
+import ru.taximaxim.pgsqlblocks.utils.Images;
+import ru.taximaxim.pgsqlblocks.utils.PathBuilder;
 import ru.taximaxim.pgsqlblocks.utils.Settings;
 
 public class SettingsDialog extends Dialog {
@@ -45,6 +52,7 @@ public class SettingsDialog extends Dialog {
     private Button confirmRequiredButton;
     private Button confirmExitButton;
     private Combo languageCombo;
+    private Text path;
 
     public SettingsDialog(Settings settings, Shell shell) {
         super(shell);
@@ -64,7 +72,36 @@ public class SettingsDialog extends Dialog {
         populateGeneralGroup(container);
         populateProcessGroup(container);
         populateNotificationGroup(container);
+        populateBlockJournalPathGroup(container);
         return container;
+    }
+
+    private void populateBlockJournalPathGroup(Composite container) {
+        Group generalGroup = new Group(container, SWT.SHADOW_IN);
+        generalGroup.setText(resourceBundle.getString("path"));
+        generalGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
+        generalGroup.setLayout(new GridLayout(2, false));
+
+        path = new Text(generalGroup, SWT.BORDER);
+        path.setText(settings.getBlocksJournalPath());
+        path.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, true));
+
+        Button btnDir = new Button(generalGroup, SWT.PUSH);
+        btnDir.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, true, true));
+        btnDir.setImage(ImageUtils.getImage(Images.FOLDER));
+        btnDir.addSelectionListener(new SelectionAdapter() {
+
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                DirectoryDialog dialog = new DirectoryDialog(getShell());
+                dialog.setText(resourceBundle.getString("choose_dir"));
+                dialog.setFilterPath(PathBuilder.getInstance().getBlocksJournalsDir().toString());
+                String p = dialog.open();
+                if (p != null) {
+                    path.setText(p);
+                }
+            }
+        });
     }
 
     private void populateGeneralGroup(Composite container) {
@@ -170,6 +207,7 @@ public class SettingsDialog extends Dialog {
         settings.setConfirmExit(confirmExitButton.getSelection());
         settings.setLanguage(languageCombo.getText());
         settings.setShowBackendPid(showBackendPidButton.getSelection());
+        settings.setBlocksJournalsPath(path.getText());
 
         super.okPressed();
     }

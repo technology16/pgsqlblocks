@@ -124,6 +124,8 @@ public class PgSqlBlocks_en extends ListResourceBundle {
             {"columns", "Columns"},
             {"general", "General"},
             {"select_ui_language", "UI language (requires restart)"},
+            {"path", "Path to save block journals"},
+            {"choose_dir", "Choose directory"},
 
             // create database dialog
             {"name", "Connection name*"},

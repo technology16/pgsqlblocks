@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.Properties;
 import java.util.ResourceBundle;
 
@@ -52,6 +53,7 @@ public final class Settings {
     private static final String CONFIRM_EXIT = "confirm_exit";
     private static final String SHOW_LOG_MESSAGES = "show_log_messages";
     private static final String CURRENT_LOCALE = "current_locale";
+    private static final String BLOCKS_JOURNAL_PATH = "blocks_journal_path";
 
     private int updatePeriodSeconds;
     private int limitBlocks;
@@ -64,6 +66,7 @@ public final class Settings {
     private boolean confirmRequired;
     private boolean showBackendPid;
     private boolean confirmExit;
+    private String blocksJournalPath;
 
     private final Properties properties;
     private final File propFile;
@@ -107,6 +110,7 @@ public final class Settings {
         this.confirmRequired = Boolean.parseBoolean(properties.getProperty(CONFIRM_REQUIRED));
         this.confirmExit = Boolean.parseBoolean(properties.getProperty(CONFIRM_EXIT));
         this.locale = new Locale.Builder().setLanguageTag(properties.getProperty(CURRENT_LOCALE)).build();
+        this.blocksJournalPath = properties.getProperty(BLOCKS_JOURNAL_PATH);
 
         resources = ResourceBundle.getBundle(ru.taximaxim.pgsqlblocks.l10n.PgSqlBlocks.class.getName(), locale);
     }
@@ -287,6 +291,30 @@ public final class Settings {
 
     public ResourceBundle getResourceBundle() {
         return resources;
+    }
+
+    public void setBlocksJournalsPath(String path) {
+        if (path.isEmpty() || path.isBlank()) {
+            if (blocksJournalPath != null) {
+                blocksJournalPath = null;
+                properties.remove(BLOCKS_JOURNAL_PATH);
+                return;
+            }
+            if (path.equals(PathBuilder.getInstance().getBlocksJournalsDir().toString())) {
+                return;
+            }
+        }
+        if (!Objects.equals(blocksJournalPath, path)) {
+            blocksJournalPath = path;
+            saveProperties(BLOCKS_JOURNAL_PATH, blocksJournalPath);
+        }
+    }
+
+    public String getBlocksJournalPath() {
+        if (blocksJournalPath != null) {
+            return blocksJournalPath;
+        }
+        return PathBuilder.getInstance().getBlocksJournalsDir().toString();
     }
 
     private void saveProperties(String key, String value) {
