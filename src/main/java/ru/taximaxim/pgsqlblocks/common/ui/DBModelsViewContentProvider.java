@@ -15,14 +15,72 @@
  *******************************************************************************/
 package ru.taximaxim.pgsqlblocks.common.ui;
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.ResourceBundle;
 
-import org.eclipse.jface.viewers.IStructuredContentProvider;
+import org.eclipse.jface.viewers.ITreeContentProvider;
 
-public class DBModelsViewContentProvider implements IStructuredContentProvider {
+import ru.taximaxim.pgsqlblocks.modules.db.controller.DBController;
+
+public class DBModelsViewContentProvider implements ITreeContentProvider {
+
+    private final String DEFAULT_DB_GROUP = "default_db_group";
+
+    private final ResourceBundle bundle;
+    private final Map<String, List<DBController>> map = new LinkedHashMap<>();
+
+    public DBModelsViewContentProvider(ResourceBundle bundle) {
+        this.bundle = bundle;
+    }
 
     @Override
     public Object[] getElements(Object inputElement) {
-        return ((List<?>) inputElement).toArray();
+        map.clear();
+        if (inputElement instanceof List) {
+            for (Object o : (List<?>) inputElement) {
+                DBController el = (DBController) o;
+                map.computeIfAbsent(getDbGroup(el), e -> new ArrayList<>()).add(el);
+            }
+            if (hasntGroup()) {
+                return map.get(bundle.getString(DEFAULT_DB_GROUP)).toArray();
+            }
+        }
+        return map.keySet().toArray();
+    }
+
+    @Override
+    public Object[] getChildren(Object parentElement) {
+        if (parentElement instanceof String) {
+            return map.get(parentElement).toArray();
+        }
+        return null;
+    }
+
+    @Override
+    public Object getParent(Object element) {
+        if (hasntGroup()) {
+            return null;
+        }
+        if (element instanceof DBController) {
+            return getDbGroup((DBController) element);
+        }
+        return null;
+    }
+
+    @Override
+    public boolean hasChildren(Object element) {
+        return element instanceof String;
+    }
+
+    private boolean hasntGroup() {
+        return map.size() == 1 && map.containsKey(bundle.getString(DEFAULT_DB_GROUP));
+    }
+
+    private String getDbGroup(DBController controller) {
+        String dbGroup = controller.getModelDbGroup();
+        return dbGroup.isEmpty() ? bundle.getString(DEFAULT_DB_GROUP) : dbGroup;
     }
 }

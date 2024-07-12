@@ -46,6 +46,8 @@ import org.xml.sax.SAXException;
 public abstract class XmlStore<T> {
 
     private static final Logger LOG = LogManager.getLogger(XmlStore.class);
+    private static final String KEY_VERSION = "version";
+    private static final String VALUE_VERSION = "1.0";
 
     protected final String rootTag;
 
@@ -95,6 +97,7 @@ public abstract class XmlStore<T> {
             try (Writer xmlWriter = Files.newBufferedWriter(path, StandardCharsets.UTF_8)) {
                 Document xml = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
                 Element root = xml.createElement(rootTag);
+                root.setAttribute(KEY_VERSION, VALUE_VERSION);
                 xml.appendChild(root);
                 appendChildren(xml, root, list);
                 serializeXml(xml, xmlWriter);

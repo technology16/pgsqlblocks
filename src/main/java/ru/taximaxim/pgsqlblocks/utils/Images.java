@@ -22,6 +22,7 @@ public enum Images {
     EDIT_DATABASE("images/db_edit_16.png"),
     CONNECT_DATABASE("images/db_connect_16.png"),
     DISCONNECT_DATABASE("images/db_disconnect_16.png"),
+    GROUP_DATABASE("images/db_group_16.png"),
     UPDATE("images/update_16.png"),
     AUTOUPDATE("images/autoupdate_16.png"),
     VIEW_ONLY_BLOCKED("images/db_ob_16.png"),

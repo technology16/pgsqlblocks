@@ -23,6 +23,8 @@ public interface DBModelsViewListener {
 
     void dbModelsViewDidSelectController(DBController controller);
 
+    void dbModelsViewDidSelectGroup();
+
     void dbModelsViewDidCallActionToController(DBController controller);
 
     void dbModelsViewDidShowMenu(IMenuManager menuManager);

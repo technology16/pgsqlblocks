@@ -105,6 +105,10 @@ public class DBController implements DBBlocksJournalListener {
         return model.copy();
     }
 
+    public String getModelDbGroup() {
+        return model.getDbGroup();
+    }
+
     public void setModel(DBModel model) {
         this.model = model;
     }

@@ -23,7 +23,7 @@ public class DBModelTest {
 
     @Test
     public void copyTest() {
-        DBModel model1 = new DBModel("test", "host", "port", "dbName", "user", "password", true, false);
+        DBModel model1 = new DBModel("test", "", "host", "port", "dbName", "user", "password", true, false);
         DBModel model2 = model1.copy();
 
         assertEquals(model1, model2);
