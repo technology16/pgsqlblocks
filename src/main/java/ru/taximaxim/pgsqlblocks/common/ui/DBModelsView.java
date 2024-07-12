@@ -81,7 +81,7 @@ public class DBModelsView extends Composite {
         processesCountColumn.getColumn().setWidth(COUNT_COLUMN_WIDTH);
         processesCountColumn.getColumn().addSelectionListener(getHeaderSelectionAdapter(Columns.COUNT));
 
-        treeViewer.setContentProvider(new DBModelsViewContentProvider());
+        treeViewer.setContentProvider(new DBModelsViewContentProvider(resourceBundle));
         treeViewer.setLabelProvider(new DBModelsViewLabelProvider(resourceBundle));
         treeViewer.addSelectionChangedListener(event -> {
             if (!event.getSelection().isEmpty()) {

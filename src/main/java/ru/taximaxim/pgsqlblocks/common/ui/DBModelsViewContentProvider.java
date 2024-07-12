@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.ResourceBundle;
 
 import org.eclipse.jface.viewers.ITreeContentProvider;
 
@@ -26,8 +27,14 @@ import ru.taximaxim.pgsqlblocks.modules.db.controller.DBController;
 
 public class DBModelsViewContentProvider implements ITreeContentProvider {
 
+    private final String DEFAULT_DB_GROUP = "default_db_group";
+
+    private final ResourceBundle bundle;
     private final Map<String, List<DBController>> map = new LinkedHashMap<>();
-    private final String DEFAULT_DB_GROUP = "<no group>";
+
+    public DBModelsViewContentProvider(ResourceBundle bundle) {
+        this.bundle = bundle;
+    }
 
     @Override
     public Object[] getElements(Object inputElement) {
@@ -39,7 +46,7 @@ public class DBModelsViewContentProvider implements ITreeContentProvider {
                 map.computeIfAbsent(dbGroup, e -> new ArrayList<>()).add(el);
             }
             if (hasntGroup()) {
-                return map.get(DEFAULT_DB_GROUP).toArray();
+                return map.get(bundle.getString(DEFAULT_DB_GROUP)).toArray();
             }
         }
         return map.keySet().toArray();
@@ -71,10 +78,10 @@ public class DBModelsViewContentProvider implements ITreeContentProvider {
     }
 
     private boolean hasntGroup() {
-        return map.size() == 1 && map.containsKey(DEFAULT_DB_GROUP);
+        return map.size() == 1 && map.containsKey(bundle.getString(DEFAULT_DB_GROUP));
     }
     
     private String getDbGroup(String DbGroup) {
-        return DbGroup.isEmpty() ? DEFAULT_DB_GROUP : DbGroup;
+        return DbGroup.isEmpty() ? bundle.getString(DEFAULT_DB_GROUP) : DbGroup;
     }
 }

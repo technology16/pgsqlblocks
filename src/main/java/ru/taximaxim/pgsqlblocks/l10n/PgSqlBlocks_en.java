@@ -135,6 +135,7 @@ public class PgSqlBlocks_en extends ListResourceBundle {
             {"use_pgpass_file", "Password will be stored in insecure storage. Use .pgpass file instead."},
             {"database_name", "Database*"},
             {"db_group", "Database group"},
+            {"default_db_group", "<no group>"},
             {"connect_automatically", "Auto connect"},
             {"add_new_connection", "Add new connection"},
             {"edit_connection", "Edit connection"},
