@@ -90,6 +90,8 @@ public class DBModelsView extends Composite {
                 if (el instanceof DBController) {
                     DBController selectedController = (DBController) el;
                     listeners.forEach(listener -> listener.dbModelsViewDidSelectController(selectedController));
+                } else {
+                    listeners.forEach(DBModelsViewListener::dbModelsViewDidSelectGroup);
                 }
             }
         });
@@ -183,7 +185,7 @@ public class DBModelsView extends Composite {
         @Override
         public int compare(Viewer v, Object e1, Object e2) {
             if (column == null) {
-                return compareByGroup(e1, e2);
+                return 0;
             }
 
             int res = 0;
@@ -201,22 +203,11 @@ public class DBModelsView extends Composite {
                 default:
                     break;
                 }
-            } else {
-                res = compareByGroup(e1, e2);
+            } else if (column.col == Columns.NAME) {
+                res = e1.toString().compareTo(e2.toString());
             }
             return column.desc ? -res : res;
         }
-    }
-
-    private int compareByGroup(Object e1, Object e2) {
-        int res = e1.toString().compareTo(e2.toString());
-        if (e1.equals("<no group>") && res < 0) {
-            return -res;
-        }
-        if (e2.equals("<no_group>") && res > 0) {
-            return -res;
-        }
-        return res;
     }
 
     private static class SortingColumn {

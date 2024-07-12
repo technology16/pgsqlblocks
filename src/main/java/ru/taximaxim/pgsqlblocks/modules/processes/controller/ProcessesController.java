@@ -331,11 +331,15 @@ SettingsListener, DBProcessInfoViewListener {
     private void changeToolItemsStateForController(DBController controller) {
         Display.getDefault().syncExec(() -> {
             boolean isDisconnected = controller != null && !controller.isConnected();
-            connectDatabaseToolItem.setEnabled(isDisconnected);
-            disconnectDatabaseToolItem.setEnabled(!isDisconnected);
-            deleteDatabaseToolItem.setEnabled(isDisconnected);
-            editDatabaseToolItem.setEnabled(isDisconnected);
+            changeToolItemsStateForController(!isDisconnected, isDisconnected);
         });
+    }
+
+    private void changeToolItemsStateForController(boolean forDisconnect, boolean forOther) {
+        connectDatabaseToolItem.setEnabled(forOther);
+        disconnectDatabaseToolItem.setEnabled(forDisconnect);
+        deleteDatabaseToolItem.setEnabled(forOther);
+        editDatabaseToolItem.setEnabled(forOther);
     }
 
     private void toggleLogsPanelVisibility(ToolItem toolItem) {
@@ -383,12 +387,10 @@ SettingsListener, DBProcessInfoViewListener {
 
     private void openAddNewDatabaseDialog() {
         List<String> reservedConnectionNames = dbControllers.stream()
-                .map(DBController::getModel)
-                .map(DBModel::getName)
+                .map(DBController::getModelName)
                 .collect(Collectors.toList());
         Set<String> dbGroupNames = dbControllers.stream()
-                .map(DBController::getModel)
-                .map(DBModel::getDbGroup)
+                .map(DBController::getModelDbGroup)
                 .collect(Collectors.toSet());
         AddDatabaseDialog addDatabaseDialog = new AddDatabaseDialog(resourceBundle, dbGroupNames, view.getShell(),
                 reservedConnectionNames);
@@ -423,8 +425,7 @@ SettingsListener, DBProcessInfoViewListener {
                 .map(DBController::getModelName)
                 .collect(Collectors.toList());
         Set<String> DbGroupNames = dbControllers.stream()
-                .map(DBController::getModel)
-                .map(DBModel::getDbGroup)
+                .map(DBController::getModelDbGroup)
                 .collect(Collectors.toSet());
         EditDatabaseDialog editDatabaseDialog = new EditDatabaseDialog(resourceBundle, view.getShell(),
                 reservedConnectionNames, DbGroupNames, selectedController.getModel());
@@ -621,6 +622,11 @@ SettingsListener, DBProcessInfoViewListener {
         dbBlocksJournalView.getTreeViewer().setInput(controller.getBlocksJournal().getProcesses());
         changeToolItemsStateForController(controller);
         dbBlocksJournalView.setController(controller);
+    }
+
+    @Override
+    public void dbModelsViewDidSelectGroup() {
+        changeToolItemsStateForController(false, false);
     }
 
     @Override

@@ -85,10 +85,7 @@ public class DBModelsXmlStore extends XmlStore<DBModel> {
             createSubElement(xml, rootElement, ELEMENT_HOST_TAG_NAME, model.getHost());
             createSubElement(xml, rootElement, ELEMENT_PORT_TAG_NAME, model.getPort());
             createSubElement(xml, rootElement, ELEMENT_DATABASE_NAME_TAG_NAME, model.getDatabaseName());
-            String dbGroup = model.getDbGroup();
-            if (dbGroup != null) {
-                createSubElement(xml, rootElement, ELEMENT_DB_GROUP_NAME, dbGroup);
-            }
+            createSubElement(xml, rootElement, ELEMENT_DB_GROUP_NAME, model.getDbGroup());
             createSubElement(xml, rootElement, ELEMENT_USER_TAG_NAME, model.getUser());
             createSubElement(xml, rootElement, ELEMENT_PASSWORD_TAG_NAME, model.getPassword());
             createSubElement(xml, rootElement, ELEMENT_READ_BACKEND_TAG_NAME, String.valueOf(model.isReadBackendType()));

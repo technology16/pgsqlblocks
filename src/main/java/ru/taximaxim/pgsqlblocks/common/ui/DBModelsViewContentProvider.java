@@ -42,8 +42,7 @@ public class DBModelsViewContentProvider implements ITreeContentProvider {
         if (inputElement instanceof List) {
             for (Object o : (List<?>) inputElement) {
                 DBController el = (DBController) o;
-                String dbGroup = getDbGroup(el.getModel().getDbGroup());
-                map.computeIfAbsent(dbGroup, e -> new ArrayList<>()).add(el);
+                map.computeIfAbsent(getDbGroup(el), e -> new ArrayList<>()).add(el);
             }
             if (hasntGroup()) {
                 return map.get(bundle.getString(DEFAULT_DB_GROUP)).toArray();
@@ -62,12 +61,11 @@ public class DBModelsViewContentProvider implements ITreeContentProvider {
 
     @Override
     public Object getParent(Object element) {
+        if (hasntGroup()) {
+            return null;
+        }
         if (element instanceof DBController) {
-            String dbGroup = getDbGroup(((DBController) element).getModel().getDbGroup());
-            if (hasntGroup()) {
-                return null;
-            }
-            return dbGroup;
+            return getDbGroup((DBController) element);
         }
         return null;
     }
@@ -80,8 +78,9 @@ public class DBModelsViewContentProvider implements ITreeContentProvider {
     private boolean hasntGroup() {
         return map.size() == 1 && map.containsKey(bundle.getString(DEFAULT_DB_GROUP));
     }
-    
-    private String getDbGroup(String DbGroup) {
-        return DbGroup.isEmpty() ? bundle.getString(DEFAULT_DB_GROUP) : DbGroup;
+
+    private String getDbGroup(DBController controller) {
+        String dbGroup = controller.getModelDbGroup();
+        return dbGroup.isEmpty() ? bundle.getString(DEFAULT_DB_GROUP) : dbGroup;
     }
 }

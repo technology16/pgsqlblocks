@@ -16,14 +16,11 @@
 package ru.taximaxim.pgsqlblocks.dialogs;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.ResourceBundle;
 import java.util.Set;
 
-import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 
 import ru.taximaxim.pgsqlblocks.common.models.DBModel;
@@ -31,7 +28,6 @@ import ru.taximaxim.pgsqlblocks.common.models.DBModel;
 public class EditDatabaseDialog extends AddDatabaseDialog {
 
     private final DBModel editedModel;
-    private boolean isNeedRefresh;
 
     public EditDatabaseDialog(ResourceBundle resourceBundle, Shell shell,
             List<String> reservedConnectionNames, Set<String> dbGroupNames, DBModel editedModel) {
@@ -57,10 +53,7 @@ public class EditDatabaseDialog extends AddDatabaseDialog {
         hostText.setText(editedModel.getHost());
         portText.setText(editedModel.getPort());
         databaseNameText.setText(editedModel.getDatabaseName());
-        String dbGroup = editedModel.getDbGroup();
-        if (dbGroup != null) {
-            cmdDbGroup.getCombo().setText(dbGroup);
-        }
+        cmdDbGroup.getCombo().setText(editedModel.getDbGroup());
         userText.setText(editedModel.getUser());
         passwordText.setText(editedModel.getPassword());
         readBackendTypeButton.setSelection(editedModel.isReadBackendType());

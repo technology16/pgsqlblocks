@@ -21,6 +21,7 @@ import org.eclipse.swt.graphics.Image;
 
 import ru.taximaxim.pgsqlblocks.modules.db.controller.DBController;
 import ru.taximaxim.pgsqlblocks.utils.ImageUtils;
+import ru.taximaxim.pgsqlblocks.utils.Images;
 
 public class DBModelsViewLabelProvider extends TreeLabelProvider {
 
@@ -32,12 +33,14 @@ public class DBModelsViewLabelProvider extends TreeLabelProvider {
 
     @Override
     public Image getColumnImage(Object element, int columnIndex) {
-        if (columnIndex == 0 && (element instanceof DBController)) {
-            DBController controller = (DBController) element;
-            return getImage(controller);
-        } else {
-            return null;
+        if (columnIndex == 0) {
+            if (element instanceof DBController) {
+                DBController controller = (DBController) element;
+                return getImage(controller);
+            }
+            return ImageUtils.getImage(Images.GROUP_DATABASE);
         }
+        return null;
     }
 
     @Override
