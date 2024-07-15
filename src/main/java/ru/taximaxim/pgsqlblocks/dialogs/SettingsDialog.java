@@ -52,7 +52,7 @@ public class SettingsDialog extends Dialog {
     private Button confirmRequiredButton;
     private Button confirmExitButton;
     private Combo languageCombo;
-    private Text path;
+    private Text textPath;
 
     public SettingsDialog(Settings settings, Shell shell) {
         super(shell);
@@ -76,39 +76,8 @@ public class SettingsDialog extends Dialog {
         return container;
     }
 
-    private void populateBlockJournalPathGroup(Composite container) {
-        Group generalGroup = new Group(container, SWT.SHADOW_IN);
-        generalGroup.setText(resourceBundle.getString("path"));
-        generalGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
-        generalGroup.setLayout(new GridLayout(2, false));
-
-        path = new Text(generalGroup, SWT.BORDER);
-        path.setText(settings.getBlocksJournalPath());
-        path.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, true));
-
-        Button btnDir = new Button(generalGroup, SWT.PUSH);
-        btnDir.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, true, true));
-        btnDir.setImage(ImageUtils.getImage(Images.FOLDER));
-        btnDir.addSelectionListener(new SelectionAdapter() {
-
-            @Override
-            public void widgetSelected(SelectionEvent e) {
-                DirectoryDialog dialog = new DirectoryDialog(getShell());
-                dialog.setText(resourceBundle.getString("choose_dir"));
-                dialog.setFilterPath(PathBuilder.getInstance().getBlocksJournalsDir().toString());
-                String p = dialog.open();
-                if (p != null) {
-                    path.setText(p);
-                }
-            }
-        });
-    }
-
     private void populateGeneralGroup(Composite container) {
-        Group generalGroup = new Group(container, SWT.SHADOW_IN);
-        generalGroup.setText(resourceBundle.getString("general"));
-        generalGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
-        generalGroup.setLayout(new GridLayout(2, false));
+        Group generalGroup = createGroup(container, resourceBundle.getString("general"), 2);
 
         Label selectLocale = new Label(generalGroup, SWT.HORIZONTAL);
         selectLocale.setText(resourceBundle.getString("select_ui_language"));
@@ -120,10 +89,7 @@ public class SettingsDialog extends Dialog {
     }
 
     private void populateProcessGroup(Composite container) {
-        Group processGroup = new Group(container, SWT.SHADOW_IN);
-        processGroup.setText(resourceBundle.getString("processes"));
-        processGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
-        processGroup.setLayout(new GridLayout(3, false));
+        Group processGroup = createGroup(container, resourceBundle.getString("processes"), 3);
 
         Label updatePeriodLabel = new Label(processGroup, SWT.HORIZONTAL);
         updatePeriodLabel.setText(resourceBundle.getString("auto_update_interval"));
@@ -167,10 +133,7 @@ public class SettingsDialog extends Dialog {
     }
 
     private void populateNotificationGroup(Composite container) {
-        Group notificationGroup = new Group(container, SWT.SHADOW_IN);
-        notificationGroup.setText(resourceBundle.getString("notifications"));
-        notificationGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
-        notificationGroup.setLayout(new GridLayout(2, false));
+        Group notificationGroup = createGroup(container, resourceBundle.getString("notifications"), 2);
 
         Label idleShowToolTip = new Label(notificationGroup, SWT.HORIZONTAL);
         idleShowToolTip.setText(resourceBundle.getString("show_tray_notifications"));
@@ -191,6 +154,39 @@ public class SettingsDialog extends Dialog {
         confirmExitButton.setSelection(settings.isConfirmExit());
     }
 
+    private void populateBlockJournalPathGroup(Composite container) {
+        Group generalGroup = createGroup(container, resourceBundle.getString("path"), 2);
+
+        textPath = new Text(generalGroup, SWT.BORDER);
+        textPath.setText(settings.getBlocksJournalPath());
+        textPath.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, true));
+
+        Button btnDir = new Button(generalGroup, SWT.PUSH);
+        btnDir.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, true, true));
+        btnDir.setImage(ImageUtils.getImage(Images.FOLDER));
+        btnDir.addSelectionListener(new SelectionAdapter() {
+
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                DirectoryDialog dialog = new DirectoryDialog(getShell());
+                dialog.setText(resourceBundle.getString("choose_dir"));
+                dialog.setFilterPath(PathBuilder.getInstance().getBlocksJournalsDir().toString());
+                String path = dialog.open();
+                if (path != null) {
+                    textPath.setText(path);
+                }
+            }
+        });
+    }
+
+    private Group createGroup(Composite container, String name, int numColumns) {
+        Group group = new Group(container, SWT.SHADOW_IN);
+        group.setText(name);
+        group.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
+        group.setLayout(new GridLayout(numColumns, false));
+        return group;
+    }
+
     @Override
     protected void configureShell(Shell newShell) {
         super.configureShell(newShell);
@@ -207,7 +203,7 @@ public class SettingsDialog extends Dialog {
         settings.setConfirmExit(confirmExitButton.getSelection());
         settings.setLanguage(languageCombo.getText());
         settings.setShowBackendPid(showBackendPidButton.getSelection());
-        settings.setBlocksJournalsPath(path.getText());
+        settings.setBlocksJournalsPath(textPath.getText());
 
         super.okPressed();
     }

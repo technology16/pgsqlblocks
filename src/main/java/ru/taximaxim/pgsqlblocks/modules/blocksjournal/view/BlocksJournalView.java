@@ -116,9 +116,9 @@ public class BlocksJournalView extends ApplicationWindow implements DBBlocksJour
                 ImageDescriptor.createFromImage(ImageUtils.getImage(Images.FOLDER))) {
             @Override
             public void run() {
-                String s = journalFiles.get(0).getAbsolutePath();
+                File file = (File) filesTable.getStructuredSelection().getFirstElement();
                 try {
-                    Desktop.getDesktop().open(new File(s).getParentFile());
+                    Desktop.getDesktop().open(file.getParentFile());
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
