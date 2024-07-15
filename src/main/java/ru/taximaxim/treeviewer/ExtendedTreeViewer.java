@@ -28,6 +28,7 @@ import org.eclipse.swt.widgets.ToolItem;
 import ru.taximaxim.pgsqlblocks.modules.db.controller.DBController;
 import ru.taximaxim.pgsqlblocks.xmlstore.ColumnLayoutsXmlStore;
 import ru.taximaxim.treeviewer.dialog.ColumnConfigDialog;
+import ru.taximaxim.treeviewer.dialog.SaveDialog;
 import ru.taximaxim.treeviewer.filter.FilterChangeHandler;
 import ru.taximaxim.treeviewer.filter.FilterComposite;
 import ru.taximaxim.treeviewer.l10n.TreeViewer;
@@ -132,6 +133,17 @@ public class ExtendedTreeViewer<T extends IObject> extends Composite {
         configColumnToolItem.setImage(ImageUtils.getImage(Images.TABLE));
         configColumnToolItem.setToolTipText(Images.TABLE.getDescription(resourceBundle));
         configColumnToolItem.addListener(SWT.Selection, event -> openConfigColumnDialog());
+
+        if (isBlockJournalTab) {
+            ToolItem saveJournals = new ToolItem(toolBar, SWT.PUSH);
+            saveJournals.setImage(ImageUtils.getImage(Images.SAVE_ALL));
+            saveJournals.setToolTipText(Images.SAVE_ALL.getDescription(resourceBundle));
+            saveJournals.addListener(SWT.Selection, event -> openSaveDialog());
+        }
+    }
+
+    private void openSaveDialog() {
+        new SaveDialog(resourceBundle, controller, getShell()).open();
     }
 
     private void openFilter() {
