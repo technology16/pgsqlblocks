@@ -57,7 +57,7 @@ public final class PathBuilder {
 
     public Path getBlocksJournalsDir() {
         Path blocksJournalsDir = path.resolve(Settings.getInstance().getBlocksJournalPath());
-        if (!blocksJournalsDir.toFile().exists()) {
+        if (Files.notExists(path)) {
             try {
                 Files.createDirectory(blocksJournalsDir);
             } catch (IOException e) {

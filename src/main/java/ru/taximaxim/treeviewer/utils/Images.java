@@ -23,7 +23,7 @@ public enum Images {
     CLEAN("images/clean_16.png", "clean"),
     FILTER("images/filter.png", "filter"),
     TABLE("images/table_16.png", "columns"),
-    SAVE_ALL("images/save_16.png", "save_all");
+    SAVE("images/save_16.png", "save");
 
     private String location;
     private String description;

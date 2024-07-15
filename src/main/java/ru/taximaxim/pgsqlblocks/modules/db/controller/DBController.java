@@ -500,7 +500,7 @@ public class DBController implements DBBlocksJournalListener {
         return new DBBlocksXmlStore(fileName);
     }
 
-    private void saveUnclosedBlockedProcessesToFile() {
+    public void saveUnclosedBlockedProcessesToFile() {
         if (blocksJournal.isEmpty()) {
             return;
         }

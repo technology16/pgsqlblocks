@@ -27,7 +27,7 @@ public class TreeViewer_ru extends ListResourceBundle {
             {"all-filter-tooltip", "Фильтровать по всем фильтрам снизу используя условие \"содержит (~)\""},
             {"columns", "Колонки"},
             {"default_action", "Пусто"},
-            {"save_all", "Сохранить все"},
+            {"save", "Сохранить"},
             {"choose_dir", "Выберите директорию"},
         };
     }
