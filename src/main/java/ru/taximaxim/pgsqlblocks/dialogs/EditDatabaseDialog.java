@@ -17,6 +17,7 @@ package ru.taximaxim.pgsqlblocks.dialogs;
 
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.Set;
 
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -29,8 +30,8 @@ public class EditDatabaseDialog extends AddDatabaseDialog {
     private final DBModel editedModel;
 
     public EditDatabaseDialog(ResourceBundle resourceBundle, Shell shell,
-            List<String> reservedConnectionNames, DBModel editedModel) {
-        super(resourceBundle, shell, reservedConnectionNames);
+            List<String> reservedConnectionNames, Set<String> dbGroupNames, DBModel editedModel) {
+        super(resourceBundle, dbGroupNames, shell, reservedConnectionNames);
         reservedConnectionNames.remove(editedModel.getName());
         this.editedModel = editedModel;
     }
@@ -52,6 +53,7 @@ public class EditDatabaseDialog extends AddDatabaseDialog {
         hostText.setText(editedModel.getHost());
         portText.setText(editedModel.getPort());
         databaseNameText.setText(editedModel.getDatabaseName());
+        cmdDbGroup.getCombo().setText(editedModel.getDbGroup());
         userText.setText(editedModel.getUser());
         passwordText.setText(editedModel.getPassword());
         readBackendTypeButton.setSelection(editedModel.isReadBackendType());

@@ -120,7 +120,7 @@ public class DBControllerTest {
                 .withExposedPorts(5432);
         postgres.start();
         DBModel model = new DBModel("TestDbc", REMOTE_HOST, postgres.getFirstMappedPort().toString(),
-                REMOTE_DB, REMOTE_USERNAME, REMOTE_PASSWORD, true, true);
+                REMOTE_DB, "", REMOTE_USERNAME, REMOTE_PASSWORD, true, true);
         testDbc = new DBController(Settings.getInstance(), model, null);
         testDbc.connectAsync();
         testDbc.addListener(LISTENER);
@@ -150,7 +150,7 @@ public class DBControllerTest {
         String query = loadQuery(CONFIG.getString("pgsqlblocks-test-configs.testing-dump-sql"));
         try (PreparedStatement prSt = getSingleConnection().prepareStatement(query)) {
             prSt.execute();
-        } 
+        }
         /* create rule */
         query = loadQuery(CREATE_RULE_SQL);
         try (PreparedStatement prSt = getSingleConnection().prepareStatement(query)) {

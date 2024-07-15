@@ -23,12 +23,13 @@ public class DBModel {
     private final String host;
     private final String port;
     private final String databaseName;
+    private final String dbGroup;
     private final String user;
     private final String password;
     private final boolean readBackendType;
     private final boolean enabled;
 
-    public DBModel(String name, String host, String port, String databaseName,
+    public DBModel(String name, String host, String port, String databaseName, String dbGroup,
             String user, String password, boolean readBackendType, boolean enabled) {
         this.name = name;
         this.host = host;
@@ -38,6 +39,7 @@ public class DBModel {
         this.password = password;
         this.readBackendType = readBackendType;
         this.enabled = enabled;
+        this.dbGroup = dbGroup;
     }
 
     public String getName() {
@@ -60,6 +62,10 @@ public class DBModel {
         return databaseName;
     }
 
+    public String getDbGroup() {
+        return dbGroup;
+    }
+
     public String getUser() {
         return user;
     }
@@ -77,7 +83,7 @@ public class DBModel {
     }
 
     public DBModel copy() {
-        return new DBModel(this.name, this.host, this.port, this.databaseName,
+        return new DBModel(this.name, this.host, this.port, this.databaseName, this.dbGroup,
                 this.user, this.password, this.readBackendType, this.enabled);
     }
 
@@ -88,6 +94,7 @@ public class DBModel {
                 ", host='" + host + '\'' +
                 ", port='" + port + '\'' +
                 ", databaseName='" + databaseName + '\'' +
+                ", dbGroup='" + dbGroup + '\'' +
                 ", user='" + user + '\'' +
                 ", password='" + password + '\'' +
                 ", readBackendType='" + readBackendType + '\'' +
@@ -108,7 +115,8 @@ public class DBModel {
 
         DBModel other = (DBModel) obj;
         return Objects.equals(databaseName, other.databaseName)
-                && enabled == other.enabled 
+                && Objects.equals(dbGroup, other.dbGroup)
+                && enabled == other.enabled
                 && Objects.equals(host, other.host)
                 && Objects.equals(name, other.name)
                 && Objects.equals(password, other.password)
@@ -119,6 +127,6 @@ public class DBModel {
 
     @Override
     public int hashCode() {
-        return Objects.hash(databaseName, enabled, host, name, password, port, readBackendType, user);
+        return Objects.hash(databaseName, dbGroup, enabled, host, name, password, port, readBackendType, user);
     }
 }
