@@ -294,7 +294,7 @@ public final class Settings {
     }
 
     public void setBlocksJournalsPath(String path) {
-        if (path.isEmpty() || path.isBlank()) {
+        if (path.isEmpty() || isBlank(path)) {
             if (blocksJournalPath != null) {
                 blocksJournalPath = null;
                 properties.remove(BLOCKS_JOURNAL_PATH);
@@ -310,11 +310,20 @@ public final class Settings {
         }
     }
 
-    public String getBlocksJournalPath() {
-        if (blocksJournalPath != null) {
-            return blocksJournalPath;
+    private boolean isBlank(String o) {
+        for (char c : o.toCharArray()) {
+            if (!Objects.equals(c, ' ')) {
+                return false;
+            }
         }
-        return PathBuilder.getInstance().getBlocksJournalsDir().toString();
+        return true;
+    }
+
+    public String getBlocksJournalPath() {
+        if (blocksJournalPath == null) {
+            blocksJournalPath = PathBuilder.getInstance().getBlocksJournalPath().toString();
+        }
+        return blocksJournalPath;
     }
 
     private void saveProperties(String key, String value) {

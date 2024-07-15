@@ -71,6 +71,10 @@ public final class PathBuilder {
         return path.resolve("servers.xml");
     }
 
+    public Path getBlocksJournalPath() {
+        return path.resolve("blocksJournals");
+    }
+
     public Path getColumnsPath() {
         return path.resolve("columns");
     }
