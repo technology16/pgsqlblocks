@@ -15,7 +15,9 @@
  *******************************************************************************/
 package ru.taximaxim.pgsqlblocks.modules.blocksjournal.view;
 
+import java.awt.Desktop;
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -23,6 +25,9 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.ResourceBundle;
 
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
@@ -36,6 +41,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Shell;
 
 import ru.taximaxim.pgsqlblocks.common.models.DBBlocksJournal;
@@ -45,6 +51,8 @@ import ru.taximaxim.pgsqlblocks.common.models.DBProcess;
 import ru.taximaxim.pgsqlblocks.common.ui.DBBlocksJournalViewDataSource;
 import ru.taximaxim.pgsqlblocks.common.ui.DBProcessInfoView;
 import ru.taximaxim.pgsqlblocks.dialogs.DBProcessInfoDialog;
+import ru.taximaxim.pgsqlblocks.utils.ImageUtils;
+import ru.taximaxim.pgsqlblocks.utils.Images;
 import ru.taximaxim.pgsqlblocks.utils.PathBuilder;
 import ru.taximaxim.pgsqlblocks.utils.Settings;
 import ru.taximaxim.pgsqlblocks.xmlstore.ColumnLayoutsXmlStore;
@@ -102,6 +110,21 @@ public class BlocksJournalView extends ApplicationWindow implements DBBlocksJour
         filesTable.setContentProvider(new BlocksJournalFilesContentProvider());
         filesTable.setInput(journalFiles);
         filesTable.addSelectionChangedListener(this::filesTableSelectionChanged);
+        MenuManager menuManager = new MenuManager();
+        Menu menu = menuManager.createContextMenu(filesTable.getControl());
+        menuManager.add(new Action(resourceBundle.getString("open_dir"),
+                ImageDescriptor.createFromImage(ImageUtils.getImage(Images.FOLDER))) {
+            @Override
+            public void run() {
+                String s = journalFiles.get(0).getAbsolutePath();
+                try {
+                    Desktop.getDesktop().open(new File(s).getParentFile());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        filesTable.getControl().setMenu(menu);
 
         Composite processesContentContainer = new Composite(sashForm, SWT.NONE);
         processesContentContainer.setLayout(new GridLayout());
