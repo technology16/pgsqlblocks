@@ -508,10 +508,10 @@ public class DBController implements DBBlocksJournalListener {
         if (blocksJournal.isEmpty()) {
             return;
         }
-        List<DBBlocksJournalProcess> savedBloсkedProc = getXmlStore().readObjects();
+        List<DBBlocksJournalProcess> savedBlockedProc = getXmlStore().readObjects();
         List<DBBlocksJournalProcess> openedBlockedProcesses = blocksJournal.getProcesses().stream()
             .filter(DBBlocksJournalProcess::isOpened)
-            .filter(e -> !savedBloсkedProc.contains(e))
+            .filter(e -> !savedBlockedProc.contains(e))
             .collect(Collectors.toList());
         if (openedBlockedProcesses.isEmpty()) {
             return;

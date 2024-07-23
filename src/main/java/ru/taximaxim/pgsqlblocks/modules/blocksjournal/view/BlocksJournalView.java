@@ -27,7 +27,6 @@ import java.util.ResourceBundle;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.MenuManager;
-import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
@@ -51,8 +50,6 @@ import ru.taximaxim.pgsqlblocks.common.models.DBProcess;
 import ru.taximaxim.pgsqlblocks.common.ui.DBBlocksJournalViewDataSource;
 import ru.taximaxim.pgsqlblocks.common.ui.DBProcessInfoView;
 import ru.taximaxim.pgsqlblocks.dialogs.DBProcessInfoDialog;
-import ru.taximaxim.pgsqlblocks.utils.ImageUtils;
-import ru.taximaxim.pgsqlblocks.utils.Images;
 import ru.taximaxim.pgsqlblocks.utils.PathBuilder;
 import ru.taximaxim.pgsqlblocks.utils.Settings;
 import ru.taximaxim.pgsqlblocks.xmlstore.ColumnLayoutsXmlStore;
@@ -112,8 +109,8 @@ public class BlocksJournalView extends ApplicationWindow implements DBBlocksJour
         filesTable.addSelectionChangedListener(this::filesTableSelectionChanged);
         MenuManager menuManager = new MenuManager();
         Menu menu = menuManager.createContextMenu(filesTable.getControl());
-        menuManager.add(new Action(resourceBundle.getString("open_dir"),
-                ImageDescriptor.createFromImage(ImageUtils.getImage(Images.FOLDER))) {
+        menuManager.add(new Action(resourceBundle.getString("open_dir")) {
+
             @Override
             public void run() {
                 File file = (File) filesTable.getStructuredSelection().getFirstElement();
@@ -148,7 +145,7 @@ public class BlocksJournalView extends ApplicationWindow implements DBBlocksJour
         processInfoView.hideToolBar();
         processInfoView.hide();
 
-        sashForm.setWeights(new int[] {20, 80});
+        sashForm.setWeights(20, 80);
         getJournalFilesFromJournalsDir();
 
         return super.createContents(parent);

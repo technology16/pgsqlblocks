@@ -52,7 +52,7 @@ public class SettingsDialog extends Dialog {
     private Button confirmRequiredButton;
     private Button confirmExitButton;
     private Combo languageCombo;
-    private Text textPath;
+    private Text journalsPathText;
 
     public SettingsDialog(Settings settings, Shell shell) {
         super(shell);
@@ -157,9 +157,9 @@ public class SettingsDialog extends Dialog {
     private void populateBlockJournalPathGroup(Composite container) {
         Group generalGroup = createGroup(container, resourceBundle.getString("path"), 2);
 
-        textPath = new Text(generalGroup, SWT.BORDER);
-        textPath.setText(settings.getBlocksJournalPath());
-        textPath.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, true));
+        journalsPathText = new Text(generalGroup, SWT.BORDER);
+        journalsPathText.setText(settings.getBlocksJournalPath());
+        journalsPathText.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, true));
 
         Button btnDir = new Button(generalGroup, SWT.PUSH);
         btnDir.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, true, true));
@@ -173,7 +173,7 @@ public class SettingsDialog extends Dialog {
                 dialog.setFilterPath(PathBuilder.getInstance().getBlocksJournalsDir().toString());
                 String path = dialog.open();
                 if (path != null) {
-                    textPath.setText(path);
+                    journalsPathText.setText(path);
                 }
             }
         });
@@ -203,7 +203,7 @@ public class SettingsDialog extends Dialog {
         settings.setConfirmExit(confirmExitButton.getSelection());
         settings.setLanguage(languageCombo.getText());
         settings.setShowBackendPid(showBackendPidButton.getSelection());
-        settings.setBlocksJournalsPath(textPath.getText());
+        settings.setBlocksJournalsPath(journalsPathText.getText());
 
         super.okPressed();
     }
