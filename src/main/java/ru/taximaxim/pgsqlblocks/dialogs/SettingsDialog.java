@@ -155,14 +155,25 @@ public class SettingsDialog extends Dialog {
     }
 
     private void populateBlockJournalPathGroup(Composite container) {
-        Group generalGroup = createGroup(container, resourceBundle.getString("path"), 2);
+        Group generalGroup = createGroup(container, resourceBundle.getString("path"), 3);
 
         journalsPathText = new Text(generalGroup, SWT.BORDER);
         journalsPathText.setText(settings.getBlocksJournalPath());
-        journalsPathText.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, true));
+        journalsPathText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
+        Button btnDefDir = new Button(generalGroup, SWT.PUSH);
+        btnDefDir.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, true));
+        btnDefDir.setImage(ImageUtils.getImage(Images.FOLDER));
+        btnDefDir.addSelectionListener(new SelectionAdapter() {
+
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                journalsPathText.setText(PathBuilder.getInstance().getDefaultBlocksJournalPath().toString());
+            }
+        });
+        
         Button btnDir = new Button(generalGroup, SWT.PUSH);
-        btnDir.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, true, true));
+        btnDir.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, true));
         btnDir.setImage(ImageUtils.getImage(Images.FOLDER));
         btnDir.addSelectionListener(new SelectionAdapter() {
 
@@ -203,7 +214,7 @@ public class SettingsDialog extends Dialog {
         settings.setConfirmExit(confirmExitButton.getSelection());
         settings.setLanguage(languageCombo.getText());
         settings.setShowBackendPid(showBackendPidButton.getSelection());
-        settings.setBlocksJournalsPath(journalsPathText.getText());
+        settings.setBlocksJournalsPath(journalsPathText.getText().trim());
 
         super.okPressed();
     }

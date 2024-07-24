@@ -469,12 +469,20 @@ public class DBController implements DBBlocksJournalListener {
 
     @Override
     public void dbBlocksJournalDidCloseProcesses(List<DBBlocksJournalProcess> processes) {
-        journalsSaveExecutor.execute(() -> saveBlockedProcessesToFile(processes));
+        journalsSaveExecutor.execute(() -> saveBlockedProcessesToFile(processes, false));
     }
 
-    private void saveBlockedProcessesToFile(List<DBBlocksJournalProcess> processes) {
+    private void saveBlockedProcessesToFile(List<DBBlocksJournalProcess> processes, boolean isOpenProcess) {
         DBBlocksXmlStore store = getXmlStore();
         List<DBBlocksJournalProcess> oldProcesses = store.readObjects();
+        if (isOpenProcess) {
+            processes = processes.stream()
+            .filter(e -> !oldProcesses.contains(e))
+            .collect(Collectors.toList());
+            if(processes.isEmpty()) {
+                return;
+            }
+        } 
         oldProcesses.addAll(processes);
 
         if (procLimit != 0) {
@@ -508,15 +516,13 @@ public class DBController implements DBBlocksJournalListener {
         if (blocksJournal.isEmpty()) {
             return;
         }
-        List<DBBlocksJournalProcess> savedBlockedProc = getXmlStore().readObjects();
         List<DBBlocksJournalProcess> openedBlockedProcesses = blocksJournal.getProcesses().stream()
             .filter(DBBlocksJournalProcess::isOpened)
-            .filter(e -> !savedBlockedProc.contains(e))
             .collect(Collectors.toList());
         if (openedBlockedProcesses.isEmpty()) {
             return;
         }
 
-        saveBlockedProcessesToFile(openedBlockedProcesses);
+        saveBlockedProcessesToFile(openedBlockedProcesses, true);
     }
 }

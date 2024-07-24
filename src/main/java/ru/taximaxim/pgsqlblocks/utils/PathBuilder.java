@@ -71,7 +71,7 @@ public final class PathBuilder {
         return path.resolve("servers.xml");
     }
 
-    public Path getBlocksJournalPath() {
+    public Path getDefaultBlocksJournalPath() {
         return path.resolve("blocksJournals");
     }
 

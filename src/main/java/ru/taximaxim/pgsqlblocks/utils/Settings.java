@@ -116,7 +116,7 @@ public final class Settings {
     }
 
     public static Settings getInstance() {
-        if(instance == null) {
+        if (instance == null) {
             instance = new Settings();
         }
         return instance;
@@ -171,6 +171,7 @@ public final class Settings {
     public int getLimitBlocks() {
         return limitBlocks;
     }
+
     /**
      * Gets the maximum time in seconds that a driver can wait
      * when attempting to log in to a database.
@@ -180,6 +181,7 @@ public final class Settings {
     public int getLoginTimeout() {
         return loginTimeout;
     }
+
     /**
      * Получаем флаг автообновления
      * @return the autoUpdate
@@ -294,16 +296,10 @@ public final class Settings {
     }
 
     public void setBlocksJournalsPath(String path) {
-        path = path.trim();
-        if (path.isEmpty()) {
-            if (blocksJournalPath != null) {
-                blocksJournalPath = null;
-                properties.remove(BLOCKS_JOURNAL_PATH);
-                return;
-            }
-            if (path.equals(PathBuilder.getInstance().getBlocksJournalsDir().toString())) {
-                return;
-            }
+        if (path.isEmpty() && blocksJournalPath != null) {
+            blocksJournalPath = null;
+            properties.remove(BLOCKS_JOURNAL_PATH);
+            return;
         }
         if (!Objects.equals(blocksJournalPath, path)) {
             blocksJournalPath = path;
@@ -312,8 +308,8 @@ public final class Settings {
     }
 
     public String getBlocksJournalPath() {
-        if (blocksJournalPath == null) {
-            blocksJournalPath = PathBuilder.getInstance().getBlocksJournalPath().toString();
+        if (blocksJournalPath == null || blocksJournalPath.isEmpty()) {
+            blocksJournalPath = PathBuilder.getInstance().getDefaultBlocksJournalPath().toString();
         }
         return blocksJournalPath;
     }

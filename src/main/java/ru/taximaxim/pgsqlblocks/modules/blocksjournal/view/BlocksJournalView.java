@@ -25,8 +25,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.ResourceBundle;
 
-import org.eclipse.jface.action.Action;
-import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
@@ -34,14 +32,14 @@ import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.window.ApplicationWindow;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.ToolBar;
+import org.eclipse.swt.widgets.ToolItem;
 
 import ru.taximaxim.pgsqlblocks.common.models.DBBlocksJournal;
 import ru.taximaxim.pgsqlblocks.common.models.DBBlocksJournalListener;
@@ -50,6 +48,8 @@ import ru.taximaxim.pgsqlblocks.common.models.DBProcess;
 import ru.taximaxim.pgsqlblocks.common.ui.DBBlocksJournalViewDataSource;
 import ru.taximaxim.pgsqlblocks.common.ui.DBProcessInfoView;
 import ru.taximaxim.pgsqlblocks.dialogs.DBProcessInfoDialog;
+import ru.taximaxim.pgsqlblocks.utils.ImageUtils;
+import ru.taximaxim.pgsqlblocks.utils.Images;
 import ru.taximaxim.pgsqlblocks.utils.PathBuilder;
 import ru.taximaxim.pgsqlblocks.utils.Settings;
 import ru.taximaxim.pgsqlblocks.xmlstore.ColumnLayoutsXmlStore;
@@ -93,12 +93,26 @@ public class BlocksJournalView extends ApplicationWindow implements DBBlocksJour
     @Override
     protected Control createContents(Composite parent) {
         Composite contentComposite = new Composite(parent, SWT.NONE);
-        contentComposite.setLayout(new GridLayout());
+        contentComposite.setLayout(new GridLayout(2, false));
 
-        SashForm sashForm = new SashForm(contentComposite, SWT.HORIZONTAL);
-        sashForm.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+        Composite journalsComposite = new Composite(contentComposite, SWT.NONE);
+        journalsComposite.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, false, true));
+        journalsComposite.setLayout(new GridLayout());
 
-        filesTable = new TableViewer(sashForm, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
+        ToolItem b = new ToolItem(new ToolBar(journalsComposite, SWT.HORIZONTAL), SWT.PUSH);
+        b.setImage(ImageUtils.getImage(Images.FOLDER));
+        b.setToolTipText(resourceBundle.getString("open_dir"));
+        b.addListener(SWT.Selection, event -> {
+            File file = new File(Settings.getInstance().getBlocksJournalPath());
+            try {
+                Desktop.getDesktop().open(file);
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        });
+
+        filesTable = new TableViewer(journalsComposite, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
+        filesTable.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
         filesTable.getTable().setHeaderVisible(true);
         TableViewerColumn column = new TableViewerColumn(filesTable, SWT.NONE);
         column.getColumn().setText(resourceBundle.getString("journals"));
@@ -107,25 +121,10 @@ public class BlocksJournalView extends ApplicationWindow implements DBBlocksJour
         filesTable.setContentProvider(new BlocksJournalFilesContentProvider());
         filesTable.setInput(journalFiles);
         filesTable.addSelectionChangedListener(this::filesTableSelectionChanged);
-        MenuManager menuManager = new MenuManager();
-        Menu menu = menuManager.createContextMenu(filesTable.getControl());
-        menuManager.add(new Action(resourceBundle.getString("open_dir")) {
 
-            @Override
-            public void run() {
-                File file = (File) filesTable.getStructuredSelection().getFirstElement();
-                try {
-                    Desktop.getDesktop().open(file.getParentFile());
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        });
-        filesTable.getControl().setMenu(menu);
-
-        Composite processesContentContainer = new Composite(sashForm, SWT.NONE);
+        Composite processesContentContainer = new Composite(contentComposite, SWT.NONE);
         processesContentContainer.setLayout(new GridLayout());
-        processesContentContainer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+        processesContentContainer.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, true));
 
         DBBlocksJournalViewDataSource dbBlocksJournalViewDataSource =
                 new DBBlocksJournalViewDataSource(resourceBundle, false);
@@ -145,7 +144,6 @@ public class BlocksJournalView extends ApplicationWindow implements DBBlocksJour
         processInfoView.hideToolBar();
         processInfoView.hide();
 
-        sashForm.setWeights(20, 80);
         getJournalFilesFromJournalsDir();
 
         return super.createContents(parent);
