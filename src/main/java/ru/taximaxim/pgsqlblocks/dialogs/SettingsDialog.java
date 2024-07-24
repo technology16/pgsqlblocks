@@ -161,10 +161,11 @@ public class SettingsDialog extends Dialog {
         journalsPathText.setText(settings.getBlocksJournalPath());
         journalsPathText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
-        Button btnDefDir = new Button(generalGroup, SWT.PUSH);
-        btnDefDir.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, true));
-        btnDefDir.setImage(ImageUtils.getImage(Images.FOLDER));
-        btnDefDir.addSelectionListener(new SelectionAdapter() {
+        Button btnSetDefaulfDir = new Button(generalGroup, SWT.PUSH);
+        btnSetDefaulfDir.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, true));
+        btnSetDefaulfDir.setImage(ImageUtils.getImage(Images.BACK));
+        btnSetDefaulfDir.setToolTipText(resourceBundle.getString("return_default_folder"));
+        btnSetDefaulfDir.addSelectionListener(new SelectionAdapter() {
 
             @Override
             public void widgetSelected(SelectionEvent e) {
@@ -175,6 +176,7 @@ public class SettingsDialog extends Dialog {
         Button btnDir = new Button(generalGroup, SWT.PUSH);
         btnDir.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, true));
         btnDir.setImage(ImageUtils.getImage(Images.FOLDER));
+        btnDir.setToolTipText(resourceBundle.getString("choose_dir"));
         btnDir.addSelectionListener(new SelectionAdapter() {
 
             @Override
