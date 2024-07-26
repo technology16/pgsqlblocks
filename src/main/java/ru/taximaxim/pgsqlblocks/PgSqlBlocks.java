@@ -28,6 +28,7 @@ public class PgSqlBlocks {
     }
 
     public static void main(String[] args) {
+        System.setProperty("java.awt.headless", "true");
         PgSqlBlocks.getInstance().launch();
     }
 
