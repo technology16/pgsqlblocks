@@ -473,26 +473,35 @@ public class DBController implements DBBlocksJournalListener {
     }
 
     private void saveBlockedProcessesToFile(List<DBBlocksJournalProcess> processes, boolean isOpenProcess) {
+
         DBBlocksXmlStore store = getXmlStore();
         List<DBBlocksJournalProcess> oldProcesses = store.readObjects();
+        // FIXME doesn't work with procLimit != 0
+        List<DBBlocksJournalProcess> result = new ArrayList<>();
         if (isOpenProcess) {
-            processes = processes.stream()
-            .filter(e -> !oldProcesses.contains(e))
-            .collect(Collectors.toList());
-            if(processes.isEmpty()) {
-                return;
+            result.addAll(oldProcesses);
+            for (DBBlocksJournalProcess p : processes) {
+                if (!oldProcesses.contains(p)) {
+                    result.add(p);
+                }
             }
-        } 
-        oldProcesses.addAll(processes);
+        } else {
+            for (DBBlocksJournalProcess p : oldProcesses) {
+                if (!processes.contains(p)) {
+                    result.add(p);
+                }
+            }
+            result.addAll(processes);
+        }
 
         if (procLimit != 0) {
-            for (List<DBBlocksJournalProcess> subList : chopped(oldProcesses, procLimit)) {
+            for (List<DBBlocksJournalProcess> subList : chopped(result, procLimit)) {
                 getXmlStore().writeObjects(subList);
                 part++;
             }
             part--;
         } else {
-            store.writeObjects(oldProcesses);
+            store.writeObjects(result);
         }
     }
 

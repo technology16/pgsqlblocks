@@ -32,11 +32,13 @@ import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.window.ApplicationWindow;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
@@ -93,25 +95,27 @@ public class BlocksJournalView extends ApplicationWindow implements DBBlocksJour
     @Override
     protected Control createContents(Composite parent) {
         Composite contentComposite = new Composite(parent, SWT.NONE);
-        contentComposite.setLayout(new GridLayout(2, false));
+        contentComposite.setLayout(new GridLayout());
 
-        Composite journalsComposite = new Composite(contentComposite, SWT.NONE);
-        journalsComposite.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, false, true));
-        journalsComposite.setLayout(new GridLayout());
-
-        ToolItem b = new ToolItem(new ToolBar(journalsComposite, SWT.HORIZONTAL), SWT.PUSH);
-        b.setImage(ImageUtils.getImage(Images.FOLDER));
-        b.setToolTipText(resourceBundle.getString("open_dir"));
-        b.addListener(SWT.Selection, event -> {
+        ToolBar toolBar = new ToolBar(contentComposite, SWT.HORIZONTAL);
+        ToolItem openDirToolItem = new ToolItem(toolBar, SWT.PUSH);
+        openDirToolItem.setImage(ImageUtils.getImage(Images.FOLDER));
+        openDirToolItem.setToolTipText(resourceBundle.getString("open_dir"));
+        openDirToolItem.addListener(SWT.Selection, event -> {
             File file = new File(Settings.getInstance().getBlocksJournalPath());
             try {
                 Desktop.getDesktop().open(file);
-            } catch (IOException ex) {
-                ex.printStackTrace();
+            } catch (Exception ex) {
+                MessageBox m = new MessageBox(getShell(), SWT.ICON_ERROR);
+                m.setMessage(ex.getLocalizedMessage());
+                m.open();
             }
         });
 
-        filesTable = new TableViewer(journalsComposite, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
+        SashForm sashForm = new SashForm(contentComposite, SWT.HORIZONTAL);
+        sashForm.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+
+        filesTable = new TableViewer(sashForm, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
         filesTable.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
         filesTable.getTable().setHeaderVisible(true);
         TableViewerColumn column = new TableViewerColumn(filesTable, SWT.NONE);
@@ -122,7 +126,7 @@ public class BlocksJournalView extends ApplicationWindow implements DBBlocksJour
         filesTable.setInput(journalFiles);
         filesTable.addSelectionChangedListener(this::filesTableSelectionChanged);
 
-        Composite processesContentContainer = new Composite(contentComposite, SWT.NONE);
+        Composite processesContentContainer = new Composite(sashForm, SWT.BORDER);
         processesContentContainer.setLayout(new GridLayout());
         processesContentContainer.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, true));
 
@@ -144,6 +148,7 @@ public class BlocksJournalView extends ApplicationWindow implements DBBlocksJour
         processInfoView.hideToolBar();
         processInfoView.hide();
 
+        sashForm.setWeights(25, 75);
         getJournalFilesFromJournalsDir();
 
         return super.createContents(parent);
@@ -170,7 +175,12 @@ public class BlocksJournalView extends ApplicationWindow implements DBBlocksJour
         Path blocksJournalsDirPath = PathBuilder.getInstance().getBlocksJournalsDir();
         File[] files = blocksJournalsDirPath.toFile().listFiles();
         if (files != null) {
-            List<File> filesList = Arrays.asList(files);
+            List<File> filesList = new ArrayList<>();;
+            for (File f : files) {
+                if (f.getName().endsWith(".xml")) {
+                    filesList.add(f);
+                }
+            }
             filesList.sort(Comparator.comparingLong(File::lastModified));
             this.journalFiles.addAll(filesList);
         }
