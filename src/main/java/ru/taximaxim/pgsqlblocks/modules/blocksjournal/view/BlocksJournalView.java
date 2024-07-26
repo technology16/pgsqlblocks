@@ -102,13 +102,12 @@ public class BlocksJournalView extends ApplicationWindow implements DBBlocksJour
         openDirToolItem.setImage(ImageUtils.getImage(Images.FOLDER));
         openDirToolItem.setToolTipText(resourceBundle.getString("open_dir"));
         openDirToolItem.addListener(SWT.Selection, event -> {
-            File file = new File(Settings.getInstance().getBlocksJournalPath());
             try {
-                Desktop.getDesktop().open(file);
-            } catch (Exception ex) {
-                MessageBox m = new MessageBox(getShell(), SWT.ICON_ERROR);
-                m.setMessage(ex.getLocalizedMessage());
-                m.open();
+                openJournalFolder();
+            } catch (IOException ex) {
+              MessageBox m = new MessageBox(getShell(), SWT.ICON_ERROR);
+              m.setMessage(ex.getMessage());
+              m.open();
             }
         });
 
@@ -152,6 +151,21 @@ public class BlocksJournalView extends ApplicationWindow implements DBBlocksJour
         getJournalFilesFromJournalsDir();
 
         return super.createContents(parent);
+    }
+
+    private void openJournalFolder() throws IOException {
+        File file = new File(Settings.getInstance().getBlocksJournalPath());
+
+        if (Desktop.isDesktopSupported()) {
+                Desktop.getDesktop().open(file);
+        } else {
+            Runtime runtime = Runtime.getRuntime();
+            if (System.getenv("OS") != null && System.getenv("OS").contains("Windows")) {
+                runtime.exec("rundll32 url.dll,FileProtocolHandler " + file);
+            } else {
+                runtime.exec("xdg-open " + file);
+            }
+        }
     }
 
     private void openProcessDialogInfo(Object dbProcess){
