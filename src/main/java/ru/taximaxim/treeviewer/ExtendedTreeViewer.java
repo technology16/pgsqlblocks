@@ -132,13 +132,6 @@ public class ExtendedTreeViewer<T extends IObject> extends Composite {
         configColumnToolItem.setImage(ImageUtils.getImage(Images.TABLE));
         configColumnToolItem.setToolTipText(Images.TABLE.getDescription(resourceBundle));
         configColumnToolItem.addListener(SWT.Selection, event -> openConfigColumnDialog());
-
-        if (isBlockJournalTab) {
-            ToolItem saveJournals = new ToolItem(toolBar, SWT.PUSH);
-            saveJournals.setImage(ImageUtils.getImage(Images.SAVE));
-            saveJournals.setToolTipText(Images.SAVE.getDescription(resourceBundle));
-            saveJournals.addListener(SWT.Selection, event -> controller.saveUnclosedBlockedProcessesToFile());
-        }
     }
 
     private void openFilter() {

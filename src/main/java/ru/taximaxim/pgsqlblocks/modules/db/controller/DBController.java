@@ -469,39 +469,22 @@ public class DBController implements DBBlocksJournalListener {
 
     @Override
     public void dbBlocksJournalDidCloseProcesses(List<DBBlocksJournalProcess> processes) {
-        journalsSaveExecutor.execute(() -> saveBlockedProcessesToFile(processes, false));
+        journalsSaveExecutor.execute(() -> saveBlockedProcessesToFile(processes));
     }
 
-    private void saveBlockedProcessesToFile(List<DBBlocksJournalProcess> processes, boolean isOpenProcess) {
-
+    private void saveBlockedProcessesToFile(List<DBBlocksJournalProcess> processes) {
         DBBlocksXmlStore store = getXmlStore();
         List<DBBlocksJournalProcess> oldProcesses = store.readObjects();
-        // FIXME doesn't work with procLimit != 0
-        List<DBBlocksJournalProcess> result = new ArrayList<>();
-        if (isOpenProcess) {
-            result.addAll(oldProcesses);
-            for (DBBlocksJournalProcess p : processes) {
-                if (!oldProcesses.contains(p)) {
-                    result.add(p);
-                }
-            }
-        } else {
-            for (DBBlocksJournalProcess p : oldProcesses) {
-                if (!processes.contains(p)) {
-                    result.add(p);
-                }
-            }
-            result.addAll(processes);
-        }
+        oldProcesses.addAll(processes);
 
         if (procLimit != 0) {
-            for (List<DBBlocksJournalProcess> subList : chopped(result, procLimit)) {
+            for (List<DBBlocksJournalProcess> subList : chopped(oldProcesses, procLimit)) {
                 getXmlStore().writeObjects(subList);
                 part++;
             }
             part--;
         } else {
-            store.writeObjects(result);
+            store.writeObjects(oldProcesses);
         }
     }
 
@@ -521,17 +504,16 @@ public class DBController implements DBBlocksJournalListener {
         return new DBBlocksXmlStore(fileName);
     }
 
-    public void saveUnclosedBlockedProcessesToFile() {
+    private void saveUnclosedBlockedProcessesToFile() {
         if (blocksJournal.isEmpty()) {
             return;
         }
         List<DBBlocksJournalProcess> openedBlockedProcesses = blocksJournal.getProcesses().stream()
-            .filter(DBBlocksJournalProcess::isOpened)
-            .collect(Collectors.toList());
+            .filter(DBBlocksJournalProcess::isOpened).collect(Collectors.toList());
         if (openedBlockedProcesses.isEmpty()) {
             return;
         }
 
-        saveBlockedProcessesToFile(openedBlockedProcesses, true);
+        saveBlockedProcessesToFile(openedBlockedProcesses);
     }
 }

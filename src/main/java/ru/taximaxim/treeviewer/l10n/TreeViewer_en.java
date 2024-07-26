@@ -27,7 +27,6 @@ public class TreeViewer_en extends ListResourceBundle {
             {"all-filter-tooltip", "Filter by filters below using \"contains (~)\""},
             {"columns", "Columns"},
             {"default_action", "Empty"},
-            {"save", "Save"},
             {"choose_dir", "Choose directory"},
         };
     }

@@ -22,8 +22,7 @@ public enum Images {
     UPDATE("images/update_16.png", "update"),
     CLEAN("images/clean_16.png", "clean"),
     FILTER("images/filter.png", "filter"),
-    TABLE("images/table_16.png", "columns"),
-    SAVE("images/save_16.png", "save");
+    TABLE("images/table_16.png", "columns");
 
     private String location;
     private String description;
