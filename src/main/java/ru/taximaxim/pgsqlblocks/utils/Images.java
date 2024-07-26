@@ -46,7 +46,8 @@ public enum Images {
     HIDE_LOG_PANEL("images/log_hide_16.png"),
     BLOCKS_JOURNAL_FOLDER("images/blocks_journal_folder_16.png"),
     FOLDER("images/folder_16.png"),
-    TABLE("images/table_16.png");
+    TABLE("images/table_16.png"),
+    BACK("images/back-16.png");
 
     private String location;
 

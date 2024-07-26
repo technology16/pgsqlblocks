@@ -19,17 +19,24 @@ import java.util.ResourceBundle;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Spinner;
+import org.eclipse.swt.widgets.Text;
 
+import ru.taximaxim.pgsqlblocks.utils.ImageUtils;
+import ru.taximaxim.pgsqlblocks.utils.Images;
+import ru.taximaxim.pgsqlblocks.utils.PathBuilder;
 import ru.taximaxim.pgsqlblocks.utils.Settings;
 
 public class SettingsDialog extends Dialog {
@@ -45,6 +52,7 @@ public class SettingsDialog extends Dialog {
     private Button confirmRequiredButton;
     private Button confirmExitButton;
     private Combo languageCombo;
+    private Text journalsPathText;
 
     public SettingsDialog(Settings settings, Shell shell) {
         super(shell);
@@ -64,14 +72,12 @@ public class SettingsDialog extends Dialog {
         populateGeneralGroup(container);
         populateProcessGroup(container);
         populateNotificationGroup(container);
+        populateBlockJournalPathGroup(container);
         return container;
     }
 
     private void populateGeneralGroup(Composite container) {
-        Group generalGroup = new Group(container, SWT.SHADOW_IN);
-        generalGroup.setText(resourceBundle.getString("general"));
-        generalGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
-        generalGroup.setLayout(new GridLayout(2, false));
+        Group generalGroup = createGroup(container, resourceBundle.getString("general"), 2);
 
         Label selectLocale = new Label(generalGroup, SWT.HORIZONTAL);
         selectLocale.setText(resourceBundle.getString("select_ui_language"));
@@ -83,10 +89,7 @@ public class SettingsDialog extends Dialog {
     }
 
     private void populateProcessGroup(Composite container) {
-        Group processGroup = new Group(container, SWT.SHADOW_IN);
-        processGroup.setText(resourceBundle.getString("processes"));
-        processGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
-        processGroup.setLayout(new GridLayout(3, false));
+        Group processGroup = createGroup(container, resourceBundle.getString("processes"), 3);
 
         Label updatePeriodLabel = new Label(processGroup, SWT.HORIZONTAL);
         updatePeriodLabel.setText(resourceBundle.getString("auto_update_interval"));
@@ -130,10 +133,7 @@ public class SettingsDialog extends Dialog {
     }
 
     private void populateNotificationGroup(Composite container) {
-        Group notificationGroup = new Group(container, SWT.SHADOW_IN);
-        notificationGroup.setText(resourceBundle.getString("notifications"));
-        notificationGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
-        notificationGroup.setLayout(new GridLayout(2, false));
+        Group notificationGroup = createGroup(container, resourceBundle.getString("notifications"), 2);
 
         Label idleShowToolTip = new Label(notificationGroup, SWT.HORIZONTAL);
         idleShowToolTip.setText(resourceBundle.getString("show_tray_notifications"));
@@ -154,6 +154,52 @@ public class SettingsDialog extends Dialog {
         confirmExitButton.setSelection(settings.isConfirmExit());
     }
 
+    private void populateBlockJournalPathGroup(Composite container) {
+        Group generalGroup = createGroup(container, resourceBundle.getString("path"), 3);
+
+        journalsPathText = new Text(generalGroup, SWT.BORDER);
+        journalsPathText.setText(settings.getBlocksJournalPath());
+        journalsPathText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+
+        Button btnSetDefaulfDir = new Button(generalGroup, SWT.PUSH);
+        btnSetDefaulfDir.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, true));
+        btnSetDefaulfDir.setImage(ImageUtils.getImage(Images.BACK));
+        btnSetDefaulfDir.setToolTipText(resourceBundle.getString("return_default_directory"));
+        btnSetDefaulfDir.addSelectionListener(new SelectionAdapter() {
+
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                journalsPathText.setText(PathBuilder.getInstance().getDefaultBlocksJournalPath().toString());
+            }
+        });
+        
+        Button btnDir = new Button(generalGroup, SWT.PUSH);
+        btnDir.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, true));
+        btnDir.setImage(ImageUtils.getImage(Images.FOLDER));
+        btnDir.setToolTipText(resourceBundle.getString("choose_dir"));
+        btnDir.addSelectionListener(new SelectionAdapter() {
+
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                DirectoryDialog dialog = new DirectoryDialog(getShell());
+                dialog.setText(resourceBundle.getString("choose_dir"));
+                dialog.setFilterPath(PathBuilder.getInstance().getBlocksJournalsDir().toString());
+                String path = dialog.open();
+                if (path != null) {
+                    journalsPathText.setText(path);
+                }
+            }
+        });
+    }
+
+    private Group createGroup(Composite container, String name, int numColumns) {
+        Group group = new Group(container, SWT.SHADOW_IN);
+        group.setText(name);
+        group.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
+        group.setLayout(new GridLayout(numColumns, false));
+        return group;
+    }
+
     @Override
     protected void configureShell(Shell newShell) {
         super.configureShell(newShell);
@@ -170,6 +216,7 @@ public class SettingsDialog extends Dialog {
         settings.setConfirmExit(confirmExitButton.getSelection());
         settings.setLanguage(languageCombo.getText());
         settings.setShowBackendPid(showBackendPidButton.getSelection());
+        settings.setBlocksJournalsPath(journalsPathText.getText().trim());
 
         super.okPressed();
     }

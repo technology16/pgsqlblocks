@@ -124,6 +124,9 @@ public class PgSqlBlocks_ru extends ListResourceBundle {
             {"columns", "Колонки"},
             {"general", "Общие"},
             {"select_ui_language", "Язык интерфейса (требует перезапуска)"},
+            {"path", "Путь хранения журналов блокировок"},
+            {"choose_dir", "Выберите директорию"},
+            {"return_default_directory", "Вернуть директорию по умолчанию"},
 
             // create database dialog
             {"name", "Имя соединения*"},

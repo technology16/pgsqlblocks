@@ -15,7 +15,9 @@
  *******************************************************************************/
 package ru.taximaxim.pgsqlblocks.modules.blocksjournal.view;
 
+import java.awt.Desktop;
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -36,7 +38,10 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.ToolBar;
+import org.eclipse.swt.widgets.ToolItem;
 
 import ru.taximaxim.pgsqlblocks.common.models.DBBlocksJournal;
 import ru.taximaxim.pgsqlblocks.common.models.DBBlocksJournalListener;
@@ -45,6 +50,8 @@ import ru.taximaxim.pgsqlblocks.common.models.DBProcess;
 import ru.taximaxim.pgsqlblocks.common.ui.DBBlocksJournalViewDataSource;
 import ru.taximaxim.pgsqlblocks.common.ui.DBProcessInfoView;
 import ru.taximaxim.pgsqlblocks.dialogs.DBProcessInfoDialog;
+import ru.taximaxim.pgsqlblocks.utils.ImageUtils;
+import ru.taximaxim.pgsqlblocks.utils.Images;
 import ru.taximaxim.pgsqlblocks.utils.PathBuilder;
 import ru.taximaxim.pgsqlblocks.utils.Settings;
 import ru.taximaxim.pgsqlblocks.xmlstore.ColumnLayoutsXmlStore;
@@ -90,10 +97,26 @@ public class BlocksJournalView extends ApplicationWindow implements DBBlocksJour
         Composite contentComposite = new Composite(parent, SWT.NONE);
         contentComposite.setLayout(new GridLayout());
 
+        ToolBar toolBar = new ToolBar(contentComposite, SWT.HORIZONTAL);
+        ToolItem openDirToolItem = new ToolItem(toolBar, SWT.PUSH);
+        openDirToolItem.setImage(ImageUtils.getImage(Images.FOLDER));
+        openDirToolItem.setToolTipText(resourceBundle.getString("open_dir"));
+        openDirToolItem.addListener(SWT.Selection, event -> {
+            File file = new File(Settings.getInstance().getBlocksJournalPath());
+            try {
+                Desktop.getDesktop().open(file);
+            } catch (Exception ex) {
+                MessageBox m = new MessageBox(getShell(), SWT.ICON_ERROR);
+                m.setMessage(ex.getLocalizedMessage());
+                m.open();
+            }
+        });
+
         SashForm sashForm = new SashForm(contentComposite, SWT.HORIZONTAL);
         sashForm.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
         filesTable = new TableViewer(sashForm, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
+        filesTable.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
         filesTable.getTable().setHeaderVisible(true);
         TableViewerColumn column = new TableViewerColumn(filesTable, SWT.NONE);
         column.getColumn().setText(resourceBundle.getString("journals"));
@@ -103,9 +126,9 @@ public class BlocksJournalView extends ApplicationWindow implements DBBlocksJour
         filesTable.setInput(journalFiles);
         filesTable.addSelectionChangedListener(this::filesTableSelectionChanged);
 
-        Composite processesContentContainer = new Composite(sashForm, SWT.NONE);
+        Composite processesContentContainer = new Composite(sashForm, SWT.BORDER);
         processesContentContainer.setLayout(new GridLayout());
-        processesContentContainer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+        processesContentContainer.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, true));
 
         DBBlocksJournalViewDataSource dbBlocksJournalViewDataSource =
                 new DBBlocksJournalViewDataSource(resourceBundle, false);
@@ -125,7 +148,7 @@ public class BlocksJournalView extends ApplicationWindow implements DBBlocksJour
         processInfoView.hideToolBar();
         processInfoView.hide();
 
-        sashForm.setWeights(new int[] {20, 80});
+        sashForm.setWeights(25, 75);
         getJournalFilesFromJournalsDir();
 
         return super.createContents(parent);
@@ -152,7 +175,12 @@ public class BlocksJournalView extends ApplicationWindow implements DBBlocksJour
         Path blocksJournalsDirPath = PathBuilder.getInstance().getBlocksJournalsDir();
         File[] files = blocksJournalsDirPath.toFile().listFiles();
         if (files != null) {
-            List<File> filesList = Arrays.asList(files);
+            List<File> filesList = new ArrayList<>();;
+            for (File f : files) {
+                if (f.getName().endsWith(".xml")) {
+                    filesList.add(f);
+                }
+            }
             filesList.sort(Comparator.comparingLong(File::lastModified));
             this.journalFiles.addAll(filesList);
         }

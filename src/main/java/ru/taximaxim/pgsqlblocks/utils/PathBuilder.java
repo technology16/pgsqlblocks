@@ -56,8 +56,8 @@ public final class PathBuilder {
     }
 
     public Path getBlocksJournalsDir() {
-        Path blocksJournalsDir = path.resolve("blocksJournals");
-        if (!blocksJournalsDir.toFile().exists()) {
+        Path blocksJournalsDir = path.resolve(Settings.getInstance().getBlocksJournalPath());
+        if (Files.notExists(path)) {
             try {
                 Files.createDirectory(blocksJournalsDir);
             } catch (IOException e) {
@@ -69,6 +69,10 @@ public final class PathBuilder {
 
     public Path getServersPath() {
         return path.resolve("servers.xml");
+    }
+
+    public Path getDefaultBlocksJournalPath() {
+        return path.resolve("blocksJournals");
     }
 
     public Path getColumnsPath() {
