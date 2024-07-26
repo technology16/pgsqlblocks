@@ -164,7 +164,7 @@ public class SettingsDialog extends Dialog {
         Button btnSetDefaulfDir = new Button(generalGroup, SWT.PUSH);
         btnSetDefaulfDir.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, true));
         btnSetDefaulfDir.setImage(ImageUtils.getImage(Images.BACK));
-        btnSetDefaulfDir.setToolTipText(resourceBundle.getString("return_default_folder"));
+        btnSetDefaulfDir.setToolTipText(resourceBundle.getString("return_default_directory"));
         btnSetDefaulfDir.addSelectionListener(new SelectionAdapter() {
 
             @Override
