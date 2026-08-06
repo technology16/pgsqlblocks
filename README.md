@@ -25,7 +25,7 @@ pgSqlBlocks - это standalone приложение, написанное на 
 
 ### Запросы
 
-Для версии PostgreSQL 10 и выше, для получения всех процессов сервера, включая или исключая idle(бездействующие), используется [скрипт](src/main/resources/query_with_idle_10.sql) или [скрипт](src/main/resources/query_10.sql) соответственно.
+Для получения всех процессов сервера, включая или исключая idle(бездействующие), используется [скрипт](src/main/resources/query_with_idle.sql) или [скрипт](src/main/resources/query.sql) соответственно.
 
 Уничтожается процесс командой: _select pg_terminate_backend(?);_
 
