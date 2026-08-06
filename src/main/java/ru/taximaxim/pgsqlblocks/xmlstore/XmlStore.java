@@ -25,6 +25,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.OutputKeys;
@@ -95,14 +96,7 @@ public abstract class XmlStore<T> {
             Path path = getXmlFile();
             Files.createDirectories(path.getParent());
             try (Writer xmlWriter = Files.newBufferedWriter(path, StandardCharsets.UTF_8)) {
-                DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-                factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
-                factory.setFeature("http://xml.org/sax/features/external-general-entities", false);
-                factory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
-                factory.setXIncludeAware(false);
-                factory.setExpandEntityReferences(false);
-
-                Document xml = factory.newDocumentBuilder().newDocument();
+                Document xml = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
                 Element root = xml.createElement(rootTag);
                 root.setAttribute(KEY_VERSION, VALUE_VERSION);
                 xml.appendChild(root);
@@ -130,6 +124,15 @@ public abstract class XmlStore<T> {
             factory.setFeature("http://xml.org/sax/features/external-general-entities", false);
             // Disable external parameter entities
             factory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
+            // Disable loading external DTDs
+            factory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+            // Disabling XInclude
+            factory.setXIncludeAware(false);
+            // Disable entity expansion (protection against Billion Laughs)
+            factory.setExpandEntityReferences(false);
+            // Prohibit the use of all protocols by external entities (JAXP 1.5+)
+            factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+            factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
             Document xml = factory.newDocumentBuilder().parse(new InputSource(reader));
             xml.normalize();
 
