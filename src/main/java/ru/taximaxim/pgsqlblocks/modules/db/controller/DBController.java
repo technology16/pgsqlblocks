@@ -390,11 +390,7 @@ public class DBController implements DBBlocksJournalListener {
     }
 
     private String getProcessesQuery() {
-        if (settings.getShowIdle()) {
-            return DBQueries.getProcessesQueryWithIdleForTen();
-        } else {
-            return DBQueries.getProcessesQueryForTen();
-        }
+        return settings.getShowIdle() ? DBQueries.getProcessesQueryWithIdle() : DBQueries.getProcessesQuery();
     }
 
     public void addListener(DBControllerListener listener) {
