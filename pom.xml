@@ -6,7 +6,7 @@
 
     <groupId>ru.taximaxim</groupId>
     <artifactId>pgsqlblocks</artifactId>
-    <version>1.9.0</version>
+    <version>1.9.1</version>
     <packaging>jar</packaging>
 
     <name>pgSqlBlocks</name>
@@ -20,19 +20,19 @@
         <swt.artifactId>org.eclipse.swt.gtk.linux.x86_64</swt.artifactId>
         <swt.id>Linux-x86_64</swt.id>
         <swt.version>3.116.100</swt.version>
-        <maven.jar.version>3.4.2</maven.jar.version>
-        <maven.compiler.version>3.13.0</maven.compiler.version>
-        <maven.surefire.version>3.3.0</maven.surefire.version>
-        <maven.assembly.version>3.7.1</maven.assembly.version>
+        <maven.jar.version>3.5.1</maven.jar.version>
+        <maven.compiler.version>3.15.0</maven.compiler.version>
+        <maven.surefire.version>3.5.6</maven.surefire.version>
+        <maven.assembly.version>3.8.0</maven.assembly.version>
         <pgpass.version>2.0.1</pgpass.version>
         <junit.version>4.13.2</junit.version>
-        <log4j.version>2.23.0</log4j.version>
-        <jface.version>3.21.0</jface.version>
-        <postgresql.version>42.7.3</postgresql.version>
-        <config.version>1.4.3</config.version>
-        <commands.version>3.9.600</commands.version>
-        <equinox.version>3.10.600</equinox.version>
-        <testcontainers.version>1.19.8</testcontainers.version>
+        <log4j.version>2.26.1</log4j.version>
+        <jface.version>3.22.200</jface.version>
+        <postgresql.version>42.7.13</postgresql.version>
+        <config.version>1.4.9</config.version>
+        <commands.version>3.9.800</commands.version>
+        <equinox.version>3.14.100</equinox.version>
+        <testcontainers.version>1.21.4</testcontainers.version>
     </properties>
 
     <developers>
