@@ -40,8 +40,6 @@ SELECT
     state, 
     date_trunc('second', state_change) AS state_change, 
     blocks.pid AS blockedby, 
-    /* deprecated
-    null::text AS blocking_locks,*/ 
     blocks.locktype AS locktype, 
     blocks.relation AS relation,
     blocks.granted AS granted,
