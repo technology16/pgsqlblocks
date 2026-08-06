@@ -26,18 +26,17 @@ public class DBModel {
     private final String dbGroup;
     private final String user;
     private final String password;
-    private final boolean readBackendType;
+    private final boolean readBackendType = true;
     private final boolean enabled;
 
     public DBModel(String name, String host, String port, String databaseName, String dbGroup,
-            String user, String password, boolean readBackendType, boolean enabled) {
+            String user, String password, boolean enabled) {
         this.name = name;
         this.host = host;
         this.port = port;
         this.databaseName = databaseName;
         this.user = user;
         this.password = password;
-        this.readBackendType = readBackendType;
         this.enabled = enabled;
         this.dbGroup = dbGroup;
     }
@@ -84,7 +83,7 @@ public class DBModel {
 
     public DBModel copy() {
         return new DBModel(this.name, this.host, this.port, this.databaseName, this.dbGroup,
-                this.user, this.password, this.readBackendType, this.enabled);
+                this.user, this.password, this.enabled);
     }
 
     @Override

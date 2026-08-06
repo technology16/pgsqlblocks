@@ -56,7 +56,6 @@ public class EditDatabaseDialog extends AddDatabaseDialog {
         cmdDbGroup.getCombo().setText(editedModel.getDbGroup());
         userText.setText(editedModel.getUser());
         passwordText.setText(editedModel.getPassword());
-        readBackendTypeButton.setSelection(editedModel.isReadBackendType());
         enabledButton.setSelection(editedModel.isEnabled());
         return dialogArea;
     }

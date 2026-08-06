@@ -120,7 +120,7 @@ public class DBControllerTest {
                 .withExposedPorts(5432);
         postgres.start();
         DBModel model = new DBModel("TestDbc", REMOTE_HOST, postgres.getFirstMappedPort().toString(),
-                REMOTE_DB, "", REMOTE_USERNAME, REMOTE_PASSWORD, true, true);
+                REMOTE_DB, "", REMOTE_USERNAME, REMOTE_PASSWORD, true);
         testDbc = new DBController(Settings.getInstance(), model, null);
         testDbc.connectAsync();
         testDbc.addListener(LISTENER);

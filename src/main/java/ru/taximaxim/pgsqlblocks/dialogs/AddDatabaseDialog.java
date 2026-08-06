@@ -49,7 +49,6 @@ public class AddDatabaseDialog extends Dialog {
     protected Text userText;
     protected Text passwordText;
     protected Text databaseNameText;
-    protected Button readBackendTypeButton;
     protected Button enabledButton;
     protected ComboViewer cmdDbGroup;
     private final Set<String> dbGroup;
@@ -138,10 +137,6 @@ public class AddDatabaseDialog extends Dialog {
 
         GridData checkGd = new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1);
 
-        readBackendTypeButton = new Button(container, SWT.CHECK);
-        readBackendTypeButton.setText(resourceBundle.getString("read_backend_type"));
-        readBackendTypeButton.setLayoutData(checkGd);
-
         enabledButton = new Button(container, SWT.CHECK);
         enabledButton.setText(resourceBundle.getString("connect_automatically"));
         enabledButton.setLayoutData(checkGd);
@@ -158,7 +153,6 @@ public class AddDatabaseDialog extends Dialog {
         String dbGroup = cmdDbGroup.getCombo().getText();
         String user = userText.getText();
         String password = passwordText.getText();
-        boolean readBackendType = readBackendTypeButton.getSelection();
         boolean enabled = enabledButton.getSelection();
         if (name.isEmpty()) {
             displayError("missing_connection_name");
@@ -175,7 +169,7 @@ public class AddDatabaseDialog extends Dialog {
         }
 
         createdModel = new DBModel(name, host, port, databaseName, dbGroup, user,
-                password, readBackendType, enabled);
+                password, enabled);
 
         super.okPressed();
     }

@@ -30,14 +30,10 @@ public final class DBQueries {
     public static final String PG_BACKEND_PID_QUERY = "select pg_backend_pid();";
 
     private static String versionQuery;
-    private static String processesQuery;
     private static String processesQueryForTen;
-    private static String processesQueryWithIdle;
     private static String processesQueryWithIdleForTen;
 
-    private static final String PROCESSES_QUERY_FILE_NAME = "query.sql";
     private static final String PROCESSES_QUERY_10_FILE_NAME = "query_10.sql";
-    private static final String PROCESSES_QUERY_WITH_IDLE_FILE_NAME = "query_with_idle.sql";
     private static final String PROCESSES_QUERY_WITH_IDLE_10_FILE_NAME = "query_with_idle_10.sql";
     private static final String PG_SERVER_VERSION_QUERY_FILE_NAME = "version.sql";
 
@@ -45,25 +41,11 @@ public final class DBQueries {
 
     public static final String PG_CANCEL_BACKEND_QUERY = "select pg_cancel_backend(?);";
 
-    public static synchronized String getProcessesQuery() {
-        if (processesQuery == null) {
-            processesQuery = loadQuery(PROCESSES_QUERY_FILE_NAME);
-        }
-        return processesQuery;
-    }
-
     public static synchronized String getProcessesQueryForTen() {
         if (processesQueryForTen == null) {
             processesQueryForTen = loadQuery(PROCESSES_QUERY_10_FILE_NAME);
         }
         return processesQueryForTen;
-    }
-
-    public static synchronized String getProcessesQueryWithIdle() {
-        if (processesQueryWithIdle == null) {
-            processesQueryWithIdle = loadQuery(PROCESSES_QUERY_WITH_IDLE_FILE_NAME);
-        }
-        return processesQueryWithIdle;
     }
 
     public static synchronized String getProcessesQueryWithIdleForTen() {

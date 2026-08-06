@@ -69,10 +69,9 @@ public class DBModelsXmlStore extends XmlStore<DBModel> {
         String dbGroup = getTextContentFromNode(dbGroupNode);
         String user = getTextContentFromNode(userNode);
         String password = getTextContentFromNode(passwordNode);
-        boolean readBackend = readBackendNode != null && Boolean.parseBoolean(getTextContentFromNode(readBackendNode));
         boolean enabled = enabledNode != null && Boolean.parseBoolean(getTextContentFromNode(enabledNode));
 
-        return new DBModel(name, host, port, databaseName, dbGroup, user, password, readBackend, enabled);
+        return new DBModel(name, host, port, databaseName, dbGroup, user, password, enabled);
     }
 
     @Override
