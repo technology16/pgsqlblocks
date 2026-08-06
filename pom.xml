@@ -31,7 +31,7 @@
         <postgresql.version>42.7.13</postgresql.version>
         <config.version>1.4.9</config.version>
         <commands.version>3.9.800</commands.version>
-        <equinox.version>3.15.0</equinox.version>
+        <equinox.version>3.13.0</equinox.version>
         <testcontainers.version>1.21.4</testcontainers.version>
     </properties>
 
