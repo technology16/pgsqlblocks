@@ -16,7 +16,7 @@ jobs:
           distribution: 'temurin'
           java-version: '8'
       - name: Compile code
-        run: mvn compile
+        run: mvn compile -B -ntp
 
   test:
     runs-on: ubuntu-latest
@@ -30,7 +30,7 @@ jobs:
           distribution: 'temurin'
           java-version: '8'
       - name: Run unit tests
-        run: mvn test -B verify
+        run: mvn test -B -ntp verify 
 
   build:
     runs-on: ubuntu-latest
@@ -44,4 +44,4 @@ jobs:
           distribution: 'temurin'
           java-version: '8'
       - name: build
-        run: mvn clean package -DskipTests
+        run: mvn clean package -DskipTests -B -ntp

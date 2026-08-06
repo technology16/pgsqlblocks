@@ -25,6 +25,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.OutputKeys;
@@ -116,8 +117,23 @@ public abstract class XmlStore<T> {
      */
     private Document readXml(Reader reader) throws IOException, SAXException {
         try {
-            Document xml = DocumentBuilderFactory.newInstance().newDocumentBuilder()
-                    .parse(new InputSource(reader));
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            // Disable DOCTYPE declarations entirely
+            factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+            // Disable external general entities
+            factory.setFeature("http://xml.org/sax/features/external-general-entities", false);
+            // Disable external parameter entities
+            factory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
+            // Disable loading external DTDs
+            factory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+            // Disabling XInclude
+            factory.setXIncludeAware(false);
+            // Disable entity expansion (protection against Billion Laughs)
+            factory.setExpandEntityReferences(false);
+            // Prohibit the use of all protocols by external entities (JAXP 1.5+)
+            factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+            factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
+            Document xml = factory.newDocumentBuilder().parse(new InputSource(reader));
             xml.normalize();
 
             if (!xml.getDocumentElement().getNodeName().equals(rootTag)) {
