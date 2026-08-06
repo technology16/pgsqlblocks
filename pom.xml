@@ -27,7 +27,7 @@
         <pgpass.version>2.0.1</pgpass.version>
         <junit.version>4.13.2</junit.version>
         <log4j.version>2.26.1</log4j.version>
-        <jface.version>3.23.0</jface.version>
+        <jface.version>3.22.200</jface.version>
         <postgresql.version>42.7.13</postgresql.version>
         <config.version>1.4.9</config.version>
         <commands.version>3.12.500</commands.version>
