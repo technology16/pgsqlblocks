@@ -95,7 +95,14 @@ public abstract class XmlStore<T> {
             Path path = getXmlFile();
             Files.createDirectories(path.getParent());
             try (Writer xmlWriter = Files.newBufferedWriter(path, StandardCharsets.UTF_8)) {
-                Document xml = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
+                DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+                factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+                factory.setFeature("http://xml.org/sax/features/external-general-entities", false);
+                factory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
+                factory.setXIncludeAware(false);
+                factory.setExpandEntityReferences(false);
+
+                Document xml = factory.newDocumentBuilder().newDocument();
                 Element root = xml.createElement(rootTag);
                 root.setAttribute(KEY_VERSION, VALUE_VERSION);
                 xml.appendChild(root);
@@ -116,8 +123,14 @@ public abstract class XmlStore<T> {
      */
     private Document readXml(Reader reader) throws IOException, SAXException {
         try {
-            Document xml = DocumentBuilderFactory.newInstance().newDocumentBuilder()
-                    .parse(new InputSource(reader));
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            // Disable DOCTYPE declarations entirely
+            factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+            // Disable external general entities
+            factory.setFeature("http://xml.org/sax/features/external-general-entities", false);
+            // Disable external parameter entities
+            factory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
+            Document xml = factory.newDocumentBuilder().parse(new InputSource(reader));
             xml.normalize();
 
             if (!xml.getDocumentElement().getNodeName().equals(rootTag)) {
