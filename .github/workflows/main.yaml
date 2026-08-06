@@ -9,39 +9,39 @@ jobs:
     runs-on: ubuntu-latest
     name: Running Java 8 compile
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Set up JDK 1.8
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: 'temurin'
           java-version: '8'
       - name: Compile code
-        run: mvn compile
+        run: mvn compile -B -ntp
 
   test:
     runs-on: ubuntu-latest
     name: Running tests
     needs: compile
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Set up JDK 1.8
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: 'temurin'
           java-version: '8'
       - name: Run unit tests
-        run: mvn test -B verify
+        run: mvn test -B -ntp verify 
 
   build:
     runs-on: ubuntu-latest
     name: mvn build
     needs: compile
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Set up JDK 1.8
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: 'temurin'
           java-version: '8'
       - name: build
-        run: mvn clean package -DskipTests
+        run: mvn clean package -DskipTests -B -ntp
