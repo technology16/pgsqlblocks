@@ -30,7 +30,7 @@
         <jface.version>3.22.200</jface.version>
         <postgresql.version>42.7.13</postgresql.version>
         <config.version>1.4.9</config.version>
-        <commands.version>3.12.500</commands.version>
+        <commands.version>3.10.0</commands.version>
         <equinox.version>3.20.400</equinox.version>
         <testcontainers.version>1.21.4</testcontainers.version>
     </properties>
