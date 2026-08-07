@@ -88,6 +88,8 @@ public class ExtendedTreeViewerComponent<T extends IObject> extends TreeViewer {
         setLabelProvider(this.dataSource);
         setContentProvider(this.dataSource);
         addDoubleClickListener(new DoubleClickListener());
+        comparator.setDefaultSort();
+        refresh();
     }
 
     private void loadColumnsFromStore(List<ColumnLayout> layouts) {
@@ -351,6 +353,10 @@ public class ExtendedTreeViewerComponent<T extends IObject> extends TreeViewer {
                 sortOrder.remove(c);
                 sortOrder.addLast(c);
             }
+        }
+
+        public void setDefaultSort() {
+            sortOrder.addLast(new SortingColumn(Columns.DURATION, true));
         }
 
         @Override

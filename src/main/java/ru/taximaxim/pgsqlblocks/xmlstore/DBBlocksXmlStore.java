@@ -17,7 +17,6 @@ package ru.taximaxim.pgsqlblocks.xmlstore;
 
 import java.nio.file.Path;
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.time.Duration;
 import java.util.Date;
