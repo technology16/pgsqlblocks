@@ -67,6 +67,8 @@ public class DBBlocksXmlStore extends XmlStore<DBBlocksJournalProcess> {
     private static final String USE_NAME = "usename";
     private static final String CLIENT = "client";
     private static final String PROCESS_STATUS = "processStatus";
+    private static final String WAIT_EVENT_TYPE = "wait_event_type";
+    private static final String WAIT_EVENT_NAME = "wait_event";
 
     private final String fileName;
 
@@ -96,7 +98,7 @@ public class DBBlocksXmlStore extends XmlStore<DBBlocksJournalProcess> {
 
         int pid = Integer.parseInt(rootElement.getElementsByTagName(PID).item(0).getTextContent());
         String backendType = "";
-        if (hasBackendType(rootElement)) {
+        if (hasElement(rootElement, BACKEND_TYPE)) {
             backendType = rootElement.getElementsByTagName(BACKEND_TYPE).item(0).getTextContent();
         }
         String appName = rootElement.getElementsByTagName(APPLICATION_NAME).item(0).getTextContent();
@@ -110,13 +112,19 @@ public class DBBlocksXmlStore extends XmlStore<DBBlocksJournalProcess> {
         Date queryStart = DateUtils.dateFromString(rootElement.getElementsByTagName(QUERY_START).item(0).getTextContent());
         Date xactStart = DateUtils.dateFromString(rootElement.getElementsByTagName(XACT_START).item(0).getTextContent());
         String duration = "";
-        if (hasDuration(rootElement)) {
+        if (hasElement(rootElement, DURATION)) {
             duration = rootElement.getElementsByTagName(DURATION).item(0).getTextContent();
         }
         DBProcessQuery query = new DBProcessQuery(queryString, slowQuery, backendStart, queryStart, xactStart, duration);
         String state = rootElement.getElementsByTagName(STATE).item(0).getTextContent();
         Date stateChange = DateUtils.dateFromString(rootElement.getElementsByTagName(STATE_CHANGE).item(0).getTextContent());
-        DBProcess process = new DBProcess(pid, backendType, caller, state, stateChange, query);
+        String waitEventType = "";
+        String waitEventName = "";
+        if (hasElement(rootElement, WAIT_EVENT_TYPE)) {
+            waitEventType = rootElement.getElementsByTagName(WAIT_EVENT_TYPE).item(0).getTextContent();
+            waitEventName = rootElement.getElementsByTagName(WAIT_EVENT_NAME).item(0).getTextContent();
+        }
+        DBProcess process = new DBProcess(pid, backendType, caller, state, stateChange, query, waitEventType, waitEventName);
         Element childrenRootElement = (Element)rootElement.getElementsByTagName(CHILDREN_ELEMENT_TAG_NAME).item(0);
         NodeList childrenElements = childrenRootElement.getChildNodes();
         for (int i = 0; i < childrenElements.getLength(); i++) {
@@ -165,17 +173,15 @@ public class DBBlocksXmlStore extends XmlStore<DBBlocksJournalProcess> {
         createSubElement(xml, rootElement, USE_NAME, process.getQueryCaller().getUserName());
         createSubElement(xml, rootElement, CLIENT, process.getQueryCaller().getClient());
         createSubElement(xml, rootElement, PROCESS_STATUS, process.getStatus().getDescr());
+        createSubElement(xml, rootElement, WAIT_EVENT_TYPE, process.getWaitEventType());
+        createSubElement(xml, rootElement, WAIT_EVENT_NAME, process.getWaitEventName());
         Element childrenElement = xml.createElement(CHILDREN_ELEMENT_TAG_NAME);
         rootElement.appendChild(childrenElement);
         process.getChildren().forEach(p -> appendProcess(xml, childrenElement, p));
     }
 
-    private boolean hasBackendType(Element element) {
-        return element.getElementsByTagName(BACKEND_TYPE).getLength() > 0;
-    }
-
-    private boolean hasDuration(Element element) {
-        return element.getElementsByTagName(DURATION).getLength() > 0;
+    private boolean hasElement(Element element, String elmentTagName) {
+        return 0 < element.getElementsByTagName(elmentTagName).getLength();
     }
 
     public static DBProcess readFromResultSet(ResultSet resultSet) throws SQLException {
@@ -197,8 +203,10 @@ public class DBBlocksXmlStore extends XmlStore<DBBlocksJournalProcess> {
         String userName = resultSet.getString(USE_NAME);
         String client = resultSet.getString(CLIENT);
         DBProcessQueryCaller caller = new DBProcessQueryCaller(appName, databaseName, userName, client);
+        String waitEventType = null == resultSet.getString(WAIT_EVENT_TYPE) ? "" : resultSet.getString(WAIT_EVENT_TYPE);
+        String waitEventName = null == resultSet.getString(WAIT_EVENT_NAME) ? "" : resultSet.getString(WAIT_EVENT_NAME);
 
-        return new DBProcess(pid, backendType, caller, state, stateChangeDate, query);
+        return new DBProcess(pid, backendType, caller, state, stateChangeDate, query, waitEventType, waitEventName);
     }
 
     private static boolean hasBackendType(ResultSetMetaData metaData) {

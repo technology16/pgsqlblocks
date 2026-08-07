@@ -109,6 +109,8 @@ public class PgSqlBlocks_en extends ListResourceBundle {
             {"block_start_date", "Block started"},
             {"block_end_date", "Block ended"},
             {"duration", "Duration"},
+            {"wait_event_type", "Wait event type"},
+            {"wait_event", "Wait event name"},
 
             // settings dialog
             {"processes", "Processes"},

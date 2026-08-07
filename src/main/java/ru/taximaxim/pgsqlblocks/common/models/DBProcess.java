@@ -37,16 +37,21 @@ public class DBProcess implements IObject {
     private final Date stateChange; //изменено
     private final DBProcessQuery query;
     private final DBProcessQueryCaller queryCaller;
+    private final String waitEventType;
+    private final String waitEventName;
 
     private DBProcessStatus status = DBProcessStatus.WORKING;
 
-    public DBProcess(int pid, String backendType, DBProcessQueryCaller queryCaller, String state, Date stateChange, DBProcessQuery query) {
+    public DBProcess(int pid, String backendType, DBProcessQueryCaller queryCaller, String state, Date stateChange,
+         DBProcessQuery query, String waitEventType, String waintEventName) {
         this.pid = pid;
         this.backendType = backendType;
         this.queryCaller = queryCaller;
         this.state = state;
         this.stateChange = stateChange;
         this.query = query;
+        this.waitEventType = waitEventType;
+        this.waitEventName = waintEventName;
     }
 
     public void addBlock(DBBlock block) {
@@ -126,6 +131,14 @@ public class DBProcess implements IObject {
         return queryCaller;
     }
 
+    public String getWaitEventType() {
+        return waitEventType;
+    }
+
+    public String getWaitEventName() {
+        return waitEventName;
+    }
+
     @Override
     public List<DBProcess> getChildren() {
         return children;
@@ -160,6 +173,8 @@ public class DBProcess implements IObject {
                 ", stateChange=" + stateChange +
                 ", query=" + query +
                 ", queryCaller=" + queryCaller +
+                ", waitEventType=" + waitEventType +
+                ", waitEventName=" + waitEventName +
                 ", status=" + status +
                 '}';
     }

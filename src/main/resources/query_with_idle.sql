@@ -28,6 +28,8 @@ SELECT
     datname, 
     usename,
     backend_type,
+    wait_event_type,
+    wait_event,
     CASE WHEN client_port=-1 THEN 'local pipe' 
          WHEN length(client_hostname)>0 THEN client_hostname||':'||client_port 
          ELSE textin(inet_out(client_addr))||':'||client_port 

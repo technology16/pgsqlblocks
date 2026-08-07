@@ -144,6 +144,6 @@ public class DBBlocksJournalTest {
 
     private DBProcess createDBProcess(int pid, DBProcessQuery processQuery) {
         DBProcessQueryCaller c = new DBProcessQueryCaller("appName", "test", "user", "client");
-        return new DBProcess(pid, "type", c, "state", new Date(), processQuery);
+        return new DBProcess(pid, "type", c, "state", new Date(), processQuery, "", "");
     }
 }

@@ -36,7 +36,9 @@ public enum Columns {
     LOCK_TYPE("lock_type"),
     RELATION("relation"),
     SLOW_QUERY("slow_query"),
-    QUERY("query");
+    QUERY("query"),
+    WAIT_EVENT_TYPE("wait_event_type"),
+    WAIT_EVENT_NAME("wait_event");
 
     private final String columnName;
 

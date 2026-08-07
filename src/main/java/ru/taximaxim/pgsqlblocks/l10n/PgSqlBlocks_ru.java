@@ -109,6 +109,8 @@ public class PgSqlBlocks_ru extends ListResourceBundle {
             {"block_start_date", "Блокировка началась"},
             {"block_end_date", "Блокировка завершена"},
             {"duration", "Длительность"},
+            {"wait_event_type", "Тип ожидаемого события"},
+            {"wait_event", "Имя ожидавемого события"},
 
             // settings dialog
             {"processes", "Процессы"},

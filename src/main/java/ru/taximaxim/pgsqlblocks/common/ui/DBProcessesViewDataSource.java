@@ -97,6 +97,10 @@ public class DBProcessesViewDataSource extends DataSource<DBProcess> {
             return String.valueOf(process.getQuery().isSlowQuery());
         case QUERY:
             return process.getQuery().getQueryFirstLine();
+        case WAIT_EVENT_TYPE:
+            return process.getWaitEventType();
+        case WAIT_EVENT_NAME:
+            return process.getWaitEventName();
         default:
             return "";
         }
@@ -189,6 +193,10 @@ public class DBProcessesViewDataSource extends DataSource<DBProcess> {
         case SLOW_QUERY:
             return Boolean.compare(process1.getQuery().isSlowQuery(),
                     process2.getQuery().isSlowQuery());
+        case WAIT_EVENT_TYPE:
+            return process1.getWaitEventType().compareTo(process2.getWaitEventType());
+        case WAIT_EVENT_NAME:
+            return process1.getWaitEventName().compareTo(process2.getWaitEventName());
         default:
             return 0;
         }

@@ -235,7 +235,9 @@ public class ExtendedTreeViewerComponent<T extends IObject> extends TreeViewer {
         case LOCK_TYPE:
         case RELATION:
         case SLOW_QUERY:
-        case QUERY: return column.name();
+        case QUERY:
+        case WAIT_EVENT_TYPE:
+        case WAIT_EVENT_NAME: return column.name();
         case DURATION: return "now - XACT_START";
         default : return "";
         }
