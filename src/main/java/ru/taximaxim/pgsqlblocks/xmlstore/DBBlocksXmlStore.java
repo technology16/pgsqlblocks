@@ -187,7 +187,7 @@ public class DBBlocksXmlStore extends XmlStore<DBBlocksJournalProcess> {
     public static DBProcess readFromResultSet(ResultSet resultSet) throws SQLException {
         int pid = resultSet.getInt(PID);
         String backendType = hasBackendType(resultSet.getMetaData()) ? resultSet.getString(BACKEND_TYPE) : "";
-        String state = resultSet.getString(STATE) == null ? "" : resultSet.getString(STATE);
+        String state = getStringOrBlank(resultSet, STATE);
         Date stateChangeDate = DateUtils.dateFromString(resultSet.getString(STATE_CHANGE));
 
         String queryString = resultSet.getString(QUERY_SQL);
@@ -203,10 +203,15 @@ public class DBBlocksXmlStore extends XmlStore<DBBlocksJournalProcess> {
         String userName = resultSet.getString(USE_NAME);
         String client = resultSet.getString(CLIENT);
         DBProcessQueryCaller caller = new DBProcessQueryCaller(appName, databaseName, userName, client);
-        String waitEventType = null == resultSet.getString(WAIT_EVENT_TYPE) ? "" : resultSet.getString(WAIT_EVENT_TYPE);
-        String waitEventName = null == resultSet.getString(WAIT_EVENT_NAME) ? "" : resultSet.getString(WAIT_EVENT_NAME);
+        String waitEventType = getStringOrBlank(resultSet, WAIT_EVENT_TYPE);
+        String waitEventName = getStringOrBlank(resultSet, WAIT_EVENT_NAME);
 
         return new DBProcess(pid, backendType, caller, state, stateChangeDate, query, waitEventType, waitEventName);
+    }
+
+    private static String getStringOrBlank(ResultSet resultSet, String columnName) throws SQLException {
+        String columnValue = resultSet.getString(columnName);
+        return null == columnValue ? "" : columnValue;
     }
 
     private static boolean hasBackendType(ResultSetMetaData metaData) {
