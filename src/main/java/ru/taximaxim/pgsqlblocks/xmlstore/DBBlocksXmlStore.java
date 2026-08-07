@@ -186,7 +186,7 @@ public class DBBlocksXmlStore extends XmlStore<DBBlocksJournalProcess> {
 
     public static DBProcess readFromResultSet(ResultSet resultSet) throws SQLException {
         int pid = resultSet.getInt(PID);
-        String backendType = hasBackendType(resultSet.getMetaData()) ? resultSet.getString(BACKEND_TYPE) : "";
+        String backendType = getStringOrBlank(resultSet, BACKEND_TYPE);
         String state = getStringOrBlank(resultSet, STATE);
         Date stateChangeDate = DateUtils.dateFromString(resultSet.getString(STATE_CHANGE));
 
@@ -213,19 +213,4 @@ public class DBBlocksXmlStore extends XmlStore<DBBlocksJournalProcess> {
         String columnValue = resultSet.getString(columnName);
         return null == columnValue ? "" : columnValue;
     }
-
-    private static boolean hasBackendType(ResultSetMetaData metaData) {
-        try {
-            int columns = metaData.getColumnCount();
-            for (int x = 1; x <= columns; x++) {
-                if (BACKEND_TYPE.equals(metaData.getColumnName(x))) {
-                    return true;
-                }
-            }
-        } catch (SQLException e) {
-            LOG.error(e.getMessage());
-        }
-        return false;
-    }
-
 }
