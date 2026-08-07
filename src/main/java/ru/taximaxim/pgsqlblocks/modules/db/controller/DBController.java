@@ -231,13 +231,13 @@ public class DBController implements DBBlocksJournalListener {
         return processes;
     }
 
-    // TODO possible duplicate processes with same pid
     public int getProcessesCount() {
-        return processes.size() + processes.stream().mapToInt(DBController::countChildren).sum();
-    }
-
-    private static int countChildren(DBProcess process) {
-        return process.getChildren().size() + process.getChildren().stream().mapToInt(DBController::countChildren).sum();
+        Set<Integer> uniqueIds = new HashSet<>();
+        processes.stream().forEach(e -> {
+            uniqueIds.add(e.getPid());
+            uniqueIds.addAll(e.getChildrenPid());
+        });
+        return uniqueIds.size();
     }
 
     public DBBlocksJournal getBlocksJournal() {
