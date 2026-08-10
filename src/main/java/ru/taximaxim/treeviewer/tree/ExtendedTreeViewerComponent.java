@@ -88,7 +88,7 @@ public class ExtendedTreeViewerComponent<T extends IObject> extends TreeViewer {
         setLabelProvider(this.dataSource);
         setContentProvider(this.dataSource);
         addDoubleClickListener(new DoubleClickListener());
-        comparator.setDefaultSort();
+        setDefaultSort();
         refresh();
     }
 
@@ -132,7 +132,7 @@ public class ExtendedTreeViewerComponent<T extends IObject> extends TreeViewer {
     }
 
     @Override
-    protected void setSelectionToWidget(List v, boolean reveal) {
+    protected void setSelectionToWidget(@SuppressWarnings("rawtypes") List v, boolean reveal) {
         if (!inRefresh) {
             super.setSelectionToWidget(v, reveal);
         }
@@ -180,6 +180,19 @@ public class ExtendedTreeViewerComponent<T extends IObject> extends TreeViewer {
         });
 
         return swtColumn;
+    }
+
+    private void setDefaultSort() {
+        if (visibleColumns.contains(Columns.DURATION)) {
+            TreeColumn duration = columns.get(Columns.DURATION);
+            selectSortColumn(duration, false);
+            selectSortColumn(duration, false);
+        }
+        if (visibleColumns.contains(Columns.BLOCKED_COUNT)) {
+            TreeColumn duration = columns.get(Columns.BLOCKED_COUNT);
+            selectSortColumn(duration, false);
+            selectSortColumn(duration, false);
+        }
     }
 
     private void addListeners() {
@@ -353,10 +366,6 @@ public class ExtendedTreeViewerComponent<T extends IObject> extends TreeViewer {
                 sortOrder.remove(c);
                 sortOrder.addLast(c);
             }
-        }
-
-        public void setDefaultSort() {
-            sortOrder.addLast(new SortingColumn(Columns.DURATION, true));
         }
 
         @Override
