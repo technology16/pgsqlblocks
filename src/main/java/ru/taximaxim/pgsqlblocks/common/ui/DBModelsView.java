@@ -198,7 +198,7 @@ public class DBModelsView extends Composite {
                     res = el1.getModelName().compareTo(el2.getModelName());
                     break;
                 case COUNT:
-                    res = Integer.compare(el1.getProcessesCount(), el2.getProcessesCount());
+                    res = Long.compare(el1.getProcessesCount(), el2.getProcessesCount());
                     break;
                 default:
                     break;

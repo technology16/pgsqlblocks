@@ -87,6 +87,7 @@ public class DBController implements DBBlocksJournalListener {
     private Connection connection;
     private ScheduledFuture<?> updater;
     private final LocalDateTime blocksJournalCreateDate;
+    private long processCount;
 
     public DBController(Settings settings, DBModel model, UserInputPasswordProvider userInputPasswordProvider) {
         this.settings = settings;
@@ -231,8 +232,8 @@ public class DBController implements DBBlocksJournalListener {
         return processes;
     }
 
-    public int getProcessesCount() {
-        return processes.size();
+    public long getProcessesCount() {
+        return processCount;
     }
 
     public DBBlocksJournal getBlocksJournal() {
@@ -303,6 +304,9 @@ public class DBController implements DBBlocksJournalListener {
             }
             proceedBlocks(tmpProcesses, tmpBlocks);
             proceedProcesses(tmpProcesses);
+            processCount = tmpProcesses.values().stream()
+                    .filter(p -> settings.getShowBackendPid() || p.getPid() != backendPid)
+                    .count();
             List<DBProcess> procs = tmpProcesses.values().stream()
                     .filter(p -> !p.hasParent())
                     // do not show this process if setting is set (current pgSqlBlocks connection)
