@@ -87,6 +87,7 @@ public class DBController implements DBBlocksJournalListener {
     private Connection connection;
     private ScheduledFuture<?> updater;
     private final LocalDateTime blocksJournalCreateDate;
+    private int processCount;
 
     public DBController(Settings settings, DBModel model, UserInputPasswordProvider userInputPasswordProvider) {
         this.settings = settings;
@@ -232,7 +233,7 @@ public class DBController implements DBBlocksJournalListener {
     }
 
     public int getProcessesCount() {
-        return processes.size();
+        return processCount;
     }
 
     public DBBlocksJournal getBlocksJournal() {
@@ -303,11 +304,20 @@ public class DBController implements DBBlocksJournalListener {
             }
             proceedBlocks(tmpProcesses, tmpBlocks);
             proceedProcesses(tmpProcesses);
-            List<DBProcess> procs = tmpProcesses.values().stream()
-                    .filter(p -> !p.hasParent())
-                    // do not show this process if setting is set (current pgSqlBlocks connection)
-                    .filter(p -> settings.getShowBackendPid() || p.getPid() != backendPid || !p.getChildren().isEmpty())
-                    .collect(Collectors.toList());
+
+            List<DBProcess> procs = new ArrayList<>();
+            int tmpCounter = 0;
+            for (DBProcess process : tmpProcesses.values()) {
+                // do not show this process if setting is set (current pgSqlBlocks connection)
+                if (process.getPid() == backendPid && !settings.getShowBackendPid() && !process.hasChildren()) {
+                    continue;
+                }
+                tmpCounter++;
+                if (!process.hasParent()) {
+                    procs.add(process);
+                }
+            }
+            processCount = tmpCounter;
             processesLoaded(procs);
         } catch (SQLException e) {
             LOG.error(String.format("Ошибка при получении процессов для %s", model.getName()), e);
