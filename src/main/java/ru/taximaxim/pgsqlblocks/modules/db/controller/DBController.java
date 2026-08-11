@@ -232,12 +232,7 @@ public class DBController implements DBBlocksJournalListener {
     }
 
     public int getProcessesCount() {
-        Set<Integer> uniqueIds = new HashSet<>();
-        processes.stream().forEach(e -> {
-            uniqueIds.add(e.getPid());
-            uniqueIds.addAll(e.getChildrenPid());
-        });
-        return uniqueIds.size();
+        return processes.size();
     }
 
     public DBBlocksJournal getBlocksJournal() {

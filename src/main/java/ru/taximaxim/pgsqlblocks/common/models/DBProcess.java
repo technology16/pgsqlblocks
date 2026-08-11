@@ -107,12 +107,6 @@ public class DBProcess implements IObject {
                 .collect(Collectors.joining(","));
     }
 
-    public Set<Integer> getChildrenPid() {
-        Set<Integer> uniqueId = new HashSet<>();
-        children.stream().map(e -> uniqueId.addAll(e.getChildrenPid()));
-        return uniqueId;
-    }
-
     public int getPid() {
         return pid;
     }
